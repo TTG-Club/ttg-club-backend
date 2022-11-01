@@ -34,20 +34,22 @@ jobs:
         with:
           node-version: 16
 
+      - name: Install & Lint application
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          npm ci
+          npm run lint:fix
+
       - name: Install & Build Dev application
         if: ${{ github.ref_name == 'dev' }}
         env:
           VUE_APP_DEV: true
         run: |
-          npm ci
-          npm run lint:fix
           npm run build:dev
 
       - name: Install & Build Prod application
         if: ${{ github.ref_name == 'main' }}
         run: |
-          npm ci
-          npm run lint:fix
           npm run build:prod
 
       - name: Upload artifact
