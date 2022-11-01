@@ -58,7 +58,7 @@ jobs:
           if-no-files-found: error
 
   build:
-    name: Build and deploy backend
+    name: Build to Docker Hub
     needs: build-front
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +92,7 @@ jobs:
           tags: magistrus/dnd5club:latest
 
   prod-ssh:
-    name: Run Dev Docker to SSH
+    name: Update Dev SSH Server
     if: ${{ github.ref_name == 'dev' }}
     needs: build
     runs-on: ubuntu-latest
@@ -110,7 +110,7 @@ jobs:
             docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
 
   dev-ssh:
-    name: Run Prod Docker to SSH
+    name: Update Prod SSH Server
     if: ${{ github.ref_name == 'main' }}
     needs: build
     runs-on: ubuntu-latest
