@@ -40,14 +40,14 @@ jobs:
           npm ci
           npm run lint:fix
 
-      - name: Install & Build Dev application
+      - name: Build Dev application
         if: ${{ github.ref_name == 'dev' }}
         env:
           VUE_APP_DEV: true
         run: |
           npm run build:dev
 
-      - name: Install & Build Prod application
+      - name: Build Prod application
         if: ${{ github.ref_name == 'main' }}
         run: |
           npm run build:prod
