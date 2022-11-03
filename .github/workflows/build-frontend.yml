@@ -1,0 +1,26 @@
+name: Deploy TTG Club Backend
+
+on:
+  workflow_call:
+
+permissions:
+  deployments: write
+  contents: read
+  pages: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: build-frontend-from-backend-${{ github.repository }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-front-dev:
+    name: Build Develop
+    if: ${{ github.ref_name == 'dev' }}
+    uses: ttg-club/ttg-club-frontend/.github/workflows/build.yml@dev
+
+  build-front-prod:
+    name: Build Production
+    if: ${{ github.ref_name == 'main' }}
+    uses: ttg-club/ttg-club-frontend/.github/workflows/build.yml@main

@@ -21,41 +21,8 @@ concurrency:
 
 jobs:
   build-front:
-    name: Build frontend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: TTG-Club/ttg-club-frontend
-          ref: ${{ github.ref_name }}
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Lint application
-        if: github.event_name != 'workflow_call'
-        run: npm run lint:fix
-
-      - name: Build Dev application
-        if: ${{ github.ref_name == 'dev' }}
-        env:
-          VUE_APP_DEV: true
-        run: npm run build:dev
-
-      - name: Build Prod application
-        if: ${{ github.ref_name == 'main' }}
-        run: npm run build:prod
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: front-app-${{ github.run_id }}
-          path: ./dist
-          retention-days: 1
-          if-no-files-found: error
+    name: Build Frontend
+    uses: ./.github/workflows/build-frontend.yml
 
   build:
     name: Build to Docker Hub
@@ -63,6 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: TTG-Club/ttg-club-backend
+          ref: ${{ github.ref_name }}
 
       - uses: actions/download-artifact@v3
         with:
