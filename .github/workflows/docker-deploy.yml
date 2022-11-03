@@ -6,7 +6,7 @@ on:
       - main
       - dev
 
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   deployments: write
@@ -16,7 +16,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: ${{ github.ref }}-${{ github.action }}
+  group: deploy-${{ github.ref }}-${{ github.action }}-${{ github.workflow }}-${{ github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
         run: npm ci
 
       - name: Lint application
-        if: github.event_name != 'workflow_dispatch'
+        if: github.event_name != 'workflow_call'
         run: npm run lint:fix
 
       - name: Build Dev application
