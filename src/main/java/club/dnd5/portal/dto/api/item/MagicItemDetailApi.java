@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import club.dnd5.portal.model.items.Rarity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -27,13 +28,13 @@ public class MagicItemDetailApi extends MagicItemApi {
 	private Collection<String> detailCustamization;
 	private CostApi cost;
 	private Collection<String> images;
-	
+
 	public MagicItemDetailApi(MagicItem item) {
 		super(item);
 		url = null;
 		description = item.getDescription();
 		if (item.getCustomization()) {
-			customization = item.getCustomization(); 
+			customization = item.getCustomization();
 		}
 		if (!item.getArmors().isEmpty()) {
 			detailType = item.getArmors().stream().map(Armor::getName).map(String::toLowerCase).collect(Collectors.toList());
@@ -55,8 +56,10 @@ public class MagicItemDetailApi extends MagicItemApi {
 			if (detailCustamization == null) {
 				detailCustamization = new ArrayList<>(1);
 			}
-			detailCustamization.add(item.getCustSpecial()); 
+			detailCustamization.add(item.getCustSpecial());
 		}
-		cost = new CostApi(item);
+		if (item.getRarity() != Rarity.UNKNOWN && item.getRarity() != Rarity.VARIES){
+			cost = new CostApi(item);
+		}
 	}
 }
