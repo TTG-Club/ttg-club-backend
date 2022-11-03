@@ -62,3 +62,4 @@ jobs:
     name: Update Server Workflow
     needs: build
     uses: ./.github/workflows/update-server.yml
+    secrets: inherit
