@@ -1,0 +1,52 @@
+name: Update Server
+
+on:
+  workflow_call:
+
+permissions:
+  deployments: write
+  contents: read
+  pages: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: restart-server-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  prod-ssh:
+    name: Update Dev SSH Server
+    if: ${{ github.ref_name == 'dev' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            docker stop devdnd5club && docker rm devdnd5club
+            docker pull magistrus/dnd5club:latest
+            docker run --network dev-dnd5-mysql-new --name devdnd5club -p 9393:8080 -d -e spring.profiles.active=dev -e dbhost=mysql-dev -e dbport=3306  -e dbuser=${{ secrets.DB_USER  }} -e dbpassword=${{ secrets.DB_PASSWORD }} -e emailpassword=${{ secrets.EMAIL_PASSWORD }} -e dbname=dnd5 magistrus/dnd5club
+            docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
+
+  dev-ssh:
+    name: Update Prod SSH Server
+    if: ${{ github.ref_name == 'main' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            docker stop dnd5club && docker rm dnd5club
+            docker pull magistrus/dnd5club:latest
+            docker run --network dnd5-mysql-new --name dnd5club -p 9090:8080 -d -e spring.profiles.active=prod -e dbhost=mysql-new -e dbport=3306  -e dbuser=${{ secrets.DB_USER  }} -e dbpassword=${{ secrets.DB_PASSWORD }} -e emailpassword=${{ secrets.EMAIL_PASSWORD }} -e dbname=dnd5 magistrus/dnd5club
+            docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
