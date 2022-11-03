@@ -1,4 +1,4 @@
-name: Deploy TTG Club Backend
+name: Build Frontend
 
 on:
   workflow_call:
@@ -11,16 +11,16 @@ permissions:
   id-token: write
 
 concurrency:
-  group: build-frontend-from-backend-${{ github.repository }}-${{ github.ref_name }}
+  group: build-frontend-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   build-front-dev:
-    name: Build Develop
+    name: Develop Workflow
     if: ${{ github.ref_name == 'dev' }}
     uses: ttg-club/ttg-club-frontend/.github/workflows/build.yml@dev
 
   build-front-prod:
-    name: Build Production
+    name: Production Workflow
     if: ${{ github.ref_name == 'main' }}
     uses: ttg-club/ttg-club-frontend/.github/workflows/build.yml@main
