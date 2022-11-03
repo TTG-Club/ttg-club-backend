@@ -16,7 +16,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: deploy-${{ github.ref }}-${{ github.action }}-${{ github.workflow }}-${{ github.run_id }}
+  group: deploy-backend-${{ github.ref_name }}-${{ github.run_id }}
   cancel-in-progress: true
 
 jobs:
