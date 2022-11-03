@@ -13,7 +13,8 @@ public enum Rarity {
 	VERY_RARE(40_000, "очень редкий", "очень редкая", "очень редкое" ),
 	LEGENDARY(200_000, "легендарный", "легендарная", "легендарное" ),
 	ARTIFACT(1_500_000, "артефакт", "артефакт", "артефакт"),
-	UNKNOWN(0, "не определеный", "не определеная", "не определеное");
+	UNKNOWN(0, "редкость не определена", "редкость не определена", "редкость не определена"),
+	VARIES(0, "редкость варьируется", "редкость варьируется", "редкость варьируется");
 
 	private String[] names;
 	Rarity(int cost, String... names){
@@ -38,7 +39,7 @@ public enum Rarity {
 	public String getMiddleName() {
 		return names[2];
 	}
-	
+
 	public static int getCostDMG(Rarity rarity) {
 		switch (rarity) {
 		case COMMON:
