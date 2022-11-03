@@ -16,12 +16,12 @@ permissions:
   id-token: write
 
 concurrency:
-  group: deploy-backend-${{ github.repository }}-${{ github.ref_name }}
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   build-front:
-    name: Build Frontend
+    name: Frontend Build Workflow
     uses: ./.github/workflows/build-frontend.yml
 
   build:
