@@ -18,7 +18,6 @@ jobs:
   prod-ssh:
     name: Update Dev SSH Server
     if: ${{ github.ref_name == 'dev' }}
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: appleboy/ssh-action@master
@@ -36,7 +35,6 @@ jobs:
   dev-ssh:
     name: Update Prod SSH Server
     if: ${{ github.ref_name == 'main' }}
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: appleboy/ssh-action@master
