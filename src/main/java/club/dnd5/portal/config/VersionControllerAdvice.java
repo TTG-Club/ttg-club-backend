@@ -8,14 +8,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
-import java.util.Properties;
 
 @ControllerAdvice
 public class VersionControllerAdvice {
-	@Value("${app.frontend.sha}")
+	@Value("${frontend.application.sha}")
 	private String version;
 	@Value("${spring.profiles.active}")
 	private String profile;

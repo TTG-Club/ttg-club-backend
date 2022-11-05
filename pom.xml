@@ -24,7 +24,7 @@
 		<bootstrap.version>5.0.2</bootstrap.version>
 		<jquery.version>3.6.0</jquery.version>
 
-		<app.frontend.sha>${app.frontend.sha}</app.frontend.sha>
+		<frontend.application.sha>${frontend.application.sha}</frontend.application.sha>
 	</properties>
 
 	<dependencies>
