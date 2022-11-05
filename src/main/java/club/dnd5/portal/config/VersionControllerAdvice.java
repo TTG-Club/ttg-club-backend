@@ -8,9 +8,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.io.InputStream;
+import java.util.Properties;
+
 @ControllerAdvice
 public class VersionControllerAdvice {
-	@Value("${git.commit.id}")
+	@Value("${app.frontend.sha}")
 	private String version;
 
 	@Value("${spring.profiles.active}")

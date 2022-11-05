@@ -13,7 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>DnD 5E portal</name>
 	<description>D&amp;D 5E club</description>
-	
+
 	<properties>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -131,21 +131,19 @@
 							<value>product</value>
 						</systemProperty>
 					</systemProperties>
+					<systemProperties>
+						<systemProperty>
+							<name>app.frontend.sha</name>
+							<value>${app.frontend.sha}</value>
+						</systemProperty>
+					</systemProperties>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-					<failOnNoGitDirectory>false</failOnNoGitDirectory>
-					<includeOnlyProperties>    
-    					<includeOnlyProperty>git.commit.id</includeOnlyProperty>
-					</includeOnlyProperties>
 				</configuration>
-			</plugin>
-			<plugin>
-    			<groupId>pl.project13.maven</groupId>
-    			<artifactId>git-commit-id-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
