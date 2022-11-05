@@ -44,7 +44,7 @@ jobs:
           java-version: 1.8
 
       - name: Maven Install
-        run: mvn -B clean install -DskipTests
+        run: mvn -B clean install -DskipTests -Dfrontend.application.sha=
 
       - uses: docker/login-action@v1
         with:
