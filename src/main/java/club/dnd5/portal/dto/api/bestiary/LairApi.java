@@ -14,11 +14,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LairApi {
-	private String discription;
+	private String description;
 	private String action;
 	private String effect;
 	public LairApi(Lair lair){
-		discription = lair.getDescription();
+		description = lair.getDescription();
 		action = lair.getAction();
 		effect = lair.getEffect();
 	}
