@@ -23,6 +23,8 @@
 		<spring-web-flow.version>2.5.1.RELEASE</spring-web-flow.version>
 		<bootstrap.version>5.0.2</bootstrap.version>
 		<jquery.version>3.6.0</jquery.version>
+
+		<app.frontend.sha>${app.frontend.sha}</app.frontend.sha>
 	</properties>
 
 	<dependencies>
@@ -129,12 +131,6 @@
 						<systemProperty>
 							<name>spring.profiles.active</name>
 							<value>product</value>
-						</systemProperty>
-					</systemProperties>
-					<systemProperties>
-						<systemProperty>
-							<name>app.frontend.sha</name>
-							<value>${app.frontend.sha}</value>
 						</systemProperty>
 					</systemProperties>
 					<excludes>
