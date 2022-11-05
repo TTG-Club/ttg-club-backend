@@ -29,7 +29,19 @@ jobs:
           script: |
             docker stop devdnd5club && docker rm devdnd5club
             docker pull magistrus/dnd5club:latest
-            docker run --network dev-dnd5-mysql-new --name devdnd5club -p 9393:8080 -d -e spring.profiles.active=dev -e frontend.application.sha=${{ github.sha }} -e dbhost=mysql-dev -e dbport=3306  -e dbuser=${{ secrets.DB_USER  }} -e dbpassword=${{ secrets.DB_PASSWORD }} -e emailpassword=${{ secrets.EMAIL_PASSWORD }} -e dbname=dnd5 magistrus/dnd5club
+            docker run \
+              --network dev-dnd5-mysql-new \
+              --name devdnd5club \
+              -p 9393:8080 \
+              -d \
+              -e spring.profiles.active=dev \
+              -e frontend.application.sha=${{ github.github.run_id }}-${{ github.github.run_number }}-${{ github.github.run_attempt }} \
+              -e dbhost=mysql-dev \
+              -e dbport=3306 \
+              -e dbuser=${{ secrets.DB_USER  }} \
+              -e dbpassword=${{ secrets.DB_PASSWORD }} \
+              -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
+              -e dbname=dnd5 magistrus/dnd5club
             docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
 
   dev-ssh:
@@ -46,5 +58,17 @@ jobs:
           script: |
             docker stop dnd5club && docker rm dnd5club
             docker pull magistrus/dnd5club:latest
-            docker run --network dnd5-mysql-new --name dnd5club -p 9090:8080 -d -e spring.profiles.active=prod -e frontend.application.sha=${{ github.sha }} -e dbhost=mysql-new -e dbport=3306  -e dbuser=${{ secrets.DB_USER  }} -e dbpassword=${{ secrets.DB_PASSWORD }} -e emailpassword=${{ secrets.EMAIL_PASSWORD }} -e dbname=dnd5 magistrus/dnd5club
+            docker run \
+              --network dnd5-mysql-new \
+              --name dnd5club \
+              -p 9090:8080 \
+              -d \
+              -e spring.profiles.active=prod \
+              -e frontend.application.sha=${{ github.github.run_id }}-${{ github.github.run_number }}-${{ github.github.run_attempt }} \
+              -e dbhost=mysql-new \
+              -e dbport=3306 \
+              -e dbuser=${{ secrets.DB_USER  }} \
+              -e dbpassword=${{ secrets.DB_PASSWORD }} \
+              -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
+              -e dbname=dnd5 magistrus/dnd5club
             docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
