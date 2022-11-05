@@ -35,7 +35,7 @@ jobs:
               -p 9393:8080 \
               -d \
               -e spring.profiles.active=dev \
-              -e frontend.application.sha=${{ github.github.run_id }}-${{ github.github.run_number }}-${{ github.github.run_attempt }} \
+              -e frontend.application.sha=$(uuidgen) \
               -e dbhost=mysql-dev \
               -e dbport=3306 \
               -e dbuser=${{ secrets.DB_USER  }} \
@@ -64,7 +64,7 @@ jobs:
               -p 9090:8080 \
               -d \
               -e spring.profiles.active=prod \
-              -e frontend.application.sha=${{ github.github.run_id }}-${{ github.github.run_number }}-${{ github.github.run_attempt }} \
+              -e frontend.application.sha=$(uuidgen) \
               -e dbhost=mysql-new \
               -e dbport=3306 \
               -e dbuser=${{ secrets.DB_USER  }} \
