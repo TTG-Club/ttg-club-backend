@@ -8,16 +8,21 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.util.Date;
+
 @ControllerAdvice
 public class VersionControllerAdvice {
-	@Value("${git.commit.id}")
+	@Value("${frontend.application.sha}")
 	private String version;
-
 	@Value("${spring.profiles.active}")
 	private String profile;
 
 	@ModelAttribute
 	public void handleRequest(HttpServletRequest request, Model model) {
+		if (version == null || version.isEmpty()) {
+			version = String.valueOf(new Date().getTime());
+		}
+
 		model.addAttribute("version", version);
 		model.addAttribute("profile", profile);
 
