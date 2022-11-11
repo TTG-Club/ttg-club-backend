@@ -53,34 +53,34 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class MetaApiController {
 	@Autowired
 	private ImageRepository imageRepository;
-	
+
 	@Autowired
 	private ClassRepository classRepository;
 
 	@Autowired
 	private RaceRepository raceRepository;
-	
+
 	@Autowired
 	private TraitDatatableRepository traitRepository;
-	
+
 	@Autowired
 	private BackgroundDatatableRepository backgroundRepository;
-	
+
 	@Autowired
 	private SpellDatatableRepository spellRepository;
-	
+
 	@Autowired
 	private OptionDatatableRepository optionRepository;
-	
+
 	@Autowired
 	private WeaponDatatableRepository weaponRepository;
-	
+
 	@Autowired
 	private ArmorDatatableRepository armorRepository;
-	
+
 	@Autowired
 	private ItemDatatableRepository itemRepository;
-	
+
 	@Autowired
 	private MagicItemDatatableRepository magicItemRepository;
 
@@ -95,7 +95,7 @@ public class MetaApiController {
 
 	@Autowired
 	private RuleDatatableRepository ruleRepository;
-	
+
 	@Autowired
 	private BookDatatableRepository bookRepository;
 
@@ -105,7 +105,7 @@ public class MetaApiController {
 		meta.setDescription("TTG.Club - сайт, посвященный DnD 5-й редакции. Тут можно найти: расы, классы, заклинания, бестиарий, снаряжение, магические предметы и инструменты для облегчения игры как игрокам, так и мастерам - все в одном месте.");
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getClassesMeta() {
 		MetaApi meta = new MetaApi();
@@ -118,7 +118,7 @@ public class MetaApiController {
 	public MetaApi getClassMeta(@PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace('_', ' '));
 		MetaApi meta = new MetaApi();
-		meta.setTitle(String.format("%s (%s) | Классы D&D 5e", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
+		meta.setTitle(String.format("%s (%s) | Классы D&D 5e", heroClass.getName(), heroClass.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
 		meta.setMenu("Классы");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
@@ -127,7 +127,7 @@ public class MetaApiController {
 		}
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/classes/{classEnglishName}/{archetypeEnglishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArchetypeMeta(@PathVariable String classEnglishName, @PathVariable String archetypeEnglishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' '));
@@ -135,10 +135,10 @@ public class MetaApiController {
 		Optional<Archetype> archetype = heroClass.getArchetypes().stream()
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeEnglishName.replace('_', ' ')))
 				.findFirst();
-		meta.setTitle(String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",  
-				StringUtils.capitalize(archetype.get().getName().toLowerCase()), heroClass.getCapitalazeName(), heroClass.getEnglishName()));
-		meta.setDescription(String.format("%s - описание %s класса %s из D&D 5 редакции", 
-				archetype.get().getName(), heroClass.getArchetypeName(), heroClass.getCapitalazeName()));
+		meta.setTitle(String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",
+				StringUtils.capitalize(archetype.get().getName().toLowerCase()), heroClass.getName(), heroClass.getEnglishName()));
+		meta.setDescription(String.format("%s - описание %s класса %s из D&D 5 редакции",
+				archetype.get().getName(), heroClass.getArchetypeName(), heroClass.getName()));
 		meta.setMenu("Классы");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
 		if (!images.isEmpty()) {
@@ -160,7 +160,7 @@ public class MetaApiController {
 		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
 		MetaApi meta = new MetaApi();
 		meta.setTitle(race.get().getName() + " | Расы D&D 5e");
-		meta.setDescription(String.format("%s - раса персонажа по D&D 5 редакции", race.get().getCapitalazeName()));
+		meta.setDescription(String.format("%s - раса персонажа по D&D 5 редакции", race.get().getName()));
 		meta.setMenu("Расы");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
@@ -168,12 +168,12 @@ public class MetaApiController {
 		}
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/races/{englishName}/{subrace}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getSubraceMeta(@PathVariable String englishName, @PathVariable String subrace) {
 		Optional<Race> race = raceRepository.findByEnglishName(subrace.replace('_', ' '));
 		MetaApi meta = new MetaApi();
-		meta.setTitle(String.format("%s | Расы | Разновидности D&D 5e", race.get().getCapitalazeName()));
+		meta.setTitle(String.format("%s | Расы | Разновидности D&D 5e", race.get().getName()));
 		meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
 		meta.setMenu("Расы");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
@@ -182,7 +182,7 @@ public class MetaApiController {
 		}
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/traits", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getTraitsMeta() {
 		MetaApi meta = new MetaApi();
@@ -200,9 +200,9 @@ public class MetaApiController {
 		meta.setDescription(String.format("%s (%s) - черта персонажа по D&D 5-редакции", trait.getName(), trait.getEnglishName()));
 		meta.setMenu("Черты");
 		meta.setKeywords(trait.getAltName() + " " + trait.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/backgrounds", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBackgroundsMeta() {
 		MetaApi meta = new MetaApi();
@@ -220,9 +220,9 @@ public class MetaApiController {
 		meta.setDescription(String.format("%s (%s) - предыстория персонажа по D&D 5 редакции", background.getName(), background.getEnglishName()));
 		meta.setMenu("Предыстории");
 		meta.setKeywords(background.getAltName() + " " + background.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/options", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getOptionsMeta() {
 		MetaApi meta = new MetaApi();
@@ -237,15 +237,15 @@ public class MetaApiController {
 		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' '));
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
-		meta.setDescription( 
+		meta.setDescription(
 				String.format("Описание особенности %s - %s",
-						option.getOptionTypes().stream().map(OptionType::getDisplayName).collect(Collectors.joining()), 
+						option.getOptionTypes().stream().map(OptionType::getDisplayName).collect(Collectors.joining()),
 						option.getName()));
 		meta.setMenu("Особенности классов");
 		meta.setKeywords(option.getAltName() + " " + option.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getSpellsMeta() {
 		MetaApi meta = new MetaApi();
@@ -264,9 +264,9 @@ public class MetaApiController {
 		meta.setMenu("Заклинания");
 		meta.setImage(String.format("https://image.ttg.club:8089/magic/%s.png", StringUtils.capitalize(spell.getSchool().name().toLowerCase())));
 		meta.setKeywords(spell.getAltName() + " " + spell.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getWeaponsMeta() {
 		MetaApi meta = new MetaApi();
@@ -284,9 +284,9 @@ public class MetaApiController {
 		meta.setDescription(String.format("%s (%s) - %s D&D 5 редакции", weapon.getName(), weapon.getEnglishName(), weapon.getType().getName()));
 		meta.setMenu("Оружие");
 		meta.setKeywords(weapon.getAltName() + " " + weapon.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/armors", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArmorsMeta() {
 		MetaApi meta = new MetaApi();
@@ -304,9 +304,9 @@ public class MetaApiController {
 		meta.setDescription(String.format("%s (%s) - доспехи по D&D 5 редакции", armor.getName(), armor.getEnglishName()));
 		meta.setMenu("Доспехи");
 		meta.setKeywords(armor.getAltName() + " " + armor.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/items", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getItemsMeta() {
 		MetaApi meta = new MetaApi();
@@ -324,9 +324,9 @@ public class MetaApiController {
 		meta.setDescription(String.format("%s (%s) снаряжение по D&D 5 редакции", item.getName(), item.getEnglishName()));
 		meta.setMenu("Снаряжение");
 		meta.setKeywords(item.getAltName() + " " + item.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getMagicItemsMeta() {
 		MetaApi meta = new MetaApi();
@@ -348,9 +348,9 @@ public class MetaApiController {
 			meta.setImage(images.iterator().next());
 		}
 		meta.setKeywords(item.getAltName() + " " + item.getEnglishName());
-		return meta;	
+		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBeastsMeta() {
 		MetaApi meta = new MetaApi();
@@ -374,7 +374,7 @@ public class MetaApiController {
 		meta.setKeywords(beast.getAltName() + " " + beast.getEnglishName());
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/screens", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getScreensMeta() {
 		MetaApi meta = new MetaApi();
@@ -394,7 +394,7 @@ public class MetaApiController {
 		meta.setKeywords(screen.get().getAltName() + " " + screen.get().getEnglishName());
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/gods", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getGodsMeta() {
 		MetaApi meta = new MetaApi();
@@ -418,7 +418,7 @@ public class MetaApiController {
 		meta.setKeywords(god.getAltName() + " " + god.getEnglishName());
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/rules", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getRulesMeta() {
 		MetaApi meta = new MetaApi();
@@ -438,7 +438,7 @@ public class MetaApiController {
 		meta.setKeywords(rule.getAltName() + " " + rule.getEnglishName());
 		return meta;
 	}
-	
+
 	@GetMapping(value = "/api/v1/meta/books", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBooksMeta() {
 		MetaApi meta = new MetaApi();

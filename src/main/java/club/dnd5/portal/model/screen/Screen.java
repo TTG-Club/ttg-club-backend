@@ -1,6 +1,7 @@
 package club.dnd5.portal.model.screen;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -32,7 +33,7 @@ public class Screen {
 	private String altName;
 	private String englishName;
 	private String category;
-	
+
 	@ManyToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "parent_id")
 	private Screen parent;
@@ -44,12 +45,12 @@ public class Screen {
 	private String description;
 	private String icon;
 	private int ordering;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
-	
+
 	public String getUrlName() {
-		return englishName.replace(' ', '_');
+		return englishName.toLowerCase().replace(' ', '_');
 	}
 }

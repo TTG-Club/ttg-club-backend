@@ -21,20 +21,22 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class MagicItemController {
+	private static final String BASE_URL = "https://ttg.club/items/magic";
+
 	@Autowired
 	private MagicItemDatatableRepository repository;
 	@Autowired
 	private ImageRepository imageRepo;
-	
+
 	@GetMapping("/items/magic")
 	public String getMagicItems(Model model) {
 		model.addAttribute("metaTitle", "Магические предметы (Magic items) D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/items/magic");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Магические предметы и артефакты по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Магические предметы");
 		return "items_magic";
 	}
-	
+
 	@GetMapping("/items/magic/{name}")
 	public String getMagicItem(Model model, @PathVariable String name, HttpServletRequest request) {
 		MagicItem item = repository.findByEnglishName(name.replace("_", " "));
@@ -43,7 +45,7 @@ public class MagicItemController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s) | Магические предметы D&D 5e", item.getName(), item.getEnglishName()));
-		model.addAttribute("metaUrl", "https://ttg.club/items/magic/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s", item.getName(), item.getEnglishName(), item.getRarity().getCyrilicName(), item.getType().getCyrilicName()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.MAGIC_ITEM, item.getId());
 		if (!images.isEmpty()) {
@@ -52,7 +54,7 @@ public class MagicItemController {
 		model.addAttribute("menuTitle", "Магические предметы");
 		return "items_magic";
 	}
-	
+
 	@GetMapping("/items/magic/fragment/{id:\\d+}")
 	public String getMagicItemFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		MagicItem item = repository.findById(id).orElseThrow(InvalidAttributesException::new);
@@ -61,7 +63,7 @@ public class MagicItemController {
 		model.addAttribute("images", images);
 		return "fragments/item_magic :: view";
 	}
-	
+
 	@GetMapping("/items/magic/fragment/{name:[A-Za-z_,']+}")
 	public String getMagicWeaponFragmentByName(Model model, @PathVariable String name) {
 		model.addAttribute("item", repository.findByEnglishName(name.replace('_', ' ')));

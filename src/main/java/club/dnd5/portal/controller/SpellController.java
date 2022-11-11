@@ -21,6 +21,8 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class SpellController {
+	private static final String BASE_URL = "https://ttg.club/spells";
+
 	@Autowired
 	private SpellDatatableRepository repository;
 	@Autowired
@@ -29,12 +31,12 @@ public class SpellController {
 	@GetMapping("/spells")
 	public String getSpells(Model model) {
 		model.addAttribute("metaTitle", "Заклинания (Spells) D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/spells");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Заклинания по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Заклинания");
 		return "spells";
 	}
-	
+
 	@GetMapping("/spells/{name}")
 	public String getSpell(Model model, @PathVariable String name, HttpServletRequest request) {
 		Spell spell = repository.findByEnglishName(name.replace("_", " "));
@@ -43,13 +45,13 @@ public class SpellController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s)", spell.getName(), spell.getEnglishName()) + " | Заклинания D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/spells/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
 		model.addAttribute("metaDescription", String.format("%s %s, %s", (spell.getLevel() == 0 ? "Заговор" : spell.getLevel() + " уровень"), spell.getName(), spell.getSchool().getName()));
 		model.addAttribute("metaImage", String.format("https://image.ttg.club:8089/magic/%s.png", StringUtils.capitalize(spell.getSchool().name().toLowerCase())));
 		model.addAttribute("menuTitle", "Заклинания");
 		return "spells";
 	}
-	
+
 	@GetMapping("/spells/fragment/{id}")
 	public String getSpellFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		model.addAttribute("archetypes", archetypeSpellRepository.findAllBySpell(id));
@@ -57,7 +59,7 @@ public class SpellController {
 		model.addAttribute("spell", repository.findById(id).orElseThrow(InvalidAttributesException::new));
 		return "fragments/spell :: view";
 	}
-	
+
 	@GetMapping("/spells/id")
 	public String getSpell(Model model, Integer id) throws InvalidAttributesException {
 		model.addAttribute("archetypes", archetypeSpellRepository.findAllBySpell(id));
