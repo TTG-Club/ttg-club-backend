@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api;
 
+import club.dnd5.portal.model.trait.Trait;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -18,8 +19,13 @@ public class SearchApi {
 	private String url;
 
 	public SearchApi(Race race) {
-		name = new NameApi(race.getCapitalazeName(), race.getEnglishName());
+		name = new NameApi(race.getName(), race.getEnglishName());
 		section = "Расы";
-		url = String.format("/races", race.getUrlName());
+		url = String.format("/races/%s", race.getUrlName());
+	}
+	public SearchApi(Trait trait) {
+		name = new NameApi(trait.getName(), trait.getEnglishName());
+		section = "Черты";
+		url = String.format("/traits/%s", trait.getUrlName());
 	}
 }
