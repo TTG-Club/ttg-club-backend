@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import club.dnd5.portal.model.book.Book;
 import lombok.Getter;
 
+import java.util.Locale;
+
 @Entity
 @Table(name = "armors")
 @Getter
@@ -35,8 +37,12 @@ public class Armor {
 	@Enumerated(EnumType.ORDINAL)
 	private ArmorCategory type;
 	private String description;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
+	public String getUrl(){
+		return englishName.toLowerCase().replace(" ", "_");
+	}
 }
