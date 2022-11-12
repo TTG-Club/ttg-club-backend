@@ -45,7 +45,7 @@ public class MagicItemController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s) | Магические предметы D&D 5e", item.getName(), item.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, item.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s", item.getName(), item.getEnglishName(), item.getRarity().getCyrilicName(), item.getType().getCyrilicName()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.MAGIC_ITEM, item.getId());
 		if (!images.isEmpty()) {

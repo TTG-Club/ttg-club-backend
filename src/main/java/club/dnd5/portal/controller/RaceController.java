@@ -55,7 +55,7 @@ public class RaceController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", race.get().getName() + " | Расы D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.get().getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.get().getCapitalazeName()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
@@ -73,7 +73,7 @@ public class RaceController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s | Расы | Разновидности D&D 5e", race.get().getCapitalazeName()));
-		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, name, subrace));
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getParent().getUrlName(), race.get().getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
 		model.addAttribute("menuTitle", "Расы");
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
