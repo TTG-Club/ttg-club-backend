@@ -12,10 +12,14 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [ main, dev ]
-  schedule:
-    - cron: '39 3 * * 6'
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+
+    branches:
+      - main
+      - dev
 
 concurrency:
   group: CodeQL-${{ github.ref }}
