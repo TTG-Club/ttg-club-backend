@@ -39,7 +39,7 @@ public class ItemController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", item.getName() + " | Снаряжение D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, item.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) снаряжение по D&D 5 редакции", item.getName(), item.getEnglishName()));
 		model.addAttribute("menuTitle", "Снаряжение");
 		return "items";

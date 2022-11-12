@@ -41,7 +41,7 @@ public class RuleController {
 		}
 		model.addAttribute("metaTitle", String.format("%s | %s | Правила и термины [Rules] D&D 5e", rule.getName(), rule.getType()));
 		model.addAttribute("metaDescription", String.format("%s (%s) Правила и термины по D&D 5 редакции", rule.getName(), rule.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, rule.getUrlName()));
 		model.addAttribute("selectedRule", new RuleDto(rule));
 		model.addAttribute("menuTitle", "Правила и термины");
 		return "rules";

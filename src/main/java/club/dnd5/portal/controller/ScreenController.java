@@ -43,7 +43,7 @@ public class ScreenController {
 
 		model.addAttribute("metaImage", screen.getIcon());
 		model.addAttribute("metaTitle", String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.getName(), screen.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, screen.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) Ширма Мастера Подземелий и Драконов по D&D 5 редакции", screen.getName(), screen.getEnglishName()));
 		model.addAttribute("menuTitle", "Ширма Мастера");
 		return "screens";

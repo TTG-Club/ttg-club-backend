@@ -46,7 +46,7 @@ public class BackgroundController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", background.getName() + " | Предыстории персонажей D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL,  name));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL,  background.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - предыстория персонажа по D&D 5 редакции", background.getName(), background.getEnglishName()));
 		model.addAttribute("menuTitle", "Предыстории");
 		return "backgrounds";

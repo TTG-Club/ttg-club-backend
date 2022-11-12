@@ -32,33 +32,33 @@ public class Equipment {
 	private String englishName;
 	private String altName;
 	private Integer cost;
-	
+
 	@Enumerated(EnumType.ORDINAL)
 	private Currency currency;
-	
+
 	private Float weight;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
-	
+
 	@ElementCollection(targetClass = EquipmentType.class)
 	@JoinTable(name = "equipments_types", joinColumns = @JoinColumn(name = "equipment_id"))
 	@Column(name = "type", nullable = false)
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private Set<EquipmentType> types;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
 	private Short page;
-	
+
 	public String getTextCost() {
 		if (getCost() == null) {
 			return null;
 		}
 		else
 		{
-			
+
 			switch (getCurrency()) {
 			case SM:
 				return String.valueOf(getCost() / 10f) + " " + getCurrency().getName();
@@ -70,5 +70,9 @@ public class Equipment {
 				return getCost() + " " + getCurrency().getName();
 			}
 		}
+	}
+
+	public String getUrlName(){
+		return englishName.toLowerCase().replace(' ', '_');
 	}
 }

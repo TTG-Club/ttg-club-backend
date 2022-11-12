@@ -39,7 +39,7 @@ public class TraitController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s)", trait.getName(), trait.getEnglishName()) + " | Черты D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, name));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, trait.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - черта персонажа по D&D 5-редакции", trait.getName(), trait.getEnglishName()));
 		model.addAttribute("menuTitle", "Черты");
 		return "traits";
