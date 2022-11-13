@@ -35,8 +35,12 @@ public class Armor {
 	@Enumerated(EnumType.ORDINAL)
 	private ArmorCategory type;
 	private String description;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
+	public String getUrlName(){
+		return englishName.toLowerCase().replace(" ", "_");
+	}
 }

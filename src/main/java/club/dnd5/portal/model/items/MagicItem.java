@@ -90,11 +90,11 @@ public class MagicItem {
 	public int getBaseCost() {
 		return cost;
 	}
-	
+
 	public String getCapitalazeName() {
 		return StringUtils.capitalize(name.toLowerCase());
 	}
-	
+
 	@Override
 	public String toString() {
 		return name.toLowerCase();
@@ -157,7 +157,7 @@ public class MagicItem {
 			return Integer.toString(getCost());
 		}
 	}
-	
+
 	public String getTextRarity() {
 		switch (type) {
 		case AMMUNITION:
@@ -172,5 +172,9 @@ public class MagicItem {
 		default:
 			return rarity.getCyrilicName();
 		}
+	}
+
+	public String getUrlName(){
+		return englishName.toLowerCase().replace(' ', '_');
 	}
 }

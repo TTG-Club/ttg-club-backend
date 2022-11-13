@@ -39,6 +39,8 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class ClassController {
+	private static final String BASE_URL = "https://ttg.club/classe";
+
 	private static final String[] prerequsitlevels = { "Нет", " 5", " 6", " 7", " 9", "11", "12", "15", "17", "18" };
 
 	@Autowired
@@ -51,15 +53,15 @@ public class ClassController {
 	private ImageRepository imageRepository;
 	@Autowired
 	private OptionDatatableRepository optionRepository;
-	
+
 	@GetMapping("/classes")
 	public String getClasses(Model model) {
 		model.addAttribute("metaTitle", "Классы (Classes) D&D 5e");
 		model.addAttribute("menuTitle", "Классы");
-		model.addAttribute("metaUrl", "https://ttg.club/classes");
+		model.addAttribute("metaUrl", BASE_URL);
 		return "classes";
 	}
-	
+
 	@GetMapping("/classes/{name}")
 	public String getClass(Model model, @PathVariable String name, HttpServletRequest request) {
 		HeroClass heroClass = classRepository.findByEnglishName(name.replace("_", " "));
@@ -68,7 +70,7 @@ public class ClassController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s) | Классы D&D 5e", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
-		model.addAttribute("metaUrl", "https://ttg.club/classes/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, heroClass.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
 		if (!images.isEmpty()) {
@@ -77,7 +79,7 @@ public class ClassController {
 		model.addAttribute("menuTitle", "Классы");
 		return "classes";
 	}
-	
+
 	@GetMapping("/classes/{name}/{archetype}")
 	public String getArchetype(Model model, @PathVariable String name, @PathVariable String archetype, HttpServletRequest request) {
 		String englishName = name.replace("_", " ");
@@ -93,10 +95,10 @@ public class ClassController {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";
 		}
-		model.addAttribute("metaTitle", String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",  
+		model.addAttribute("metaTitle", String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",
 				StringUtils.capitalize(selectedArchetype.get().getName().toLowerCase()), heroClass.getCapitalazeName(), heroClass.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("https://ttg.club/classes/%s/%s", name, archetype));
-		model.addAttribute("metaDescription", String.format("%s - описание %s класса %s из D&D 5 редакции", 
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, heroClass.getUrlName(), selectedArchetype.get().getUrlName()));
+		model.addAttribute("metaDescription", String.format("%s - описание %s класса %s из D&D 5 редакции",
 				selectedArchetype.get().getName(), heroClass.getArchetypeName(), heroClass.getCapitalazeName()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.SUBCLASS, selectedArchetype.get().getId());
 		if (!images.isEmpty()) {
@@ -105,7 +107,7 @@ public class ClassController {
 		model.addAttribute("menuTitle", "Классы");
 		return "classes";
 	}
-	
+
 	@GetMapping("/classes/fragment/{englishName}")
 	public String getFragmentClasses(Model model, @PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
@@ -120,7 +122,7 @@ public class ClassController {
 						Collectors.groupingBy(
 								f -> f.getArchetype().getId(),
 								Collectors.mapping(f -> new ClassFetureDto(
-										f, f.getArchetype().getGenitiveName()), 
+										f, f.getArchetype().getGenitiveName()),
 										Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(ClassFetureDto::getLevel).thenComparing(ClassFetureDto::getName))))
 								)
 				);
@@ -132,7 +134,7 @@ public class ClassController {
 		model.addAttribute("selectedArchetypeName", heroClass.getArchetypeName());
 		return "fragments/class :: view";
 	}
-	
+
 	@GetMapping("/classes/fragment_id/{id}")
 	public String getFragmentClassesById(Model model, @PathVariable Integer id) {
 		HeroClass heroClass = classRepository.findById(id).orElseThrow(IllegalArgumentException::new);
@@ -147,7 +149,7 @@ public class ClassController {
 						Collectors.groupingBy(
 								f -> f.getArchetype().getId(),
 								Collectors.mapping(f -> new ClassFetureDto(
-										f, f.getArchetype().getGenitiveName()), 
+										f, f.getArchetype().getGenitiveName()),
 										Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(ClassFetureDto::getLevel).thenComparing(ClassFetureDto::getName))))
 								)
 				);
@@ -159,14 +161,14 @@ public class ClassController {
 		model.addAttribute("selectedArchetypeName", heroClass.getArchetypeName());
 		return "fragments/class :: view";
 	}
-	
+
 	@GetMapping("/classes/images/{englishName}")
 	public String getClassImages(Model model, @PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
 		model.addAttribute("images", imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId()));
 		return "fragments/class :: images";
 	}
-	
+
 	@GetMapping("/classes/spells/{englishName}")
 	public String getClassSpells(Model model, @PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
@@ -188,7 +190,7 @@ public class ClassController {
 	@ResponseBody
 	public String getArchitypeName(@PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
-		return heroClass.getArchetypeName(); 
+		return heroClass.getArchetypeName();
 	}
 
 	@GetMapping("/classes/{englishName}/architypes/list")
@@ -197,9 +199,9 @@ public class ClassController {
 		model.addAttribute("archetypeName", heroClass.getArchetypeName());
 		model.addAttribute("archetypes", heroClass.getArchetypes().stream().sorted(Comparator.comparing(Archetype::getBook)).collect(Collectors.toList()));
 		model.addAttribute("images", imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId()));
-		return "fragments/archetypes_list :: sub_menu"; 
+		return "fragments/archetypes_list :: sub_menu";
 	}
-	
+
 	@GetMapping("/classes/{className}/architypes/{archetypeName}")
 	public String getByClassIdAndByArchetypeId(Model model, @PathVariable String className, @PathVariable String archetypeName) {
 		HeroClass heroClass = classRepository.findByEnglishName(className.replace("_", " "));
@@ -230,7 +232,7 @@ public class ClassController {
 
 		Collections.sort(features, Comparator.comparing(ClassFetureDto::getLevel).thenComparing(ClassFetureDto::getOrder));
 		model.addAttribute("archetypeName", archetype.getName());
-		
+
 		model.addAttribute("heroClass", heroClass);
 		model.addAttribute("features", features);
 		model.addAttribute("selectedArchetypeId", archetype.getId());
@@ -257,7 +259,7 @@ public class ClassController {
 			.map(Archetype::getDescription)
 			.findFirst().orElse("");
 	}
-	
+
 	@GetMapping("/classes/feature/{id}")
 	@ResponseBody
 	public String getClassFeatureDescription(@PathVariable Integer id) {

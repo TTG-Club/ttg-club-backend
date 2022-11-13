@@ -17,18 +17,20 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class TraitController {
+	private static final String BASE_URL = "https://ttg.club/traits";
+
 	@Autowired
 	private TraitDatatableRepository repository;
-	
+
 	@GetMapping("/traits")
 	public String getTraits(Model model) {
 		model.addAttribute("metaTitle", "Черты (Traits) D&D 5e");
 		model.addAttribute("menuTitle", "Черты");
-		model.addAttribute("metaUrl", "https://ttg.club/traits");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Списко черт персонажей по D&D 5 редакции");
 		return "traits";
 	}
-	
+
 	@GetMapping("/traits/{name}")
 	public String getTrait(Model model, @PathVariable String name, HttpServletRequest request) {
 		Trait trait = repository.findByEnglishName(name.replace("_", " "));
@@ -37,12 +39,12 @@ public class TraitController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s)", trait.getName(), trait.getEnglishName()) + " | Черты D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/traits/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, trait.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - черта персонажа по D&D 5-редакции", trait.getName(), trait.getEnglishName()));
 		model.addAttribute("menuTitle", "Черты");
 		return "traits";
 	}
-	
+
 	@GetMapping("/traits/fragment/{id}")
 	public String getTraitFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		model.addAttribute("trait", repository.findById(id).orElseThrow(InvalidAttributesException::new));
