@@ -21,13 +21,13 @@
             <meta property="og:url" id="meta_url" th:content="${metaUrl eq null ? 'https://ttg.club/' : metaUrl}">
             <meta property="og:title" id= "meta_title" th:content="${metaTitle eq null ? 'TTG.Club Oнлайн-справочник' : metaTitle}">
             <meta property="og:description" th:content="${metaDescription eq null ? 'TTG.Club - сайт, посвященный DnD 5-й редакции. Тут можно найти: расы, классы, заклинания, бестиарий, снаряжение, магические предметы и инструменты для облегчения игры как игрокам, так и мастерам - все в одном месте.' : metaDescription}">
-            <meta property="og:image" id="meta_image" th:content="${metaImage eq null ? 'https://image.ttg.club:8089/dnd-meta-ttg.jpg' : metaImage}">
+            <meta property="og:image" id="meta_image" th:content="${metaImage eq null ? 'https://image.ttg.club:8089/meta-logo.jpg' : metaImage}">
             <meta name="twitter:title" th:content="${metaTitle eq null ? 'TTG.Club Oнлайн-справочник' : metaTitle}">
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="mobile-web-app-capable" content="yes">
 
             <link rel="manifest" href="/manifest.json" crossorigin="anonymous">
-            <link rel="icon" type="image/svg+xml" th:href="@{/favicon_ttg.svg?v=1}" />
+            <link rel="icon" type="image/svg+xml" th:href="@{/favicon_ttg_v2.svg}" />
             <link rel="canonical" th:href="@{${metaUrl eq null ? '#' : metaUrl}}">
             <link rel="apple-touch-icon" sizes="48x48" href="/style/icons/48.png">
             <link rel="apple-touch-icon" sizes="72x72" href="/style/icons/72.png">
