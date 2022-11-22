@@ -13,5 +13,5 @@ import club.dnd5.portal.model.image.ImageType;
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Long>{
 	@Query("SELECT i.url FROM Image i WHERE i.type=:type AND i.refId=:refId")
-	Collection<String> findAllByTypeAndRefId(@Param("type") ImageType type,@Param("refId") Integer refId);
+	Collection<String> findAllByTypeAndRefId(@Param("type") ImageType type, @Param("refId") Integer refId);
 }
