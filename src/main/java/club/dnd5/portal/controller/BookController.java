@@ -25,17 +25,17 @@ public class BookController {
 		model.addAttribute("menuTitle", "Источники");
 		return "books";
 	}
-	
+
 	@GetMapping("/books/{name}")
 	public String getRule(Model model, @PathVariable String name) {
 		Book book = repository.findByEnglishName(name.replace("_", " "));
 		model.addAttribute("metaTitle", String.format("%s (%s) | Источники (Books) D&D 5e", book.getName(), book.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("https://ttg.club/books/%s", name));
+		model.addAttribute("metaUrl", String.format("https://ttg.club/books/%s", book.getUrlName()));
 		model.addAttribute("selectedBook", "name");
 		model.addAttribute("menuTitle", "Источники");
 		return "books";
 	}
-	
+
 	@GetMapping("/books/fragment/{id}")
 	public String getMagicRuleFragmentById(Model model, @PathVariable String id) throws InvalidAttributesException {
 		model.addAttribute("book", repository.findById(id).orElseThrow(InvalidAttributesException::new));

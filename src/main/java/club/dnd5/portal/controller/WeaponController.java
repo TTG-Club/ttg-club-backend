@@ -18,21 +18,23 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class WeaponController {
+	private static final String BASE_URL = "https://ttg.club/weapons";
+
 	@Autowired
 	private WeaponDatatableRepository repository;
-	
+
 	@Autowired
 	private WeaponPropertyDatatableRepository propertyRepository;
-	
+
 	@GetMapping("/weapons")
 	public String getWeapons(Model model) {
 		model.addAttribute("metaTitle", "Оружие (Weapons) D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/weapons");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Оружие по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Оружие");
 		return "weapons";
 	}
-	
+
 	@GetMapping("/weapons/{name}")
 	public String getWeapon(Model model, @PathVariable String name, HttpServletRequest request) {
 		Weapon weapon = repository.findByEnglishName(name.replace('_', ' '));
@@ -41,18 +43,18 @@ public class WeaponController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s) | Оружие D&D 5e", weapon.getName(), weapon.getEnglishName()));
-		model.addAttribute("metaUrl", "https://ttg.club/weapons/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, weapon.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s D&D 5 редакции", weapon.getName(), weapon.getEnglishName(), weapon.getType().getName()));
 		model.addAttribute("menuTitle", "Оружие");
 		return "weapons";
 	}
-	
+
 	@GetMapping("/weapons/fragment/{id:\\d+}")
 	public String getMagicWeaponFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		model.addAttribute("weapon", repository.findById(id).orElseThrow(InvalidAttributesException::new));
 		return "fragments/weapon :: view";
 	}
-	
+
 	@GetMapping("/weapons/fragment/{name:[A-Za-z_,']+}")
 	public String getMagicWeaponFragmentByName(Model model, @PathVariable String name) throws InvalidAttributesException {
 		model.addAttribute("weapon", repository.findByEnglishName(name.replace('_', ' ')));

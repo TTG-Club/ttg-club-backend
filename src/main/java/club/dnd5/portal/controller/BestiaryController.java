@@ -22,21 +22,23 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class BestiaryController {
+	private static final String BASE_URL = "https://ttg.club/bestiary";
+
 	@Autowired
 	private BestiaryDatatableRepository repository;
-	
+
 	@Autowired
 	private ImageRepository imageRepo;
 
 	@GetMapping("/bestiary")
 	public String getCreatures(Model model) {
 		model.addAttribute("metaTitle", "Бестиарий (Monster Manual) D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/bestiary");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Бестиарий - существа для D&D 5 редакции");
 		model.addAttribute("menuTitle", "Бестиарий");
 		return "bestiary";
 	}
-	
+
 	@GetMapping("/bestiary/{name}")
 	public String getCreature(Model model, @PathVariable String name, HttpServletRequest request) {
 		Creature beast = repository.findByEnglishName(name.replace("_", " "));
@@ -46,7 +48,7 @@ public class BestiaryController {
 		}
 		CreatureDto creature = new CreatureDto(beast);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Бестиарий D&D 5e", creature.getName(), creature.getEnglishName()));
-		model.addAttribute("metaUrl", "https://ttg.club/bestiary/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, beast.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.CREATURE, creature.getId());
 		if (!images.isEmpty()) {
@@ -55,7 +57,7 @@ public class BestiaryController {
 		model.addAttribute("menuTitle", "Бестиарий");
 		return "bestiary";
 	}
-	
+
 	@GetMapping("/bestiary/fragment/{id:\\d+}")
 	public String getCreatureFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		Creature creature = repository.findById(id).orElseThrow(InvalidAttributesException::new);
@@ -64,7 +66,7 @@ public class BestiaryController {
 		model.addAttribute("images", images);
 		return "fragments/creature :: view";
 	}
-	
+
 	@GetMapping("/bestiary/description/{id:\\d+}")
 	public String getCreatureDescription(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		model.addAttribute("creature", repository.findById(id).orElseThrow(InvalidAttributesException::new));

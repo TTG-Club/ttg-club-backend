@@ -21,21 +21,23 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class GodController {
+	private static final String BASE_URL = "https://ttg.club/gods";
+
 	@Autowired
 	private GodDatatableRepository repository;
-	
+
 	@Autowired
 	private ImageRepository imageRepo;
-	
+
 	@GetMapping("/gods")
 	public String getGods(Model model) {
 		model.addAttribute("metaTitle", "Боги (Gods) D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/gods");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Боги, полубоги и философии D&D 5 редакции");
 		model.addAttribute("menuTitle", "Боги");
 		return "gods";
 	}
-	
+
 	@GetMapping("/gods/{name}")
 	public String getGod(Model model, @PathVariable String name, HttpServletRequest request) {
 		God god = repository.findByEnglishName(name.replace("_", " "));
@@ -45,7 +47,7 @@ public class GodController {
 		}
 
 		model.addAttribute("metaTitle", String.format("%s (%s) | Боги D&D 5e", god.getName(), god.getEnglishName()));
-		model.addAttribute("metaUrl", "https://ttg.club/gods/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, god.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s", god.getName(), god.getEnglishName(), god.getAligment().getCyrilicName(), god.getSex().getCyrilicName(), god.getCommitment()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.GOD, god.getId());
 		if (!images.isEmpty()) {
@@ -54,7 +56,7 @@ public class GodController {
 		model.addAttribute("menuTitle", "Боги");
 		return "gods";
 	}
-	
+
 	@GetMapping("/gods/fragment/{id}")
 	public String getGodFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		God god = repository.findById(id).orElseThrow(InvalidAttributesException::new);

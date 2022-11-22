@@ -27,24 +27,26 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class RaceController {
+	private static final String BASE_URL = "https://ttg.club/races";
+
 	@Autowired
 	private RaceRepository raceRepository;
-	
+
 	@Autowired
 	private ImageRepository imageRepository;
 
 	@Autowired
 	private ImageRepository imageRepo;
-	
+
 	@GetMapping("/races")
 	public String getRaces(Model model) {
 		model.addAttribute("metaTitle", "Расы (Races) D&D 5e");
 		model.addAttribute("menuTitle", "Расы");
-		model.addAttribute("metaUrl", "https://ttg.club/races");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Расы персонажей по D&D 5 редакции");
 		return "races";
 	}
-	
+
 	@GetMapping("/races/{name}")
 	public String getRace(Model model, @PathVariable String name, HttpServletRequest request) {
 		Optional<Race> race = raceRepository.findByEnglishName(name.replace('_', ' '));
@@ -53,7 +55,7 @@ public class RaceController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", race.get().getName() + " | Расы D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/races/" + name);
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.get().getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.get().getCapitalazeName()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
@@ -62,7 +64,7 @@ public class RaceController {
 		model.addAttribute("menuTitle", "Расы");
 		return "races";
 	}
-	
+
 	@GetMapping("/races/{name}/{subrace}")
 	public String getSubraceList(Model model, @PathVariable String name, @PathVariable String subrace, HttpServletRequest request) {
 		Optional<Race> race = raceRepository.findByEnglishName(subrace.replace('_', ' '));
@@ -71,7 +73,7 @@ public class RaceController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s | Расы | Разновидности D&D 5e", race.get().getCapitalazeName()));
-		model.addAttribute("metaUrl", "https://ttg.club/races/" + name + "/" + subrace);
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getParent().getUrlName(), race.get().getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
 		model.addAttribute("menuTitle", "Расы");
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
@@ -81,7 +83,7 @@ public class RaceController {
 		model.addAttribute("menuTitle", "Расы");
 		return "races";
 	}
-	
+
 	@GetMapping("/races/fragment/{id}")
 	public String getFragmentRace(Model model, @PathVariable Integer id) {
 		Race race = raceRepository.findById(id).get();
@@ -98,13 +100,13 @@ public class RaceController {
 		}
 		return "fragments/race :: view";
 	}
-	
+
 	@GetMapping("/races/{raceName}/subrace/{subraceName}")
 	public String getFragmentSubraces(Model model, @PathVariable String raceName, @PathVariable String subraceName) {
 		model.addAttribute("abilities", AbilityType.values());
 		Race subRace = raceRepository.findBySubrace(raceName.replace("_", " "), subraceName.replace("_", " ")).orElseThrow(IllegalArgumentException::new);
 		final Set<Integer> replaceFeatureIds = subRace.getFeatures().stream().map(Feature::getReplaceFeatureId).filter(Objects::nonNull).collect(Collectors.toSet());
-		model.addAttribute("features", 
+		model.addAttribute("features",
 				subRace.getParent().getFeatures()
 				.stream()
 				.filter(feature -> !replaceFeatureIds.contains(feature.getId()))
@@ -126,13 +128,13 @@ public class RaceController {
 		}
 		return "fragments/race :: view";
 	}
-	
+
 	@GetMapping("/races/{englishName}/subraces/list")
 	public String getArchitypeList(Model model,@PathVariable String englishName) {
 		Race race = raceRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(IllegalArgumentException::new);
 		model.addAttribute("images", imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId()));
 		model.addAttribute("race", race);
 		model.addAttribute("subraces", race.getSubRaces());
-		return "fragments/subraces_list :: sub_menu"; 
+		return "fragments/subraces_list :: sub_menu";
 	}
 }

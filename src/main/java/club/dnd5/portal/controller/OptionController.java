@@ -22,20 +22,22 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class OptionController {
+	private static final String BASE_URL = "https://ttg.club/options";
+
 	@Autowired
 	private OptionDatatableRepository repository;
-	
+
 	private Map<String, String> classIcons = new HashMap<>();
-	
+
 	@GetMapping("/options")
 	public String getOptions(Model model) {
 		model.addAttribute("metaTitle", "Особенности классов (Options) D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/options");
+		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Список особенности классов и подкласов по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Особенности классов");
 		return "options";
 	}
-	
+
 	@GetMapping("/options/{name}")
 	public String getOption(Model model, @PathVariable String name, HttpServletRequest request) {
 		Option option = repository.findByEnglishName(name.replace("_", " "));
@@ -44,15 +46,15 @@ public class OptionController {
 			return "forward: /error";
 		}
 		model.addAttribute("metaTitle", String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
-		model.addAttribute("metaUrl", "https://ttg.club/options/" + name);
-		model.addAttribute("metaDescription", 
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, option.getUrlName()));
+		model.addAttribute("metaDescription",
 				String.format("Описание особенности %s - %s",
-						option.getOptionTypes().stream().map(OptionType::getDisplayName).collect(Collectors.joining()), 
+						option.getOptionTypes().stream().map(OptionType::getDisplayName).collect(Collectors.joining()),
 						option.getName()));
 		model.addAttribute("menuTitle", "Особенности классов");
 		return "options";
 	}
-	
+
 	@GetMapping("/options/fragment/{id}")
 	public String getOptionFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
 		model.addAttribute("option", repository.findById(id).orElseThrow(InvalidAttributesException::new));

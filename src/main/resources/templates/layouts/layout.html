@@ -39,6 +39,7 @@
             <link rel="apple-touch-icon" sizes="512x512" href="/style/icons/512.png">
 
             <!-- Vue App -->
+            <script defer="defer" th:src="@{|/js/runtime.js?v=${version}|}"></script>
             <script defer="defer" th:src="@{|/js/chunk-vendors.js?v=${version}|}"></script>
             <script defer="defer" th:src="@{|/js/app.js?v=${version}|}"></script>
             <!-- End Vue App -->
