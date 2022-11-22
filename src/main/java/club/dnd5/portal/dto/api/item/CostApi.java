@@ -19,7 +19,7 @@ public class CostApi {
 	public CostApi(MagicItem item) {
 		dmg = item.getRangeCostDMG();
 		if (item.isConsumed()) {
-			xge = String.format("(%s)/2", item.getRangeCostXGE());
+			xge = String.format("(%s) / 2", item.getRangeCostXGE());
 		} else {
 			xge = item.getRangeCostXGE();
 		}
