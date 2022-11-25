@@ -17,7 +17,6 @@ on:
       - opened
       - ready_for_review
       - reopened
-      - edited
 
     branches:
       - main
