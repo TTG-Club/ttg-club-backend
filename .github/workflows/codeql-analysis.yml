@@ -13,11 +13,6 @@ name: "CodeQL"
 
 on:
   pull_request:
-    types:
-      - opened
-      - ready_for_review
-      - reopened
-
     branches:
       - main
       - dev
