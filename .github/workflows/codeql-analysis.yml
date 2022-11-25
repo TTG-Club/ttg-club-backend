@@ -13,6 +13,12 @@ name: "CodeQL"
 
 on:
   pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+
     branches:
       - main
       - dev
@@ -24,6 +30,7 @@ concurrency:
 jobs:
   analyze:
     name: Analyze
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
