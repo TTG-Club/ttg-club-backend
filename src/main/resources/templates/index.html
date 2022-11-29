@@ -141,23 +141,28 @@
                         <h3>Инструменты:</h3>
                         <div class="list">
                             <a href="/tools/trader" class="block tip w-100"
-                               v-tippy="'Быстро создать ассортимент торговца для вашей игры'"
+                                content="Быстро создать ассортимент торговца для вашей игры" 
+                                v-tippy="{ placement : 'left' }"
                             > Торговец
                             </a>
                             <a href="/tools/encounters" class="block tip w-100"
-                               v-tippy="'Кого же в этот раз встречают герои у себя на пути?'"
+                                content="Кого же в этот раз встречают герои у себя на пути?" 
+                                v-tippy="{ placement : 'left' }"
                             > Случайные столкновения
                             </a>
                             <a href="/tools/treasury" class="block tip w-100"
-                               v-tippy="'Устали придумывать что нашли ваши игроки? Доверьтесь удачи!'"
+                                content="Устали придумывать что нашли ваши игроки? Доверьтесь удачи!" 
+                                v-tippy="{ placement : 'left' }"
                             > Генератор содержимого сокровищницы
                             </a>
                             <a href="/tools/wildmagic" class="block tip w-100"
-                               v-tippy="'Куда бежать и от кого прятаться?'"
+                                content="Куда бежать и от кого прятаться?" 
+                                v-tippy="{ placement : 'left' }"
                             > Случайная дикая магия
                             </a>
                             <a href="/tools/madness" class="block tip w-100"
-                               v-tippy="'Безумству нет предела!'"
+                                content="Безумству нет предела!" 
+                                v-tippy="{ placement : 'left' }"                            
                             > Случайное безумие
                             </a>
                         </div>
@@ -233,6 +238,12 @@
                                 <img
                                         width="20px" height="20px" src="/partner/dm_helpmate.webp" alt="DM Helpmate"
                                 > DM Helpmate
+                            </a>
+                            <a href="https://vk.com/dndworlds?partner=ttg.club" class="block tip" target="_blank"
+                               v-tippy="'Переводы материалов для мастеров и игроков, мемы, запись на игры.'">
+                                <img
+                                        width="20px" height="20px" src="/partner/dndworlds.webp" alt="Круговорот миров"
+                                > Круговорот миров
                             </a>
                         </div>
                     </div>
