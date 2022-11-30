@@ -40,10 +40,10 @@ public class RaceController {
 
 	@GetMapping("/races")
 	public String getRaces(Model model) {
-		model.addAttribute("metaTitle", "Расы (Races) D&D 5e");
-		model.addAttribute("menuTitle", "Расы");
+		model.addAttribute("metaTitle", "Расы и происхождения (Races) D&D 5e");
+		model.addAttribute("menuTitle", "Расы и происхождения");
 		model.addAttribute("metaUrl", BASE_URL);
-		model.addAttribute("metaDescription", "Расы персонажей по D&D 5 редакции");
+		model.addAttribute("metaDescription", "Расы и происхождения персонажей по D&D 5 редакции");
 		return "races";
 	}
 
@@ -54,14 +54,14 @@ public class RaceController {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";
 		}
-		model.addAttribute("metaTitle", race.get().getName() + " | Расы D&D 5e");
+		model.addAttribute("metaTitle", race.get().getName() + " | Расы и происхождения D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.get().getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.get().getCapitalazeName()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
-		model.addAttribute("menuTitle", "Расы");
+		model.addAttribute("menuTitle", "Расы и происхождения");
 		return "races";
 	}
 
@@ -72,15 +72,15 @@ public class RaceController {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";
 		}
-		model.addAttribute("metaTitle", String.format("%s | Расы | Разновидности D&D 5e", race.get().getCapitalazeName()));
+		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", race.get().getCapitalazeName()));
 		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getParent().getUrlName(), race.get().getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
-		model.addAttribute("menuTitle", "Расы");
+		model.addAttribute("menuTitle", "Расы и происхождения");
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
-		model.addAttribute("menuTitle", "Расы");
+		model.addAttribute("menuTitle", "Расы и происхождения");
 		return "races";
 	}
 
