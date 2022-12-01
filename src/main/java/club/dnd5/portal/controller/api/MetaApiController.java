@@ -102,7 +102,7 @@ public class MetaApiController {
 	@GetMapping(value = "/api/v1/meta/*", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getNotMapping() {
 		MetaApi meta = new MetaApi();
-		meta.setDescription("TTG.Club - сайт, посвященный DnD 5-й редакции. Тут можно найти: расы, классы, заклинания, бестиарий, снаряжение, магические предметы и инструменты для облегчения игры как игрокам, так и мастерам - все в одном месте.");
+		meta.setDescription("TTG.Club - сайт, посвященный DnD 5-й редакции. Тут можно найти: расы, происхождения, классы, заклинания, бестиарий, снаряжение, магические предметы и инструменты для облегчения игры как игрокам, так и мастерам - все в одном месте.");
 		return meta;
 	}
 
@@ -150,8 +150,8 @@ public class MetaApiController {
 	@GetMapping(value = "/api/v1/meta/races", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getRacesMeta() {
 		MetaApi meta = new MetaApi();
-		meta.setTitle("Расы (Races) D&D 5e");
-		meta.setMenu("Расы");
+		meta.setTitle("Расы и происхождения (Races) D&D 5e");
+		meta.setMenu("Расы и происхождения");
 		return meta;
 	}
 
@@ -159,9 +159,9 @@ public class MetaApiController {
 	public MetaApi getRaceMeta(@PathVariable String englishName) {
 		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
 		MetaApi meta = new MetaApi();
-		meta.setTitle(race.get().getName() + " | Расы D&D 5e");
+		meta.setTitle(race.get().getName() + " | Расы и происхождения D&D 5e");
 		meta.setDescription(String.format("%s - раса персонажа по D&D 5 редакции", race.get().getName()));
-		meta.setMenu("Расы");
+		meta.setMenu("Расы и происхождения");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
 			meta.setImage(images.iterator().next());
@@ -173,9 +173,9 @@ public class MetaApiController {
 	public MetaApi getSubraceMeta(@PathVariable String englishName, @PathVariable String subrace) {
 		Optional<Race> race = raceRepository.findByEnglishName(subrace.replace('_', ' '));
 		MetaApi meta = new MetaApi();
-		meta.setTitle(String.format("%s | Расы | Разновидности D&D 5e", race.get().getName()));
+		meta.setTitle(String.format("%s | Расы и происхождения | Разновидности D&D 5e", race.get().getName()));
 		meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
-		meta.setMenu("Расы");
+		meta.setMenu("Расы и происхождения");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
 			meta.setImage(images.iterator().next());
