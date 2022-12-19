@@ -18,10 +18,9 @@ public class MenuApi {
 	private String name;
 	private String icon;
 	private String url;
-	private Boolean inDev;
-	private Integer order;
-	private List<MenuApi> children;
+	private Boolean onlyDev;
 	private Boolean external;
+	private List<MenuApi> children;
 
 	public MenuApi(Menu menu) {
 		name = menu.getName();
@@ -34,12 +33,12 @@ public class MenuApi {
 			url = menu.getUrl();
 		}
 
-		if (menu.getExternal() != null && menu.getExternal()) {
+		if (menu.isExternal()) {
 			external = true;
 		}
 
-		if (menu.getInDev() != null && menu.getInDev()) {
-			inDev = true;
+		if (menu.isOnlyDev()) {
+			onlyDev = true;
 		}
 
 		if (!menu.getChildren().isEmpty()) {

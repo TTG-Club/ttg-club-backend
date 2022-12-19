@@ -25,7 +25,7 @@ public class MenuApiController {
 	@ResponseStatus(code = HttpStatus.OK)
 	public List<MenuApi> getMenu() {
 		return menuRepository
-			.findAll(Sort.by("order").ascending().and(Sort.by("name").ascending()))
+			.findAll(Sort.by(Sort.Direction.ASC, "order", "name"))
 			.stream()
 			.filter(item -> !item.getChildren().isEmpty())
 			.map(MenuApi::new)

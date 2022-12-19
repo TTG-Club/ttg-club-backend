@@ -13,20 +13,19 @@ import java.util.List;
 public class Menu {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Short id;
 
 	@Basic(optional = false)
 	@Column(nullable = false)
 	private String name;
 	private String icon;
 	private String url;
-	private Boolean external;
-	@JoinColumn(name = "in_dev")
-	private Boolean inDev;
+	private boolean external;
+	@JoinColumn(name = "only_dev")
+	private boolean onlyDev;
 
 	@Basic(optional = false)
-	@Column(nullable = false)
-	private Integer order;
+	private int order;
 
 	@ManyToOne
 	@JoinColumn(name = "parent_id")
