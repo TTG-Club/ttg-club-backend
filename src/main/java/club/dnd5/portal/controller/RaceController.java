@@ -65,16 +65,16 @@ public class RaceController {
 		return "races";
 	}
 
-	@GetMapping("/races/{name}/{subrace}")
-	public String getSubraceList(Model model, @PathVariable String name, @PathVariable String subrace, HttpServletRequest request) {
-		Optional<Race> race = raceRepository.findByEnglishName(name.replace('_', ' '));
+	@GetMapping("/races/{raceEnglishName}/{subraceEnglishName}")
+	public String getSubraceList(Model model, @PathVariable String raceEnglishName, @PathVariable String subraceEnglishName, HttpServletRequest request) {
+		Optional<Race> race = raceRepository.findByEnglishName(raceEnglishName.replace('_', ' '));
 		if (!race.isPresent()) {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";
 		}
 		Optional<Race> subRace = race.get().getSubRaces()
 			.stream()
-			.filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' ')))
+			.filter(r -> r.getEnglishName().equalsIgnoreCase(subraceEnglishName.replace('_', ' ')))
 			.findFirst();
 		if (!subRace.isPresent()){
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
