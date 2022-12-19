@@ -72,11 +72,12 @@ public class RaceController {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";
 		}
-		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", race.get().getCapitalazeName()));
-		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getParent().getUrlName(), race.get().getUrlName()));
-		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
+		Optional<Race> subRace = race.get().getSubRaces().stream().filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' '))).findFirst();
+		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.get().getCapitalazeName()));
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getParent().getUrlName(), subRace.get().getUrlName()));
+		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.get().getName()));
 		model.addAttribute("menuTitle", "Расы и происхождения");
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
+		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, subRace.get().getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
