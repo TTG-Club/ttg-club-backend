@@ -24,8 +24,10 @@ public class MenuApiController {
 	@GetMapping
 	@ResponseStatus(code = HttpStatus.OK)
 	public List<MenuApi> getMenu() {
+		final Sort order = Sort.by(Sort.Direction.ASC, "order", "name");
+
 		return menuRepository
-			.findAll(Sort.by(Sort.Direction.ASC, "order", "name"))
+			.findAll(order)
 			.stream()
 			.filter(item -> !item.getChildren().isEmpty())
 			.map(MenuApi::new)
