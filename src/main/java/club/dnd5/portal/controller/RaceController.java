@@ -67,7 +67,7 @@ public class RaceController {
 
 	@GetMapping("/races/{name}/{subrace}")
 	public String getSubraceList(Model model, @PathVariable String name, @PathVariable String subrace, HttpServletRequest request) {
-		Optional<Race> race = raceRepository.findByEnglishName(subrace.replace('_', ' '));
+		Optional<Race> race = raceRepository.findByEnglishName(name.replace('_', ' '));
 		if (!race.isPresent()) {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";
@@ -76,6 +76,10 @@ public class RaceController {
 			.stream()
 			.filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' ')))
 			.findFirst();
+		if (!subRace.isPresent()){
+			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
+			return "forward: /error";
+		}
 		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.get().getCapitalazeName()));
 		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getParent().getUrlName(), subRace.get().getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.get().getName()));
