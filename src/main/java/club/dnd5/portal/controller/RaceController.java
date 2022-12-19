@@ -65,18 +65,26 @@ public class RaceController {
 		return "races";
 	}
 
-	@GetMapping("/races/{name}/{subrace}")
-	public String getSubraceList(Model model, @PathVariable String name, @PathVariable String subrace, HttpServletRequest request) {
-		Optional<Race> race = raceRepository.findByEnglishName(subrace.replace('_', ' '));
+	@GetMapping("/races/{raceEnglishName}/{subraceEnglishName}")
+	public String getSubraceList(Model model, @PathVariable String raceEnglishName, @PathVariable String subraceEnglishName, HttpServletRequest request) {
+		Optional<Race> race = raceRepository.findByEnglishName(raceEnglishName.replace('_', ' '));
 		if (!race.isPresent()) {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";
 		}
-		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", race.get().getCapitalazeName()));
-		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getParent().getUrlName(), race.get().getUrlName()));
-		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
+		Optional<Race> subRace = race.get().getSubRaces()
+			.stream()
+			.filter(r -> r.getEnglishName().equalsIgnoreCase(subraceEnglishName.replace('_', ' ')))
+			.findFirst();
+		if (!subRace.isPresent()){
+			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
+			return "forward: /error";
+		}
+		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.get().getCapitalazeName()));
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getUrlName(), subRace.get().getUrlName()));
+		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.get().getName()));
 		model.addAttribute("menuTitle", "Расы и происхождения");
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
+		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, subRace.get().getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}

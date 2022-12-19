@@ -39,15 +39,18 @@ public class RaceApi {
 		else {
 			url = String.format("/races/%s/%s", race.getParent().getUrlName(), race.getUrlName());
 		}
-		source = new SourceApi(race.getBook());
-		if (!race.getSubRaces().isEmpty()) {
-			subraces = race.getSubRaces().stream().map(RaceApi::new).collect(Collectors.toList());
-		}
 		type = new SourceTypeApi(race.getBook().getType().getName(), race.getBook().getType().ordinal());
+		image = String.format("https://image.ttg.club:8089/races/background/race-%s.webp", race.getEnglishName().replace(' ', '-').toLowerCase());
+		if (race.getParent() != null) {
+			image = String.format("https://image.ttg.club:8089/races/background/race-%s.webp", race.getParent().getEnglishName().replace(' ', '-').toLowerCase());
+		}
 		abilities = race.getAbilityValueBonuses()
 				.stream()
 				.map(bonus -> new NameValueApi(bonus.getAbility().getCyrilicName(), bonus.getAbility().getShortName(), bonus.getAbility(), bonus.getBonus()))
 				.collect(Collectors.toList());
-		image = String.format("https://image.ttg.club:8089/races/background/race-%s.webp", race.getEnglishName().replace(' ', '-').toLowerCase());
+		source = new SourceApi(race.getBook());
+		if (!race.getSubRaces().isEmpty()) {
+			subraces = race.getSubRaces().stream().map(RaceApi::new).collect(Collectors.toList());
+		}
 	}
 }

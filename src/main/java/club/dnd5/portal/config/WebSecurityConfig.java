@@ -101,15 +101,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		 registry.addMapping("/**") .allowedOrigins(
-			"http://localhost:8080",
-			"http://localhost:30000",
-			"http://localhost:8081",
-			"https://dev.ttg.club/",
-			"https://dev.ttg.club/",
-			"https://ttg.club/",
-			"https://ttg.club/"
-			) .allowedMethods("*").allowCredentials(true);
+		 registry
+			 .addMapping("/**")
+			 .allowedOrigins(
+				 "https://ttg.club/",
+				 "https://dev.ttg.club/"
+			 )
+			 .allowedMethods("*")
+			 .allowCredentials(true);
 	}
 
 	@Override
