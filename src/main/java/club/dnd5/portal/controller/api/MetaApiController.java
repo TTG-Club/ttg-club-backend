@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -170,17 +171,24 @@ public class MetaApiController {
 	}
 
 	@GetMapping(value = "/api/v1/meta/races/{englishName}/{subrace}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public MetaApi getSubraceMeta(@PathVariable String englishName, @PathVariable String subrace) {
-		Optional<Race> race = raceRepository.findByEnglishName(subrace.replace('_', ' '));
-		MetaApi meta = new MetaApi();
-		meta.setTitle(String.format("%s | Расы и происхождения | Разновидности D&D 5e", race.get().getName()));
-		meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", race.get().getName()));
-		meta.setMenu("Расы и происхождения");
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
-		if (!images.isEmpty()) {
-			meta.setImage(images.iterator().next());
+	public ResponseEntity<MetaApi> getSubraceMeta(@PathVariable String englishName, @PathVariable String subrace) {
+		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
+		if (race.isPresent()) {
+			Optional<Race> subRace = race.get().getSubRaces()
+				.stream()
+				.filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' ')))
+				.findFirst();
+			MetaApi meta = new MetaApi();
+			meta.setTitle(String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.get().getName()));
+			meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.get().getName()));
+			meta.setMenu("Расы и происхождения");
+			Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.get().getId());
+			if (!images.isEmpty()) {
+				meta.setImage(images.iterator().next());
+			}
+			return ResponseEntity.ok(meta);
 		}
-		return meta;
+		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping(value = "/api/v1/meta/traits", produces = MediaType.APPLICATION_JSON_VALUE)
