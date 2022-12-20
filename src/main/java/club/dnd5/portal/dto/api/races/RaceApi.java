@@ -50,7 +50,11 @@ public class RaceApi {
 				.collect(Collectors.toList());
 		source = new SourceApi(race.getBook());
 		if (!race.getSubRaces().isEmpty()) {
-			subraces = race.getSubRaces().stream().map(RaceApi::new).collect(Collectors.toList());
+			subraces = race.getSubRaces()
+				.stream()
+				.filter(r -> !r.isView())
+				.map(RaceApi::new)
+				.collect(Collectors.toList());
 		}
 	}
 }

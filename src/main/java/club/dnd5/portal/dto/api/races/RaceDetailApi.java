@@ -27,7 +27,7 @@ public class RaceDetailApi extends RaceApi {
 	private Collection<String> images;
 	private Integer darkvision;
 	protected Collection<RaceSkillApi> skills;
-	
+
 	public RaceDetailApi(Race race) {
 		super(race);
 		description = race.getDescription();
@@ -37,7 +37,10 @@ public class RaceDetailApi extends RaceApi {
 		speed.add(new NameValueApi(null, race.getSpeed()));
 		darkvision = race.getDarkvision();
 		if (!race.getSubRaces().isEmpty()) {
-			subraces = race.getSubRaces().stream().map(RaceDetailApi::new).collect(Collectors.toList());
+			subraces = race.getSubRaces()
+				.stream()
+				.map(RaceDetailApi::new)
+				.collect(Collectors.toList());
 		}
 		fillSkill(race);
 	}
