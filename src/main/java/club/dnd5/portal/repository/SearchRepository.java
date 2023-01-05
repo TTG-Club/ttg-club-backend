@@ -23,11 +23,17 @@ public class SearchRepository {
 			"UNION ALL " +
 			"SELECT name, 'Бестиарий' as section, CONCAT('/bestiary/', REPLACE(LOWER(english_name), ' ', '_')) url FROM creatures WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name " +
 			"UNION ALL " +
+			"SELECT name, 'Ширма Мастера' as section, CONCAT('/screens/', REPLACE(LOWER(english_name), ' ', '_')) url FROM screens WHERE name LIKE :name OR english_name LIKE :name " +
+			"UNION ALL " +
+			"SELECT name, 'Правила и термины' as section, CONCAT('/rules/', REPLACE(LOWER(english_name), ' ', '_')) url FROM rules WHERE name LIKE :name OR english_name LIKE :name " +
+			"UNION ALL " +
 			"SELECT name, 'Черты' as section, CONCAT('/traits/', REPLACE(LOWER(english_name), ' ', '_')) url FROM traits WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name " +
 			"UNION ALL " +
 			"SELECT name, 'Особенности классов' as section, CONCAT('/options/', REPLACE(LOWER(english_name), ' ', '_')) url FROM options WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name " +
 			"UNION ALL " +
-			"SELECT name, 'Предыстории и происхождения' as section, CONCAT('/backgrounds/', REPLACE(LOWER(english_name), ' ', '_')) url FROM backgrounds WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name ");
+			"SELECT name, 'Предыстории и происхождения' as section, CONCAT('/backgrounds/', REPLACE(LOWER(english_name), ' ', '_')) url FROM backgrounds WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name "+
+			"UNION ALL " +
+			"SELECT name, 'Боги' as section, CONCAT('/gods/', REPLACE(LOWER(english_name), ' ', '_')) url FROM gods WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name ");
 		query.setParameter("name", "%" + searchText.trim() + "%");
 		return query.getResultList();
 	}
