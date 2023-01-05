@@ -19,9 +19,19 @@ public class SearchRepository {
 			" UNION ALL " +
 			"SELECT name, 'Классы' as section, CONCAT('/classes/', REPLACE(LOWER(english_name), ' ', '_')) url FROM classes WHERE name LIKE :name OR english_name LIKE :name" +
 			" UNION ALL " +
+			"SELECT a.name, 'Архетипы классов' as section, CONCAT('/classes/', REPLACE(LOWER(c.english_name), ' ', '_'), '/', REPLACE(LOWER(a.english_name), ' ', '_')) url FROM archetypes a JOIN classes c ON c.id = a.class_id WHERE a.name LIKE :name OR a.english_name LIKE :name" +
+			" UNION ALL " +
 			"SELECT name, 'Расы и происхождения ' as section, CONCAT('/races/', REPLACE(LOWER(english_name), ' ', '_')) url FROM races WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
 			"  UNION ALL " +
 			"SELECT name, 'Бестиарий' as section, CONCAT('/bestiary/', REPLACE(LOWER(english_name), ' ', '_')) url FROM creatures WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
+			"  UNION ALL " +
+			"SELECT name, 'Магические предметы' as section, CONCAT('/items/magic/', REPLACE(LOWER(english_name), ' ', '_')) url FROM artifactes WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
+			"  UNION ALL " +
+			"SELECT name, 'Снаряжение' as section, CONCAT('/items/', REPLACE(LOWER(english_name), ' ', '_')) url FROM equipments WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
+			"  UNION ALL " +
+			"SELECT name, 'Оружие' as section, CONCAT('/weapons/', REPLACE(LOWER(english_name), ' ', '_')) url FROM weapons WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
+			"  UNION ALL " +
+			"SELECT name, 'Доспехи' as section, CONCAT('/armors/', REPLACE(LOWER(english_name), ' ', '_')) url FROM armors WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
 			" UNION ALL " +
 			"SELECT name, 'Ширма Мастера' as section, CONCAT('/screens/', REPLACE(LOWER(english_name), ' ', '_')) url FROM screens WHERE name LIKE :name OR english_name LIKE :name" +
 			" UNION ALL " +
