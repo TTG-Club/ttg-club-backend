@@ -2,8 +2,10 @@ package club.dnd5.portal.controller.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import club.dnd5.portal.repository.SearchRepository;
 import club.dnd5.portal.repository.datatable.BackgroundDatatableRepository;
 import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
 import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
@@ -23,42 +25,10 @@ import club.dnd5.portal.repository.classes.RaceRepository;
 @RequestMapping("/api/v1/search")
 public class FullSearchController {
 	@Autowired
-	ClassRepository classRepository;
-
-	@Autowired
-	RaceRepository raceRepository;
-	@Autowired
-	TraitDatatableRepository traitRepository;
-	@Autowired
-	OptionDatatableRepository optionRepository;
-	@Autowired
-	BackgroundDatatableRepository backgroundRepository;
-	@Autowired
-	SpellDatatableRepository spellRepository;
+	private SearchRepository repository;
 
 	@PostMapping
-	public Collection<SearchApi> search(String search){
-		Collection<SearchApi> result = new ArrayList<>();
-		result.addAll(raceRepository.findByEnglishNameContainsOrNameContainsOrAltNameContains(search, search, search)
-				.stream()
-				.map(SearchApi::new)
-				.collect(Collectors.toList()));
-		result.addAll(traitRepository.findByEnglishNameContainsOrNameContainsOrAltNameContains(search, search, search)
-			.stream()
-			.map(SearchApi::new)
-			.collect(Collectors.toList()));
-		result.addAll(optionRepository.findByEnglishNameContainsOrNameContainsOrAltNameContains(search, search, search)
-			.stream()
-			.map(SearchApi::new)
-			.collect(Collectors.toList()));
-		result.addAll(backgroundRepository.findByEnglishNameContainsOrNameContainsOrAltNameContains(search, search, search)
-			.stream()
-			.map(SearchApi::new)
-			.collect(Collectors.toList()));
-		result.addAll(spellRepository.findByEnglishNameContainsOrNameContainsOrAltNameContains(search, search, search)
-			.stream()
-			.map(SearchApi::new)
-			.collect(Collectors.toList()));
-		return result;
+	public List search(String search){
+		return repository.search(search);
 	}
 }
