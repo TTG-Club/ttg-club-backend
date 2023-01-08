@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +40,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class TraitApiController {
 	@Autowired
 	private TraitDatatableRepository traitRepository;
-	
+
 	@Operation(summary = "Gets all traits")
 	@PostMapping(value = "/api/v1/traits", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<TraitApi> getTraits(@RequestBody TraitRequesApi request) {
@@ -54,7 +55,7 @@ public class TraitApiController {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -62,18 +63,18 @@ public class TraitApiController {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.FALSE);
 		columns.add(column);
-		
+
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
@@ -110,15 +111,26 @@ public class TraitApiController {
 					return cb.and(join.in(request.getFilter().getAbilities().stream().map(AbilityType::valueOf).collect(Collectors.toList())));
 				});
 			}
+			if (!request.getFilter().getRequirements().isEmpty()) {
+				if (request.getFilter().getRequirements().contains("requirement_yes")) {
+
+				}
+				if (request.getFilter().getRequirements().contains("requirement_no")) {
+
+				}
+				if (request.getFilter().getRequirements().contains("level")) {
+
+				}
+			}
 		}
 		return traitRepository.findAll(input, specification, specification, TraitApi::new).getData();
 	}
-	
+
 	@PostMapping(value = "/api/v1/traits/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<TraitDetailApi> getTrait(@PathVariable String englishName) {
 		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' '));
 		if (trait == null) {
-			return ResponseEntity.notFound().build(); 
+			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.ok(new TraitDetailApi(trait));
 	}
@@ -138,15 +150,23 @@ public class TraitApiController {
 			}
 		}
 		filters.setSources(sources);
-		
+
 		List<FilterApi> otherFilters = new ArrayList<>();
 		FilterApi abilitiesFilter = new FilterApi("Характеристики", "abilities");
 		abilitiesFilter.setValues(
 				AbilityType.getBaseAbility().stream()
 				 .map(ability -> new FilterValueApi(ability.getCyrilicName(), ability.name()))
 				 .collect(Collectors.toList()));
-		
 		otherFilters.add(abilitiesFilter);
+
+		FilterApi requirementFilter = new FilterApi("дополнительные требования", "requirements");
+		abilitiesFilter.setValues(Arrays.asList(
+			new FilterValueApi("есть", "requirement_yes"),
+			new FilterValueApi("нет", "requirement_no"),
+			new FilterValueApi("уровень", "requirement_думуд")
+		));
+		otherFilters.add(abilitiesFilter);
+
 		filters.setOther(otherFilters);
 		return filters;
 	}
