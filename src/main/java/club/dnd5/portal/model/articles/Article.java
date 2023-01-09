@@ -49,20 +49,20 @@ public class Article {
 	private String imageUrl;
 	private String imageAuthor;
 	private String cause_canceled;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "creator_id")
 	private User creator;
 	@ManyToOne
 	@JoinColumn(name = "moderator_id")
 	private User moderator;
-	
+
 	private LocalDateTime created;
 	private LocalDateTime changed;
 	private LocalDateTime moderated;
 	private LocalDateTime published;
 	private LocalDateTime deleted;
-	
+
 	@SuppressWarnings("unchecked")
 	public String getShortText() {
 		if (StringUtils.isEmpty(text)) {
@@ -84,7 +84,7 @@ public class Article {
 	public String getPublishedDate() {
 		return published == null ? "" : published.format(formatter);
 	}
-	
+
 	public String getLastDate() {
 		if (published != null) {
 			return getPublishedDate();

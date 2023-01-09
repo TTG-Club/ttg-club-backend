@@ -13,6 +13,7 @@ public class ConditionDto {
 	private String type;
 	private String book;
 	private String bookshort;
+
 	public ConditionDto(Condition condition) {
 		id = condition.getId();
 		name = condition.getName();

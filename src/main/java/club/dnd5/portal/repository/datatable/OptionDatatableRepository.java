@@ -3,6 +3,7 @@ package club.dnd5.portal.repository.datatable;
 import java.util.Collection;
 import java.util.List;
 
+import club.dnd5.portal.model.trait.Trait;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,7 +23,7 @@ public interface OptionDatatableRepository extends DataTablesRepository<Option, 
 
 	@Query("SELECT o.prerequisite FROM Option o JOIN o.optionTypes t WHERE o.prerequisite IS NOT NULL AND t =:type GROUP BY o.prerequisite ORDER BY o.prerequisite")
 	Collection<String> findAlldPrerequisite(@Param("type") OptionType type);
-	
+
 	@Query("SELECT c.book FROM Option c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
 
@@ -31,4 +32,6 @@ public interface OptionDatatableRepository extends DataTablesRepository<Option, 
 
 	@Query("SELECT o.level FROM Option o GROUP BY o.level ORDER BY o.level")
 	List<String> findAllLevels();
+
+	Collection<Option> findByEnglishNameContainsOrNameContainsOrAltNameContains(String search, String search1, String search2);
 }

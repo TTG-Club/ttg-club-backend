@@ -15,7 +15,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import club.dnd5.portal.dto.UserRegForm;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,11 +44,4 @@ public class User {
     public User() {
     	this.createDate = LocalDateTime.now();
     }
-
-	public User(UserRegForm userForm) {
-		this.name = userForm.getName();
-		this.password = userForm.getPassword();
-		this.email = userForm.getEmail();
-		this.createDate = LocalDateTime.now();
-	}
 }

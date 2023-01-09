@@ -32,12 +32,13 @@ public class Trait {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	
+
 	private String name;
 	private String englishName;
 	private String altName;
+	private Integer level;
 	private String requirement;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
@@ -46,13 +47,13 @@ public class Trait {
 	@Column(name = "ability", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private List<AbilityType> abilities;
-	
+
 	@ElementCollection(targetClass = SkillType.class)
 	@JoinTable(name = "trait_skills", joinColumns = @JoinColumn(name = "trait_id"))
 	@Column(name = "skill", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private List<SkillType> skills;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;

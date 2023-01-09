@@ -1,5 +1,6 @@
 package club.dnd5.portal.repository.datatable;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
@@ -17,4 +18,6 @@ public interface BackgroundDatatableRepository extends DataTablesRepository<Back
 
 	@Query("SELECT c.book FROM Background c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
+
+	Collection<Background> findByEnglishNameContainsOrNameContainsOrAltNameContains(String search, String search1, String search2);
 }
