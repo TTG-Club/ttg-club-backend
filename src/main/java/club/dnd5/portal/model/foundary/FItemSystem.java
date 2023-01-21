@@ -7,13 +7,14 @@ import java.util.regex.Pattern;
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.ActionDataType;
+import club.dnd5.portal.model.creature.ActionType;
 import club.dnd5.portal.model.creature.CreatureFeat;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class FItemData {
+public class FItemSystem {
 	private String name;
 	private FDiscription description;
 	private String source = "";
@@ -46,7 +47,7 @@ public class FItemData {
     private boolean proficient = true;
     private String cptooltipmode = "hide";
 
-	FItemData(CreatureFeat feat) {
+	FItemSystem(CreatureFeat feat) {
 		name = feat.getName();
 		description = new FDiscription(feat.getDescription().replace("/hero", "http://ttg.club/hero"));
 		activation = new FActivation();
@@ -83,10 +84,22 @@ public class FItemData {
 				save.setDc(Integer.parseInt(dc.trim()));
 				save.setScaling("flat");
 			}
+			activation = new FActivation(ActionType.ACTION.name().toLowerCase(), (byte) 1, "");
+			actionType = ActionDataType.parse(feat.getDescription());
+			damage = new FItemDamage();
+
+			Queue<String> damageTypes = FDamageType.parse(feat.getDescription());
+			Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");
+			matcher = patternDamageFormula.matcher(feat.getDescription());
+			while (matcher.find()) {
+				String damageFormula = matcher.group().replace("к", "d").replace("−", "-");
+				String damageType = damageTypes.poll();
+				damage.addDamage(damageFormula, damageType);
+			}
 		}
 	}
 
-	public FItemData(Action action) {
+	public FItemSystem(Action action) {
 		name = action.getName();
 		if (name.contains("перезарядка")) {
 			int value = 4;
@@ -98,7 +111,7 @@ public class FItemData {
 			recharge = new FCharge();
 			recharge.setValue(value);
 		}
-		description = new FDiscription(action.getDescription().replace("/hero", "http://ttg.club/hero"));
+		description = new FDiscription(action.getDescription().replace("href=\"/", "href=\"/https://ttg.club/hero"));
 		activation = new FActivation(action.getActionType().name().toLowerCase(), (byte) 1, "");
 		duration = new FDuration();
 		target = new FTarget();
@@ -152,7 +165,7 @@ public class FItemData {
 		properties = new FWeaponProperties();
 	}
 
-	public FItemData(ArmorType armorType) {
+	public FItemSystem(ArmorType armorType) {
 		description = new FDiscription(armorType.getCyrillicName());
 		activation = new FActivation();
 		duration = new FDuration();

@@ -18,7 +18,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FCreatureData {
+public class FSystem {
     public FAbilities abilities;
     public FAttributes attributes;
     public FDetails details;
@@ -29,7 +29,7 @@ public class FCreatureData {
     public FBonuses bonuses;
     public FResources resources;
 
-	public FCreatureData(Creature creature) {
+	public FSystem(Creature creature) {
 		abilities = new FAbilities(creature);
 		attributes = new FAttributes(creature);
 		details = new FDetails(creature);

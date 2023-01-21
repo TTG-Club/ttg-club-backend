@@ -20,8 +20,8 @@ public class FDiscription {
     	while (matcher.find()) {
     		String group = matcher.group();
     		String formula = group
-    				.replace("<dice-roller formula=\"", "[[/r ")
-    				.replace('к', 'd').replace("\"/>", "]]");
+    				.replace("<dice-roller formula=\"", "<strong>")
+    				.replace('к', 'd').replace("\"/>", "</strong>");
     		description = description.replace(group, formula);
     	}
 		value = description;

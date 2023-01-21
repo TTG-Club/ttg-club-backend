@@ -17,7 +17,7 @@ public class FCreature {
 	private String name;
 	private String type;
 	private String img;
-	private FCreatureData data;
+	private FSystem system;
 	private FToken token;
 	private List<FItem> items = new ArrayList<>();
 	private List<FEffect> effects = new ArrayList<>();
@@ -25,10 +25,10 @@ public class FCreature {
 	public FCreature(Creature creature) {
 		name = creature.getName();
 		type = "npc";
-		data = new FCreatureData(creature);
+		system = new FSystem(creature);
 		if (creature.getImg() == null) {
-			img = StringUtils.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
-				creature.getBook().getSource(), creature.getEnglishName()));
+			img = String.format("https://5e.tools/img/%s/%s.png",
+				creature.getBook().getSource(), StringUtils.capitalizeWords(creature.getEnglishName()));
 		}
 		token = new FToken(creature);
 		creature.getActions().stream()

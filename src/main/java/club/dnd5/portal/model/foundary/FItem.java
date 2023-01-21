@@ -29,14 +29,14 @@ public class FItem {
 	// private String _id;
 	private String name;
 	private String type;
-	private FItemData system;
+	private FItemSystem system;
 	public List<FEffect> effects = new ArrayList<FEffect>();
 	private String img;
 
 	public FItem(CreatureFeat feat) {
 		name = feat.getName();
 		type = "feat";
-		system = new FItemData(feat);
+		system = new FItemSystem(feat);
 		img = feat.getImg();
 	}
 
@@ -48,7 +48,7 @@ public class FItem {
 		} else {
 			type = "feat";
 		}
-		system = new FItemData(action);
+		system = new FItemSystem(action);
 		if (action.getImg() != null) {
 			img = action.getImg();
 		}
@@ -56,7 +56,7 @@ public class FItem {
 
 	public FItem(ArmorType armor) {
 		name = armor.getCyrillicName();
-		system = new FItemData(armor);
+		system = new FItemSystem(armor);
 		type = "equipment";
 		img = armor.getFvttIcon();
 	}
