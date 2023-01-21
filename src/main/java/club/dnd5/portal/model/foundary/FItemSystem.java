@@ -16,6 +16,7 @@ import lombok.Setter;
 @Setter
 public class FItemSystem {
 	private String name;
+	private String type;
 	private FDiscription description;
 	private String source = "";
 	private int quantity = 1;
@@ -49,7 +50,9 @@ public class FItemSystem {
 
 	FItemSystem(CreatureFeat feat) {
 		name = feat.getName();
-		description = new FDiscription(feat.getDescription().replace("/hero", "http://ttg.club/hero"));
+		type = "feat";
+		parseRecharge();
+		description = new FDiscription(feat.getDescription().replace("href=\"/", "href=\"/http://ttg.club/"));
 		activation = new FActivation();
 		duration = new FDuration();
 		target = new FTarget();
@@ -101,17 +104,8 @@ public class FItemSystem {
 
 	public FItemSystem(Action action) {
 		name = action.getName();
-		if (name.contains("перезарядка")) {
-			int value = 4;
-			if (name.contains("5")) {
-				value = 5;
-			} else if (name.contains("6")) {
-				value = 5;
-			}
-			recharge = new FCharge();
-			recharge.setValue(value);
-		}
-		description = new FDiscription(action.getDescription().replace("href=\"/", "href=\"/https://ttg.club/hero"));
+		parseRecharge();
+		description = new FDiscription(action.getDescription().replace("href=\"/", "href=\"/https://ttg.club/"));
 		activation = new FActivation(action.getActionType().name().toLowerCase(), (byte) 1, "");
 		duration = new FDuration();
 		target = new FTarget();
@@ -144,7 +138,6 @@ public class FItemSystem {
 				save.setScaling("flat");
 			}
 		}
-
 		armor = new FArmor();
 		damage = new FItemDamage();
 
@@ -177,5 +170,18 @@ public class FItemSystem {
 		armor = new FArmor(armorType.getArmorClass(), armorType.getArmorType(), armorType.getArmorDexBonus());
 		hp = new FIHP();
 		properties = new FWeaponProperties();
+	}
+
+	private void parseRecharge(){
+		if (name.contains("перезарядка")) {
+			int value = 4;
+			if (name.contains("5")) {
+				value = 5;
+			} else if (name.contains("6")) {
+				value = 5;
+			}
+			recharge = new FCharge();
+			recharge.setValue(value);
+		}
 	}
 }

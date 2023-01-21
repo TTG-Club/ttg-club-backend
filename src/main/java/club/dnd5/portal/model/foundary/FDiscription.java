@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FDiscription {
-	private static final Pattern pattern = Pattern.compile("<dice-roller formula=\"\\d+(к|d)\\d+(\\s\\+\\s\\d+){0,}\"/{0,}>");
+	private static final Pattern pattern = Pattern.compile("<dice-roller formula=\"\\d{0,}(к|d)\\d+(\\s\\+\\s\\d+){0,}\"/{0,}>");
 
 	private String value;
 	private String chat ="";
@@ -21,7 +21,7 @@ public class FDiscription {
     		String group = matcher.group();
     		String formula = group
     				.replace("<dice-roller formula=\"", "<strong>")
-    				.replace('к', 'd').replace("\"/>", "</strong>");
+    				.replace("\"/>", "</strong>");
     		description = description.replace(group, formula);
     	}
 		value = description;
