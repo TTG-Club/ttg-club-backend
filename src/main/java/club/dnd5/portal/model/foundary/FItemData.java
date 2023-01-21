@@ -31,7 +31,7 @@ public class FItemData {
 	private FUses uses;
 	private FConsume consume;
 	private String ability = "";
-	private String actionType= ""; 
+	private String actionType= "";
     private byte attackBonus;
     private String chatFlavor = "";
     private String critical;
@@ -59,8 +59,33 @@ public class FItemData {
 		armor = new FArmor();
 		hp = new FIHP();
 		properties = new FWeaponProperties();
+		if (feat.getDescription().contains("спасброс")) {
+			save = new FSave();
+			if (feat.getDescription().contains("Силы")) {
+				save.setAbility("str");
+			} else if (feat.getDescription().contains("Ловкости")) {
+				save.setAbility("dex");
+			} else if (feat.getDescription().contains("Телосложения")) {
+				save.setAbility("con");
+			} else if (feat.getDescription().contains("Мудрости")) {
+				save.setAbility("wiz");
+			} else if (feat.getDescription().contains("Интеллекта")) {
+				save.setAbility("int");
+			} else if (feat.getDescription().contains("Харизмы")) {
+				save.setAbility("cha");
+			}
+			Pattern dcMatcher =
+				Pattern.compile("(Сл|Сложностью)\\s\\d+");
+			Matcher matcher = dcMatcher.matcher(feat.getDescription());
+			if (matcher.find()) {
+				String dc = matcher.group();
+				dc = dc.replaceAll("\\D+", "");
+				save.setDc(Integer.parseInt(dc.trim()));
+				save.setScaling("flat");
+			}
+		}
 	}
-	
+
 	public FItemData(Action action) {
 		name = action.getName();
 		if (name.contains("перезарядка")) {
@@ -96,7 +121,7 @@ public class FItemData {
 			} else if (action.getDescription().contains("Харизмы")) {
 				save.setAbility("cha");
 			}
-			Pattern dcMatcher = 
+			Pattern dcMatcher =
 					Pattern.compile("(Сл|Сложностью)\\s\\d+");
 			Matcher matcher = dcMatcher.matcher(action.getDescription());
 			if (matcher.find()) {

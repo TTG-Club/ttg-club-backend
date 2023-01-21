@@ -26,8 +26,10 @@ public class FCreature {
 		name = creature.getName();
 		type = "npc";
 		data = new FCreatureData(creature);
-		img = StringUtils.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
+		if (creature.getImg() == null) {
+			img = StringUtils.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
 				creature.getBook().getSource(), creature.getEnglishName()));
+		}
 		token = new FToken(creature);
 		creature.getActions().stream()
 			.map(FItem::new)
