@@ -29,9 +29,9 @@ public class FItem {
 	// private String _id;
 	private String name;
 	private String type;
+	private String img;
 	private FItemSystem system;
 	public List<FEffect> effects = new ArrayList<FEffect>();
-	private String img;
 
 	public FItem(CreatureFeat feat) {
 		name = feat.getName();

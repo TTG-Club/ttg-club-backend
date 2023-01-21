@@ -15,13 +15,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FItemSystem {
-	private String name;
-	private String type;
 	private FDiscription description;
 	private String source = "";
 	private int quantity = 1;
 	private float weight;
-	private float price;
+	private FPrice price = new FPrice();
 	private boolean attuned;
 	private boolean equipped = true;
 	private String rarity;
@@ -49,9 +47,7 @@ public class FItemSystem {
     private String cptooltipmode = "hide";
 
 	FItemSystem(CreatureFeat feat) {
-		name = feat.getName();
-		type = "feat";
-		parseRecharge();
+		parseRecharge(feat.getName());
 		description = new FDiscription(feat.getDescription().replace("href=\"/", "href=\"/http://ttg.club/"));
 		activation = new FActivation();
 		duration = new FDuration();
@@ -103,8 +99,7 @@ public class FItemSystem {
 	}
 
 	public FItemSystem(Action action) {
-		name = action.getName();
-		parseRecharge();
+		parseRecharge(action.getName());
 		description = new FDiscription(action.getDescription().replace("href=\"/", "href=\"/https://ttg.club/"));
 		activation = new FActivation(action.getActionType().name().toLowerCase(), (byte) 1, "");
 		duration = new FDuration();
@@ -172,7 +167,7 @@ public class FItemSystem {
 		properties = new FWeaponProperties();
 	}
 
-	private void parseRecharge(){
+	private void parseRecharge(String name){
 		if (name.contains("перезарядка")) {
 			int value = 4;
 			if (name.contains("5")) {
