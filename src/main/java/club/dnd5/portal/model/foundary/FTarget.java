@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FTarget {
-    private String value;
+    private Object value;
     private String width;
     private String units= "";
     private String type = "";

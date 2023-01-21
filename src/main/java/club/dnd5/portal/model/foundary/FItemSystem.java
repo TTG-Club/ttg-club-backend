@@ -51,7 +51,7 @@ public class FItemSystem {
 		description = new FDiscription(feat.getDescription().replace("href=\"/", "href=\"/http://ttg.club/"));
 		activation = new FActivation();
 		duration = new FDuration();
-		target = new FTarget();
+		parseTarget(feat);
 		range = new FRange();
 		uses = new FUses();
 		consume = new FConsume();
@@ -95,6 +95,28 @@ public class FItemSystem {
 				String damageType = damageTypes.poll();
 				damage.addDamage(damageFormula, damageType);
 			}
+		}
+	}
+
+	private void parseTarget(CreatureFeat feat) {
+		target = new FTarget();
+		if(feat.getDescription().contains("конус")) {
+			if (feat.getDescription().contains("15-фут")){
+				target.setValue(15);
+			}
+			if (feat.getDescription().contains("20-фут")){
+				target.setValue(20);
+			}
+			if (feat.getDescription().contains("30-фут")){
+				target.setValue(30);
+			}
+			if (feat.getDescription().contains("90-фут")){
+				target.setValue(90);
+			}
+			if (feat.getDescription().contains("120-фут")){
+				target.setValue(90);
+			}
+			target.setType("cone");
 		}
 	}
 
