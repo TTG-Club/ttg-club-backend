@@ -1,6 +1,5 @@
 package club.dnd5.portal.model.foundary;
 
-import club.dnd5.portal.model.foundary.data.FBonuses;
 import lombok.Getter;
 import lombok.Setter;
 
