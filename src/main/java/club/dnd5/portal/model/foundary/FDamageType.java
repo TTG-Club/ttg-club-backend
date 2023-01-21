@@ -14,17 +14,17 @@ public enum FDamageType {
 	slashing("дробящий", "дробяшего", "дробящим"),
 	bludgeoning("рубящий", "рубящего", "рубящим"),
 
-	thunder("звуком"),
+	thunder("звуком", "громом"),
 	acid("кислотой", "кислотный"),
 	radiant("лучистый", "излучением"),
 	lightning("электричеством"),
 	necrotic("некротический", "некротической энергией"),
-	fire("урона огнем", "урон огнем"),
+	fire("урона огнем", "урон огнем", "урона огнём" , "урон огнём"),
 	psychic("психического", "психический", "психической"),
 	force("силовым полем"),
 	cold("холодом"),
 	poison("урон ядом", "урона ядом"),
-	
+
 	healing("восстанавливает", "лечит");
 
 	private static Pattern patternDamages;
@@ -34,7 +34,7 @@ public enum FDamageType {
 	FDamageType(String... worlds){
 		this.worlds = new HashSet<>(Arrays.asList(worlds));
 	}
-	
+
 	public static Queue<String> parse(String text) {
 		text = text.toLowerCase();
 		if (patternDamages == null) {

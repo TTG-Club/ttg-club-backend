@@ -18,26 +18,12 @@ import lombok.Setter;
 public class FDetails {
     public FBiography biography;
     public String alignment;
-    public String race;
+    public String race = "";
     public FType type;
     public String environment;
     public double cr;
     public int spellLevel;
-    public FValue xp;
     public String source;
-    @JsonProperty("class")
-    public FClass fclass;
-    public String gender;
-    public String age;
-    public String height;
-    public String weight;
-    public String eyes;
-    public String skin;
-    public String hair;
-    public String notes1name;
-    public String notes2name;
-    public String notes3name;
-    public String notes4name;
 
 	public FDetails(Creature creature) {
 		biography = new FBiography(creature.getDescription(), "");
@@ -61,7 +47,6 @@ public class FDetails {
 		default:
 			cr = Integer.valueOf(creature.getChallengeRating());
 		}
-		xp = new FValue(creature.getExp());
 		if (!creature.getSpellcasters().isEmpty()) {
 			for (Spellcater spellcaster : creature.getSpellcasters()) {
 				spellLevel = spellcaster.getLevel();
