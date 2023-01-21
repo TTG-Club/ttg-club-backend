@@ -1,14 +1,18 @@
 package club.dnd5.portal.model.foundary;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 
 @Getter
 @Setter
 public class FInit {
-    private int value;
-    private int bonus;
-    private int mod;
-    private int total;
-    private int prof;
+	private String ability = "";
+	private int bonus = 0;
+    private Integer value;
+    private Integer mod;
+    private Integer total;
+    private Integer prof;
 }

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FRange {
-    private String value;
+    private Object value;
     @JsonProperty("long")
     private String longer;
     private String units= "";

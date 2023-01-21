@@ -7,19 +7,19 @@ import java.util.regex.Pattern;
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.ActionDataType;
+import club.dnd5.portal.model.creature.ActionType;
 import club.dnd5.portal.model.creature.CreatureFeat;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class FItemData {
-	private String name;
+public class FItemSystem {
 	private FDiscription description;
 	private String source = "";
 	private int quantity = 1;
 	private float weight;
-	private float price;
+	private FPrice price = new FPrice();
 	private boolean attuned;
 	private boolean equipped = true;
 	private String rarity;
@@ -31,7 +31,7 @@ public class FItemData {
 	private FUses uses;
 	private FConsume consume;
 	private String ability = "";
-	private String actionType= ""; 
+	private String actionType= "";
     private byte attackBonus;
     private String chatFlavor = "";
     private String critical;
@@ -46,9 +46,9 @@ public class FItemData {
     private boolean proficient = true;
     private String cptooltipmode = "hide";
 
-	FItemData(CreatureFeat feat) {
-		name = feat.getName();
-		description = new FDiscription(feat.getDescription().replace("/hero", "http://ttg.club/hero"));
+	FItemSystem(CreatureFeat feat) {
+		parseRecharge(feat.getName());
+		description = new FDiscription(feat.getDescription().replace("href=\"/", "href=\"/http://ttg.club/"));
 		activation = new FActivation();
 		duration = new FDuration();
 		target = new FTarget();
@@ -59,21 +59,48 @@ public class FItemData {
 		armor = new FArmor();
 		hp = new FIHP();
 		properties = new FWeaponProperties();
-	}
-	
-	public FItemData(Action action) {
-		name = action.getName();
-		if (name.contains("перезарядка")) {
-			int value = 4;
-			if (name.contains("5")) {
-				value = 5;
-			} else if (name.contains("6")) {
-				value = 5;
+		if (feat.getDescription().contains("спасброс")) {
+			save = new FSave();
+			if (feat.getDescription().contains("Силы")) {
+				save.setAbility("str");
+			} else if (feat.getDescription().contains("Ловкости")) {
+				save.setAbility("dex");
+			} else if (feat.getDescription().contains("Телосложения")) {
+				save.setAbility("con");
+			} else if (feat.getDescription().contains("Мудрости")) {
+				save.setAbility("wiz");
+			} else if (feat.getDescription().contains("Интеллекта")) {
+				save.setAbility("int");
+			} else if (feat.getDescription().contains("Харизмы")) {
+				save.setAbility("cha");
 			}
-			recharge = new FCharge();
-			recharge.setValue(value);
+			Pattern dcMatcher =
+				Pattern.compile("(Сл|Сложностью)\\s\\d+");
+			Matcher matcher = dcMatcher.matcher(feat.getDescription());
+			if (matcher.find()) {
+				String dc = matcher.group();
+				dc = dc.replaceAll("\\D+", "");
+				save.setDc(Integer.parseInt(dc.trim()));
+				save.setScaling("flat");
+			}
+			activation = new FActivation(ActionType.ACTION.name().toLowerCase(), (byte) 1, "");
+			actionType = ActionDataType.parse(feat.getDescription());
+			damage = new FItemDamage();
+
+			Queue<String> damageTypes = FDamageType.parse(feat.getDescription());
+			Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");
+			matcher = patternDamageFormula.matcher(feat.getDescription());
+			while (matcher.find()) {
+				String damageFormula = matcher.group().replace("к", "d").replace("−", "-");
+				String damageType = damageTypes.poll();
+				damage.addDamage(damageFormula, damageType);
+			}
 		}
-		description = new FDiscription(action.getDescription().replace("/hero", "http://ttg.club/hero"));
+	}
+
+	public FItemSystem(Action action) {
+		parseRecharge(action.getName());
+		description = new FDiscription(action.getDescription().replace("href=\"/", "href=\"/https://ttg.club/"));
 		activation = new FActivation(action.getActionType().name().toLowerCase(), (byte) 1, "");
 		duration = new FDuration();
 		target = new FTarget();
@@ -96,7 +123,7 @@ public class FItemData {
 			} else if (action.getDescription().contains("Харизмы")) {
 				save.setAbility("cha");
 			}
-			Pattern dcMatcher = 
+			Pattern dcMatcher =
 					Pattern.compile("(Сл|Сложностью)\\s\\d+");
 			Matcher matcher = dcMatcher.matcher(action.getDescription());
 			if (matcher.find()) {
@@ -106,7 +133,6 @@ public class FItemData {
 				save.setScaling("flat");
 			}
 		}
-
 		armor = new FArmor();
 		damage = new FItemDamage();
 
@@ -127,7 +153,7 @@ public class FItemData {
 		properties = new FWeaponProperties();
 	}
 
-	public FItemData(ArmorType armorType) {
+	public FItemSystem(ArmorType armorType) {
 		description = new FDiscription(armorType.getCyrillicName());
 		activation = new FActivation();
 		duration = new FDuration();
@@ -139,5 +165,18 @@ public class FItemData {
 		armor = new FArmor(armorType.getArmorClass(), armorType.getArmorType(), armorType.getArmorDexBonus());
 		hp = new FIHP();
 		properties = new FWeaponProperties();
+	}
+
+	private void parseRecharge(String name){
+		if (name.contains("перезарядка")) {
+			int value = 4;
+			if (name.contains("5")) {
+				value = 5;
+			} else if (name.contains("6")) {
+				value = 5;
+			}
+			recharge = new FCharge();
+			recharge.setValue(value);
+		}
 	}
 }

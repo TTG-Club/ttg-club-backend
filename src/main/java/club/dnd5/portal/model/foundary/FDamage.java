@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.foundary;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -13,7 +14,9 @@ import lombok.Setter;
 @Setter
 public class FDamage {
 	private List<String> value;
+	private List<Object> bypasses = new ArrayList<>(0);
 	private String custom ="";
+
 	public FDamage(Creature creature, Supplier<List<DamageType>> values) {
 		value = values.get().stream()
 				.map(DamageType::name)

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class FHP {
     private short value;
-    private short min;
+    private short min = 0;
     private short max;
     private byte temp;
     private byte tempmax;
@@ -17,6 +17,6 @@ public class FHP {
 	public FHP(Creature creature) {
 		value = creature.getAverageHp();
 		max = creature.getAverageHp();
-		formula = creature.getHpFormula();	
+		formula = creature.getHpFormula();
 	}
 }
