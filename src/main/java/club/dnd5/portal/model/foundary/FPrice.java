@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FPrice {
-	private Object value;
+	private Object value = 0;
 	private String denomination = "gp";
 }
