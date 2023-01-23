@@ -40,6 +40,7 @@ public class FItemSystem {
     private FRecharge recharge = new FRecharge();
     private String formula = "";
     private FSave save = new FSave();
+	private String requirements = "";
     private FArmor armor;
     private FIHP hp;
     private String weaponType = "natural";
