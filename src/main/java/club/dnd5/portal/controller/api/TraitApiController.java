@@ -1,26 +1,5 @@
 package club.dnd5.portal.controller.api;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.TraitApi;
@@ -34,6 +13,24 @@ import club.dnd5.portal.repository.datatable.TraitDatatableRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.datatables.mapping.Column;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.Search;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(name = "Trait", description = "The Trait API")
 @RestController
@@ -73,16 +70,16 @@ public class TraitApiController {
 
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
-		if (request.getPage() != null && request.getLimit()!=null) {
+		if (request.getPage() != null && request.getLimit() != null) {
 			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 				List<Order> orders = request.getOrders().stream()
-						.map(
-							order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-						)
-						.collect(Collectors.toList());
+					.map(
+						order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
+					)
+					.collect(Collectors.toList());
 				query.orderBy(orders);
 				return cb.and();
 			});
@@ -111,15 +108,31 @@ public class TraitApiController {
 					return cb.and(join.in(request.getFilter().getAbilities().stream().map(AbilityType::valueOf).collect(Collectors.toList())));
 				});
 			}
-			if (!request.getFilter().getRequirements().isEmpty()) {
-				if (request.getFilter().getRequirements().contains("requirement_yes")) {
-
-				}
-				if (request.getFilter().getRequirements().contains("requirement_no")) {
-
-				}
+			if (request.getFilter().getRequirements() != null && !request.getFilter().getRequirements().isEmpty()) {
 				if (request.getFilter().getRequirements().contains("level")) {
-
+					if (request.getFilter().getRequirements().contains("no")) {
+						specification = SpecificationUtil.getAndSpecification(
+							specification,
+							(root, query, cb) -> cb.like(root.get("requirement"), "% уровень")
+						);
+					} else {
+						specification = SpecificationUtil.getAndSpecification(
+							specification,
+							(root, query, cb) -> cb.like(root.get("requirement"), "% уровень%")
+						);
+					}
+				} else {
+					if (request.getFilter().getRequirements().contains("yes") && !request.getFilter().getRequirements().contains("no")) {
+						specification = SpecificationUtil.getAndSpecification(
+							specification,
+							(root, query, cb) -> cb.and(cb.notEqual(root.get("requirement"), "Нет"), cb.isNotNull(root.get("requirement")))
+						);
+					} else if (request.getFilter().getRequirements().contains("no") && !request.getFilter().getRequirements().contains("yes")) {
+						specification = SpecificationUtil.getAndSpecification(
+							specification,
+							(root, query, cb) -> cb.or(cb.equal(root.get("requirement"), "Нет"), cb.isNull(root.get("requirement")))
+						);
+					}
 				}
 			}
 		}
@@ -144,8 +157,8 @@ public class TraitApiController {
 			if (!books.isEmpty()) {
 				FilterApi filter = new FilterApi(typeBook.getName(), typeBook.name());
 				filter.setValues(books.stream()
-						.map(book -> new FilterValueApi(book.getSource(), book.getSource(),	Boolean.TRUE, book.getName()))
-						.collect(Collectors.toList()));
+					.map(book -> new FilterValueApi(book.getSource(), book.getSource(), Boolean.TRUE, book.getName()))
+					.collect(Collectors.toList()));
 				sources.add(filter);
 			}
 		}
@@ -154,18 +167,21 @@ public class TraitApiController {
 		List<FilterApi> otherFilters = new ArrayList<>();
 		FilterApi abilitiesFilter = new FilterApi("Характеристики", "abilities");
 		abilitiesFilter.setValues(
-				AbilityType.getBaseAbility().stream()
-				 .map(ability -> new FilterValueApi(ability.getCyrilicName(), ability.name()))
-				 .collect(Collectors.toList()));
+			AbilityType.getBaseAbility().stream()
+				.map(ability -> new FilterValueApi(ability.getCyrilicName(), ability.name()))
+				.collect(Collectors.toList()));
 		otherFilters.add(abilitiesFilter);
 
-		FilterApi requirementFilter = new FilterApi("дополнительные требования", "requirements");
-		abilitiesFilter.setValues(Arrays.asList(
-			new FilterValueApi("есть", "requirement_yes"),
-			new FilterValueApi("нет", "requirement_no"),
-			new FilterValueApi("уровень", "requirement_думуд")
-		));
-		otherFilters.add(abilitiesFilter);
+		FilterApi requirementFilter = new FilterApi("Дополнительные требования", "requirements");
+
+		List<FilterValueApi> values = new ArrayList<>(3);
+
+		values.add(new FilterValueApi("да", "yes"));
+		values.add(new FilterValueApi("нет", "no"));
+		values.add(new FilterValueApi("уровень", "level"));
+
+		requirementFilter.setValues(values);
+		otherFilters.add(requirementFilter);
 
 		filters.setOther(otherFilters);
 		return filters;
