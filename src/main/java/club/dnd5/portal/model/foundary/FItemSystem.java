@@ -17,12 +17,13 @@ import lombok.Setter;
 public class FItemSystem {
 	private FDiscription description;
 	private String source = "";
+	private int	attunement = 0;
 	private int quantity = 1;
 	private float weight;
 	private FPrice price = new FPrice();
 	private boolean attuned;
 	private boolean equipped = true;
-	private String rarity;
+	private String rarity = "";
 	private boolean  identified = true;
 	private FActivation activation;
 	private FDuration duration;
@@ -31,17 +32,19 @@ public class FItemSystem {
 	private FUses uses;
 	private FConsume consume;
 	private String ability = "";
-	private String actionType= "";
-    private byte attackBonus;
+	private String actionType = "";
+    private String attackBonus = "";
     private String chatFlavor = "";
-    private String critical;
-    private FItemDamage damage;
-    private FCharge recharge;
+    private FCritical critical = new FCritical();
+    private FItemDamage damage = new FItemDamage();;
+    private FRecharge recharge = new FRecharge();
     private String formula = "";
-    private FSave save;
+    private FSave save = new FSave();
+	private String requirements = "";
     private FArmor armor;
     private FIHP hp;
     private String weaponType = "natural";
+	private String baseItem = "";
     private FWeaponProperties properties;
     private boolean proficient = true;
     private String cptooltipmode = "hide";
@@ -51,7 +54,7 @@ public class FItemSystem {
 		description = new FDiscription(feat.getDescription().replace("href=\"/", "href=\"/http://ttg.club/"));
 		activation = new FActivation();
 		duration = new FDuration();
-		target = new FTarget();
+		parseTarget(feat);
 		range = new FRange();
 		uses = new FUses();
 		consume = new FConsume();
@@ -85,8 +88,6 @@ public class FItemSystem {
 			}
 			activation = new FActivation(ActionType.ACTION.name().toLowerCase(), (byte) 1, "");
 			actionType = ActionDataType.parse(feat.getDescription());
-			damage = new FItemDamage();
-
 			Queue<String> damageTypes = FDamageType.parse(feat.getDescription());
 			Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");
 			matcher = patternDamageFormula.matcher(feat.getDescription());
@@ -95,6 +96,28 @@ public class FItemSystem {
 				String damageType = damageTypes.poll();
 				damage.addDamage(damageFormula, damageType);
 			}
+		}
+	}
+
+	private void parseTarget(CreatureFeat feat) {
+		target = new FTarget();
+		if(feat.getDescription().contains("конус")) {
+			if (feat.getDescription().contains("15-фут")){
+				target.setValue(15);
+			}
+			if (feat.getDescription().contains("20-фут")){
+				target.setValue(20);
+			}
+			if (feat.getDescription().contains("30-фут")){
+				target.setValue(30);
+			}
+			if (feat.getDescription().contains("90-фут")){
+				target.setValue(90);
+			}
+			if (feat.getDescription().contains("120-фут")){
+				target.setValue(90);
+			}
+			target.setType("cone");
 		}
 	}
 
@@ -134,7 +157,6 @@ public class FItemSystem {
 			}
 		}
 		armor = new FArmor();
-		damage = new FItemDamage();
 
 		Queue<String> damageTypes = FDamageType.parse(action.getDescription());
 		Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");
@@ -175,8 +197,9 @@ public class FItemSystem {
 			} else if (name.contains("6")) {
 				value = 5;
 			}
-			recharge = new FCharge();
+			recharge = new FRecharge();
 			recharge.setValue(value);
+			recharge.setCharged(true);
 		}
 	}
 }

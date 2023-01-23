@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FCharge {
+public class FRecharge {
     private int value;
-    private boolean charged = true;
+    private boolean charged;
 }
