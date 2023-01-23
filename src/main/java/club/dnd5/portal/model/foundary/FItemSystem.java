@@ -37,7 +37,7 @@ public class FItemSystem {
     private String chatFlavor = "";
     private FCritical critical = new FCritical();
     private FItemDamage damage = new FItemDamage();;
-    private FCharge recharge = new FCharge();
+    private FRecharge recharge = new FRecharge();
     private String formula = "";
     private FSave save = new FSave();
     private FArmor armor;
@@ -196,8 +196,9 @@ public class FItemSystem {
 			} else if (name.contains("6")) {
 				value = 5;
 			}
-			recharge = new FCharge();
+			recharge = new FRecharge();
 			recharge.setValue(value);
+			recharge.setCharged(true);
 		}
 	}
 }
