@@ -10,6 +10,8 @@ import lombok.Setter;
 @Setter
 public class FItemDamage {
 	private List<List<String>> parts =new ArrayList<>();
+	private String versatile = "";
+
 	public void addDamage(String formula, String damageType) {
 		List<String> damage = new ArrayList<>(2);
 		damage.add(formula);
