@@ -36,8 +36,8 @@ public class FItemSystem {
     private String attackBonus = "";
     private String chatFlavor = "";
     private FCritical critical = new FCritical();
-    private FItemDamage damage;
-    private FCharge recharge;
+    private FItemDamage damage = new FItemDamage();;
+    private FCharge recharge = new FCharge();
     private String formula = "";
     private FSave save = new FSave();
     private FArmor armor;
@@ -87,8 +87,6 @@ public class FItemSystem {
 			}
 			activation = new FActivation(ActionType.ACTION.name().toLowerCase(), (byte) 1, "");
 			actionType = ActionDataType.parse(feat.getDescription());
-			damage = new FItemDamage();
-
 			Queue<String> damageTypes = FDamageType.parse(feat.getDescription());
 			Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");
 			matcher = patternDamageFormula.matcher(feat.getDescription());
@@ -158,7 +156,6 @@ public class FItemSystem {
 			}
 		}
 		armor = new FArmor();
-		damage = new FItemDamage();
 
 		Queue<String> damageTypes = FDamageType.parse(action.getDescription());
 		Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");

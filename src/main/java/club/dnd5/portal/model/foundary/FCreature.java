@@ -31,10 +31,10 @@ public class FCreature {
 				creature.getBook().getSource(), StringUtils.capitalizeWords(creature.getEnglishName()));
 		}
 		token = new FToken(creature);
-		creature.getActions().stream()
+		creature.getFeats().stream()
 			.map(FItem::new)
 			.forEach(i -> items.add(i));
-		creature.getFeats().stream()
+		creature.getActions().stream()
 			.map(FItem::new)
 			.forEach(i -> items.add(i));
 		creature.getArmorTypes().stream()
