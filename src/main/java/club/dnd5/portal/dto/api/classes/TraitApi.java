@@ -22,8 +22,10 @@ public class TraitApi {
 	public TraitApi(Trait trait) {
 		name = new NameApi(trait.getName(), trait.getEnglishName());
 		url = String.format("/traits/%s", trait.getUrlName());
-		if (trait.getRequirement()!=null) {
-			requirements  = trait.getRequirement();
+		if (trait.getRequirement() != null) {
+			requirements = trait.getRequirement();
+		} else {
+			requirements = "Нет";
 		}
 		if (trait.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;

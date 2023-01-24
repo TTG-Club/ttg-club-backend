@@ -1,15 +1,17 @@
 package club.dnd5.portal.model.foundary;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 
 @Getter
 @Setter
-@AllArgsConstructor
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class FAC {
-	private byte flat;
+	@NonNull private byte flat;
 	private String calc = "default";
-	private String formula;
-	private byte min;
+	private String formula = "";
+	private Byte min;
 }

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FCharge {
-    private int value;
-    private boolean charged = true;
+public class FAbilityBonuses {
+	private String check = "";
+	private String save = "";
 }

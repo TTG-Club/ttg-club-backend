@@ -6,7 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FUses {
-    private int value;
-    private int  max;
+    private Integer value;
+    private String max = "";
     private String per;
+	private String recovery = "";
 }
