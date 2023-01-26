@@ -9,6 +9,9 @@ Disallow: /creatures
 Disallow: /search
 Disallow: /login
 Disallow: /registration
+Disallow: /reset
+Disallow: /api
+Disallow: /css
 
 Sitemap: https://dnd5.club/sitemap.xml
 Host: dnd5.club
