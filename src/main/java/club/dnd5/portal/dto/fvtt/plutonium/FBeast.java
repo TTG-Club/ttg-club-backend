@@ -1,4 +1,4 @@
-package club.dnd5.portal.model.fvtt.plutonium;
+package club.dnd5.portal.dto.fvtt.plutonium;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,12 +87,12 @@ public class FBeast {
 	public List<String> group;
 	public List<FVariant> variant;
 	public String dragonCastingColor;
-	
+
 	public List<Object> resist;
 	public List<Object> immune;
 	public List<String> conditionImmune;
 	public List<String> vulnerable;
-	
+
 	public List<String> conditionInflictSpell;
 	public List<FVersion> _versions;
 
@@ -187,7 +187,7 @@ public class FBeast {
 			reaction = creature.getActions(ActionType.LEGENDARY).stream().map(FAction::new)
 					.collect(Collectors.toList());
 		}
-		
+
 		if (!creature.getHabitates().isEmpty()) {
 			environment = creature.getHabitates().stream()
 					.map(HabitatType::name)
@@ -235,7 +235,7 @@ public class FBeast {
 			}
 			if (action.getDescription().toLowerCase().contains("рубящий урон")) {
 				damageTags.add("S");
-			} 
+			}
 			if (action.getDescription().toLowerCase().contains("урон огнём")) {
 				damageTags.add("F");
 			}

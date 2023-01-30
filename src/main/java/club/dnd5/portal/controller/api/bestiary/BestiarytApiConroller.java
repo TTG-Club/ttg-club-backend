@@ -43,7 +43,7 @@ import club.dnd5.portal.model.creature.CreatureFeat;
 import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.foundary.FBeastiary;
 import club.dnd5.portal.model.foundary.FCreature;
-import club.dnd5.portal.model.fvtt.plutonium.FBeast;
+import club.dnd5.portal.dto.fvtt.plutonium.FBeast;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
@@ -57,10 +57,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class BestiarytApiConroller {
 	@Autowired
 	private BestiaryDatatableRepository beastRepository;
-	
+
 	@Autowired
 	private TagBestiaryDatatableRepository tagRepository;
-	
+
 	@Autowired
 	private ImageRepository imageRepository;
 
@@ -77,7 +77,7 @@ public class BestiarytApiConroller {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -85,7 +85,7 @@ public class BestiarytApiConroller {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
@@ -107,7 +107,7 @@ public class BestiarytApiConroller {
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -207,7 +207,7 @@ public class BestiarytApiConroller {
 						Join<Action, Creature> join = root.join("actions", JoinType.INNER);
 						query.distinct(true);
 						return cb.equal(join.get("actionType"), ActionType.LEGENDARY);
-					});	
+					});
 					request.getFilter().getFeatures().remove("legendary");
 				}
 				for (String featureName : request.getFilter().getFeatures()) {
@@ -215,9 +215,9 @@ public class BestiarytApiConroller {
 						Join<CreatureFeat, Creature> join = root.join("feats", JoinType.INNER);
 						query.distinct(true);
 						return cb.like(join.get("name"), "%" + featureName + "%");
-					});	
+					});
 				}
-				specification = SpecificationUtil.getAndSpecification(specification, addSpec); 
+				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 			}
 		}
 		return beastRepository.findAll(input, specification, specification, BeastApi::new).getData();
@@ -233,16 +233,16 @@ public class BestiarytApiConroller {
 		}
 		return beastApi;
 	}
-	
+
 	@GetMapping("//api/fvtt/v1/bestiary/{id}")
 	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
 		Creature creature = beastRepository.findById(id).get();
 		response.setContentType("application/json");
 		String file = String.format("attachment; filename=\"%s.json\"", creature.getEnglishName());
-		response.setHeader("Content-Disposition", file); 
+		response.setHeader("Content-Disposition", file);
 		return ResponseEntity.ok(new FCreature(creature));
 	}
-	
+
 	@CrossOrigin
 	@GetMapping("/api/fvtt/v1/bestiary")
 	public FBeastiary getCreatures(){
@@ -252,7 +252,7 @@ public class BestiarytApiConroller {
 				.collect(Collectors.toList());
 		return new FBeastiary(list);
 	}
-	
+
 	@PostMapping("/api/v1/filters/bestiary")
 	public FilterApi getFilter() {
 		FilterApi filters = new FilterApi();
@@ -268,14 +268,14 @@ public class BestiarytApiConroller {
 			}
 		}
 		filters.setSources(sources);
-		
+
 		List<FilterApi> otherFilters = new ArrayList<>();
-		
+
 		FilterApi npcFilter = new FilterApi("Именнованые НИП", "npc");
 		npcFilter.setType("toggle");
 		npcFilter.setValues(Collections.singletonList(new FilterValueApi("показать именованных НИП", "showNpc", Boolean.TRUE)));
 		otherFilters.add(npcFilter);
-		
+
 		FilterApi crFilter = new FilterApi("Уровень опасности", "challengeRating");
 		crFilter.setExpand(Boolean.TRUE);
 		List<FilterValueApi> values = new ArrayList<>();
@@ -290,28 +290,28 @@ public class BestiarytApiConroller {
 				.collect(Collectors.toList()));
 		crFilter.setValues(values);
 		otherFilters.add(crFilter);
-		
+
 		FilterApi typeFilter = new FilterApi("Тип существа", "type");
 		typeFilter.setValues(
 				CreatureType.getFilterTypes().stream()
 				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(typeFilter);
-		
+
 		FilterApi sizeFilter = new FilterApi("Размер существа", "size");
 		sizeFilter.setValues(
 				CreatureSize.getFilterSizes().stream()
 				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(sizeFilter);
-		
+
 		FilterApi tagFilter = new FilterApi("Тэги", "tag");
 		tagFilter.setValues(
 				tagRepository.findByOrderByName().stream()
 				 .map(value -> new FilterValueApi(value.getName(), value.getId()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(tagFilter);
-		
+
 		FilterApi moveFilter = new FilterApi("Перемещение", "moving");
 		values = new ArrayList<>(3);
 		values.add(new FilterValueApi("летает", "fly"));
@@ -341,14 +341,14 @@ public class BestiarytApiConroller {
 		values.add(new FilterValueApi("логово", "lair"));
 		featureFilter.setValues(values);
 		otherFilters.add(featureFilter);
-		
+
 		FilterApi environmentFilter = new FilterApi("Места обитания", "environment");
 		environmentFilter.setValues(
 				HabitatType.types().stream()
 				 .map(value -> new FilterValueApi(value.getName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(environmentFilter);
-		
+
 		filters.setOther(otherFilters);
 		return filters;
 	}

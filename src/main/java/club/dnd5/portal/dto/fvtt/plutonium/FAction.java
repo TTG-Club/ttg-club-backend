@@ -1,4 +1,4 @@
-package club.dnd5.portal.model.fvtt.plutonium;
+package club.dnd5.portal.dto.fvtt.plutonium;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,34 +28,34 @@ public class FAction {
     		Matcher matcher = Pattern.compile("\\d+").matcher(action.getDescription());
     		matcher.find();
     		int attack = Integer.valueOf(matcher.group());
-    		entries.add(String.format("{@atk mw} {@hit %d} ", attack)); 
-    	} 
+    		entries.add(String.format("{@atk mw} {@hit %d} ", attack));
+    	}
     	if (action.getDescription().contains("Дальнобойная атака оружием")) {
     		Matcher matcher = Pattern.compile("\\d+").matcher(action.getDescription());
     		matcher.find();
     		int attack = Integer.valueOf(matcher.group());
-    		entries.add(String.format("{@atk rw} {@hit %d} ", attack)); 
+    		entries.add(String.format("{@atk rw} {@hit %d} ", attack));
     	}
     	if (action.getDescription().contains("Рукопашная или дальнобойная атака оружием")) {
     		Matcher matcher = Pattern.compile("\\d+").matcher(action.getDescription());
     		matcher.find();
     		int attack = Integer.valueOf(matcher.group());
-    		entries.add(String.format("{@atk mw,rw} {@hit %d} ", attack)); 
+    		entries.add(String.format("{@atk mw,rw} {@hit %d} ", attack));
     	}
     	if (action.getDescription().contains("Рукопашная атака заклинанием")) {
     		Matcher matcher = Pattern.compile("\\d+").matcher(action.getDescription());
     		matcher.find();
     		int attack = Integer.valueOf(matcher.group());
-    		entries.add(String.format("{@atk ms} {@hit %d} ", attack)); 
+    		entries.add(String.format("{@atk ms} {@hit %d} ", attack));
     	}
     	if (action.getDescription().contains("Дальнобойная атака заклинанием")) {
     		Matcher matcher = Pattern.compile("\\d+").matcher(action.getDescription());
     		if(matcher.find()) {
         		int attack = Integer.valueOf(matcher.group());
-        		entries.add(String.format("{@atk rs} {@hit %d} ", attack)); 
+        		entries.add(String.format("{@atk rs} {@hit %d} ", attack));
     		}
     	}
-    	
+
     	Matcher matcher = DAMAGE_FORMULA.matcher(action.getDescription());
     	String description = action.getDescription();
     	while (matcher.find()) {
@@ -65,7 +65,7 @@ public class FAction {
     		description = description.replace(group, formula);
     	}
     	description = description.replace("href=\"", "href=\"https://ttg.club/");
-    	
+
     	matcher = DAMAGE_FORMULA_PATTERN.matcher(description);
     	while (matcher.find()) {
     		String group = matcher.group();
@@ -75,6 +75,6 @@ public class FAction {
     	entries.addAll(Arrays.stream(description.replace("<p>", "").split("</p>"))
     			.filter(t -> !t.isEmpty())
     			.collect(Collectors.toList()));
-    	
+
     }
 }
