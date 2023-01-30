@@ -41,8 +41,8 @@ import club.dnd5.portal.model.creature.ActionType;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.creature.CreatureFeat;
 import club.dnd5.portal.model.creature.HabitatType;
-import club.dnd5.portal.model.foundary.FBeastiary;
-import club.dnd5.portal.model.foundary.FCreature;
+import club.dnd5.portal.dto.fvtt.export.FBeastiary;
+import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.dto.fvtt.plutonium.FBeast;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.splells.Spell;
@@ -234,7 +234,7 @@ public class BestiarytApiConroller {
 		return beastApi;
 	}
 
-	@GetMapping("//api/fvtt/v1/bestiary/{id}")
+	@GetMapping("/api/fvtt/v1/bestiary/{id}")
 	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
 		Creature creature = beastRepository.findById(id).get();
 		response.setContentType("application/json");
