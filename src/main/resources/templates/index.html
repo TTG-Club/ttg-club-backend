@@ -12,7 +12,7 @@
         <h1 style="height: 0px; opacity: 0; overflow: hidden;">TTG.Club Oнлайн-справочник</h1>
         <div class="main_block">
             <div class="header">
-                <p class="search_row_g">
+                <p class="search_row_g" @click.left.exact.prevent="openSearchModal">
                     Нажмите <span class="computer_version">&nbsp;тут или<span class="key">&#171;{{ isAppleDevice ? 'CMD' : 'Ctrl' }} + K&#187;</span></span> для начала поиска
                 </p>
             </div>
