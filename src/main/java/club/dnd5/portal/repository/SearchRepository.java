@@ -78,7 +78,7 @@ public class SearchRepository {
 
 	private String shortDescription(Object description) {
 		if (description == null) {
-			return "...";
+			return "";
 		}
 		String text = Jsoup.clean(description.toString().replace("&nbsp;", " "), Safelist.none());
 		if (text.length() > 200){
