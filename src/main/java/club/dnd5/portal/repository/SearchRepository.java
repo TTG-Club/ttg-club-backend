@@ -80,7 +80,7 @@ public class SearchRepository {
 		if (description == null) {
 			return "...";
 		}
-		String text = Jsoup.clean(description.toString(), Safelist.none());
+		String text = Jsoup.clean(description.toString().replace("&nbsp;", " "), Safelist.none());
 		if (text.length() > 200){
 			text = String.format("%s...",text.substring(0, 200).trim());
 		}
