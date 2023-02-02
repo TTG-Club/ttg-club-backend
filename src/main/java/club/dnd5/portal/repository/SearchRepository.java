@@ -41,7 +41,7 @@ public class SearchRepository {
 				"  UNION ALL " +
 				"SELECT name, 'Доспехи' as section, CONCAT('/armors/', REPLACE(LOWER(english_name), ' ', '_')) url, description FROM armors WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
 				" UNION ALL " +
-				"SELECT name, 'Ширма Мастера' as section, CONCAT('/screens/', REPLACE(LOWER(english_name), ' ', '_')) url, description FROM screens WHERE name LIKE :name OR english_name LIKE :name" +
+				"SELECT name, 'Ширма Мастера' as section, CONCAT('/screens/', REPLACE(LOWER(english_name), ' ', '_')) url, description FROM screens WHERE name LIKE :name OR english_name LIKE :name OR alt_name LIKE :name" +
 				" UNION ALL " +
 				"SELECT name, 'Правила и термины' as section, CONCAT('/rules/', REPLACE(LOWER(english_name), ' ', '_')) url, description FROM rules WHERE name LIKE :name OR english_name LIKE :name" +
 				" UNION ALL " +
