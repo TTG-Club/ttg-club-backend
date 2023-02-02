@@ -29,7 +29,7 @@ public class SearchRepository {
 				" UNION ALL " +
 				"SELECT a.name, 'Архетипы классов' as section, CONCAT('/classes/', REPLACE(LOWER(c.english_name), ' ', '_'), '/', REPLACE(LOWER(a.english_name), ' ', '_')) url, a.description FROM archetypes a JOIN classes c ON c.id = a.class_id WHERE a.name LIKE :name OR a.english_name LIKE :name" +
 				" UNION ALL " +
-				"SELECT r.name, 'Расы и происхождения ' as section, CASE WHEN p.name IS NOT NULL THEN CONCAT('/races/', REPLACE(LOWER(p.english_name), ' ', '_'), '/',REPLACE(LOWER(r.english_name), ' ', '_')) ELSE CONCAT('/races/', REPLACE(LOWER(r.english_name), ' ', '_1')) END AS url, r.description FROM races r LEFT JOIN races p ON r.parent_id = p.id WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
+				"SELECT r.name, 'Расы и происхождения ' as section, CASE WHEN p.name IS NOT NULL THEN CONCAT('/races/', REPLACE(LOWER(p.english_name), ' ', '_'), '/',REPLACE(LOWER(r.english_name), ' ', '_')) ELSE CONCAT('/races/', REPLACE(LOWER(r.english_name), ' ', '_1')) END AS url, r.description FROM races r LEFT JOIN races p ON r.parent_id = p.id WHERE r.name LIKE :name OR r.alt_name LIKE :name OR r.english_name LIKE :name" +
 				"  UNION ALL " +
 				"SELECT name, 'Бестиарий' as section, CONCAT('/bestiary/', REPLACE(LOWER(english_name), ' ', '_')) url, description FROM creatures WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
 				"  UNION ALL " +
