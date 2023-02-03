@@ -19,8 +19,8 @@ public class SearchRepository {
 	EntityManager entityManager;
 
 	public long getCount(String searchText) {
-		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM full_text_search WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name");
-		query.setParameter("name", "%" + searchText.trim() + "%");
+		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM full_text_search WHERE LOWER(name) LIKE :name OR LOWER(alt_name) LIKE :name OR LOWER(english_name) LIKE :name");
+		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
 		return ((BigInteger) query.getSingleResult()).longValue();
 	}
 
