@@ -37,8 +37,14 @@
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="mobile-web-app-capable" content="yes">
 
+            <link rel="icon" type="image/svg+xml" th:href="@{/favicon_ttg_v3.svg}" />
+            <link rel="icon" type="image/png" th:href="@{/favicon_ttg_v3.svg}" />
+            
+            <!-- Chrome на Android -->
+            <link rel="icon" sizes="192x192" href="/style/icons/192.png">
             <link rel="manifest" href="/manifest.json" crossorigin="anonymous">
-            <link rel="icon" type="image/svg+xml" th:href="@{/favicon_ttg_v2.svg}" />
+
+            <!-- Иконка закладки в iOS -->
             <link rel="apple-touch-icon" sizes="48x48" href="/style/icons/48.png">
             <link rel="apple-touch-icon" sizes="72x72" href="/style/icons/72.png">
             <link rel="apple-touch-icon" sizes="96x96" href="/style/icons/96.png">
@@ -59,7 +65,7 @@
             <link rel="stylesheet preload" as="style" th:href="@{|/css/app.css?v=${version}|}" />
             <!-- End Core CSS -->
 
-            <link rel="preload" as="image" th:href="'/img/' + ${themeName} + '/bg-main-ng.webp'" />
+            <link rel="preload" as="image" th:href="'/img/' + ${themeName} + '/bg-main.webp'" />
 
             <th:block th:if="${profile eq 'prod'}">
                 <meta name="yandex-verification" content="fcb3cea757dfffdd" />
@@ -98,7 +104,7 @@
             <div layout:fragment="content"></div>
         </div>
 
-        <img v-if="uiStore.theme && !uiStore.isMobile" th::src="'`/img/${ uiStore.theme || \'' + ${themeName} + '\' }/bg-main-ng.webp`'" alt="img-bg" class="bg-img-main">
+        <img v-if="uiStore.theme && !uiStore.isMobile" th::src="'`/img/${ uiStore.theme || \'' + ${themeName} + '\' }/bg-main.webp`'" alt="img-bg" class="bg-img-main">
     </div>
 	</body>
 

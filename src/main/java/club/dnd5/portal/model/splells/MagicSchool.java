@@ -12,7 +12,7 @@ public enum MagicSchool {
 
 	private String name;
 
-	private MagicSchool(String name) {
+	MagicSchool(String name) {
 		this.name = name;
 	}
 

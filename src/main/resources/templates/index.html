@@ -9,13 +9,13 @@
 <body id="body" class="main_page">
 <div id="container" class="container">
     <div layout:fragment="content" class="main_page_wrapper">
-        <h1 style="height: 1px; opacity: 0; overflow: hidden;">TTG.Club Oнлайн-справочник</h1>
+        <h1 style="height: 0px; opacity: 0; overflow: hidden;">TTG.Club Oнлайн-справочник</h1>
         <div class="main_block">
-            <!-- <div class="header">
-                <div class="search_row_g">
-                    Воспользуйтесь поиском в разделе.
-                </div>
-            </div> -->
+            <div class="header">
+                <p class="search_row_g" @click.left.exact.prevent="openSearchModal">
+                    Нажмите <span class="computer_version">&nbsp;тут или<span class="key">&#171; / &#187;</span></span> для начала поиска
+                </p>
+            </div>
             <div class="card_row">
                 <a th:href="@{/classes}" class="card classes">
                     <div class="title">
@@ -232,6 +232,12 @@
                                 <img
                                         width="20px" height="20px" src="/partner/dndworlds.webp" alt="Круговорот миров"
                                 > Круговорот миров
+                            </a>
+                            <a href="https://vk.com/myriads_of_truths?partner=ttg.club" class="block tip" target="_blank"
+                               v-tippy="'Небольшая команда энтузиастов, которая хочет переводить, оформлять и делиться с вами интересными новостями, статьями, артами и прочими работами во вселенной D&D'">
+                                <img
+                                        width="20px" height="20px" src="/partner/myriads_of_truths.webp" alt="Мириады Истин"
+                                > Мириады Истин
                             </a>
                         </div>
                     </div>

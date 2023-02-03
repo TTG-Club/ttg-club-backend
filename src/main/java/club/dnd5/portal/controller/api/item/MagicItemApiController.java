@@ -11,8 +11,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.foundary.FCreature;
+import club.dnd5.portal.dto.fvtt.export.FCreature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;

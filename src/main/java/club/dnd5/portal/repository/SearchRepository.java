@@ -1,50 +1,34 @@
 package club.dnd5.portal.repository;
 
 import club.dnd5.portal.dto.api.SearchApi;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.math.BigInteger;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Repository
 public class SearchRepository {
 	@PersistenceContext
 	EntityManager entityManager;
 
-	public List search(String searchText, Integer page, Integer limit) {
+	public long getCount(String searchText) {
+		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM full_text_search WHERE LOWER(name) LIKE :name OR LOWER(alt_name) LIKE :name OR LOWER(english_name) LIKE :name");
+		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
+		return ((BigInteger) query.getSingleResult()).longValue();
+	}
+
+	public List<SearchApi> search(String searchText, Integer page, Integer limit) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT name, 'Заклинания' as section, CONCAT('/spells/', REPLACE(LOWER(english_name), ' ', '_')) url FROM spells WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT name, 'Классы' as section, CONCAT('/classes/', REPLACE(LOWER(english_name), ' ', '_')) url FROM classes WHERE name LIKE :name OR english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT a.name, 'Архетипы классов' as section, CONCAT('/classes/', REPLACE(LOWER(c.english_name), ' ', '_'), '/', REPLACE(LOWER(a.english_name), ' ', '_')) url FROM archetypes a JOIN classes c ON c.id = a.class_id WHERE a.name LIKE :name OR a.english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT name, 'Расы и происхождения ' as section, CONCAT('/races/', REPLACE(LOWER(english_name), ' ', '_')) url FROM races WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			"  UNION ALL " +
-			"SELECT name, 'Бестиарий' as section, CONCAT('/bestiary/', REPLACE(LOWER(english_name), ' ', '_')) url FROM creatures WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			"  UNION ALL " +
-			"SELECT name, 'Магические предметы' as section, CONCAT('/items/magic/', REPLACE(LOWER(english_name), ' ', '_')) url FROM artifactes WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			"  UNION ALL " +
-			"SELECT name, 'Снаряжение' as section, CONCAT('/items/', REPLACE(LOWER(english_name), ' ', '_')) url FROM equipments WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			"  UNION ALL " +
-			"SELECT name, 'Оружие' as section, CONCAT('/weapons/', REPLACE(LOWER(english_name), ' ', '_')) url FROM weapons WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			"  UNION ALL " +
-			"SELECT name, 'Доспехи' as section, CONCAT('/armors/', REPLACE(LOWER(english_name), ' ', '_')) url FROM armors WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT name, 'Ширма Мастера' as section, CONCAT('/screens/', REPLACE(LOWER(english_name), ' ', '_')) url FROM screens WHERE name LIKE :name OR english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT name, 'Правила и термины' as section, CONCAT('/rules/', REPLACE(LOWER(english_name), ' ', '_')) url FROM rules WHERE name LIKE :name OR english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT name, 'Черты' as section, CONCAT('/traits/', REPLACE(LOWER(english_name), ' ', '_')) url FROM traits WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT name, 'Особенности классов' as section, CONCAT('/options/', REPLACE(LOWER(english_name), ' ', '_')) url FROM options WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name" +
-			" UNION ALL " +
-			"SELECT name, 'Предыстории и происхождения' as section, CONCAT('/backgrounds/', REPLACE(LOWER(english_name), ' ', '_')) url FROM backgrounds WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name"+
-			" UNION ALL " +
-			"SELECT name, 'Боги' as section, CONCAT('/gods/', REPLACE(LOWER(english_name), ' ', '_')) url FROM gods WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name");
-		query.setParameter("name", "%" + searchText.trim() + "%");
+			"SELECT name, section, url, description FROM full_text_search WHERE LOWER(name) LIKE :name OR LOWER(alt_name) LIKE :name OR LOWER(english_name) LIKE :name");
+		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
+
 		if (limit != null) {
 			query.setMaxResults(limit);
 		} else {
@@ -53,6 +37,33 @@ public class SearchRepository {
 		if (page != null) {
 			query.setFirstResult(page * limit);
 		}
-		return query.getResultList();
+		List<Object[]> result = query.getResultList();
+		return result.stream().map(row -> new SearchApi(row[0], row[1], row[2], shortDescription(row[3]))).collect(Collectors.toList());
+	}
+
+	public SearchApi findByIndex(int index) {
+		Query query = entityManager.createNativeQuery("SELECT name, section, url, description FROM full_text_search");
+		query.setFirstResult(index);
+		query.setMaxResults(1);
+		Object[] row = (Object[]) query.getSingleResult();
+		return new SearchApi(row[0], row[1], row[2], shortDescription(row[3]));
+	}
+
+	private String shortDescription(Object description) {
+		if (description == null) {
+			return null;
+		}
+		String text = Jsoup.clean(
+			description.toString()
+				.replace("&nbsp;", " ")
+				.replaceAll("</(.+?)><(\\w)", "</$1> <$2"),
+			Safelist.none()
+		);
+		if (text.length() > 200){
+			text = String.format("%s...", text.substring(0, 200).trim())
+				.replaceAll("\\s+", " ")
+				.replaceAll("\\.{4,}", "...");
+		}
+		return text;
 	}
 }
