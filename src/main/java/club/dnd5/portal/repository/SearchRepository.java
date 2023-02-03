@@ -5,7 +5,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Repository;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -38,6 +37,14 @@ public class SearchRepository {
 		}
 		List<Object[]> result = query.getResultList();
 		return result.stream().map(row -> new SearchApi(row[0], row[1], row[2], shortDescription(row[3]))).collect(Collectors.toList());
+	}
+
+	public SearchApi findByIndex(int index) {
+		Query query = entityManager.createNativeQuery("SELECT name, section, url, description FROM full_text_search");
+		query.setFirstResult(index);
+		query.setMaxResults(1);
+		Object[] row = (Object[]) query.getSingleResult();
+		return new SearchApi(row[0], row[1], row[2], shortDescription(row[3]));
 	}
 
 	private String shortDescription(Object description) {
