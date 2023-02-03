@@ -55,13 +55,13 @@ public class SearchRepository {
 	}
 
 	public long getCount(String searchText) {
-		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM(" + SQL_SEARCH + ") countResult");
+		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM full_text_search WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name");
 		query.setParameter("name", "%" + searchText.trim() + "%");
 		return ((BigInteger) query.getSingleResult()).longValue();
 	}
 
 	public List<SearchApi> search(String searchText, Integer page, Integer limit) {
-		Query query = entityManager.createNativeQuery(SQL_SEARCH);
+		Query query = entityManager.createNativeQuery("SELECT name, section, url, description FROM full_text_search WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name");
 		query.setParameter("name", "%" + searchText.trim() + "%");
 
 		if (limit != null) {
