@@ -1,18 +1,17 @@
 package club.dnd5.portal.dto.api;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchApi {
-	private Object name;
-	private Object section;
-	private Object url;
+	@NonNull private Object name;
+	@NonNull private Object section;
+	@NonNull private Object url;
 	private Object description;
 }

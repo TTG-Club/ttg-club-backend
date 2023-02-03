@@ -42,11 +42,18 @@ public class SearchRepository {
 
 	private String shortDescription(Object description) {
 		if (description == null) {
-			return "...";
+			return null;
 		}
-		String text = Jsoup.clean(description.toString().replace("&nbsp;", " "), Safelist.none());
+		String text = Jsoup.clean(
+			description.toString()
+				.replace("&nbsp;", " ")
+				.replaceAll("</(.+?)><(\\w)", "</$1> <$2"),
+			Safelist.none()
+		);
 		if (text.length() > 200){
-			text = String.format("%s...",text.substring(0, 200).trim());
+			text = String.format("%s...", text.substring(0, 200).trim())
+				.replaceAll("\\s+", " ")
+				.replaceAll("\\.{4,}", "...");
 		}
 		return text;
 	}
