@@ -10,6 +10,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Repository
@@ -24,8 +25,9 @@ public class SearchRepository {
 	}
 
 	public List<SearchApi> search(String searchText, Integer page, Integer limit) {
-		Query query = entityManager.createNativeQuery("SELECT name, section, url, description FROM full_text_search WHERE name LIKE :name OR alt_name LIKE :name OR english_name LIKE :name");
-		query.setParameter("name", "%" + searchText.trim() + "%");
+		Query query = entityManager.createNativeQuery(
+			"SELECT name, section, url, description FROM full_text_search WHERE LOWER(name) LIKE :name OR LOWER(alt_name) LIKE :name OR LOWER(english_name) LIKE :name");
+		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
 
 		if (limit != null) {
 			query.setMaxResults(limit);
