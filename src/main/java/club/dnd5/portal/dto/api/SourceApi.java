@@ -23,7 +23,13 @@ public class SourceApi {
 	private String name;
 	private Boolean homebrew;
 	private Short page;
-	
+
+	public SourceApi(String  shortName, String type, String name) {
+		this.shortName = shortName;
+		this.name = name;
+		homebrew = TypeBook.valueOf(type) == TypeBook.CUSTOM;
+	}
+
 	public SourceApi(Book book) {
 		name = book.getName();
 		shortName = book.getSource();
@@ -31,7 +37,7 @@ public class SourceApi {
 			homebrew = Boolean.TRUE;
 		}
 	}
-	
+
 	public SourceApi(Book book, Short page) {
 		this(book);
 		if (page != null) {

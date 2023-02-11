@@ -9,9 +9,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 
 @NoArgsConstructor
 @Getter
@@ -21,7 +23,7 @@ import lombok.Setter;
 @Table(name = "books")
 public class Book implements Serializable, Comparable<Book>{
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@Column(unique = true, nullable = false)
 	private String source;
@@ -32,7 +34,7 @@ public class Book implements Serializable, Comparable<Book>{
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	@Enumerated(EnumType.STRING) 
+	@Enumerated(EnumType.STRING)
 	private TypeBook type;
 
 	private Integer year;
@@ -45,7 +47,7 @@ public class Book implements Serializable, Comparable<Book>{
 	public int compareTo(Book b) {
 		return type.compareTo(b.getType());
 	}
-	
+
 	@Override
 	public String toString() {
 		return source;
@@ -75,7 +77,7 @@ public class Book implements Serializable, Comparable<Book>{
 			return false;
 		return true;
 	}
-	
+
 	public String getUrlName() {
 		return englishName.replace(' ', '_');
 	}

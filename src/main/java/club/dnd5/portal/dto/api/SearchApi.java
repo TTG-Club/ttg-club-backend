@@ -14,4 +14,5 @@ public class SearchApi {
 	@NonNull private Object section;
 	@NonNull private Object url;
 	private Object description;
+	private SourceApi source;
 }
