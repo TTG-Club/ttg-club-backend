@@ -70,15 +70,27 @@
             <div class="column">
                 <div class="left">
                     <div class="block">
-                        <div class="dnd5club_tel_bot">
-                            <div class="info">
-                                <h4>Telegram Bot</h4>
-                                <div class="bottom">
-                                    <a href="/telegram_bot">Описание</a> <a href="https://t.me/ttg_club_bot"
-                                                                            target="_blank">Попробовать</a>
+                        <div class="block__bot">
+                            <div class="dnd5club_tel_bot">
+                                <div class="info">
+                                    <h4>Telegram Bot</h4>
+                                    <div class="bottom">
+                                        <a href="https://t.me/ttg_club_bot" target="_blank" rel="noopener noreferrer">Подключить</a>
+                                        <a href="/telegram_bot">Описание</a>
+                                    </div>
                                 </div>
+                                <div class="bg_img"></div>
                             </div>
-                            <div class="bg_img"></div>
+                            <div class="discord_bot">
+                                <div class="info">
+                                    <h4>Discord Bot</h4>
+                                    <div class="bottom">
+                                        <a href="https://discord.com/api/oauth2/authorize?client_id=1074095730265964654&permissions=274878032896&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">Пришласить</a>
+                                        <a href="/">Описание</a>
+                                    </div>
+                                </div>
+                                <div class="bg_img"></div>
+                            </div>
                         </div>
                         <div class="links_block">
                             <h3>Инструменты:</h3>
@@ -109,92 +121,125 @@
                     <div class="links_block">
                         <h3>Наши друзья:</h3>
                         <div class="list">
-                            <a href="https://badmimic.com/?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'команда создает авторские миниатюры в разных системах и жанрах. Заказать 3Д скульпт и найти качественную отливку можно у них в группе или на сайте'"
-                            > <img width="20px" height="20px" src="/partner/bad_mimic.webp"
-                                   alt="Наши друзья магазин миниатюр Bad Mimic"> Bad Mimic
+                            <a href="https://badmimic.com/?partner=ttg.club" 
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'команда создает авторские миниатюры в разных системах и жанрах. Заказать 3Д скульпт и найти качественную отливку можно у них в группе или на сайте'">
+                                <img width="20px" height="20px" src="/partner/bad_mimic.webp" alt="Наши друзья магазин миниатюр Bad Mimic">
+                                Bad Mimic
                             </a>
                             <a href="https://www.youtube.com/channel/UCMfMw5ZX4_rZ4rv4TlY8j8g?partner=ttg.club"
-                               class="block tip" target="_blank"
-                               v-tippy="'Канал расскжет вам о тонкостях и нюансах игры в онлайне. Поможет разобраться с виртуальными столами. Упростит подготовку к вашей игре. Автоматизирует максимум процессов игровой механики. Всё, чтобы игра стала атмосфернее и интереснее.'"
-                            > <img width="20px" height="20px" src="/partner/koroz.webp" alt="Онлайн ширма"> «Онлайн
-                                ширма»
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Канал расскжет вам о тонкостях и нюансах игры в онлайне. Поможет разобраться с виртуальными столами. Упростит подготовку к вашей игре. Автоматизирует максимум процессов игровой механики. Всё, чтобы игра стала атмосфернее и интереснее.'">
+                                <img width="20px" height="20px" src="/partner/koroz.webp" alt="Онлайн ширма">
+                                «Онлайн ширма»
                             </a>
-                            <a href="https://discord.gg/Vxu2Cu9mbM?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Сервер ставит перед собой цель помочь новичкам, интересующимся D&D в Discord сегменте, а также стремится стать надежной базой для Discord-комьюнити системы D&D.'"
-                            > <img width="20px" height="20px" src="/partner/Empire_tavern.webp" alt="Empire Tavern">
+                            <a href="https://discord.gg/Vxu2Cu9mbM?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Сервер ставит перед собой цель помочь новичкам, интересующимся D&D в Discord сегменте, а также стремится стать надежной базой для Discord-комьюнити системы D&D.'">
+                                <img width="20px" height="20px" src="/partner/Empire_tavern.webp" alt="Empire Tavern">
                                 Empire Tavern
                             </a>
-                            <a href="https://vk.com/ravenheart_studio?partner=ttg.club" class="block tip"
-                               target="_blank"
-                               v-tippy="'Это клуб ролевых игр Великого Новгорода Студия «Ravenheart». Если ты хочешь круто провести время, то ты пришел по адресу!'"
-                            > <img width="20px" height="20px" src="/partner/ravenheart_studio.webp"
-                                   alt="Студия «Ravenheart»"> Студия «Ravenheart»
+                            <a href="https://vk.com/ravenheart_studio?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Это клуб ролевых игр Великого Новгорода Студия «Ravenheart». Если ты хочешь круто провести время, то ты пришел по адресу!'"> 
+                                <img width="20px" height="20px" src="/partner/ravenheart_studio.webp" alt="Студия «Ravenheart»">
+                                Студия «Ravenheart»
                             </a>
-                            <a href="https://vk.com/anykeyspb?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Сообщество опытного мастера Andy по настольным и ролевым играм, который хочет сделать ваш досуг максимально интересным и доступным.'"
-                            > <img width="20px" height="20px" src="/partner/any_key.webp" alt="ANY KEY"> ANY KEY
+                            <a href="https://vk.com/anykeyspb?partner=ttg.club" 
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Сообщество опытного мастера Andy по настольным и ролевым играм, который хочет сделать ваш досуг максимально интересным и доступным.'"> 
+                                <img width="20px" height="20px" src="/partner/any_key.webp" alt="ANY KEY">
+                                ANY KEY
                             </a>
-                            <a href="https://vk.com/rrules?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Random Rules это канал про настольные ролевые игры. Любите проводить время с друзьями, играя в Dungeons & Dragons? Вам сюда!'"
-                            > <img width="20px" height="20px" src="/partner/random_rules.webp" alt="Random Rules">
+                            <a href="https://vk.com/rrules?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Random Rules это канал про настольные ролевые игры. Любите проводить время с друзьями, играя в Dungeons & Dragons? Вам сюда!'"> 
+                                <img width="20px" height="20px" src="/partner/random_rules.webp" alt="Random Rules">
                                 Random Rules
                             </a>
-                            <a href="https://vk.com/dicehead_dnd?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'DiceHead собирает множество информации по Dungeons & Dragons, выкладывает материалы для вдохновения и стремиться поддерживать сообщество НРИ в России.'"
-                            > <img width="20px" height="20px" src="/partner/dicehead.webp" alt="DiceHead | D&D">
+                            <a href="https://vk.com/dicehead_dnd?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'DiceHead собирает множество информации по Dungeons & Dragons, выкладывает материалы для вдохновения и стремиться поддерживать сообщество НРИ в России.'">
+                                <img width="20px" height="20px" src="/partner/dicehead.webp" alt="DiceHead | D&D">
                                 DiceHead | D&D
                             </a>
-                            <a href="https://vk.com/ngdnd?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Короткие авторские приключения для D&D 5e и других систем.'"> <img
-                                    src="/partner/ngdnd.webp" alt="Заметки упыря | Короткие приключения | D&D"
-                            > Заметки упыря
+                            <a href="https://vk.com/ngdnd?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Короткие авторские приключения для D&D 5e и других систем.'">
+                                <img src="/partner/ngdnd.webp" alt="Заметки упыря | Короткие приключения | D&D">
+                                Заметки упыря
                             </a>
-                            <a href="https://vk.com/plutovkapetti?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Если вы хотите украсить свой игровой стол различными игровыми предметами по настольным играм, приобрести фигурки для D&D и других игр, то вам нужна Плутовка Пэтти.'">
-                                <img
-                                        width="20px" height="20px" src="/partner/plutovkapetti.webp"
-                                        alt="Плутовка Пэтти"
-                                > Плутовка Пэтти
+                            <a href="https://vk.com/plutovkapetti?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Если вы хотите украсить свой игровой стол различными игровыми предметами по настольным играм, приобрести фигурки для D&D и других игр, то вам нужна Плутовка Пэтти.'">
+                                <img width="20px" height="20px" src="/partner/plutovkapetti.webp" alt="Плутовка Пэтти">
+                                Плутовка Пэтти
                             </a>
-                            <a href="https://vk.com/gryadut_priklyucheniya?partner=ttg.club" class="block tip"
-                               target="_blank"
-                               v-tippy="'Пятеро друзей, которые любят играть в Dungeons & Dragons. Среди них есть актёры, режиссёры, художники, и сценаристы, но в первую очередь они друзья и большие поклонники ролевых игр.'">
-                                <img
-                                        width="20px" height="20px" src="/partner/gryadut_priklyucheniya.webp"
-                                        alt="Грядут Приключения"
-                                > Грядут Приключения
+                            <a href="https://vk.com/gryadut_priklyucheniya?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Пятеро друзей, которые любят играть в Dungeons & Dragons. Среди них есть актёры, режиссёры, художники, и сценаристы, но в первую очередь они друзья и большие поклонники ролевых игр.'">
+                                <img width="20px" height="20px" src="/partner/gryadut_priklyucheniya.webp" alt="Грядут Приключения">
+                                Грядут Приключения
                             </a>
                             <a href="https://www.youtube.com/channel/UCe_vCsHHRPT9XPVYDInQqqQ?partner=ttg.club"
-                               class="block tip" target="_blank"
-                               v-tippy="'Этот парень любит настольно-ролевые игры и делится своей любовью на канале, рассказывая о правилах и нюансах игры на своём опыте, да и просто веселится.'">
-                                <img
-                                        width="20px" height="20px" src="/partner/sneaky_dice.webp" alt="Sneaky Dice"
-                                > Sneaky Dice
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Этот парень любит настольно-ролевые игры и делится своей любовью на канале, рассказывая о правилах и нюансах игры на своём опыте, да и просто веселится.'">
+                                <img width="20px" height="20px" src="/partner/sneaky_dice.webp" alt="Sneaky Dice">
+                                Sneaky Dice
                             </a>
-                            <a href="https://vk.com/mastademic?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Программа DM Helpmate 2 будет полезна мастерам D&D для подготовки и проведения игр в офлайн. В ней вы сможете найти: база данных D&D 5, добавление персонажей и НПЦ, ведение тактических карт, генератор добычи и множество других вещей.'">
-                                <img
-                                        width="20px" height="20px" src="/partner/dm_helpmate.webp" alt="DM Helpmate"
-                                > DM Helpmate
+                            <a href="https://vk.com/mastademic?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Программа DM Helpmate 2 будет полезна мастерам D&D для подготовки и проведения игр в офлайн. В ней вы сможете найти: база данных D&D 5, добавление персонажей и НПЦ, ведение тактических карт, генератор добычи и множество других вещей.'">
+                                <img width="20px" height="20px" src="/partner/dm_helpmate.webp" alt="DM Helpmate">
+                                DM Helpmate
                             </a>
-                            <a href="https://vk.com/dndworlds?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Переводы материалов для мастеров и игроков, мемы, запись на игры.'">
-                                <img
-                                        width="20px" height="20px" src="/partner/dndworlds.webp" alt="Круговорот миров"
-                                > Круговорот миров
+                            <a href="https://vk.com/dndworlds?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Переводы материалов для мастеров и игроков, мемы, запись на игры.'">
+                                <img width="20px" height="20px" src="/partner/dndworlds.webp" alt="Круговорот миров">
+                                Круговорот миров
                             </a>
-                            <a href="https://vk.com/myriads_of_truths?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Небольшая команда энтузиастов, которая хочет переводить, оформлять и делиться с вами интересными новостями, статьями, артами и прочими работами во вселенной D&D'">
-                                <img
-                                        width="20px" height="20px" src="/partner/myriads_of_truths.webp" alt="Мириады Истин"
-                                > Мириады Истин
+                            <a href="https://vk.com/myriads_of_truths?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Небольшая команда энтузиастов, которая хочет переводить, оформлять и делиться с вами интересными новостями, статьями, артами и прочими работами во вселенной D&D'">
+                                <img width="20px" height="20px" src="/partner/myriads_of_truths.webp" alt="Мириады Истин">
+                                Мириады Истин
                             </a>
-                            <a href="https://vk.com/artfilinkov?partner=ttg.club" class="block tip" target="_blank"
-                               v-tippy="'Создатель НРИ-контента, рисующий иконки, карты, токены и другие вещи, которые пригодятся как ГМам, так и игрокам.'">
-                                <img
-                                        width="20px" height="20px" src="/partner/artfilinkov.webp" alt="A.Filinkov"
-                                > A.Filinkov
+                            <a href="https://vk.com/artfilinkov?partner=ttg.club"
+                                class="block tip"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-tippy="'Создатель НРИ-контента, рисующий иконки, карты, токены и другие вещи, которые пригодятся как ГМам, так и игрокам.'">
+                                <img width="20px" height="20px" src="/partner/artfilinkov.webp" alt="A.Filinkov">
+                                A.Filinkov
                             </a>
                         </div>
                     </div>
