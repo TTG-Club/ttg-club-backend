@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class TreasuryToolController {
-	
+
 	@GetMapping("/tools/treasury")
 	public String getTreasuryTool(Model model) {
 		model.addAttribute("metaTitle", "Генератор сокровищницы");
@@ -17,6 +17,6 @@ public class TreasuryToolController {
 		model.addAttribute("metaDescription", "Генерация содержимого сокровищницы");
 		model.addAttribute("menuTitle", "Генератор содержимого сокровищницы");
 
-		return "tools/treasury";
+		return "spa";
 	}
 }

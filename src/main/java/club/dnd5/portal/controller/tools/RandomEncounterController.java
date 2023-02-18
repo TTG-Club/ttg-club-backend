@@ -17,6 +17,6 @@ public class RandomEncounterController {
 		model.addAttribute("metaDescription", "Генерация случайных столкновений");
 		model.addAttribute("types", HabitatType.types());
 		model.addAttribute("menuTitle", "Генератор случайных столкновений");
-		return "tools/random_encounters";
+		return "spa";
 	}
 }
