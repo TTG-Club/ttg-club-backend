@@ -14,6 +14,6 @@ public class AbilityCalculatorController {
 		model.addAttribute("metaDescription", "Калькулятор характеристик персонажа. Roll, Point bay, Arrays");
 		model.addAttribute("types", HabitatType.types());
 		model.addAttribute("menuTitle", "Калькулятор характеристик");
-		return "/tools/ability-calc";
+		return "spa";
 	}
 }

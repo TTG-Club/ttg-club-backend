@@ -1,18 +1,17 @@
 package club.dnd5.portal.controller;
 
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.trait.Trait;
+import club.dnd5.portal.repository.datatable.TraitDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.model.trait.Trait;
-import club.dnd5.portal.repository.datatable.TraitDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.naming.directory.InvalidAttributesException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
 
 @Hidden
 @Controller
@@ -28,7 +27,7 @@ public class TraitController {
 		model.addAttribute("menuTitle", "Черты");
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Списко черт персонажей по D&D 5 редакции");
-		return "traits";
+		return "spa";
 	}
 
 	@GetMapping("/traits/{name}")
@@ -42,7 +41,7 @@ public class TraitController {
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, trait.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - черта персонажа по D&D 5-редакции", trait.getName(), trait.getEnglishName()));
 		model.addAttribute("menuTitle", "Черты");
-		return "traits";
+		return "spa";
 	}
 
 	@GetMapping("/traits/fragment/{id}")

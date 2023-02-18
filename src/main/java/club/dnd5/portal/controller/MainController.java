@@ -13,17 +13,17 @@ public class MainController {
 	public String getHome(Model model) {
 		return "index";
 	}
-	
+
 	@GetMapping("/search")
 	public String getSearch(Model model) {
-		return "search";
+		return "spa";
 	}
-	
+
 	@GetMapping("/page")
 	public String getPageText(Model model) {
 		return "page";
 	}
-	
+
 	@GetMapping("/telegram_bot")
 	public String getPageTelegrammBot(Model model) {
 		model.addAttribute("metaTitle", "TTG Club Telegram Bot");
@@ -39,7 +39,7 @@ public class MainController {
 		model.addAttribute("metaDescription", "Инструкция по импорту существ из Бестиария в FVTT.");
 		return "fvtt_import";
 	}
-	
+
 	@GetMapping("/bookmarks_info")
 	public String getBookmarkInstruction(Model model) {
 		model.addAttribute("metaTitle", "TTG Club инструкция по закладкам");
@@ -47,5 +47,5 @@ public class MainController {
 		model.addAttribute("metaDescription", "Инструкция по использованию закладок.");
 		return "bookmarks_info";
 	}
-	
+
 }

@@ -1,18 +1,7 @@
 package club.dnd5.portal.controller.api;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.MetaApi;
+import club.dnd5.portal.model.InfoPage;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
@@ -32,22 +21,22 @@ import club.dnd5.portal.model.screen.Screen;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.InfoPagesRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.RaceRepository;
-import club.dnd5.portal.repository.datatable.ArmorDatatableRepository;
-import club.dnd5.portal.repository.datatable.BackgroundDatatableRepository;
-import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
-import club.dnd5.portal.repository.datatable.BookDatatableRepository;
-import club.dnd5.portal.repository.datatable.GodDatatableRepository;
-import club.dnd5.portal.repository.datatable.ItemDatatableRepository;
-import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
-import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
-import club.dnd5.portal.repository.datatable.RuleDatatableRepository;
-import club.dnd5.portal.repository.datatable.ScreenDatatableRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
-import club.dnd5.portal.repository.datatable.TraitDatatableRepository;
-import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
+import club.dnd5.portal.repository.datatable.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Tag(name = "Meta", description = "The meta API")
 @RestController
@@ -99,10 +88,13 @@ public class MetaApiController {
 
 	@Autowired
 	private BookDatatableRepository bookRepository;
+	@Autowired
+	private InfoPagesRepository infoPagesRepository;
 
 	@GetMapping(value = "/api/v1/meta/*", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getNotMapping() {
 		MetaApi meta = new MetaApi();
+		meta.setTitle("TTG Club Oнлайн-справочник");
 		meta.setDescription("TTG.Club - сайт, посвященный DnD 5-й редакции. Тут можно найти: расы, происхождения, классы, заклинания, бестиарий, снаряжение, магические предметы и инструменты для облегчения игры как игрокам, так и мастерам - все в одном месте.");
 		return meta;
 	}
@@ -464,6 +456,15 @@ public class MetaApiController {
 		meta.setDescription(String.format("%s (%s) Источник [Source] по D&D 5 редакции", book.getName(), book.getEnglishName()));
 		meta.setMenu("Источники");
 		meta.setKeywords(book.getAltName() + " " + book.getEnglishName());
+		return meta;
+	}
+
+	@GetMapping(value = "/api/v1/meta/info/{url}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MetaApi getInfoMeta(@PathVariable String url) {
+		InfoPage infoPage = infoPagesRepository.findByUrl(url);
+		MetaApi meta = new MetaApi();
+		meta.setTitle(String.format("%s | TTG Club", infoPage.getTitle()));
+		meta.setDescription(infoPage.getDescription().substring(0, 30));
 		return meta;
 	}
 }

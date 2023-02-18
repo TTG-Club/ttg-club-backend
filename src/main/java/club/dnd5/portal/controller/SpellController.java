@@ -1,11 +1,9 @@
 package club.dnd5.portal.controller;
 
-import java.util.Collections;
-
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
+import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,10 +11,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.naming.directory.InvalidAttributesException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 
 @Hidden
 @Controller
@@ -34,7 +32,7 @@ public class SpellController {
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Заклинания по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Заклинания");
-		return "spells";
+		return "spa";
 	}
 
 	@GetMapping("/spells/{name}")
@@ -49,7 +47,7 @@ public class SpellController {
 		model.addAttribute("metaDescription", String.format("%s %s, %s", (spell.getLevel() == 0 ? "Заговор" : spell.getLevel() + " уровень"), spell.getName(), spell.getSchool().getName()));
 		model.addAttribute("metaImage", String.format("https://image.ttg.club:8089/magic/%s.png", StringUtils.capitalize(spell.getSchool().name().toLowerCase())));
 		model.addAttribute("menuTitle", "Заклинания");
-		return "spells";
+		return "spa";
 	}
 
 	@GetMapping("/spells/fragment/{id}")

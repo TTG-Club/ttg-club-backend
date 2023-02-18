@@ -1,18 +1,17 @@
 package club.dnd5.portal.controller;
 
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.items.Armor;
+import club.dnd5.portal.repository.datatable.ArmorDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.model.items.Armor;
-import club.dnd5.portal.repository.datatable.ArmorDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.naming.directory.InvalidAttributesException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
 
 @Hidden
 @Controller
@@ -28,7 +27,7 @@ public class ArmorController {
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Доспехи по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Доспехи");
-		return "armors";
+		return "spa";
 	}
 
 	@GetMapping("/armors/{name}")
@@ -42,7 +41,7 @@ public class ArmorController {
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, armor.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - доспехи по D&D 5 редакции", armor.getName(), armor.getEnglishName()));
 		model.addAttribute("menuTitle", "Доспехи");
-		return "armors";
+		return "spa";
 	}
 
 	@GetMapping("/armors/fragment/{id:\\d+}")
