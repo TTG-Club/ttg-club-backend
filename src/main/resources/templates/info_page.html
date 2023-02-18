@@ -2,8 +2,8 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
 <body id="body">
 <div layout:fragment="content" th:object="${page}">
-    <page-layout date-time="2022-10-13T00:00:00+03:00">
-        <template # th:utext="*{title}">Заголовок</template>
+    <page-layout>
+        <template #title th:utext="*{title}">Заголовок</template>
         <template #subtitle th:utext="*{subtitle}">Описание не обязательно</template>
         <template #default th:utext="*{description}"/>
     </page-layout>
