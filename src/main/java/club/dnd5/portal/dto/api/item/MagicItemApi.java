@@ -18,6 +18,7 @@ import lombok.Setter;
 @Setter
 public class MagicItemApi extends ItemApi {
 	private RarityApi rarity;
+	private Boolean customization;
 	private SpellApi spell;
 	protected SourceApi source;
 
@@ -26,8 +27,11 @@ public class MagicItemApi extends ItemApi {
 		type = new TypeApi(item.getType().getCyrilicName(), item.getType().ordinal());
 		rarity = new RarityApi(item.getRarity().name().toLowerCase().replace('_', '-'), item.getRarity().getShort(), item.getTextRarity());
 		source = new SourceApi(item.getBook());
+		if (item.getCustomization()) {
+			customization = item.getCustomization();
+		}
 	}
-	
+
 	public void setRarity(Rarity rarity) {
 		this.rarity = new RarityApi(rarity);
 	}
