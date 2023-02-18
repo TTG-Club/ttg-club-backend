@@ -1,9 +1,6 @@
 package club.dnd5.portal.controller.api.bestiary;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -12,6 +9,9 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 
+import club.dnd5.portal.dto.api.bestiary.BeastFilter;
+import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.creature.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -36,11 +36,6 @@ import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
-import club.dnd5.portal.model.creature.Action;
-import club.dnd5.portal.model.creature.ActionType;
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.creature.CreatureFeat;
-import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.dto.fvtt.export.FBeastiary;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.dto.fvtt.plutonium.FBeast;
@@ -119,35 +114,36 @@ public class BestiarytApiConroller {
 				}
 			}
 		}
+		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
 		if (request.getFilter() != null) {
-			if (request.getFilter().getNpc().isEmpty()) {
+			if (!filter.map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
 			}
-			if (!request.getFilter().getChallengeRatings().isEmpty()) {
+			if (!filter.map(BeastFilter::getChallengeRatings).orElseGet(Collections::emptyList).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> root.get("challengeRating").in(request.getFilter().getChallengeRatings()));
 			}
-			if (!request.getFilter().getBooks().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Book, Spell> join = root.join("book", JoinType.INNER);
-					return join.get("source").in(request.getFilter().getBooks());
-				});
-			}
-			if (!request.getFilter().getTypes().isEmpty()) {
+			if (!filter.map(BeastFilter::getTypes).orElseGet(Collections::emptyList).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
 						specification,  (root, query, cb) -> root.get("type").in(request.getFilter().getTypes()));
 			}
-			if (!request.getFilter().getSizes().isEmpty()) {
+			if (!filter.map(BeastFilter::getSizes).orElseGet(Collections::emptyList).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
 						specification,  (root, query, cb) -> root.get("size").in(request.getFilter().getSizes()));
 			}
-			if (!request.getFilter().getTags().isEmpty()) {
+			if (!filter.map(BeastFilter::getTags).orElseGet(Collections::emptyList).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,  (root, query, cb) -> {
 					Join<Object, Object> join = root.join("races", JoinType.INNER);
 					query.distinct(true);
 					return cb.and(join.get("id").in(request.getFilter().getTags()));
 				});
 			}
-			if (!request.getFilter().getMoving().isEmpty()) {
+			if (!filter.map(BeastFilter::getBooks).orElseGet(Collections::emptyList).isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+					Join<Book, Spell> join = root.join("book", JoinType.INNER);
+					return join.get("source").in(request.getFilter().getBooks());
+				});
+			}
+			if (!filter.map(BeastFilter::getMoving).orElseGet(Collections::emptyList).isEmpty()) {
 				if(request.getFilter().getMoving().contains("fly")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
 							(root, query, cb) -> cb.isNotNull(root.get("flySpeed")));
@@ -169,14 +165,42 @@ public class BestiarytApiConroller {
 							(root, query, cb) -> cb.isNotNull(root.get("diggingSpeed")));
 				}
 			}
-			if (!request.getFilter().getEnvironments().isEmpty()) {
+			if (!filter.map(BeastFilter::getEnvironments).orElseGet(Collections::emptyList).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,  (root, query, cb) -> {
 					Join<Object, Object> join = root.join("habitates", JoinType.INNER);
 					query.distinct(true);
 					return join.in(request.getFilter().getEnvironments());
 				});
 			}
-			if (!request.getFilter().getSenses().isEmpty()) {
+			if (!filter.map(BeastFilter::getVulnerabilityDamage).orElseGet(Collections::emptyList).isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(specification,  (root, query, cb) -> {
+					Join<Object, Object> join = root.join("vulnerabilityDamages", JoinType.INNER);
+					query.distinct(true);
+					return join.in(request.getFilter().getVulnerabilityDamage());
+				});
+			}
+			if (!filter.map(BeastFilter::getResistanceDamage).orElseGet(Collections::emptyList).isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(specification,  (root, query, cb) -> {
+					Join<Object, Object> join = root.join("resistanceDamages", JoinType.INNER);
+					query.distinct(true);
+					return join.in(request.getFilter().getResistanceDamage());
+				});
+			}
+			if (!filter.map(BeastFilter::getImmunityDamage).orElseGet(Collections::emptyList).isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(specification,  (root, query, cb) -> {
+					Join<Object, Object> join = root.join("immunityCondition", JoinType.INNER);
+					query.distinct(true);
+					return join.in(request.getFilter().getImmunityDamage());
+				});
+			}
+			if (!filter.map(BeastFilter::getImmunityCondition).orElseGet(Collections::emptyList).isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(specification,  (root, query, cb) -> {
+					Join<Object, Object> join = root.join("immunityStates", JoinType.INNER);
+					query.distinct(true);
+					return join.in(request.getFilter().getImmunityCondition());
+				});
+			}
+			if (!filter.map(BeastFilter::getSenses).orElseGet(Collections::emptyList).isEmpty()) {
 				if(request.getFilter().getSenses().contains("darkvision")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
 							(root, query, cb) -> cb.isNotNull(root.get("darkvision")));
@@ -194,7 +218,7 @@ public class BestiarytApiConroller {
 							(root, query, cb) -> cb.isNotNull(root.get("vibration")));
 				}
 			}
-			if (!CollectionUtils.isEmpty(request.getFilter().getFeatures())) {
+			if (!filter.map(BeastFilter::getFeatures).orElseGet(Collections::emptyList).isEmpty()) {
 				Specification<Creature> addSpec = null;
 				if (request.getFilter().getFeatures().contains("lair")) {
 					addSpec = SpecificationUtil.getOrSpecification(addSpec,  (root, query, cb) ->
@@ -330,6 +354,26 @@ public class BestiarytApiConroller {
 		values.add(new FilterValueApi("чувство вибрации", "tremmor"));
 		sanseFilter.setValues(values);
 		otherFilters.add(sanseFilter);
+
+		FilterApi vulnerabilityDamageFilter = new FilterApi("Уязвимость к урону", "vulnerabilityDamage");
+		values = DamageType.getVulnerability().stream().map(damage-> new FilterValueApi(damage.getCyrilicName(), damage.name())).collect(Collectors.toList());
+		vulnerabilityDamageFilter.setValues(values);
+		otherFilters.add(vulnerabilityDamageFilter);
+
+		FilterApi resistDamageFilter = new FilterApi("Сопротивление к урону", "resistanceDamage");
+		values = DamageType.getResistance().stream().map(damage-> new FilterValueApi(damage.getCyrilicName(), damage.name())).collect(Collectors.toList());
+		resistDamageFilter.setValues(values);
+		otherFilters.add(resistDamageFilter);
+
+		FilterApi immunityDamageFilter = new FilterApi("Иммунитет к урону", "immunityDamage");
+		values = DamageType.getImmunity().stream().map(damage-> new FilterValueApi(damage.getCyrilicName(), damage.name())).collect(Collectors.toList());
+		immunityDamageFilter.setValues(values);
+		otherFilters.add(immunityDamageFilter);
+
+		FilterApi immunityConditionFilter = new FilterApi("Иммунитет к состояниям", "immunityCondition");
+		values = Condition.getImmunity().stream().map(condition-> new FilterValueApi(condition.getCyrilicName(), condition.name())).collect(Collectors.toList());
+		immunityConditionFilter.setValues(values);
+		otherFilters.add(immunityConditionFilter);
 
 		FilterApi featureFilter = new FilterApi("Умения", "features");
 		values = new ArrayList<>(3);
