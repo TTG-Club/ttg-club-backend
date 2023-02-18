@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<body id="body">
+<div layout:fragment="content" th:object="${page}">
+    <page-layout>
+        <template #title th:utext="*{title}">Заголовок</template>
+        <template #subtitle th:utext="*{subtitle}">Описание не обязательно</template>
+        <template #default th:utext="*{description}"/>
+    </page-layout>
+</div>
+</body>
+</html>
