@@ -1,20 +1,18 @@
 package club.dnd5.portal.controller;
 
-import java.util.LinkedHashMap;
-import java.util.stream.Collectors;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.screen.Screen;
+import club.dnd5.portal.repository.datatable.ScreenDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.model.screen.Screen;
-import club.dnd5.portal.repository.datatable.ScreenDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
 
 @Hidden
 @Controller
@@ -30,7 +28,7 @@ public class ScreenController {
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Ширма Мастера Подземелий и Драконов по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Ширма Мастера");
-		return "screens";
+		return "spa";
 	}
 
 	@GetMapping("/screens/{name}")
@@ -46,7 +44,7 @@ public class ScreenController {
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, screen.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) Ширма Мастера Подземелий и Драконов по D&D 5 редакции", screen.getName(), screen.getEnglishName()));
 		model.addAttribute("menuTitle", "Ширма Мастера");
-		return "screens";
+		return "spa";
 	}
 
 	@GetMapping("/screens/{name}/{subscreen}")
@@ -54,7 +52,7 @@ public class ScreenController {
 		model.addAttribute("screens", repository.findAllByParentIsNullOrderByOrdering());
 		model.addAttribute("selectedScreen", name);
 		model.addAttribute("selectedSubscreen", subscreen);
-		return "screens";
+		return "spa";
 	}
 
 	@GetMapping("/screens/fragment/{id:\\d+}")

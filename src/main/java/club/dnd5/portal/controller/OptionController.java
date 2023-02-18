@@ -1,23 +1,21 @@
 package club.dnd5.portal.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.classes.Option;
+import club.dnd5.portal.model.classes.Option.OptionType;
+import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.model.classes.Option;
-import club.dnd5.portal.model.classes.Option.OptionType;
-import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.naming.directory.InvalidAttributesException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Hidden
 @Controller
@@ -35,7 +33,7 @@ public class OptionController {
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Список особенности классов и подкласов по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Особенности классов");
-		return "options";
+		return "spa";
 	}
 
 	@GetMapping("/options/{name}")
@@ -52,7 +50,7 @@ public class OptionController {
 						option.getOptionTypes().stream().map(OptionType::getDisplayName).collect(Collectors.joining()),
 						option.getName()));
 		model.addAttribute("menuTitle", "Особенности классов");
-		return "options";
+		return "spa";
 	}
 
 	@GetMapping("/options/fragment/{id}")

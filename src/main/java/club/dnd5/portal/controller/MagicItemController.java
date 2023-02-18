@@ -1,22 +1,20 @@
 package club.dnd5.portal.controller;
 
-import java.util.Collection;
-
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.image.ImageType;
+import club.dnd5.portal.model.items.MagicItem;
+import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.model.image.ImageType;
-import club.dnd5.portal.model.items.MagicItem;
-import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.naming.directory.InvalidAttributesException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 
 @Hidden
 @Controller
@@ -34,7 +32,7 @@ public class MagicItemController {
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Магические предметы и артефакты по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Магические предметы");
-		return "items_magic";
+		return "spa";
 	}
 
 	@GetMapping("/items/magic/{name}")
@@ -52,7 +50,7 @@ public class MagicItemController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Магические предметы");
-		return "items_magic";
+		return "spa";
 	}
 
 	@GetMapping("/items/magic/fragment/{id:\\d+}")

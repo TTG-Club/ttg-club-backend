@@ -1,21 +1,5 @@
 package club.dnd5.portal.controller;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.races.Feature;
@@ -23,6 +7,16 @@ import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.classes.RaceRepository;
 import io.swagger.v3.oas.annotations.Hidden;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Hidden
 @Controller
@@ -44,7 +38,7 @@ public class RaceController {
 		model.addAttribute("menuTitle", "Расы и происхождения");
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Расы и происхождения персонажей по D&D 5 редакции");
-		return "races";
+		return "spa";
 	}
 
 	@GetMapping("/races/{name}")
@@ -62,7 +56,7 @@ public class RaceController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Расы и происхождения");
-		return "races";
+		return "spa";
 	}
 
 	@GetMapping("/races/{raceEnglishName}/{subraceEnglishName}")
@@ -89,7 +83,7 @@ public class RaceController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Расы и происхождения");
-		return "races";
+		return "spa";
 	}
 
 	@GetMapping("/races/fragment/{id}")
