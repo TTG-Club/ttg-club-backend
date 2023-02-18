@@ -2,6 +2,8 @@ package club.dnd5.portal.dto.api.bestiary;
 
 import java.util.List;
 
+import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.creature.Condition;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,7 +27,7 @@ public class BeastFilter {
 	private List<String> challengeRatings;
 	@JsonProperty("type")
 	private List<CreatureType> types;
-	
+
 	@JsonProperty("size")
 	private List<CreatureSize> sizes;
 	@JsonProperty("tag")
@@ -34,10 +36,16 @@ public class BeastFilter {
 	private List<String> senses;
 	private List<String> features;
 	private List<String> npc;
+
+	private List<DamageType> vulnerabilityDamage;
+	private List<DamageType> resistanceDamage;
+	private List<DamageType> immunityDamage;
+
+	private List<Condition> immunityCondition;
+
 	@JsonProperty("environment")
 	private List<HabitatType> environments;
 
-	
 	@JsonProperty("book")
 	private List<String> books;
 }
