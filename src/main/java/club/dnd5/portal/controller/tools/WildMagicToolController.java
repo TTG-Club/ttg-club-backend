@@ -16,6 +16,6 @@ public class WildMagicToolController {
 		model.addAttribute("metaUrl", "https://ttg.club/tools/wildmagic");
 		model.addAttribute("metaDescription", "Генерация эффектов дикой магии");
 		model.addAttribute("menuTitle", "Генератор дикой магии");
-		return "tools/wildmagic";
+		return "spa";
 	}
 }

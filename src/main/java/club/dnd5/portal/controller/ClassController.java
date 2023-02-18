@@ -1,27 +1,5 @@
 package club.dnd5.portal.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.thymeleaf.util.StringUtils;
-
 import club.dnd5.portal.dto.classes.ClassFetureDto;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
@@ -35,6 +13,18 @@ import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
 import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
 import io.swagger.v3.oas.annotations.Hidden;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.thymeleaf.util.StringUtils;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Hidden
 @Controller
@@ -59,7 +49,7 @@ public class ClassController {
 		model.addAttribute("metaTitle", "Классы (Classes) D&D 5e");
 		model.addAttribute("menuTitle", "Классы");
 		model.addAttribute("metaUrl", BASE_URL);
-		return "classes";
+		return "spa";
 	}
 
 	@GetMapping("/classes/{name}")
@@ -77,7 +67,7 @@ public class ClassController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Классы");
-		return "classes";
+		return "spa";
 	}
 
 	@GetMapping("/classes/{name}/{archetype}")
@@ -105,7 +95,7 @@ public class ClassController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Классы");
-		return "classes";
+		return "spa";
 	}
 
 	@GetMapping("/classes/fragment/{englishName}")

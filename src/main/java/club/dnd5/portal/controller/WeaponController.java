@@ -1,19 +1,18 @@
 package club.dnd5.portal.controller;
 
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.items.Weapon;
+import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
+import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.model.items.Weapon;
-import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
-import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.naming.directory.InvalidAttributesException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
 
 @Hidden
 @Controller
@@ -32,7 +31,7 @@ public class WeaponController {
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Оружие по D&D 5 редакции");
 		model.addAttribute("menuTitle", "Оружие");
-		return "weapons";
+		return "spa";
 	}
 
 	@GetMapping("/weapons/{name}")
@@ -46,7 +45,7 @@ public class WeaponController {
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, weapon.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s D&D 5 редакции", weapon.getName(), weapon.getEnglishName(), weapon.getType().getName()));
 		model.addAttribute("menuTitle", "Оружие");
-		return "weapons";
+		return "spa";
 	}
 
 	@GetMapping("/weapons/fragment/{id:\\d+}")

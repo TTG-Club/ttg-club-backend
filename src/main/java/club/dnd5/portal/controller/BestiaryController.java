@@ -1,23 +1,20 @@
 package club.dnd5.portal.controller;
 
-import java.util.Collection;
-
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.model.creature.Creature;
+import club.dnd5.portal.model.image.ImageType;
+import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import club.dnd5.portal.dto.bestiary.CreatureDto;
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.image.ImageType;
-import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.naming.directory.InvalidAttributesException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 
 @Hidden
 @Controller
@@ -36,7 +33,7 @@ public class BestiaryController {
 		model.addAttribute("metaUrl", BASE_URL);
 		model.addAttribute("metaDescription", "Бестиарий - существа для D&D 5 редакции");
 		model.addAttribute("menuTitle", "Бестиарий");
-		return "bestiary";
+		return "spa";
 	}
 
 	@GetMapping("/bestiary/{name}")
@@ -54,7 +51,7 @@ public class BestiaryController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Бестиарий");
-		return "bestiary";
+		return "spa";
 	}
 
 	@GetMapping("/bestiary/fragment/{id:\\d+}")

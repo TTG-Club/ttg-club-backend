@@ -36,7 +36,7 @@ public class ProfileController {
 		model.addAttribute("user_writer", usersRepository.countByRoles("WRITER"));
 		model.addAttribute("user_moderator", usersRepository.countByRoles("MODERATOR"));
 
-		return "user/profile";
+		return "spa";
 	}
 
 	@PostMapping(value = "/api/v1/profile/{username}", produces = MediaType.APPLICATION_JSON_VALUE)

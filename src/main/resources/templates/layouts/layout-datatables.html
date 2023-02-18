@@ -11,15 +11,7 @@
         <!-- End Google Tag Manager (noscript) -->
     </th:block>
 
-    <div id="dnd5club" class="dnd5club">
-		<nav-bar th:section="${menuTitle}"></nav-bar>
-
-        <div id="container" class="container">
-            <router-view></router-view>
-        </div>
-
-        <img v-if="uiStore.theme && !uiStore.isMobile" th::src="'`/img/${ uiStore.theme || \'' + ${themeName} + '\' }/bg-main.webp?v=2`'" alt="img-bg" class="bg-img-main">
-    </div>
+    <div id="dnd5club" class="dnd5club"></div>
 	</body>
 	<th:block th:replace="layouts/layout :: mainJS"/>
 	<script layout:fragment="js-script"></script>
