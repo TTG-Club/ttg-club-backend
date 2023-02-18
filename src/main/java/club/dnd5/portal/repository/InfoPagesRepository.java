@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface InfoPagesRepository extends JpaRepository<InfoPage, String> {
+	InfoPage findByUrl(String url);
 	Optional<InfoPage> findOneByUrl(String url);
 }

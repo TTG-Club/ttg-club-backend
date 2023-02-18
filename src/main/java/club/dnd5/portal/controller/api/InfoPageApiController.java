@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -21,17 +18,21 @@ public class InfoPageApiController {
 	@Autowired
 	private InfoPagesRepository infoPagesRepository;
 
-	@Operation(summary = "Gets info page result", tags = "info page")
-	@GetMapping("/{url}")
-	public ResponseEntity<InfoPageApi> getPage(@PathVariable String url) {
+	@Operation(summary = "Check is info page exist", tags = "info page exist")
+	@PostMapping("/{url}")
+	public ResponseEntity<?> getPageExist(@PathVariable String url) {
 		Optional<InfoPage> page = infoPagesRepository.findOneByUrl(url);
 
-		if (page.isPresent()) {
-			InfoPage data = page.get();
+		return page.isPresent()
+			? ResponseEntity.ok().build()
+			: ResponseEntity.notFound().build();
+	}
 
-			return ResponseEntity.ok(new InfoPageApi(data.getTitle(), data.getSubtitle(), data.getDescription()));
-		}
+	@Operation(summary = "Gets info page result", tags = "info page")
+	@GetMapping("/{url}")
+	public InfoPageApi getPage(@PathVariable String url) {
+		InfoPage infoPage = infoPagesRepository.findByUrl(url);
 
-		return ResponseEntity.notFound().build();
+		return new InfoPageApi(infoPage.getTitle(), infoPage.getSubtitle(), infoPage.getDescription());
 	}
 }

@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.MetaApi;
+import club.dnd5.portal.model.InfoPage;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
@@ -20,6 +21,7 @@ import club.dnd5.portal.model.screen.Screen;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.InfoPagesRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.RaceRepository;
 import club.dnd5.portal.repository.datatable.*;
@@ -86,6 +88,8 @@ public class MetaApiController {
 
 	@Autowired
 	private BookDatatableRepository bookRepository;
+	@Autowired
+	private InfoPagesRepository infoPagesRepository;
 
 	@GetMapping(value = "/api/v1/meta/*", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getNotMapping() {
@@ -452,6 +456,15 @@ public class MetaApiController {
 		meta.setDescription(String.format("%s (%s) Источник [Source] по D&D 5 редакции", book.getName(), book.getEnglishName()));
 		meta.setMenu("Источники");
 		meta.setKeywords(book.getAltName() + " " + book.getEnglishName());
+		return meta;
+	}
+
+	@GetMapping(value = "/api/v1/meta/info/{url}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MetaApi getInfoMeta(@PathVariable String url) {
+		InfoPage infoPage = infoPagesRepository.findByUrl(url);
+		MetaApi meta = new MetaApi();
+		meta.setTitle(String.format("%s | TTG Club", infoPage.getTitle()));
+		meta.setDescription(infoPage.getDescription().substring(0, 30));
 		return meta;
 	}
 }
