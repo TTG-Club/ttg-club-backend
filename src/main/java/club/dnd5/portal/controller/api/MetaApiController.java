@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.MetaApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.InfoPage;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.book.Book;
@@ -362,7 +363,8 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBeastMeta(@PathVariable String englishName) {
-		Creature beast = bestiaryItemRepository.findByEnglishName(englishName.replace('_', ' '));
+		Creature beast = bestiaryItemRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));

@@ -9,7 +9,10 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 
+
 import club.dnd5.portal.dto.api.bestiary.BeastFilter;
+import club.dnd5.portal.exception.PageNotFoundException;
+
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.creature.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,6 @@ import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +51,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Bestiary", description = "The Bestiary API")
 @RestController
-public class BestiarytApiConroller {
+public class BestiaryApiController {
 	@Autowired
 	private BestiaryDatatableRepository beastRepository;
 
@@ -187,7 +189,7 @@ public class BestiarytApiConroller {
 		}
 		if (!filter.map(BeastFilter::getImmunityDamage).orElseGet(Collections::emptyList).isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				Join<Object, Object> join = root.join("immunityCondition", JoinType.INNER);
+				Join<Object, Object> join = root.join("immunityDamages", JoinType.INNER);
 				query.distinct(true);
 				return join.in(request.getFilter().getImmunityDamage());
 			});
@@ -247,7 +249,8 @@ public class BestiarytApiConroller {
 
 	@PostMapping(value = "/api/v1/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BeastDetailApi getBeast(@PathVariable String englishName) {
-		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '));
+		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		BeastDetailApi beastApi = new BeastDetailApi(beast);
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {
@@ -258,7 +261,7 @@ public class BestiarytApiConroller {
 
 	@GetMapping("/api/fvtt/v1/bestiary/{id}")
 	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
-		Creature creature = beastRepository.findById(id).get();
+		Creature creature = beastRepository.findById(id).orElseThrow(PageNotFoundException::new);
 		response.setContentType("application/json");
 		String file = String.format("attachment; filename=\"%s.json\"", creature.getEnglishName());
 		response.setHeader("Content-Disposition", file);

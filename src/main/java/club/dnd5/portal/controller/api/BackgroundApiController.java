@@ -43,14 +43,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class BackgroundApiController {
 	@Autowired
 	private BackgroundDatatableRepository backgroundRepository;
-	
+
 	@Operation(summary = "Gets all backgrounds", tags = "background")
 	@PostMapping(value = "/api/v1/backgrounds", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BackgroundApi> getBackgrainds(@RequestBody TraitRequesApi request) {
 		Specification<Background> specification = null;
 
 		DataTablesInput input = new DataTablesInput();
-		List<Column> columns = new ArrayList<Column>(3);
+		List<Column> columns = new ArrayList<>(3);
 		Column column = new Column();
 		column.setData("name");
 		column.setName("name");
@@ -58,7 +58,7 @@ public class BackgroundApiController {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -66,18 +66,18 @@ public class BackgroundApiController {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.FALSE);
 		columns.add(column);
-		
+
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
-		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+		if (request.getPage() != null && request.getLimit() != null) {
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -143,7 +143,7 @@ public class BackgroundApiController {
 			}
 		}
 		filters.setSources(sources);
-		
+
 		List<FilterApi> otherFilters = new ArrayList<>();
 		FilterApi schoolSpellFilter = new FilterApi("Навыки", "skills");
 		schoolSpellFilter.setValues(
@@ -151,7 +151,7 @@ public class BackgroundApiController {
 				 .sorted(Comparator.comparing(SkillType::getCyrilicName))
 				 .map(ability -> new FilterValueApi(ability.getCyrilicName(), ability.name()))
 				 .collect(Collectors.toList()));
-		
+
 		otherFilters.add(schoolSpellFilter);
 		filters.setOther(otherFilters);
 		return filters;
