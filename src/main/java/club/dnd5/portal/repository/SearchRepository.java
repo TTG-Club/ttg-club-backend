@@ -29,7 +29,7 @@ public class SearchRepository {
 
 	public List<SearchApi> search(String searchText, Integer page, Integer limit) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT fts.name, fts.section, fts.url, fts.description, b.source, b.type, b.name book_name FROM full_text_search fts " +
+			"SELECT fts.name, fts.english_name, fts.section, fts.url, fts.description, b.source, b.type, b.name book_name FROM full_text_search fts " +
 					"JOIN books b ON fts.source = b.source " +
 					"WHERE LOWER(fts.name) LIKE :name OR LOWER(fts.alt_name) LIKE :name OR LOWER(fts.english_name) LIKE :name");
 		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
@@ -43,18 +43,18 @@ public class SearchRepository {
 			query.setFirstResult(page * limit);
 		}
 		List<Object[]> result = query.getResultList();
-		return result.stream().map(row -> new SearchApi(row[0], row[1], row[2], shortDescription(row[3]),
-			new SourceApi(row[4].toString(), row[5].toString(), row[6].toString()))).collect(Collectors.toList());
+		return result.stream().map(row -> new SearchApi(row[0], row[1], row[2], row[3], shortDescription(row[4]),
+			new SourceApi(row[5].toString(), row[6].toString(), row[7].toString()))).collect(Collectors.toList());
 	}
 
 	public SearchApi findByIndex(int index) {
-		Query query = entityManager.createNativeQuery("SELECT fts.name, fts.section, fts.url, fts.description, b.source, b.type, b.name book_name " +
+		Query query = entityManager.createNativeQuery("SELECT fts.name, fts.english_name, fts.section, fts.url, fts.description, b.source, b.type, b.name book_name " +
 			"FROM full_text_search fts " +
 			"JOIN books b ON fts.source = b.source");
 		query.setFirstResult(index);
 		query.setMaxResults(1);
 		Object[] row = (Object[]) query.getSingleResult();
-		return new SearchApi(row[0], row[1], row[2], shortDescription(row[3]), new SourceApi(row[4].toString(), row[5].toString(), row[6].toString()));
+		return new SearchApi(row[0], row[1], row[2], row[3], shortDescription(row[4]), new SourceApi(row[5].toString(), row[6].toString(), row[7].toString()));
 	}
 
 	private String shortDescription(Object description) {

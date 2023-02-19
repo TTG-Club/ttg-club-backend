@@ -8,6 +8,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -33,7 +34,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ArmorApiController {
 	@Autowired
 	private ArmorDatatableRepository repo;
-	
+
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ArmorApi> getItem(@RequestBody ArmorRequesApi request) {
 		Specification<Armor> specification = null;
@@ -47,7 +48,7 @@ public class ArmorApiController {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -55,18 +56,18 @@ public class ArmorApiController {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.FALSE);
 		columns.add(column);
-		
+
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -100,12 +101,12 @@ public class ArmorApiController {
 		}
 		return repo.findAll(input, specification, specification, ArmorApi::new).getData();
 	}
-	
+
 	@PostMapping(value = "/api/v1/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ArmorDetailApi getOption(@PathVariable String englishName) {
-		return new ArmorDetailApi(repo.findByEnglishName(englishName.replace('_', ' ')));
+		return new ArmorDetailApi(repo.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new));
 	}
-	
+
 	private <T> Specification<T> addSpecification(Specification<T> specification, Specification<T> addSpecification) {
 		if (specification == null) {
 			return Specification.where(addSpecification);

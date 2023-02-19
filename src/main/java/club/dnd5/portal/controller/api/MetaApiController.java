@@ -299,7 +299,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArmorMeta(@PathVariable String englishName) {
-		Armor armor = armorRepository.findByEnglishName(englishName.replace('_', ' '));
+		Armor armor = armorRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Доспехи D&D 5e", armor.getName(), armor.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - доспехи по D&D 5 редакции", armor.getName(), armor.getEnglishName()));

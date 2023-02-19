@@ -2,8 +2,11 @@ package club.dnd5.portal.controller.api.wiki;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -36,8 +39,10 @@ public class RuleApiController {
 
 	@PostMapping(value = "/api/v1/rules", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RuleApi> getRules(@RequestBody RuleRequestApi request) {
-		Specification<Rule> specification = null;
+
 		Sort sort = Sort.unsorted();
+		Optional<RuleRequestApi> optionalRequest = Optional.ofNullable(request);
+
 		if (!CollectionUtils.isEmpty(request.getOrders())) {
 			sort = Sort.by(request.getOrders()
 				.stream()
@@ -49,18 +54,17 @@ public class RuleApiController {
 			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 
 		}
-		if (request.getSearch() != null) {
-			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
-				if (request.getSearch().getExact() != null && request.getSearch().getExact()) {
-					specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
-				} else {
-					String likeSearch = "%" + request.getSearch().getValue() + "%";
-					specification = SpecificationUtil.getAndSpecification(null, (root, query, cb) -> {
-						return cb.or(cb.like(root.get("altName"), likeSearch),
-							cb.like(root.get("englishName"), likeSearch),
-							cb.like(root.get("name"), likeSearch));
-					});
-				}
+		Specification<Rule> specification = null;
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+			if (optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
+				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
+			} else {
+				String likeSearch = "%" + request.getSearch().getValue() + "%";
+				specification = SpecificationUtil.getAndSpecification(null, (root, query, cb) -> {
+					return cb.or(cb.like(root.get("altName"), likeSearch),
+						cb.like(root.get("englishName"), likeSearch),
+						cb.like(root.get("name"), likeSearch));
+				});
 			}
 		}
 		if (request.getFilter() != null) {

@@ -5,7 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import club.dnd5.portal.model.items.Armor;
 
+import java.util.Optional;
+
 @Repository
 public interface ArmorDatatableRepository extends DataTablesRepository<Armor, Integer> {
-	Armor findByEnglishName(String name);
+	Optional<Armor> findByEnglishName(String name);
 }
