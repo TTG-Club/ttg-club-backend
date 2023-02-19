@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 public class MainController {
 	@GetMapping("/")
 	public String getHome(Model model) {
-		return "index";
+		return "spa";
 	}
 
 	@GetMapping("/search")
