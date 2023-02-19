@@ -189,7 +189,7 @@ public class BestiaryApiController {
 		}
 		if (!filter.map(BeastFilter::getImmunityDamage).orElseGet(Collections::emptyList).isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				Join<Object, Object> join = root.join("immunityCondition", JoinType.INNER);
+				Join<Object, Object> join = root.join("immunityDamages", JoinType.INNER);
 				query.distinct(true);
 				return join.in(request.getFilter().getImmunityDamage());
 			});
