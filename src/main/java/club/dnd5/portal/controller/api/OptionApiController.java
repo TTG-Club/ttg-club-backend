@@ -11,6 +11,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -49,7 +50,7 @@ public class OptionApiController {
 
 	@Autowired
 	private ClassRepository classRepository;
-	
+
 	@PostMapping(value = "/api/v1/options", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<OptionApi> getOptions(@RequestBody OptionRequesApi request) {
 		Specification<Option> specification = null;
@@ -63,7 +64,7 @@ public class OptionApiController {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -71,18 +72,18 @@ public class OptionApiController {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.FALSE);
 		columns.add(column);
-		
+
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -135,16 +136,13 @@ public class OptionApiController {
 		}
 		return optionRepository.findAll(input, specification, specification, OptionApi::new).getData();
 	}
-	
+
 	@PostMapping(value = "/api/v1/options/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<OptionDetailApi> getOption(@PathVariable String englishName) {
-		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (option == null) {
-			return ResponseEntity.notFound().build();
-		}
+		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(new OptionDetailApi(option));
 	}
-	
+
 	@PostMapping("/api/v1/filters/options")
 	public FilterApi getOptionFilter() {
 		FilterApi filters = new FilterApi();
@@ -160,9 +158,9 @@ public class OptionApiController {
 			}
 		}
 		filters.setSources(sources);
-		
+
 		List<FilterApi> otherFilters = new ArrayList<>();
-		
+
 		FilterApi classOptionFilter = new FilterApi("Классовые особености", "classOption");
 		classOptionFilter.setValues(
 				Arrays.stream(Option.OptionType.values())
@@ -172,11 +170,11 @@ public class OptionApiController {
 
 		otherFilters.add(getLevelsFilter());
 		otherFilters.add(getPrerequsitFilter(optionRepository.findAlldPrerequisite()));
-		
+
 		filters.setOther(otherFilters);
 		return filters;
 	}
-	
+
 	@PostMapping("/api/v1/filters/options/{englishClassName}")
 	public FilterApi getByClassFilter(@PathVariable String englishClassName) {
 		FilterApi filters = new FilterApi();
@@ -199,11 +197,11 @@ public class OptionApiController {
 		customFilter.setValues(Collections.singletonList(customValue));
 		customFilters.add(customFilter);
 		otherFilters.add(customFilter);
-		
+
 		filters.setOther(otherFilters);
 		return filters;
 	}
-	
+
 	@PostMapping("/api/v1/filters/options/{englishClassName}/{englishArchetypeName}")
 	public FilterApi getByArchitypeFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();
@@ -228,7 +226,7 @@ public class OptionApiController {
 		customFilter.setValues(Collections.singletonList(customValue));
 		customFilters.add(customFilter);
 		otherFilters.add(customFilter);
-		
+
 		filters.setOther(otherFilters);
 		return filters;
 	}
@@ -243,7 +241,7 @@ public class OptionApiController {
 				.collect(Collectors.toList()));
 		return levelsFilter;
 	}
-	
+
 	private FilterApi getLevelsFilter(OptionType optionType) {
 		FilterApi levelsFilter = new FilterApi("Требования к уровню", "levels");
 		List<String> levels =  optionRepository.findAllLevel(optionType);
@@ -254,7 +252,7 @@ public class OptionApiController {
 				.collect(Collectors.toList()));
 		return levelsFilter;
 	}
-	
+
 	private FilterApi getPrerequsitFilter(Collection<String> prerequisite) {
 		FilterApi prerequisiteFilter = new FilterApi("Требования", "prerequsite");
 		if (prerequisite.size() == 1) {

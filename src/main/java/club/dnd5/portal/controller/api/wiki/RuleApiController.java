@@ -4,16 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Predicate;
-
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +24,7 @@ import club.dnd5.portal.dto.api.wiki.RuleApi;
 import club.dnd5.portal.dto.api.wiki.RuleDetailApi;
 import club.dnd5.portal.dto.api.wiki.RuleRequestApi;
 import club.dnd5.portal.model.rule.Rule;
-import club.dnd5.portal.repository.datatable.RuleDatatableRepository;
+import club.dnd5.portal.repository.datatable.RuleRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -37,7 +32,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 public class RuleApiController {
 	@Autowired
-	private RuleDatatableRepository ruleRepository;
+	private RuleRepository ruleRepository;
 
 	@PostMapping(value = "/api/v1/rules", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RuleApi> getRules(@RequestBody RuleRequestApi request) {
@@ -88,10 +83,7 @@ public class RuleApiController {
 
 	@PostMapping(value = "/api/v1/rules/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<RuleDetailApi> getRule(@PathVariable String englishName) {
-		Rule rule = ruleRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (rule == null) {
-			ResponseEntity.notFound().build();
-		}
+		Rule rule = ruleRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(new RuleDetailApi(rule));
 	}
 

@@ -11,6 +11,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -46,7 +47,7 @@ public class WeaponApiController {
 	private WeaponDatatableRepository weaponRepository;
 	@Autowired
 	private WeaponPropertyDatatableRepository propertyRepository;
-	
+
 	@PostMapping(value = "/api/v1/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<WeaponApi> getWeapon(@RequestBody WeaponRequesApi request) {
 		Specification<Weapon> specification = null;
@@ -60,7 +61,7 @@ public class WeaponApiController {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -68,18 +69,18 @@ public class WeaponApiController {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.FALSE);
 		columns.add(column);
-		
+
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -118,7 +119,7 @@ public class WeaponApiController {
 							if(d.startsWith("2")) {
 								damages.add(2);
 								return d.replace("2", "");
-							} 
+							}
 							return d;
 						})
 						.map(Dice::valueOf)
@@ -146,12 +147,14 @@ public class WeaponApiController {
 		}
 		return weaponRepository.findAll(input, specification, specification, WeaponApi::new).getData();
 	}
-	
+
 	@PostMapping(value = "/api/v1/weapons/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public WeaponDetailApi getWeapon(@PathVariable String englishName) {
-		return new WeaponDetailApi(weaponRepository.findByEnglishName(englishName.replace('_', ' ')));
+		return new WeaponDetailApi(weaponRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new)
+		);
 	}
-	
+
 	@PostMapping("/api/v1/filters/weapons")
 	public FilterApi getWeaponsFilter() {
 		FilterApi filters = new FilterApi();
@@ -167,9 +170,9 @@ public class WeaponApiController {
 			}
 		}
 		filters.setSources(sources);
-		
+
 		List<FilterApi> otherFilters = new ArrayList<>();
-		
+
 		FilterApi damageTypeFilter = new FilterApi("По типу урона", "damageType");
 		damageTypeFilter.setValues(
 				DamageType.getWeaponDamage().stream()
@@ -190,7 +193,7 @@ public class WeaponApiController {
 				 .map(value -> new FilterValueApi(value, value.replace('к', 'd')))
 				 .collect(Collectors.toList()));
 		otherFilters.add(diceFilter);
-		
+
 		filters.setOther(otherFilters);
 		return filters;
 	}

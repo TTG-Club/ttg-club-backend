@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.items.Weapon;
 import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
 import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
@@ -36,11 +37,7 @@ public class WeaponController {
 
 	@GetMapping("/weapons/{name}")
 	public String getWeapon(Model model, @PathVariable String name, HttpServletRequest request) {
-		Weapon weapon = repository.findByEnglishName(name.replace('_', ' '));
-		if (weapon == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+		Weapon weapon = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Оружие D&D 5e", weapon.getName(), weapon.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, weapon.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s D&D 5 редакции", weapon.getName(), weapon.getEnglishName(), weapon.getType().getName()));

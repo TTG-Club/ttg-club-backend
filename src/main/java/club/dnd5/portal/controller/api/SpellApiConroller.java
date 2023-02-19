@@ -11,6 +11,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -61,14 +62,14 @@ public class SpellApiConroller {
 	private static final String[][] classesMap = { { "1", "Бард" }, { "2", "Волшебник" }, { "3", "Друид" },
 			{ "4", "Жрец" }, { "5", "Колдун" }, { "6", "Паладин" }, { "7", "Следопыт" }, { "8", "Чародей" },
 			{ "14", "Изобретатель" } };
-	
+
 	@Autowired
 	private SpellDatatableRepository spellRepo;
 	@Autowired
 	private ClassRepository classRepository;
 	@Autowired
 	private ArchetypeSpellRepository archetypeSpellRepository;
-	
+
 	@Operation(summary = "Gets all spells")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<SpellApi> getSpells(@RequestBody SpellRequesApi request) {
@@ -83,7 +84,7 @@ public class SpellApiConroller {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -91,7 +92,7 @@ public class SpellApiConroller {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
@@ -100,7 +101,7 @@ public class SpellApiConroller {
 
 		columns.add(column);
 		if (request.getOrders()!=null && !request.getOrders().isEmpty()) {
-			
+
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 				List<Order> orders = request.getOrders().stream()
 						.map(
@@ -114,7 +115,7 @@ public class SpellApiConroller {
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -227,22 +228,19 @@ public class SpellApiConroller {
 		}
 		return spellRepo.findAll(input, specification, specification, SpellApi::new).getData();
 	}
-	
+
 	@Operation(summary = "Gets spell by english name")
-	@ApiResponses(value = { 
-		  @ApiResponse(responseCode = "200", description = "Found the spell", 
-		    content = { @Content(mediaType = "application/json", 
+	@ApiResponses(value = {
+		  @ApiResponse(responseCode = "200", description = "Found the spell",
+		    content = { @Content(mediaType = "application/json",
 		      schema = @Schema(implementation = SpellDetailApi.class)) }),
-		  @ApiResponse(responseCode = "400", description = "Invalid id supplied", 
-		    content = @Content), 
-		  @ApiResponse(responseCode = "404", description = "Spell not found", 
+		  @ApiResponse(responseCode = "400", description = "Invalid id supplied",
+		    content = @Content),
+		  @ApiResponse(responseCode = "404", description = "Spell not found",
 		    content = @Content) })
 	@PostMapping(value = "/api/v1/spells/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<SpellDetailApi> getSpell(@PathVariable String englishName) {
-		Spell spell = spellRepo.findByEnglishName(englishName.replace('_', ' '));
-		if (spell == null) {
-			return ResponseEntity.notFound().build();
-		}
+		Spell spell = spellRepo.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		SpellDetailApi spellApi = new SpellDetailApi(spell);
 		List<Archetype> archetypes = archetypeSpellRepository.findAllBySpell(spell.getId());
 		if (!archetypes.isEmpty()) {
@@ -254,7 +252,7 @@ public class SpellApiConroller {
 		}
 		return ResponseEntity.ok(spellApi);
 	}
-	
+
 	@Operation(summary = "Gets filters for spells")
 	@CrossOrigin
 	@GetMapping(value = "/api/fvtt/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -268,7 +266,7 @@ public class SpellApiConroller {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -276,7 +274,7 @@ public class SpellApiConroller {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("level");
 		column.setName("level");
@@ -297,7 +295,7 @@ public class SpellApiConroller {
 		}
 		return new SpellsFvtt(spellRepo.findAll(input, specification, specification, SpellFvtt::new).getData());
 	}
-	
+
 	@Operation(summary = "Gets spells filter", tags = "spells")
 	@PostMapping("/api/v1/filters/spells")
 	public FilterApi getFilter() {
@@ -316,7 +314,7 @@ public class SpellApiConroller {
 		filters.setSources(sources);
 
 		List<FilterApi> otherFilters = new ArrayList<>();
-		
+
 		otherFilters.add(getLevelsFilter(9));
 
 		FilterApi spellClassFilter = new FilterApi("Классы", "class");
@@ -324,7 +322,7 @@ public class SpellApiConroller {
 				 .mapToObj(indexSpellClass -> new FilterValueApi(classesMap[indexSpellClass][1], classesMap[indexSpellClass][0]))
 				 .collect(Collectors.toList()));
 		otherFilters.add(spellClassFilter);
-		
+
 		FilterApi schoolSpellFilter = new FilterApi("Школа", "school");
 		schoolSpellFilter.setValues(
 				Arrays.stream(MagicSchool.values())
@@ -352,7 +350,7 @@ public class SpellApiConroller {
 				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
-		
+
 		FilterApi timecastFilter = new FilterApi("Время накладывания", "timecast");
 		values = new ArrayList<>();
 		values.add(new FilterValueApi("бонусное действие", "1 BONUS"));
@@ -367,7 +365,7 @@ public class SpellApiConroller {
 		values.add(new FilterValueApi("24 час", "24 HOUR"));
 		timecastFilter.setValues(values);
 		otherFilters.add(timecastFilter);
-		
+
 		FilterApi distanceFilter = new FilterApi("Дистанция", "distance");
 		values = new ArrayList<>();
 		values.add(new FilterValueApi("на себя", "На себя"));
@@ -389,7 +387,7 @@ public class SpellApiConroller {
 		values.add(new FilterValueApi("500 миль", "500 миль"));
 		distanceFilter.setValues(values);
 		otherFilters.add(distanceFilter);
-		
+
 		FilterApi durationFilter = new FilterApi("Длительность", "duration");
 		values = new ArrayList<>();
 		values.add(new FilterValueApi("Мгновенная", "Мгновенная"));
@@ -406,13 +404,13 @@ public class SpellApiConroller {
 		values.add(new FilterValueApi("1 год", "1 год"));
 		durationFilter.setValues(values);
 		otherFilters.add(durationFilter);
-		
+
 		otherFilters.add(getCompomemtsFilter());
-	
+
 		filters.setOther(otherFilters);
 		return filters;
 	}
-	
+
 	@PostMapping("/api/v1/filters/spells/{englishClassName}")
 	public FilterApi getByClassFilter(@PathVariable String englishClassName) {
 		FilterApi filters = new FilterApi();
@@ -440,11 +438,11 @@ public class SpellApiConroller {
 		customFilter.setValues(Collections.singletonList(customValue));
 		customFilters.add(customFilter);
 		otherFilters.add(customFilter);
-		
+
 		filters.setOther(otherFilters);
 		return filters;
 	}
-	
+
 	@PostMapping("/api/v1/filters/spells/{englishClassName}/{englishArchetypeName}")
 	public FilterApi getByClassFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();
@@ -459,13 +457,13 @@ public class SpellApiConroller {
 		}
 		otherFilters.add(getCompomemtsFilter());
 		otherFilters.add(getSchoolsFilter());
-		
+
 		List<FilterApi> customFilters = new ArrayList<>();
 		FilterApi customFilter = new FilterApi();
 		customFilter.setName("Классы");
 		customFilter.setKey("class");
 		customFilter.setHidden(Boolean.TRUE);
-		
+
 		FilterValueApi customValue = new FilterValueApi();
 		customValue.setLabel(heroClass.getCapitalazeName());
 		customValue.setDefaultValue(Boolean.TRUE);
@@ -479,12 +477,12 @@ public class SpellApiConroller {
 		customFilter.setValues(Collections.singletonList(customValue));
 		customFilters.add(customFilter);
 		otherFilters.add(customFilter);
-		
+
 		filters.setOther(otherFilters);
 
 		return filters;
 	}
-	
+
 	private FilterApi getLevelsFilter(int maxLevel) {
 		FilterApi levelFilter = new FilterApi("Уровень", "level");
 		levelFilter.setValues(IntStream.rangeClosed(0, maxLevel)
@@ -492,7 +490,7 @@ public class SpellApiConroller {
 				 .collect(Collectors.toList()));
 		return levelFilter;
 	}
-	
+
 	private FilterApi getSchoolsFilter() {
 		FilterApi schoolSpellFilter = new FilterApi("Школа", "school");
 		schoolSpellFilter.setValues(
@@ -501,7 +499,7 @@ public class SpellApiConroller {
 				 .collect(Collectors.toList()));
 		return schoolSpellFilter;
 	}
-	
+
 	private FilterApi getCompomemtsFilter() {
 		FilterApi componentsSpellFilter = new FilterApi("Компоненты", "components");
 		List<FilterValueApi> componentValues = new ArrayList<>();
@@ -510,7 +508,7 @@ public class SpellApiConroller {
 		componentValues.add(new FilterValueApi("материальный", "3"));
 		componentValues.add(new FilterValueApi("расходуемый", "4"));
 		componentValues.add(new FilterValueApi("не расходуемый", "5"));
-		
+
 		componentsSpellFilter.setValues(componentValues);
 		return componentsSpellFilter;
 	}

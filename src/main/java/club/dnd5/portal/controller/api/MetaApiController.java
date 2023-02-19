@@ -85,7 +85,7 @@ public class MetaApiController {
 	private GodDatatableRepository godRepository;
 
 	@Autowired
-	private RuleDatatableRepository ruleRepository;
+	private RuleRepository ruleRepository;
 
 	@Autowired
 	private BookDatatableRepository bookRepository;
@@ -195,7 +195,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/traits/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getTraitMeta(@PathVariable String englishName) {
-		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' '));
+		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle( String.format("%s (%s)", trait.getName(), trait.getEnglishName()) + " | Черты D&D 5e");
 		meta.setDescription(String.format("%s (%s) - черта персонажа по D&D 5-редакции", trait.getName(), trait.getEnglishName()));
@@ -235,7 +235,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/options/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getOptiondMeta(@PathVariable String englishName) {
-		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' '));
+		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
 		meta.setDescription(
@@ -258,7 +258,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/spells/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getSpellMeta(@PathVariable String englishName) {
-		Spell spell = spellRepository.findByEnglishName(englishName.replace('_', ' '));
+		Spell spell = spellRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s)", spell.getName(), spell.getEnglishName()) + " | Заклинания D&D 5e");
 		meta.setDescription(String.format("%s %s, %s", (spell.getLevel() == 0 ? "Заговор" : spell.getLevel() + " уровень"), spell.getName(), spell.getSchool().getName()));
@@ -279,7 +279,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/weapons/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getWeaponMeta(@PathVariable String englishName) {
-		Weapon weapon = weaponRepository.findByEnglishName(englishName.replace('_', ' '));
+		Weapon weapon = weaponRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Оружие D&D 5e", weapon.getName(), weapon.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s D&D 5 редакции", weapon.getName(), weapon.getEnglishName(), weapon.getType().getName()));
@@ -339,7 +339,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/items/magic/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getMagicItemMeta(@PathVariable String englishName) {
-		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' '));
+		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Магические предметы D&D 5e", item.getName(), item.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s %s", item.getName(), item.getEnglishName(), item.getTextRarity(), item.getType().getCyrilicName()));
@@ -431,8 +431,8 @@ public class MetaApiController {
 	}
 
 	@GetMapping(value = "/api/v1/meta/rules/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public MetaApi getReleMeta(@PathVariable String englishName) {
-		Rule rule = ruleRepository.findByEnglishName(englishName.replace('_', ' '));
+	public MetaApi getRuleMeta(@PathVariable String englishName) {
+		Rule rule = ruleRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s | %s | Правила и термины [Rules] D&D 5e", rule.getName(), rule.getType()));
 		meta.setDescription(String.format("%s (%s) Правила и термины по D&D 5 редакции", rule.getName(), rule.getEnglishName()));

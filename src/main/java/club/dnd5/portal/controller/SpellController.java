@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
@@ -37,11 +38,7 @@ public class SpellController {
 
 	@GetMapping("/spells/{name}")
 	public String getSpell(Model model, @PathVariable String name, HttpServletRequest request) {
-		Spell spell = repository.findByEnglishName(name.replace("_", " "));
-		if (spell == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+		Spell spell = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s)", spell.getName(), spell.getEnglishName()) + " | Заклинания D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, spell.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s %s, %s", (spell.getLevel() == 0 ? "Заговор" : spell.getLevel() + " уровень"), spell.getName(), spell.getSchool().getName()));

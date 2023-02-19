@@ -1,6 +1,7 @@
 package club.dnd5.portal.repository.datatable;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,8 +16,8 @@ import club.dnd5.portal.model.items.Weapon;
 public interface WeaponDatatableRepository extends DataTablesRepository<Weapon, Integer> {
 	List<Weapon> findAll();
 
-	Weapon findByEnglishName(String name);
-	
+	Optional<Weapon> findByEnglishName(String name);
+
 	@Query("SELECT c.book FROM Weapon c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
 }

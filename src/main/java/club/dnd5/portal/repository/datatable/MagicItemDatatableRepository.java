@@ -1,6 +1,7 @@
 package club.dnd5.portal.repository.datatable;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +14,7 @@ import club.dnd5.portal.model.items.MagicItem;
 
 @Repository
 public interface MagicItemDatatableRepository extends DataTablesRepository<MagicItem, Integer> {
-	MagicItem findByEnglishName(String name);
+	Optional<MagicItem> findByEnglishName(String name);
 
 	@Query("SELECT c.book FROM MagicItem c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);

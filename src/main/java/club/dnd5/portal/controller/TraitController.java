@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.datatable.TraitDatatableRepository;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -32,7 +33,7 @@ public class TraitController {
 
 	@GetMapping("/traits/{name}")
 	public String getTrait(Model model, @PathVariable String name, HttpServletRequest request) {
-		Trait trait = repository.findByEnglishName(name.replace("_", " "));
+		Trait trait = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		if (trait == null) {
 			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
 			return "forward: /error";

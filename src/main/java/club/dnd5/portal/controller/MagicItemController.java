@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.items.MagicItem;
 import club.dnd5.portal.repository.ImageRepository;
@@ -37,11 +38,7 @@ public class MagicItemController {
 
 	@GetMapping("/items/magic/{name}")
 	public String getMagicItem(Model model, @PathVariable String name, HttpServletRequest request) {
-		MagicItem item = repository.findByEnglishName(name.replace("_", " "));
-		if (item == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+		MagicItem item = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Магические предметы D&D 5e", item.getName(), item.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, item.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s", item.getName(), item.getEnglishName(), item.getRarity().getCyrilicName(), item.getType().getCyrilicName()));

@@ -62,10 +62,10 @@ public enum DamageType {
 	public static Set<DamageType> getImmunity()
 	{
 		return EnumSet.of(BLUDGEONING, PIERCING, SLASHING, FAIR, COLD, LIGHTNING, POISON, ACID, SOUND, NECTOTIC,
-				RADIANT, PHYSICAL, PHYSICAL_MAGIC, NO_ADMANTIT);
+				RADIANT, PHYSICAL, NO_ADMANTIT);
 	}
 
-	public static Set<DamageType> getSpecil()
+	public static Set<DamageType> getSpecial()
 	{
 		return EnumSet.of(PHYSICAL, NO_NOSILVER, NO_ADMANTIT, PHYSICAL_MAGIC);
 	}

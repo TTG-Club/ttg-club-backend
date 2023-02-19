@@ -11,7 +11,13 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class NotHandlerControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(PageNotFoundException.class)
-	public String handle(Exception exception) {
-		return "error_404";
+	public String handlePageNotFound(Exception exception) {
+		return "spa";
+	}
+
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ExceptionHandler(NoHandlerFoundException.class)
+	public String handleNoHandlePageException(Exception exception) {
+		return "spa";
 	}
 }

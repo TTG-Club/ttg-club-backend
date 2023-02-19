@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.Option.OptionType;
 import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
@@ -38,11 +39,7 @@ public class OptionController {
 
 	@GetMapping("/options/{name}")
 	public String getOption(Model model, @PathVariable String name, HttpServletRequest request) {
-		Option option = repository.findByEnglishName(name.replace("_", " "));
-		if (option == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+		Option option = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, option.getUrlName()));
 		model.addAttribute("metaDescription",

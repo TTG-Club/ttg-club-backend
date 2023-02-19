@@ -389,7 +389,7 @@ public class BestiaryApiController {
 
 		FilterApi environmentFilter = new FilterApi("Места обитания", "environment");
 		environmentFilter.setValues(
-				HabitatType.types().stream()
+				HabitatType.allTypes().stream()
 				 .map(value -> new FilterValueApi(value.getName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(environmentFilter);
