@@ -12,6 +12,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -225,7 +226,8 @@ public class BestiarytApiConroller {
 
 	@PostMapping(value = "/api/v1/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BeastDetailApi getBeast(@PathVariable String englishName) {
-		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '));
+		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		BeastDetailApi beastApi = new BeastDetailApi(beast);
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {
@@ -236,7 +238,7 @@ public class BestiarytApiConroller {
 
 	@GetMapping("/api/fvtt/v1/bestiary/{id}")
 	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
-		Creature creature = beastRepository.findById(id).get();
+		Creature creature = beastRepository.findById(id).orElseThrow(PageNotFoundException::new);
 		response.setContentType("application/json");
 		String file = String.format("attachment; filename=\"%s.json\"", creature.getEnglishName());
 		response.setHeader("Content-Disposition", file);
