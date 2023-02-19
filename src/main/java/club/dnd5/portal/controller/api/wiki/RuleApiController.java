@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -60,9 +61,9 @@ public class RuleApiController {
 				} else {
 					String likeSearch = "%" + request.getSearch().getValue() + "%";
 					specification = SpecificationUtil.getAndSpecification(null, (root, query, cb) -> {
-						cb.or(cb.like(root.get("name"), likeSearch));
-						cb.or(cb.like(root.get("englishName"), likeSearch));
-						return cb.or(cb.like(root.get("altName"), likeSearch));
+						return cb.or(cb.like(root.get("altName"), likeSearch),
+							cb.like(root.get("englishName"), likeSearch),
+							cb.like(root.get("name"), likeSearch));
 					});
 				}
 			}
