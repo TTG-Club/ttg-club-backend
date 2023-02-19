@@ -466,7 +466,7 @@ public class MetaApiController {
 		InfoPage infoPage = infoPagesRepository.findByUrl(url);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s | TTG Club", infoPage.getTitle()));
-		meta.setDescription(infoPage.getDescription().substring(0, 30));
+		meta.setDescription(infoPage.getSubtitle());
 		return meta;
 	}
 }
