@@ -56,11 +56,9 @@ public class RuleApiController {
 				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
 			} else {
 				String likeSearch = "%" + request.getSearch().getValue() + "%";
-				specification = SpecificationUtil.getAndSpecification(null, (root, query, cb) -> {
-					return cb.or(cb.like(root.get("altName"), likeSearch),
-						cb.like(root.get("englishName"), likeSearch),
-						cb.like(root.get("name"), likeSearch));
-				});
+				specification = (root, query, cb) -> cb.or(cb.like(root.get("altName"), likeSearch),
+					cb.like(root.get("englishName"), likeSearch),
+					cb.like(root.get("name"), likeSearch));
 			}
 		}
 		if (request.getFilter() != null) {
