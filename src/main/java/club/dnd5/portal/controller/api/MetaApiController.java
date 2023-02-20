@@ -110,7 +110,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/classes/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getClassMeta(@PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Классы D&D 5e", heroClass.getName(), heroClass.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
@@ -124,7 +124,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/classes/{classEnglishName}/{archetypeEnglishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArchetypeMeta(@PathVariable String classEnglishName, @PathVariable String archetypeEnglishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		Optional<Archetype> archetype = heroClass.getArchetypes().stream()
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeEnglishName.replace('_', ' ')))
@@ -215,7 +215,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/backgrounds/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBackgroundMeta(@PathVariable String englishName) {
-		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' '));
+		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(background.getName() + " | Предыстории персонажей D&D 5e");
 		meta.setDescription(String.format("%s (%s) - предыстория персонажа по D&D 5 редакции", background.getName(), background.getEnglishName()));
@@ -319,7 +319,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/items/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getItemMeta(@PathVariable String englishName) {
-		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' '));
+		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Снаряжение D&D 5e",item.getName(), item.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) снаряжение по D&D 5 редакции", item.getName(), item.getEnglishName()));
@@ -408,7 +408,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/gods/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getGodMeta(@PathVariable String englishName) {
-		God god = godRepository.findByEnglishName(englishName.replace('_', ' '));
+		God god = godRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Боги D&D 5e", god.getName(), god.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s %s, %s", god.getName(), god.getEnglishName(), god.getAligment().getCyrilicName(), god.getSex().getCyrilicName(), god.getCommitment()));
@@ -452,7 +452,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/books/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBooksMeta(@PathVariable String englishName) {
-		Book book = bookRepository.findByEnglishName(englishName.replace('_', ' '));
+		Book book = bookRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Источники (Books) D&D 5e", book.getName(), book.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) Источник [Source] по D&D 5 редакции", book.getName(), book.getEnglishName()));

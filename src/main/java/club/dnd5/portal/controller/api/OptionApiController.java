@@ -179,7 +179,7 @@ public class OptionApiController {
 	public FilterApi getByClassFilter(@PathVariable String englishClassName) {
 		FilterApi filters = new FilterApi();
 
-		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		List<FilterApi> otherFilters = new ArrayList<>();
 		otherFilters.add(getLevelsFilter(heroClass.getOptionType()));
 		otherFilters.add(getPrerequsitFilter(optionRepository.findAlldPrerequisite(heroClass.getOptionType())));
@@ -206,7 +206,7 @@ public class OptionApiController {
 	public FilterApi getByArchitypeFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();
 
-		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		Archetype archetype = heroClass.getArchetypes().stream().filter(a -> a.getEnglishName().equalsIgnoreCase(englishArchetypeName.replace('_', ' '))).findFirst().get();
 
 		List<FilterApi> otherFilters = new ArrayList<>();

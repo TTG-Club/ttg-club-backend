@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.screen.Screen;
 import club.dnd5.portal.repository.datatable.ScreenDatatableRepository;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -33,12 +34,7 @@ public class ScreenController {
 
 	@GetMapping("/screens/{name}")
 	public String getScreen(Model model, @PathVariable String name, HttpServletRequest request) {
-		Screen screen = repository.findByEnglishName(name.replace('_', ' ')).get();
-		if (screen == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
-
+		Screen screen = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaImage", screen.getIcon());
 		model.addAttribute("metaTitle", String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.getName(), screen.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, screen.getUrlName()));
@@ -53,33 +49,5 @@ public class ScreenController {
 		model.addAttribute("selectedScreen", name);
 		model.addAttribute("selectedSubscreen", subscreen);
 		return "spa";
-	}
-
-	@GetMapping("/screens/fragment/{id:\\d+}")
-	public String getScreenFragmentById(Model model, @PathVariable Integer id) {
-		model.addAttribute("screens", repository.findById(id).get().getChields()
-				.stream()
-				.collect(Collectors.groupingBy(Screen::getCategory, LinkedHashMap::new, Collectors.toList())));
-		return "fragments/screen :: view";
-	}
-
-	@GetMapping("/screens/fragmentone/{id:\\d+}")
-	public String getScreenOneFragmentById(Model model, @PathVariable Integer id) {
-		model.addAttribute("screen", repository.findById(id).get());
-		return "fragments/screen :: viewOne";
-	}
-
-	@GetMapping("/screens/{englishName}/subscreens/list")
-	public String getSubscreenList(Model model, @PathVariable String englishName) {
-		Screen screen = repository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(IllegalArgumentException::new);
-		model.addAttribute("subscreens", screen.getChields().stream().filter(s -> s.getCategory() != null).collect(Collectors.groupingBy(Screen::getCategory)));
-		return "fragments/subscreens_list :: sub_menu";
-	}
-
-	@GetMapping("/screens/{screenName}/subscreen/{subscreenName}")
-	public String getFragmentSubraces(Model model, @PathVariable String screenName, @PathVariable String subscreenName) {
-		Screen screen = repository.findByEnglishName(subscreenName.replace("_", " ")).orElseThrow(IllegalArgumentException::new);
-		model.addAttribute("screen", screen);
-		return "fragments/screen :: view";
 	}
 }

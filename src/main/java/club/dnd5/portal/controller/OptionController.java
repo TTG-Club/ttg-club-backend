@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,7 +36,7 @@ public class OptionController {
 	}
 
 	@GetMapping("/options/{name}")
-	public String getOption(Model model, @PathVariable String name, HttpServletRequest request) {
+	public String getOption(Model model, @PathVariable String name) {
 		Option option = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, option.getUrlName()));

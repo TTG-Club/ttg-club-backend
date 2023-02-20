@@ -58,7 +58,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Spell", description = "The Spell API")
 @RestController
-public class SpellApiConroller {
+public class SpellApiController {
 	private static final String[][] classesMap = { { "1", "Бард" }, { "2", "Волшебник" }, { "3", "Друид" },
 			{ "4", "Жрец" }, { "5", "Колдун" }, { "6", "Паладин" }, { "7", "Следопыт" }, { "8", "Чародей" },
 			{ "14", "Изобретатель" } };
@@ -415,7 +415,7 @@ public class SpellApiConroller {
 	public FilterApi getByClassFilter(@PathVariable String englishClassName) {
 		FilterApi filters = new FilterApi();
 
-		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		List<FilterApi> otherFilters = new ArrayList<>();
 		if (heroClass.getEnglishName().equals("Warlock")) {
 			otherFilters.add(getLevelsFilter(Spell.MAX_LEVEL));
@@ -447,7 +447,7 @@ public class SpellApiConroller {
 	public FilterApi getByClassFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();
 
-		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		List<FilterApi> otherFilters = new ArrayList<>();
 		if (heroClass.getEnglishName().equals("Warlock")) {
 			otherFilters.add(getLevelsFilter(Spell.MAX_LEVEL));

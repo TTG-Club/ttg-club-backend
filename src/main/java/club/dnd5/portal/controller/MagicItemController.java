@@ -12,9 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 @Hidden
@@ -24,6 +21,7 @@ public class MagicItemController {
 
 	@Autowired
 	private MagicItemDatatableRepository repository;
+
 	@Autowired
 	private ImageRepository imageRepo;
 
@@ -37,7 +35,7 @@ public class MagicItemController {
 	}
 
 	@GetMapping("/items/magic/{name}")
-	public String getMagicItem(Model model, @PathVariable String name, HttpServletRequest request) {
+	public String getMagicItem(Model model, @PathVariable String name) {
 		MagicItem item = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Магические предметы D&D 5e", item.getName(), item.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, item.getUrlName()));
@@ -48,20 +46,5 @@ public class MagicItemController {
 		}
 		model.addAttribute("menuTitle", "Магические предметы");
 		return "spa";
-	}
-
-	@GetMapping("/items/magic/fragment/{id:\\d+}")
-	public String getMagicItemFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		MagicItem item = repository.findById(id).orElseThrow(InvalidAttributesException::new);
-		model.addAttribute("item", item);
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.MAGIC_ITEM, item.getId());
-		model.addAttribute("images", images);
-		return "fragments/item_magic :: view";
-	}
-
-	@GetMapping("/items/magic/fragment/{name:[A-Za-z_,']+}")
-	public String getMagicWeaponFragmentByName(Model model, @PathVariable String name) {
-		model.addAttribute("item", repository.findByEnglishName(name.replace('_', ' ')));
-		return "fragments/item_magic :: view";
 	}
 }

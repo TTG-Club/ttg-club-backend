@@ -12,8 +12,8 @@ import club.dnd5.portal.model.rule.Rule;
 
 @Repository
 public interface RuleRepository extends JpaRepository<Rule, Integer>, JpaSpecificationExecutor<Rule> {
+	Optional<Rule> findByEnglishName(String name);
+
 	@Query("SELECT r.type FROM Rule r GROUP BY r.type")
 	Set<String> findAllCategories();
-
-	Optional<Rule> findByEnglishName(String name);
 }

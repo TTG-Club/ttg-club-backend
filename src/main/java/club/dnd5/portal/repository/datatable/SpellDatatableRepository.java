@@ -24,13 +24,6 @@ public interface SpellDatatableRepository extends DataTablesRepository<Spell, In
 	@Query("SELECT DISTINCT r FROM Race r JOIN r.spells s WHERE s.id=:spellId")
 	List<Race> findAllRaceBySpell(@Param("spellId") int spellId);
 
-	@Query("SELECT s.book FROM Spell s GROUP BY s.book HAVING s.book.type = 'OFFICAL' ORDER BY s.book.year")
-	List<Book> findBook();
-	@Query("SELECT s.book FROM Spell s GROUP BY s.book HAVING s.book.type = 'CUSTOM' ORDER BY s.book.year")
-	List<Book> findHomebrewBook();
-	@Query("SELECT s.book FROM Spell s GROUP BY s.book HAVING s.book.type = 'SETTING' ORDER BY s.book.year")
-	List<Book> findSettingBook();
-
 	@Query("SELECT s.book FROM Spell s GROUP BY s.book HAVING s.book.type = :type ORDER BY s.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
 }

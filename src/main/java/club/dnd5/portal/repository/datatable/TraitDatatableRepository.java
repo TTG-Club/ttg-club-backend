@@ -22,6 +22,4 @@ public interface TraitDatatableRepository extends DataTablesRepository<Trait, In
 
 	@Query("SELECT c.book FROM Trait c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	Collection<Book> findBook(@Param("type") TypeBook type);
-
-    Collection<Trait> findByEnglishNameContainsOrNameContainsOrAltNameContains(String search, String search1, String search2);
 }

@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.background.Personalization;
 import club.dnd5.portal.model.background.PersonalizationType;
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +36,8 @@ public class BackgroundController {
 	}
 
 	@GetMapping("/backgrounds/{name}")
-	public String getBackGround(Model model, @PathVariable String name, HttpServletRequest request) {
-		Background background = repository.findByEnglishName(name.replace("_", " "));
-		if (background == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+	public String getBackGround(Model model, @PathVariable String name) {
+		Background background = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", background.getName() + " | Предыстории персонажей D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL,  background.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - предыстория персонажа по D&D 5 редакции", background.getName(), background.getEnglishName()));

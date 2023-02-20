@@ -5,7 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import club.dnd5.portal.model.book.Book;
 
+import java.util.Optional;
+
 @Repository
 public interface BookDatatableRepository extends DataTablesRepository<Book, String> {
-	Book findByEnglishName(String name);
+	Optional<Book> findByEnglishName(String name);
 }

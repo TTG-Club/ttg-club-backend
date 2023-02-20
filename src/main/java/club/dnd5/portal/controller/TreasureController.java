@@ -31,10 +31,4 @@ public class TreasureController {
 	public String getItem(Model model, @PathVariable String name) {
 		return "spa";
 	}
-
-	@GetMapping("/treasures/fragment/{id}")
-	public String getMagicItemFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		model.addAttribute("item", repository.findById(id).orElseThrow(InvalidAttributesException::new));
-		return "fragments/treasure :: view";
-	}
 }

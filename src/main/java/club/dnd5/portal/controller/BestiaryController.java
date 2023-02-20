@@ -12,9 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 @Hidden
@@ -38,9 +35,8 @@ public class BestiaryController {
 	}
 
 	@GetMapping("/bestiary/{name}")
-	public String getCreature(Model model, @PathVariable String name, HttpServletRequest request) {
-		Creature beast = repository.findByEnglishName(name.replace("_", " "))
-			.orElseThrow(PageNotFoundException::new);
+	public String getCreature(Model model, @PathVariable String name) {
+		Creature beast = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, beast.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));
@@ -50,20 +46,5 @@ public class BestiaryController {
 		}
 		model.addAttribute("menuTitle", "Бестиарий");
 		return "spa";
-	}
-
-	@GetMapping("/bestiary/fragment/{id:\\d+}")
-	public String getCreatureFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		Creature creature = repository.findById(id).orElseThrow(InvalidAttributesException::new);
-		model.addAttribute("creature", creature);
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.CREATURE, creature.getId());
-		model.addAttribute("images", images);
-		return "fragments/creature :: view";
-	}
-
-	@GetMapping("/bestiary/description/{id:\\d+}")
-	public String getCreatureDescription(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		model.addAttribute("creature", repository.findById(id).orElseThrow(InvalidAttributesException::new));
-		return "fragments/creature :: description";
 	}
 }

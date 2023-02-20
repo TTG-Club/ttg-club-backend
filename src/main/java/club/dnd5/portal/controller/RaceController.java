@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.races.Feature;
@@ -43,15 +44,11 @@ public class RaceController {
 
 	@GetMapping("/races/{name}")
 	public String getRace(Model model, @PathVariable String name, HttpServletRequest request) {
-		Optional<Race> race = raceRepository.findByEnglishName(name.replace('_', ' '));
-		if (!race.isPresent()) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
-		model.addAttribute("metaTitle", race.get().getName() + " | Расы и происхождения D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.get().getUrlName()));
-		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.get().getCapitalazeName()));
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
+		Race race = raceRepository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		model.addAttribute("metaTitle", race.getName() + " | Расы и происхождения D&D 5e");
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.getUrlName()));
+		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.getCapitalazeName()));
+		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
@@ -61,24 +58,16 @@ public class RaceController {
 
 	@GetMapping("/races/{raceEnglishName}/{subraceEnglishName}")
 	public String getSubraceList(Model model, @PathVariable String raceEnglishName, @PathVariable String subraceEnglishName, HttpServletRequest request) {
-		Optional<Race> race = raceRepository.findByEnglishName(raceEnglishName.replace('_', ' '));
-		if (!race.isPresent()) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
-		Optional<Race> subRace = race.get().getSubRaces()
+		Race race = raceRepository.findByEnglishName(raceEnglishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		Race subRace = race.getSubRaces()
 			.stream()
 			.filter(r -> r.getEnglishName().equalsIgnoreCase(subraceEnglishName.replace('_', ' ')))
-			.findFirst();
-		if (!subRace.isPresent()){
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
-		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.get().getCapitalazeName()));
-		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.get().getUrlName(), subRace.get().getUrlName()));
-		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.get().getName()));
+			.findFirst().orElseThrow(PageNotFoundException::new);
+		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.getCapitalazeName()));
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.getUrlName(), subRace.getUrlName()));
+		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.getName()));
 		model.addAttribute("menuTitle", "Расы и происхождения");
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, subRace.get().getId());
+		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, subRace.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}

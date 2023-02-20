@@ -9,6 +9,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -103,13 +104,10 @@ public class ScreenApiController {
 		}
 		return screenRepository.findAll(input, specification, specification, ScreenApi::new).getData();
 	}
-	
+
 	@PostMapping(value = "/api/v1/screens/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ScreenDetailApi> getRule(@PathVariable String englishName) {
-		Optional<Screen> rule = screenRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (!rule.isPresent()) {
-			ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(new ScreenDetailApi(rule.get()));
+		Screen screen = screenRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		return ResponseEntity.ok(new ScreenDetailApi(screen));
 	}
 }

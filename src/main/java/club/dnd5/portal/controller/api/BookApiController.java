@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -95,10 +96,7 @@ public class BookApiController {
 	@Operation(summary = "Get book by english name")
 	@PostMapping(value = "/api/v1/books/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<BookApi> getBook(@PathVariable String englishName) {
-		Book book = repo.findByEnglishName(englishName.replace('_', ' '));
-		if (book == null) {
-			return ResponseEntity.notFound().build();
-		}
+		Book book = repo.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		BookApi bookApi = new BookApi(book);
 		bookApi.setDescription(book.getDescription());
 		return ResponseEntity.ok(bookApi);

@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.items.Equipment;
 import club.dnd5.portal.repository.datatable.ItemDatatableRepository;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 
 @Hidden
@@ -32,11 +32,7 @@ public class ItemController {
 
 	@GetMapping("/items/{name}")
 	public String getItem(Model model, @PathVariable String name, HttpServletRequest request) {
-		Equipment item = repository.findByEnglishName(name.replace("_", " "));
-		if (item == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+		Equipment item = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", item.getName() + " | Снаряжение D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, item.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) снаряжение по D&D 5 редакции", item.getName(), item.getEnglishName()));

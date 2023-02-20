@@ -10,6 +10,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -121,10 +122,7 @@ public class BackgroundApiController {
 
 	@PostMapping(value = "/api/v1/backgrounds/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<BackgroundDetailApi> getBackground(@PathVariable String englishName) {
-		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (background == null) {
-			return ResponseEntity.notFound().build();
-		}
+		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(new BackgroundDetailApi(background));
 	}
 

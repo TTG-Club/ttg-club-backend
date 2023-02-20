@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
 
 @Hidden
 @Controller
@@ -36,7 +34,7 @@ public class WeaponController {
 	}
 
 	@GetMapping("/weapons/{name}")
-	public String getWeapon(Model model, @PathVariable String name, HttpServletRequest request) {
+	public String getWeapon(Model model, @PathVariable String name) {
 		Weapon weapon = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Оружие D&D 5e", weapon.getName(), weapon.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, weapon.getUrlName()));

@@ -10,10 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.naming.directory.InvalidAttributesException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
 @Hidden
 @Controller
 public class ArmorController {
@@ -32,24 +28,12 @@ public class ArmorController {
 	}
 
 	@GetMapping("/armors/{name}")
-	public String getArmor(Model model, @PathVariable String name, HttpServletRequest request) {
+	public String getArmor(Model model, @PathVariable String name) {
 		Armor armor = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Доспехи D&D 5e", armor.getName(), armor.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, armor.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - доспехи по D&D 5 редакции", armor.getName(), armor.getEnglishName()));
 		model.addAttribute("menuTitle", "Доспехи");
 		return "spa";
-	}
-
-	@GetMapping("/armors/fragment/{id:\\d+}")
-	public String getArmorFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		model.addAttribute("armor", repository.findById(id).orElseThrow(InvalidAttributesException::new));
-		return "fragments/armor :: view";
-	}
-
-	@GetMapping("/armors/fragment/{name:[A-Za-z_]+}")
-	public String getMagicWeaponFragmentByName(Model model, @PathVariable String name) throws InvalidAttributesException {
-		model.addAttribute("armor", repository.findByEnglishName(name.replace('_', ' ')));
-		return "fragments/armor :: view";
 	}
 }

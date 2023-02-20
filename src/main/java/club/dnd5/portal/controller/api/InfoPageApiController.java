@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.InfoPageApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.InfoPage;
 import club.dnd5.portal.repository.InfoPagesRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,18 +22,14 @@ public class InfoPageApiController {
 	@Operation(summary = "Check is info page exist", tags = "info page exist")
 	@PostMapping("/{url}")
 	public ResponseEntity<?> getPageExist(@PathVariable String url) {
-		Optional<InfoPage> page = infoPagesRepository.findOneByUrl(url);
-
-		return page.isPresent()
-			? ResponseEntity.ok().build()
-			: ResponseEntity.notFound().build();
+		InfoPage page = infoPagesRepository.findOneByUrl(url).orElseThrow(PageNotFoundException::new);
+		return ResponseEntity.ok(page);
 	}
 
 	@Operation(summary = "Gets info page result", tags = "info page")
 	@GetMapping("/{url}")
-	public InfoPageApi getPage(@PathVariable String url) {
-		InfoPage infoPage = infoPagesRepository.findByUrl(url);
-
-		return new InfoPageApi(infoPage.getTitle(), infoPage.getSubtitle(), infoPage.getDescription());
+	public  ResponseEntity<InfoPageApi> getPage(@PathVariable String url) {
+		InfoPage infoPage = infoPagesRepository.findOneByUrl(url).orElseThrow(PageNotFoundException::new);
+		return  ResponseEntity.ok(new InfoPageApi(infoPage.getTitle(), infoPage.getSubtitle(), infoPage.getDescription()));
 	}
 }
