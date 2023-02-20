@@ -27,7 +27,7 @@ import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.BackgroundApi;
 import club.dnd5.portal.dto.api.classes.BackgroundDetailApi;
-import club.dnd5.portal.dto.api.classes.TraitRequesApi;
+import club.dnd5.portal.dto.api.classes.FeatRequestApi;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.background.Background;
@@ -47,7 +47,7 @@ public class BackgroundApiController {
 
 	@Operation(summary = "Gets all backgrounds", tags = "background")
 	@PostMapping(value = "/api/v1/backgrounds", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<BackgroundApi> getBackgrainds(@RequestBody TraitRequesApi request) {
+	public List<BackgroundApi> getBackgrounds(@RequestBody FeatRequestApi request) {
 		Specification<Background> specification = null;
 
 		DataTablesInput input = new DataTablesInput();

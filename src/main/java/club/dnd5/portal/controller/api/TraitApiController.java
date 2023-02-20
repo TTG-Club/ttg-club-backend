@@ -4,7 +4,7 @@ import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.TraitApi;
 import club.dnd5.portal.dto.api.classes.TraitDetailApi;
-import club.dnd5.portal.dto.api.classes.TraitRequesApi;
+import club.dnd5.portal.dto.api.classes.FeatRequestApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
@@ -42,7 +42,7 @@ public class TraitApiController {
 
 	@Operation(summary = "Gets all traits")
 	@PostMapping(value = "/api/v1/traits", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<TraitApi> getTraits(@RequestBody TraitRequesApi request) {
+	public List<TraitApi> getTraits(@RequestBody FeatRequestApi request) {
 		Specification<Trait> specification = null;
 
 		DataTablesInput input = new DataTablesInput();

@@ -29,6 +29,7 @@ public class SpellDetailApi extends SpellApi {
 	private List<ReferenceClassApi> subclasses;
 	private List<ReferenceClassApi> races;
 	private List<ReferenceClassApi> backgrounds;
+	private List<ReferenceClassApi> feats;
 
 	@NotNull
 	private String description;
@@ -42,7 +43,7 @@ public class SpellDetailApi extends SpellApi {
 		description = spell.getDescription();
 		components.setM(spell.getAdditionalMaterialComponent());
 		classes = spell.getHeroClass().stream().map(ReferenceClassApi::new).collect(Collectors.toList());
-		if (spell.getUpperLevel()!=null) {
+		if (spell.getUpperLevel() != null) {
 			upper = spell.getUpperLevel();
 		}
 		source.setPage(spell.getPage());

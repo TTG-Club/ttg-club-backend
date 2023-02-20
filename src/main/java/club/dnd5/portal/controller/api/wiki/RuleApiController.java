@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api.wiki;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.util.SortUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,22 +41,16 @@ public class RuleApiController {
 
 	@PostMapping(value = "/api/v1/rules", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RuleApi> getRules(@RequestBody RuleRequestApi request) {
-
 		Sort sort = Sort.unsorted();
-		Optional<RuleRequestApi> optionalRequest = Optional.ofNullable(request);
-
 		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = Sort.by(request.getOrders()
-				.stream()
-				.map(order -> order.getDirection().equalsIgnoreCase("asc") ? Sort.Order.asc(order.getField()) : Sort.Order.desc(order.getField()))
-				.collect(Collectors.toList()));
+			sort = SortUtil.getSort(request);
 		}
 		Pageable pageable = null;
 		if (request.getPage() != null && request.getLimit() != null) {
 			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-
 		}
 		Specification<Rule> specification = null;
+		Optional<RuleRequestApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			if (optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
 				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
@@ -73,13 +69,13 @@ public class RuleApiController {
 					specification, (root, query, cb) -> root.get("type").in(request.getFilter().getCategory()));
 			}
 		}
+		Collection<Rule> rules;
 		if (pageable == null) {
-			return ruleRepository.findAll(specification, sort)
-				.stream()
-				.map(RuleApi::new)
-				.collect(Collectors.toList());
+			rules = ruleRepository.findAll(specification, sort);
+		} else {
+			rules = ruleRepository.findAll(specification, pageable).toList();
 		}
-		return ruleRepository.findAll(specification, pageable)
+		return rules
 			.stream()
 			.map(RuleApi::new)
 			.collect(Collectors.toList());

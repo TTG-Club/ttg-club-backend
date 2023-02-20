@@ -2,7 +2,7 @@ package club.dnd5.portal.controller;
 
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.repository.datatable.BookDatatableRepository;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class BookController {
 	@Autowired
-	private BookDatatableRepository repository;
+	private BookRepository repository;
 
 	@GetMapping("/books")
 	public String getRules(Model model) {

@@ -88,7 +88,7 @@ public class MetaApiController {
 	private RuleRepository ruleRepository;
 
 	@Autowired
-	private BookDatatableRepository bookRepository;
+	private BookRepository bookRepository;
 	@Autowired
 	private InfoPagesRepository infoPagesRepository;
 
