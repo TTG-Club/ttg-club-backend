@@ -29,7 +29,7 @@ public class ProfileController {
 	@Autowired
 	private ArticleService service;
 
-	@GetMapping("/profile/{username}")
+	@GetMapping({"/profile", "/profile/{username}"})
 	public String getProfileForm(Model model, Authentication authentication, HttpServletRequest request) {
 		model.addAttribute("moderate_article_count", service.getCountByStatus(ArtricleStatus.MODERATION));
 		model.addAttribute("user_count", usersRepository.count());
