@@ -3,13 +3,17 @@ package club.dnd5.portal.controller.api;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.api.wiki.RuleApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.util.SortUtil;
+import com.sun.xml.bind.v2.schemagen.episode.SchemaBindings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +56,19 @@ public class BookApiController {
 			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 		}
 		Specification<Book> specification = null;
+		Optional<BookRequestApi> optionalRequest = Optional.ofNullable(request);
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+			if (optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
+				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
+			} else {
+				String likeSearch = "%" + request.getSearch().getValue() + "%";
+				specification = SpecificationUtil.getAndSpecification(null, (root, query, cb) -> {
+					return cb.or(cb.like(root.get("altName"), likeSearch),
+						cb.like(root.get("englishName"), likeSearch),
+						cb.like(root.get("name"), likeSearch));
+				});
+			}
+		}
 		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 				List<Order> orders = request.getOrders().stream()
