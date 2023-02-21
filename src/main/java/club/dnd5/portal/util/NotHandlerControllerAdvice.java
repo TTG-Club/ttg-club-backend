@@ -1,5 +1,6 @@
 package club.dnd5.portal.util;
 
+import club.dnd5.portal.config.VersionControllerAdvice;
 import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @ControllerAdvice
-public class NotHandlerControllerAdvice {
+public class NotHandlerControllerAdvice extends VersionControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(PageNotFoundException.class)
 	public String handlePageNotFound(Exception exception) {
