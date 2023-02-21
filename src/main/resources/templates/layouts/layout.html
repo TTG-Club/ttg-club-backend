@@ -71,6 +71,11 @@
             <link th:if="${#httpServletRequest.requestURI == '/'}" rel="preload" as="image" href="/img/bg_discord_bot.webp">
             <link th:if="${#httpServletRequest.requestURI == '/'}" rel="preload" as="image" href="/img/bg_telegram_bot.webp">
 
+			<th:block th:unless="${profile eq 'prod'}">
+				<meta name="build-sha" th:content="${version}">
+				<meta name="build-type" th:content="${profile}">
+			</th:block>
+
             <th:block th:if="${profile eq 'prod'}">
                 <meta name="yandex-verification" content="fcb3cea757dfffdd" />
                 <!-- Google Tag Manager -->
