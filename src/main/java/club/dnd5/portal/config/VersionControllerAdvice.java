@@ -1,16 +1,25 @@
 package club.dnd5.portal.config;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
+import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.util.NotHandlerControllerAdvice;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = {
+	Controller.class,
+	NotHandlerControllerAdvice.class,
+	PageNotFoundException.class
+})
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class VersionControllerAdvice {
 	@Value("${frontend.application.sha}")
 	private String version;
