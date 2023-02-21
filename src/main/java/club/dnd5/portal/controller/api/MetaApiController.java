@@ -67,7 +67,7 @@ public class MetaApiController {
 	private WeaponDatatableRepository weaponRepository;
 
 	@Autowired
-	private ArmorDatatableRepository armorRepository;
+	private ArmorRepository armorRepository;
 
 	@Autowired
 	private ItemDatatableRepository itemRepository;

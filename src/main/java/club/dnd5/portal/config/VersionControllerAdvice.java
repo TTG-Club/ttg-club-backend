@@ -21,9 +21,9 @@ import java.util.Date;
 })
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class VersionControllerAdvice {
-	@Value("${frontend.application.sha}")
+	@Value("${frontend.application.sha:1}")
 	private String version;
-	@Value("${spring.profiles.active}")
+	@Value("${spring.profiles.active:prod}")
 	private String profile;
 
 	@ModelAttribute
