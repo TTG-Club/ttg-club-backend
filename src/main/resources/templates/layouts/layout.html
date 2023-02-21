@@ -2,6 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}" th:data-theme="'theme-' + ${themeName}">
 	<head>
 	 	<th:block th:fragment="mainLayout" >
+			<th:block th:unless="${profile eq 'prod'}">
+				<meta name="build-sha" th:content="${version}">
+				<meta name="build-type" th:content="${profile}">
+			</th:block>
+
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
             <meta name="author" content="Peterko - https://www.behance.net/peterko, Magistrus" />
@@ -70,11 +75,6 @@
             <link th:if="${#httpServletRequest.requestURI == '/'}" rel="preload" as="image" href="/img/bg_main_page_button_nav_3.png">
             <link th:if="${#httpServletRequest.requestURI == '/'}" rel="preload" as="image" href="/img/bg_discord_bot.webp">
             <link th:if="${#httpServletRequest.requestURI == '/'}" rel="preload" as="image" href="/img/bg_telegram_bot.webp">
-
-			<th:block th:unless="${profile eq 'prod'}">
-				<meta name="build-sha" th:content="${version}">
-				<meta name="build-type" th:content="${profile}">
-			</th:block>
 
             <th:block th:if="${profile eq 'prod'}">
                 <meta name="yandex-verification" content="fcb3cea757dfffdd" />
