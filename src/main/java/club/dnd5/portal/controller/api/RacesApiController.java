@@ -5,6 +5,7 @@ import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.RaceRequestApi;
 import club.dnd5.portal.dto.api.races.RaceApi;
 import club.dnd5.portal.dto.api.races.RaceDetailApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -137,12 +138,9 @@ public class RacesApiController {
 
 	@PostMapping(value = "/api/v1/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<RaceDetailApi> getRace(@PathVariable String englishName) {
-		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (!race.isPresent()) {
-			return ResponseEntity.notFound().build();
-		}
-		RaceDetailApi raceApi = new RaceDetailApi(race.get());
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
+		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		RaceDetailApi raceApi = new RaceDetailApi(race);
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			raceApi.setImages(images);
 		}

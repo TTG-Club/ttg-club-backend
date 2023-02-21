@@ -11,41 +11,11 @@ import io.swagger.v3.oas.annotations.Hidden;
 public class MainController {
 	@GetMapping("/")
 	public String getHome(Model model) {
-		return "index";
-	}
-	
-	@GetMapping("/search")
-	public String getSearch(Model model) {
-		return "search";
-	}
-	
-	@GetMapping("/page")
-	public String getPageText(Model model) {
-		return "page";
-	}
-	
-	@GetMapping("/telegram_bot")
-	public String getPageTelegrammBot(Model model) {
-		model.addAttribute("metaTitle", "TTG Club Telegram Bot");
-		model.addAttribute("metaUrl", "https://ttg.club/telegram_bot");
-		model.addAttribute("metaDescription", "Бот в Telegram, который поможет вам быстро найти нужные вам заклинания в компактном виде или бросить кубы, если вы забыли их дома.");
-		return "telegram_bot";
+		return "spa";
 	}
 
-	@GetMapping("/fvtt_import")
-	public String getPageFvttExport(Model model) {
-		model.addAttribute("metaTitle", "TTG Club импорт монстров в FVTT");
-		model.addAttribute("metaUrl", "https://ttg.club/fvtt_import");
-		model.addAttribute("metaDescription", "Инструкция по импорту существ из Бестиария в FVTT.");
-		return "fvtt_import";
+	@GetMapping("/search")
+	public String getSearch(Model model) {
+		return "spa";
 	}
-	
-	@GetMapping("/bookmarks_info")
-	public String getBookmarkInstruction(Model model) {
-		model.addAttribute("metaTitle", "TTG Club инструкция по закладкам");
-		model.addAttribute("metaUrl", "https://ttg.club/bookmarks_info");
-		model.addAttribute("metaDescription", "Инструкция по использованию закладок.");
-		return "bookmarks_info";
-	}
-	
 }

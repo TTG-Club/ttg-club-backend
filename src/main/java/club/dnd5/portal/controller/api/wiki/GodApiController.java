@@ -10,6 +10,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -42,15 +43,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "God", description = "The God API")
 @RestController
-public class GodApiConroller {
+public class GodApiController {
 	@Autowired
 	private GodDatatableRepository godRepository;
 	@Autowired
-	private PantheonGodRepository pantheonReposotory;
-	
+	private PantheonGodRepository pantheonRepository;
+
 	@Autowired
 	private ImageRepository imageRepository;
-	
+
 	@PostMapping(value = "/api/v1/gods", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<GodApi> getGods(@RequestBody GodRequestApi request) {
 		Specification<God> specification = null;
@@ -64,7 +65,7 @@ public class GodApiConroller {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -72,7 +73,7 @@ public class GodApiConroller {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
@@ -94,7 +95,7 @@ public class GodApiConroller {
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -126,7 +127,7 @@ public class GodApiConroller {
 			}
 			if (!request.getFilter().getRank().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
-						specification, (root, query, cb) -> root.get("rank").in(request.getFilter().getRank().stream().map(Rank::valueOf).collect(Collectors.toList())));	
+						specification, (root, query, cb) -> root.get("rank").in(request.getFilter().getRank().stream().map(Rank::valueOf).collect(Collectors.toList())));
 			}
 				if (!request.getFilter().getPantheon().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
@@ -137,10 +138,10 @@ public class GodApiConroller {
 		}
 		return godRepository.findAll(input, specification, specification, GodApi::new).getData();
 	}
-	
+
 	@PostMapping(value = "/api/v1/gods/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public GodDetailApi getGod(@PathVariable String englishName) {
-		God god = godRepository.findByEnglishName(englishName.replace('_', ' '));
+		God god = godRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		GodDetailApi godApi = new GodDetailApi(god);
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.GOD, god.getId());
 		if (!images.isEmpty()) {
@@ -148,7 +149,7 @@ public class GodApiConroller {
 		}
 		return godApi;
 	}
-	
+
 	@PostMapping("/api/v1/filters/gods")
 	public FilterApi getFilter() {
 		FilterApi filters = new FilterApi();
@@ -164,16 +165,16 @@ public class GodApiConroller {
 			}
 		}
 		filters.setSources(sources);
-		
+
 		List<FilterApi> otherFilters = new ArrayList<>();
-		
+
 		FilterApi alignmentFilter = new FilterApi("Мировоззрение", "alignment");
 		alignmentFilter.setValues(
 				Alignment.getGods().stream()
 				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(alignmentFilter);
-		
+
 		FilterApi domainFilter = new FilterApi("Домены", "domain");
 		domainFilter.setValues(
 				Arrays.stream(Domain.values())
@@ -181,21 +182,21 @@ public class GodApiConroller {
 				 .collect(Collectors.toList()));
 		otherFilters.add(domainFilter);
 
-		
+
 		FilterApi rankFilter = new FilterApi("Ранг", "rank");
 		rankFilter.setValues(
 				Arrays.stream(Rank.values())
 				 .map(value -> new FilterValueApi(value.getName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(rankFilter);
-		
+
 		FilterApi pantheonFilter = new FilterApi("Пантеоны", "pantheon");
 		pantheonFilter.setValues(
-				pantheonReposotory.findAll().stream()
+				pantheonRepository.findAll().stream()
 				 .map(value -> new FilterValueApi(value.getName(), value.getId()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(pantheonFilter);
-		
+
 		filters.setOther(otherFilters);
 		return filters;
 	}

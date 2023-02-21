@@ -1,33 +1,24 @@
 package club.dnd5.portal.controller;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.servlet.http.HttpServletRequest;
 
 @Hidden
 @Controller
 public class CustomErrorController implements ErrorController {
-	@GetMapping({"/error", "/error.html"})
+	@GetMapping({
+		"/error",
+		"/error.html",
+		"/401",
+		"/403",
+		"/404",
+		"/500"
+	})
     public String handleError(HttpServletRequest request) {
-        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-        if (status != null) {
-            int statusCode = Integer.parseInt(status.toString());
-            switch (statusCode) {
-                case 404:
-                    return "error_404";
-                case 403:
-                    return "error_403";
-                case 401:
-                    return "error_401";
-                case 500:
-                    return "error_500";
-            }
-        }
-        return "error";
+        return "spa";
     }
 }

@@ -1,18 +1,8 @@
 package club.dnd5.portal.controller.api;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.MetaApi;
+import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.InfoPage;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
@@ -32,22 +22,22 @@ import club.dnd5.portal.model.screen.Screen;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.InfoPagesRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.RaceRepository;
-import club.dnd5.portal.repository.datatable.ArmorDatatableRepository;
-import club.dnd5.portal.repository.datatable.BackgroundDatatableRepository;
-import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
-import club.dnd5.portal.repository.datatable.BookDatatableRepository;
-import club.dnd5.portal.repository.datatable.GodDatatableRepository;
-import club.dnd5.portal.repository.datatable.ItemDatatableRepository;
-import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
-import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
-import club.dnd5.portal.repository.datatable.RuleDatatableRepository;
-import club.dnd5.portal.repository.datatable.ScreenDatatableRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
-import club.dnd5.portal.repository.datatable.TraitDatatableRepository;
-import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
+import club.dnd5.portal.repository.datatable.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Tag(name = "Meta", description = "The meta API")
 @RestController
@@ -77,7 +67,7 @@ public class MetaApiController {
 	private WeaponDatatableRepository weaponRepository;
 
 	@Autowired
-	private ArmorDatatableRepository armorRepository;
+	private ArmorRepository armorRepository;
 
 	@Autowired
 	private ItemDatatableRepository itemRepository;
@@ -95,14 +85,17 @@ public class MetaApiController {
 	private GodDatatableRepository godRepository;
 
 	@Autowired
-	private RuleDatatableRepository ruleRepository;
+	private RuleRepository ruleRepository;
 
 	@Autowired
-	private BookDatatableRepository bookRepository;
+	private BookRepository bookRepository;
+	@Autowired
+	private InfoPagesRepository infoPagesRepository;
 
 	@GetMapping(value = "/api/v1/meta/*", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getNotMapping() {
 		MetaApi meta = new MetaApi();
+		meta.setTitle("TTG Club Oнлайн-справочник");
 		meta.setDescription("TTG.Club - сайт, посвященный DnD 5-й редакции. Тут можно найти: расы, происхождения, классы, заклинания, бестиарий, снаряжение, магические предметы и инструменты для облегчения игры как игрокам, так и мастерам - все в одном месте.");
 		return meta;
 	}
@@ -117,7 +110,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/classes/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getClassMeta(@PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Классы D&D 5e", heroClass.getName(), heroClass.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
@@ -131,7 +124,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/classes/{classEnglishName}/{archetypeEnglishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArchetypeMeta(@PathVariable String classEnglishName, @PathVariable String archetypeEnglishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' '));
+		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		Optional<Archetype> archetype = heroClass.getArchetypes().stream()
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeEnglishName.replace('_', ' ')))
@@ -202,7 +195,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/traits/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getTraitMeta(@PathVariable String englishName) {
-		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' '));
+		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle( String.format("%s (%s)", trait.getName(), trait.getEnglishName()) + " | Черты D&D 5e");
 		meta.setDescription(String.format("%s (%s) - черта персонажа по D&D 5-редакции", trait.getName(), trait.getEnglishName()));
@@ -222,7 +215,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/backgrounds/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBackgroundMeta(@PathVariable String englishName) {
-		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' '));
+		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(background.getName() + " | Предыстории персонажей D&D 5e");
 		meta.setDescription(String.format("%s (%s) - предыстория персонажа по D&D 5 редакции", background.getName(), background.getEnglishName()));
@@ -242,7 +235,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/options/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getOptiondMeta(@PathVariable String englishName) {
-		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' '));
+		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
 		meta.setDescription(
@@ -265,7 +258,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/spells/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getSpellMeta(@PathVariable String englishName) {
-		Spell spell = spellRepository.findByEnglishName(englishName.replace('_', ' '));
+		Spell spell = spellRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s)", spell.getName(), spell.getEnglishName()) + " | Заклинания D&D 5e");
 		meta.setDescription(String.format("%s %s, %s", (spell.getLevel() == 0 ? "Заговор" : spell.getLevel() + " уровень"), spell.getName(), spell.getSchool().getName()));
@@ -286,7 +279,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/weapons/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getWeaponMeta(@PathVariable String englishName) {
-		Weapon weapon = weaponRepository.findByEnglishName(englishName.replace('_', ' '));
+		Weapon weapon = weaponRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Оружие D&D 5e", weapon.getName(), weapon.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s D&D 5 редакции", weapon.getName(), weapon.getEnglishName(), weapon.getType().getName()));
@@ -306,7 +299,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArmorMeta(@PathVariable String englishName) {
-		Armor armor = armorRepository.findByEnglishName(englishName.replace('_', ' '));
+		Armor armor = armorRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Доспехи D&D 5e", armor.getName(), armor.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - доспехи по D&D 5 редакции", armor.getName(), armor.getEnglishName()));
@@ -326,7 +319,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/items/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getItemMeta(@PathVariable String englishName) {
-		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' '));
+		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Снаряжение D&D 5e",item.getName(), item.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) снаряжение по D&D 5 редакции", item.getName(), item.getEnglishName()));
@@ -346,7 +339,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/items/magic/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getMagicItemMeta(@PathVariable String englishName) {
-		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' '));
+		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Магические предметы D&D 5e", item.getName(), item.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s %s", item.getName(), item.getEnglishName(), item.getTextRarity(), item.getType().getCyrilicName()));
@@ -370,7 +363,8 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBeastMeta(@PathVariable String englishName) {
-		Creature beast = bestiaryItemRepository.findByEnglishName(englishName.replace('_', ' '));
+		Creature beast = bestiaryItemRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));
@@ -414,7 +408,7 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/gods/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getGodMeta(@PathVariable String englishName) {
-		God god = godRepository.findByEnglishName(englishName.replace('_', ' '));
+		God god = godRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Боги D&D 5e", god.getName(), god.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - %s %s, %s", god.getName(), god.getEnglishName(), god.getAligment().getCyrilicName(), god.getSex().getCyrilicName(), god.getCommitment()));
@@ -437,8 +431,8 @@ public class MetaApiController {
 	}
 
 	@GetMapping(value = "/api/v1/meta/rules/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public MetaApi getReleMeta(@PathVariable String englishName) {
-		Rule rule = ruleRepository.findByEnglishName(englishName.replace('_', ' '));
+	public MetaApi getRuleMeta(@PathVariable String englishName) {
+		Rule rule = ruleRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s | %s | Правила и термины [Rules] D&D 5e", rule.getName(), rule.getType()));
 		meta.setDescription(String.format("%s (%s) Правила и термины по D&D 5 редакции", rule.getName(), rule.getEnglishName()));
@@ -458,12 +452,21 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/books/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBooksMeta(@PathVariable String englishName) {
-		Book book = bookRepository.findByEnglishName(englishName.replace('_', ' '));
+		Book book = bookRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Источники (Books) D&D 5e", book.getName(), book.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) Источник [Source] по D&D 5 редакции", book.getName(), book.getEnglishName()));
 		meta.setMenu("Источники");
 		meta.setKeywords(book.getAltName() + " " + book.getEnglishName());
+		return meta;
+	}
+
+	@GetMapping(value = "/api/v1/meta/info/{url}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MetaApi getInfoMeta(@PathVariable String url) {
+		InfoPage infoPage = infoPagesRepository.findByUrl(url);
+		MetaApi meta = new MetaApi();
+		meta.setTitle(String.format("%s | TTG Club", infoPage.getTitle()));
+		meta.setDescription(infoPage.getSubtitle());
 		return meta;
 	}
 }

@@ -9,7 +9,7 @@ public final class SpecificationUtil {
 		}
 		return specification.and(addSpecification);
 	}
-	
+
 	public static <T> Specification<T> getOrSpecification(Specification<T> specification, Specification<T> addSpecification) {
 		if (specification == null) {
 			return Specification.where(addSpecification);

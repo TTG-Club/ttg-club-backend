@@ -15,6 +15,6 @@ public class MadnessToolController {
 		model.addAttribute("metaUrl", "https://ttg.club/tools/wildmagic");
 		model.addAttribute("metaDescription", "Генерация кратковреммных, долговременных и бессрочных эффектов безумия");
 		model.addAttribute("menuTitle", "Генератор безумия");
-		return "tools/madness";
+		return "spa";
 	}
 }

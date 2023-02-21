@@ -1,20 +1,19 @@
 package club.dnd5.portal.config;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @ControllerAdvice
 public class VersionControllerAdvice {
-	@Value("${frontend.application.sha}")
+	@Value("${frontend.application.sha:1}")
 	private String version;
-	@Value("${spring.profiles.active}")
+	@Value("${spring.profiles.active:prod}")
 	private String profile;
 
 	@ModelAttribute

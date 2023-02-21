@@ -2,6 +2,7 @@ package club.dnd5.portal.repository.datatable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,13 +15,11 @@ import club.dnd5.portal.model.trait.Trait;
 
 @Repository
 public interface TraitDatatableRepository extends DataTablesRepository<Trait, Integer> {
-	Trait findByEnglishName(String name);
+	Optional<Trait> findByEnglishName(String name);
 
 	@Query("SELECT t.requirement FROM Trait t GROUP BY t.requirement")
-	List<String> findAllPrerequisite();
+	Collection<String> findAllPrerequisite();
 
 	@Query("SELECT c.book FROM Trait c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
-	List<Book> findBook(@Param("type") TypeBook type);
-
-    Collection<Trait> findByEnglishNameContainsOrNameContainsOrAltNameContains(String search, String search1, String search2);
+	Collection<Book> findBook(@Param("type") TypeBook type);
 }

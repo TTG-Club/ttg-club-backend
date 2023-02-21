@@ -1,6 +1,7 @@
 package club.dnd5.portal.model.creature;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,14 +26,15 @@ public enum HabitatType {
 	SWAMP("болото", "swamp"),
 	DESERT("пустыня", "desert"),
 	TROPICS("тропики", null);
-	
+
 	private String name;
 	private String xmlName;
-	
-	public boolean isXml() {
-		return xmlName != null;
-	}
+
 	public static Set<HabitatType> types(){
 		return Arrays.stream(values()).filter(t -> t.xmlName != null).collect(Collectors.toSet());
+	}
+
+	public static Set<HabitatType> allTypes(){
+		return EnumSet.allOf(HabitatType.class);
 	}
 }

@@ -12,6 +12,7 @@ import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 
 import club.dnd5.portal.dto.fvtt.export.FCreature;
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -146,7 +147,7 @@ public class MagicItemApiController {
 
 	@PostMapping(value = "/api/v1/items/magic/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MagicItemDetailApi getItem(@PathVariable String englishName) {
-		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' '));
+		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MagicItemDetailApi itemApi = new MagicItemDetailApi(item);
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.MAGIC_ITEM, item.getId());
 		if (!images.isEmpty()) {

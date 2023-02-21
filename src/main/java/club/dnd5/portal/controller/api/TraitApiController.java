@@ -4,7 +4,8 @@ import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.TraitApi;
 import club.dnd5.portal.dto.api.classes.TraitDetailApi;
-import club.dnd5.portal.dto.api.classes.TraitRequesApi;
+import club.dnd5.portal.dto.api.classes.FeatRequestApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -29,6 +30,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class TraitApiController {
 
 	@Operation(summary = "Gets all traits")
 	@PostMapping(value = "/api/v1/traits", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<TraitApi> getTraits(@RequestBody TraitRequesApi request) {
+	public List<TraitApi> getTraits(@RequestBody FeatRequestApi request) {
 		Specification<Trait> specification = null;
 
 		DataTablesInput input = new DataTablesInput();
@@ -141,10 +143,7 @@ public class TraitApiController {
 
 	@PostMapping(value = "/api/v1/traits/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<TraitDetailApi> getTrait(@PathVariable String englishName) {
-		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (trait == null) {
-			return ResponseEntity.notFound().build();
-		}
+		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(new TraitDetailApi(trait));
 	}
 
@@ -153,7 +152,7 @@ public class TraitApiController {
 		FilterApi filters = new FilterApi();
 		List<FilterApi> sources = new ArrayList<>();
 		for (TypeBook typeBook : TypeBook.values()) {
-			List<Book> books = traitRepository.findBook(typeBook);
+			Collection<Book> books = traitRepository.findBook(typeBook);
 			if (!books.isEmpty()) {
 				FilterApi filter = new FilterApi(typeBook.getName(), typeBook.name());
 				filter.setValues(books.stream()

@@ -1,28 +1,7 @@
 package club.dnd5.portal.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.thymeleaf.util.StringUtils;
-
 import club.dnd5.portal.dto.classes.ClassFetureDto;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.Archetype;
@@ -35,13 +14,25 @@ import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
 import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
 import io.swagger.v3.oas.annotations.Hidden;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.thymeleaf.util.StringUtils;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Hidden
 @Controller
 public class ClassController {
 	private static final String BASE_URL = "https://ttg.club/classe";
 
-	private static final String[] prerequsitlevels = { "Нет", " 5", " 6", " 7", " 9", "11", "12", "15", "17", "18" };
+	private static final String[] prerequisites = { "Нет", " 5", " 6", " 7", " 9", "11", "12", "15", "17", "18" };
 
 	@Autowired
 	private ClassRepository classRepository;
@@ -59,16 +50,12 @@ public class ClassController {
 		model.addAttribute("metaTitle", "Классы (Classes) D&D 5e");
 		model.addAttribute("menuTitle", "Классы");
 		model.addAttribute("metaUrl", BASE_URL);
-		return "classes";
+		return "spa";
 	}
 
 	@GetMapping("/classes/{name}")
-	public String getClass(Model model, @PathVariable String name, HttpServletRequest request) {
-		HeroClass heroClass = classRepository.findByEnglishName(name.replace("_", " "));
-		if (heroClass == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+	public String getClass(Model model, @PathVariable String name) {
+		HeroClass heroClass = classRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Классы D&D 5e", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, heroClass.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
@@ -77,17 +64,13 @@ public class ClassController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Классы");
-		return "classes";
+		return "spa";
 	}
 
 	@GetMapping("/classes/{name}/{archetype}")
 	public String getArchetype(Model model, @PathVariable String name, @PathVariable String archetype, HttpServletRequest request) {
 		String englishName = name.replace("_", " ");
-		HeroClass heroClass = classRepository.findByEnglishName(englishName);
-		if (heroClass == null) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+		HeroClass heroClass = classRepository.findByEnglishName(englishName).orElseThrow(PageNotFoundException::new);
 		Optional<Archetype> selectedArchetype = heroClass.getArchetypes().stream()
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetype.replace('_', ' ')))
 				.findFirst();
@@ -105,12 +88,12 @@ public class ClassController {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
 		model.addAttribute("menuTitle", "Классы");
-		return "classes";
+		return "spa";
 	}
 
 	@GetMapping("/classes/fragment/{englishName}")
 	public String getFragmentClasses(Model model, @PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		List<ClassFetureDto> features = new ArrayList<>();
 		heroClass.getTraits().stream()
 			.filter(f -> !f.isArchitype())
@@ -164,14 +147,14 @@ public class ClassController {
 
 	@GetMapping("/classes/images/{englishName}")
 	public String getClassImages(Model model, @PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("images", imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId()));
 		return "fragments/class :: images";
 	}
 
 	@GetMapping("/classes/spells/{englishName}")
 	public String getClassSpells(Model model, @PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("heroClass", heroClass);
 		model.addAttribute("schools", MagicSchool.values());
 		return "fragments/class_spell :: view";
@@ -179,23 +162,23 @@ public class ClassController {
 
 	@GetMapping("/classes/options/{englishName}")
 	public String getClassOption(Model model, @PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("heroClass", heroClass);
 		model.addAttribute("requirements", optionRepository.findAlldPrerequisite());
-		model.addAttribute("levels", prerequsitlevels);
+		model.addAttribute("levels", prerequisites);
 		return "fragments/class_options :: view";
 	}
 
 	@GetMapping("/classes/{englishName}/architype/name")
 	@ResponseBody
 	public String getArchitypeName(@PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		return heroClass.getArchetypeName();
 	}
 
 	@GetMapping("/classes/{englishName}/architypes/list")
 	public String getArchitypeList(Model model, @PathVariable String englishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("archetypeName", heroClass.getArchetypeName());
 		model.addAttribute("archetypes", heroClass.getArchetypes().stream().sorted(Comparator.comparing(Archetype::getBook)).collect(Collectors.toList()));
 		model.addAttribute("images", imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId()));
@@ -204,7 +187,7 @@ public class ClassController {
 
 	@GetMapping("/classes/{className}/architypes/{archetypeName}")
 	public String getByClassIdAndByArchetypeId(Model model, @PathVariable String className, @PathVariable String archetypeName) {
-		HeroClass heroClass = classRepository.findByEnglishName(className.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(className.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		List<ClassFetureDto> features = new ArrayList<>();
 		heroClass.getTraits().stream()
 			.filter(f -> !f.isArchitype())
@@ -245,14 +228,14 @@ public class ClassController {
 	@GetMapping("/classes/{name}/description")
 	@ResponseBody
 	public String getClassDescription(@PathVariable String name) {
-		HeroClass heroClass = classRepository.findByEnglishName(name.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		return heroClass.getDescription();
 	}
 
 	@GetMapping("/classes/{className}/archetype/{archetypeName}/description")
 	@ResponseBody
 	public String getArchetypeDescription(@PathVariable String className, @PathVariable String archetypeName) {
-		HeroClass heroClass = classRepository.findByEnglishName(className.replace("_", " "));
+		HeroClass heroClass = classRepository.findByEnglishName(className.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		return heroClass.getArchetypes()
 			.stream()
 			.filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeName.replace("_", " ")))
@@ -268,7 +251,7 @@ public class ClassController {
 
 	@GetMapping("/classes/archetype/feature/{id}")
 	@ResponseBody
-	public String getArchetyprFeatureDescription(@PathVariable Integer id) {
+	public String getArchetypeFeatureDescription(@PathVariable Integer id) {
 		return archetypeTraitRepository.findById(id).map(ArchetypeTrait::getDescription).orElse("");
 	}
 }

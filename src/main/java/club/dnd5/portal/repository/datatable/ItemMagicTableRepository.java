@@ -10,5 +10,5 @@ import club.dnd5.portal.model.items.MagicThingTable;
 @Repository
 public interface ItemMagicTableRepository extends JpaRepository<MagicThingTable, Integer> {
 	@Query("SELECT mt FROM MagicThingTable mt WHERE mt.start <= :result AND mt.end >=:result AND mt.nameTable = :table")
-	public MagicThingTable findOne(@Param("result") Integer result, @Param("table")  String table);
+	MagicThingTable findOne(@Param("result") Integer result, @Param("table")  String table);
 }

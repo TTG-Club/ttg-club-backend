@@ -11,13 +11,13 @@ import lombok.Getter;
 
 /**
  * Состояния существ
- * 
+ *
  */
 @Getter
 public enum Condition {
 	BLINDED(8, "ослепление", "слепота"), // 0
 	CHARMED(11, "очарование", "очарован"), // 1
-	DYING(-1,"смерть"), //2 
+	DYING(-1,"смерть"), //2
 	EVASIONS(-2, "уклонение"), //3
 	DEAFENED(5, "глухота", "оглохший"),  //4
 	EXHAUSTION(10, "истощение"), //5 exhaustion
@@ -36,7 +36,7 @@ public enum Condition {
 	private String cyrilicName;
 	private Set<String> names;
 	private Integer id;
-	
+
 	Condition(int id, String ...  names){
 		this.id = id;
 		cyrilicName = names[0];
@@ -44,13 +44,13 @@ public enum Condition {
 	}
 
 	public static Set<Condition> getImmunity() {
-		return EnumSet.of(BLINDED, CHARMED, DEAFENED,EXHAUSTION,FRIGHTENED, GRAPPLED, PARALYZED, PETRIFIED, POISONED, PRONE, RESTRAINED, STUNNED, UNCONSCIOUS);
+		return EnumSet.of(BLINDED, CHARMED, DEAFENED, EXHAUSTION, FRIGHTENED, GRAPPLED, PARALYZED, PETRIFIED, POISONED, PRONE, RESTRAINED, STUNNED, UNCONSCIOUS);
 	}
-	
+
 	public String getName() {
 		return StringUtils.capitalizeWords(cyrilicName.toLowerCase());
 	}
-	
+
 	public static Condition parse(String stateString) {
 		return Arrays.stream(values())
 				.filter(s -> s.getNames().stream().anyMatch(stateString::equalsIgnoreCase))

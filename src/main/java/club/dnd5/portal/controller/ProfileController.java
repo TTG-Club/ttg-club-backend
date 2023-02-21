@@ -29,14 +29,14 @@ public class ProfileController {
 	@Autowired
 	private ArticleService service;
 
-	@GetMapping("/profile/{username}")
+	@GetMapping({"/profile", "/profile/{username}"})
 	public String getProfileForm(Model model, Authentication authentication, HttpServletRequest request) {
 		model.addAttribute("moderate_article_count", service.getCountByStatus(ArtricleStatus.MODERATION));
 		model.addAttribute("user_count", usersRepository.count());
 		model.addAttribute("user_writer", usersRepository.countByRoles("WRITER"));
 		model.addAttribute("user_moderator", usersRepository.countByRoles("MODERATOR"));
 
-		return "user/profile";
+		return "spa";
 	}
 
 	@PostMapping(value = "/api/v1/profile/{username}", produces = MediaType.APPLICATION_JSON_VALUE)

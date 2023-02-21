@@ -17,15 +17,11 @@ import club.dnd5.portal.model.screen.Screen;
 
 @Repository
 public interface RaceDatatableRepository extends DataTablesRepository<Race, String> {
-	Collection<Screen> findAllByParentIsNull();
-	
-	Collection<Race> findAllByParent(Race race, Sort sort);
-	
 	Optional<Race> findByEnglishName(String name);
-	
+
 	@Query("SELECT r FROM Race r WHERE r.parent.englishName = :raceName AND r.englishName = :subraceName")
 	Optional<Race> findBySubrace(@Param("raceName") String raceName, @Param("subraceName") String subraceName);
-	
+
 	@Query("SELECT r.book FROM Race r GROUP BY r.book HAVING r.book.type = :type ORDER BY r.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
 }

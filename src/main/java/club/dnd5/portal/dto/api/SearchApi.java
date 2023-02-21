@@ -11,7 +11,9 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchApi {
 	@NonNull private Object name;
+	@NonNull private Object englishName;
 	@NonNull private Object section;
 	@NonNull private Object url;
 	private Object description;
+	private SourceApi source;
 }

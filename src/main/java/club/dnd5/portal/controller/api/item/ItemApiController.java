@@ -10,6 +10,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -40,7 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ItemApiController {
 	@Autowired
 	private ItemDatatableRepository itemRepository;
-	
+
 	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ItemApi> getItem(@RequestBody ItemRequesApi request) {
 		Specification<Equipment> specification = null;
@@ -54,7 +55,7 @@ public class ItemApiController {
 		column.setOrderable(Boolean.TRUE);
 		column.setSearch(new Search("", Boolean.FALSE));
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("englishName");
 		column.setName("englishName");
@@ -62,18 +63,18 @@ public class ItemApiController {
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.TRUE);
 		columns.add(column);
-		
+
 		column = new Column();
 		column.setData("altName");
 		column.setName("altName");
 		column.setSearchable(Boolean.TRUE);
 		column.setOrderable(Boolean.FALSE);
 		columns.add(column);
-		
+
 		input.setColumns(columns);
 		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
 		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());	
+			input.setStart(request.getPage() * request.getLimit());
 		}
 		if (request.getSearch() != null) {
 			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
@@ -113,12 +114,13 @@ public class ItemApiController {
 		}
 		return itemRepository.findAll(input, specification, specification, ItemApi::new).getData();
 	}
-	
+
 	@PostMapping(value = "/api/v1/items/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemDetailApi getOption(@PathVariable String englishName) {
-		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' '));
+		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		return new ItemDetailApi(item);
 	}
+
 	@PostMapping("/api/v1/filters/items")
 	public FilterApi getItemsFilter() {
 		FilterApi filters = new FilterApi();
@@ -134,9 +136,9 @@ public class ItemApiController {
 			}
 		}
 		filters.setSources(sources);
-		
+
 		List<FilterApi> otherFilters = new ArrayList<>();
-		
+
 		FilterApi damageTypeFilter = new FilterApi("Категория", "category");
 		damageTypeFilter.setValues(
 				Arrays.stream(EquipmentType.values())
