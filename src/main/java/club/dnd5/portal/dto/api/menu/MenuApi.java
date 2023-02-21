@@ -21,9 +21,11 @@ public class MenuApi {
 	private Boolean onlyDev;
 	private Boolean external;
 	private List<MenuApi> children;
+	private int order;
 
 	public MenuApi(Menu menu) {
 		name = menu.getName();
+		order = menu.getOrder();
 
 		if (menu.getIcon() != null) {
 			icon = menu.getIcon();
