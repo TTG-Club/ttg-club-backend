@@ -18,9 +18,4 @@ public class MainController {
 	public String getSearch(Model model) {
 		return "spa";
 	}
-
-	@GetMapping("/page")
-	public String getPageText(Model model) {
-		return "page";
-	}
 }
