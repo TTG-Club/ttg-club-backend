@@ -4,7 +4,6 @@ import club.dnd5.portal.dto.api.menu.MenuApi;
 import club.dnd5.portal.repository.MenuRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,10 +23,8 @@ public class MenuApiController {
 	@GetMapping
 	@ResponseStatus(code = HttpStatus.OK)
 	public List<MenuApi> getMenu() {
-		final Sort order = Sort.by(Sort.Direction.ASC, "order", "name");
-
 		return menuRepository
-			.findAll(order)
+			.findAll()
 			.stream()
 			.filter(item -> !item.getChildren().isEmpty())
 			.map(MenuApi::new)

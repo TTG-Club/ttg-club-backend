@@ -22,10 +22,20 @@ public class MenuApi {
 	private Boolean external;
 	private List<MenuApi> children;
 	private int order;
+	private Boolean onIndex;
+	private Integer indexOrder;
 
 	public MenuApi(Menu menu) {
 		name = menu.getName();
 		order = menu.getOrder();
+
+		if (menu.isOnIndex()) {
+			onIndex = true;
+		}
+
+		if (menu.getIndexOrder() != null) {
+			indexOrder = menu.getIndexOrder();
+		}
 
 		if (menu.getIcon() != null) {
 			icon = menu.getIcon();
