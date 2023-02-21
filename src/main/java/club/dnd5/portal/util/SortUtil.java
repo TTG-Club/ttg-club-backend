@@ -20,7 +20,7 @@ public class SortUtil {
 	}
 
 	private static Sort.Order getOrder(Order order) {
-		if (order == null) {
+		if (order == null || order.getField() == null) {
 			return Sort.Order.asc("name");
 		}
 		return order.getDirection().equalsIgnoreCase("asc") ? Sort.Order.asc(order.getField()) : Sort.Order.desc(order.getField());
