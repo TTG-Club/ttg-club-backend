@@ -15,9 +15,9 @@ import java.util.Date;
 
 @ControllerAdvice
 public class NotHandlerControllerAdvice {
-	@Value("${frontend.application.sha:1}")
+	@Value("${frontend.application.sha:'1'}")
 	private String version;
-	@Value("${spring.profiles.active:prof}")
+	@Value("${spring.profiles.active:'prod'}")
 	private String profile;
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
