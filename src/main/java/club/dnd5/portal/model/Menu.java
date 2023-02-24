@@ -33,4 +33,10 @@ public class Menu {
 
 	@OneToMany(mappedBy = "parent", orphanRemoval = false, cascade = CascadeType.REMOVE)
 	private List<Menu> children;
+
+	@JoinColumn(name = "on_index")
+	private boolean onIndex;
+
+	@JoinColumn(name = "index_order")
+	private Integer indexOrder;
 }
