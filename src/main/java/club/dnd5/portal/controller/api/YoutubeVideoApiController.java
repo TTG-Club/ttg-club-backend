@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Tag(name = "Youtube", description = "The Youtube API")
@@ -60,12 +61,16 @@ public class YoutubeVideoApiController {
 		Optional<YoutubeVideo> oldVideo = youtubeVideosRepository.findById(id);
 		YoutubeVideo video = oldVideo.orElseGet(YoutubeVideo::new);
 
-		video.setId(id);
-		video.setUser(user);
-		video.setActive(true);
-		video.setOrder(0);
+		if (!oldVideo.isPresent()) {
+			video.setId(id);
+			video.setActive(true);
+			video.setOrder(0);
+		}
 
-		youtubeVideosRepository.saveAndFlush(video);
+		video.setUser(user);
+		video.setCreated(LocalDateTime.now());
+
+		youtubeVideosRepository.save(video);
 
 		return ResponseEntity.ok().build();
 	}
