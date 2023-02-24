@@ -58,11 +58,7 @@ public class YoutubeVideoApiController {
 		}
 
 		Optional<YoutubeVideo> oldVideo = youtubeVideosRepository.findById(id);
-		YoutubeVideo video = new YoutubeVideo();
-
-		if (oldVideo.isPresent()) {
-			video = oldVideo.get();
-		}
+		YoutubeVideo video = oldVideo.orElseGet(YoutubeVideo::new);
 
 		video.setId(id);
 		video.setUser(user);
