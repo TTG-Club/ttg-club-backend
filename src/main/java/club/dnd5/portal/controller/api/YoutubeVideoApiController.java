@@ -17,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @Tag(name = "Youtube", description = "The Youtube API")
 @RestController
 @RequestMapping(value = "/api/v1/youtube")
@@ -55,7 +57,12 @@ public class YoutubeVideoApiController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission!");
 		}
 
+		Optional<YoutubeVideo> oldVideo = youtubeVideosRepository.findById(id);
 		YoutubeVideo video = new YoutubeVideo();
+
+		if (oldVideo.isPresent()) {
+			video = oldVideo.get();
+		}
 
 		video.setId(id);
 		video.setUser(user);
