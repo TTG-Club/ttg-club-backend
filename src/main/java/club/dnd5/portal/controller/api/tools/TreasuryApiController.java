@@ -50,18 +50,18 @@ public class TreasuryApiController {
 	private TreasureDatatableRepository treasureRepo;
 
 	@PostMapping("/api/v1/tools/treasury")
-	public TreasuryApi getItems(@RequestBody RequestTreasuryApi reques) {
+	public TreasuryApi getItems(@RequestBody RequestTreasuryApi request) {
 		TreasuryApi treasuryApi = new TreasuryApi();
-		if (reques.getCr() == null) {
-			reques.setCr(Dice.d4.roll());
+		if (request.getCr() == null) {
+			request.setCr(Dice.d4.roll());
 		}
-		if (reques.getUnique() == null) {
-			reques.setUnique(Boolean.FALSE);
+		if (request.getUnique() == null) {
+			request.setUnique(Boolean.FALSE);
 		}
-		if (reques.getCoins() != null && reques.getCoins()) {
+		if (request.getCoins() != null && request.getCoins()) {
 			CoinsApi coins = new CoinsApi();
 			treasuryApi.setCoins(coins);
-			switch (reques.getCr()) {
+			switch (request.getCr()) {
 			case 1:
 				coins.setCopper(Dice.d6.roll(6) * 100);
 				coins.setSilver(Dice.d6.roll(3) * 100);
@@ -85,72 +85,72 @@ public class TreasuryApiController {
 				break;
 			}
 		}
-		if (reques.getMagicItem() != null && reques.getMagicItem()) {
+		if (request.getMagicItem() != null && request.getMagicItem()) {
 			List<MagicItemApi> magicItems = new ArrayList<>();
 			int ri = Dice.d100.roll();
-			switch (reques.getCr()) {
+			switch (request.getCr()) {
 			case 1:
 				if (ri >= 37 && ri <= 60) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "А", 6, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "А", 6, request));
 				} else if (ri >= 61 && ri <= 75) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Б", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Б", 4, request));
 				} else if (ri >= 76 && ri <= 85) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 4, request));
 				} else if (ri >= 86 && ri <= 97) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е", 4, request));
 				} else if (ri >= 98 && ri <= 100) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 1, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 1, request));
 				}
 				break;
 			case 2:
 				if (ri >= 29 && ri <= 44) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "А", 6, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "А", 6, request));
 				} else if (ri >= 45 && ri <= 63) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Б", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Б", 4, request));
 				} else if (ri >= 64 && ri <= 74) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 4, request));
 				} else if (ri >= 75 && ri <= 80) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Г", 1, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Г", 1, request));
 				} else if (ri >= 81 && ri <= 94) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е", 4, request));
 				} else if (ri >= 95 && ri <= 98) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 4, request));
 				} else if (ri >= 96 && ri <= 100) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Ж", 1, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Ж", 1, request));
 				}
 				break;
 			case 3:
 				if (ri >= 16 && ri <= 29) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "А", 4, reques.getUnique()));
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Б", 6, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "А", 4, request));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Б", 6, request));
 				} else if (ri >= 30 && ri <= 50) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 6, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 6, request));
 				} else if (ri >= 51 && ri <= 66) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Г", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Г", 4, request));
 				} else if (ri >= 67 && ri <= 74) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Д", 1, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Д", 1, request));
 				} else if (ri >= 75 && ri <= 82) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е", 1, reques.getUnique()));
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е", 1, request));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 4, request));
 				} else if (ri >= 83 && ri <= 92) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Ж", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Ж", 4, request));
 				} else if (ri >= 93 && ri <= 100) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "З", 1, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "З", 1, request));
 				}
 				break;
 			case 4:
 				if (ri >= 3 && ri <= 14) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 8, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "В", 8, request));
 				} else if (ri >= 15 && ri <= 46) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Г", 6, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Г", 6, request));
 				} else if (ri >= 47 && ri <= 68) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Д", 6, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Д", 6, request));
 				} else if (ri >= 69 && ri <= 72) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 6, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Е1", 6, request));
 				} else if (ri >= 73 && ri <= 80) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "Ж", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "Ж", 4, request));
 				} else if (ri >= 81 && ri <= 100) {
-					magicItems.addAll(getMagicItems(ri, 1, 1000, "З", 4, reques.getUnique()));
+					magicItems.addAll(getMagicItems(ri, 1, 1000, "З", 4, request));
 				}
 				break;
 			default:
@@ -161,7 +161,7 @@ public class TreasuryApiController {
 		List<ItemApi> arts = new ArrayList<>();
 		List<ItemApi> gems = new ArrayList<>();
 		int ri = Dice.d100.roll();
-		if (reques.getCr() == 1) {
+		if (request.getCr() == 1) {
 			if (ri >= 7 && ri <= 16) {
 				gems.addAll(getTreasures(10, TreasureType.GEM, 2, Dice.d6));
 			} else if (ri >= 17 && ri <= 26) {
@@ -195,7 +195,7 @@ public class TreasuryApiController {
 			} else if (ri == 100) {
 				gems.addAll(getTreasures(50, TreasureType.GEM, 2, Dice.d6));
 			}
-		} else if (reques.getCr() == 2) {
+		} else if (request.getCr() == 2) {
 			if (ri >= 5 && ri <= 10) {
 				arts.addAll(getTreasures(25, TreasureType.WORKS_OF_ART, 2, Dice.d4));
 			} else if (ri >= 11 && ri <= 16) {
@@ -253,7 +253,7 @@ public class TreasuryApiController {
 			} else if (ri == 100) {
 				arts.addAll(getTreasures(250, TreasureType.WORKS_OF_ART, 2, Dice.d6));
 			}
-		} else if (reques.getCr() == 3) {
+		} else if (request.getCr() == 3) {
 			if (ri >= 4 && ri <= 6) {
 				arts.addAll(getTreasures(250, TreasureType.WORKS_OF_ART, 2, Dice.d4));
 			} else if (ri >= 7 && ri <= 9) {
@@ -319,7 +319,7 @@ public class TreasuryApiController {
 			} else if (ri >= 99 && ri <= 100) {
 				gems.addAll(getTreasures(1000, TreasureType.GEM, 3, Dice.d6));
 			}
-		} else if (reques.getCr() == 4) {
+		} else if (request.getCr() == 4) {
 			if (ri >= 3 && ri <= 5) {
 				gems.addAll(getTreasures(1000, TreasureType.GEM, 3, Dice.d6));
 			} else if (ri >= 6 && ri <= 8) {
@@ -370,13 +370,13 @@ public class TreasuryApiController {
 				gems.addAll(getTreasures(5000, TreasureType.GEM, 1, Dice.d8));
 			}
 		}
-		if (reques.getArt() != null && reques.getArt()) {
+		if (request.getArt() != null && request.getArt()) {
 			treasuryApi.setArts(arts);
 		}
-		if (reques.getGem() != null && reques.getGem()) {
+		if (request.getGem() != null && request.getGem()) {
 			treasuryApi.setGems(gems);
 		}
-		if (reques.getTrinket() != null && reques.getTrinket()) {
+		if (request.getTrinket() != null && request.getTrinket()) {
 			List<Treasure> items = treasureRepo.findAllByTypeIn(EnumSet.range(TreasureType.BAUBLE, TreasureType.IDR_TRINKET));
 			List<ItemApi> trinkets = new ArrayList<>();
 			for (int i = 0; i < 1 + Dice.d12.roll(); i++) {
@@ -388,7 +388,7 @@ public class TreasuryApiController {
 	}
 
 	private List<MagicItemApi> getMagicItems(Integer result, int start, int end, String tableName, int count,
-			boolean unique) {
+											 RequestTreasuryApi request) {
 		Set<String> names = new HashSet<>();
 		List<MagicItemApi> list = new ArrayList<>();
 		if (result >= start) {
@@ -406,7 +406,7 @@ public class TreasuryApiController {
 					}
 					if (tableName.equals("В")) {
 						if (ri >= 82 && ri <= 84) {
-							String effect = "";
+							String effect;
 							int er = Dice.roll(Dice.d100);
 							if (er <= 15) {
 								effect = "веер";
@@ -423,7 +423,7 @@ public class TreasuryApiController {
 							}
 							itemApi.changeName("(Эффект: " + effect + ")");
 						} else if (ri >= 85 && ri <= 87) {
-							String effect = "";
+							String effect;
 							int er = Dice.roll(Dice.d100);
 							if (er <= 10) {
 								effect = "Аберрации";
@@ -500,9 +500,6 @@ public class TreasuryApiController {
 							itemApi.changeName("(полулаты)");
 							break;
 						case 65:
-							itemApi.changeName("(кираса)");
-							itemApi.setRarity(Rarity.UNCOMMON);
-							break;
 						case 66:
 							itemApi.changeName("(кираса)");
 							itemApi.setRarity(Rarity.UNCOMMON);
@@ -644,7 +641,7 @@ public class TreasuryApiController {
 						} else if (rb < 11) {
 							itemApi.changeName("(снаряды для пращи)");
 						}
-					} else if (itemApi.getName().getRus().contains("Свиток заклинания")) {
+					} else if (itemApi.getName().getRus().contains("Свиток заклинания") && request.getScroll()) {
 						if (itemApi.getName().getRus().contains("заговор")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 0, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
@@ -773,7 +770,7 @@ public class TreasuryApiController {
 					} else if (itemApi.getName().getRus().contains("Камень элементаля")) {
 						switch (Dice.roll(Dice.d4)) {
 						case 1:
-							itemApi.changeName("Изумруд	(элементаль воды)");
+							itemApi.changeName("Изумруд (элементаль воды)");
 							break;
 						case 2:
 							itemApi.changeName("Синий сапфир элементаль воздуха");
@@ -785,10 +782,27 @@ public class TreasuryApiController {
 							itemApi.changeName("Красный корунд (элементаль огня)");
 							break;
 						}
-					} else if (itemApi.getName().getRus().contains("Свиток защиты")) {
-						// int roll = Dice.d100.roll();
+					} else if (itemApi.getName().getRus().contains("Свиток защиты") && request.getScroll()) {
+						int roll = Dice.d100.roll();
+						if (roll <= 10) {
+							itemApi.changeName("Свиток защиты (Аберрации)");
+						} else if (roll >= 11 && roll <= 20) {
+							itemApi.changeName("Свиток защиты (Звери)");
+						} else if (roll >= 21 && roll <= 45) {
+							itemApi.changeName("Свиток защиты (Исчадия)");
+						} else if (roll >= 46 && roll <= 55) {
+							itemApi.changeName("Свиток защиты (Небожители)");
+						} else if (roll >= 56 && roll <= 75) {
+							itemApi.changeName("Свиток защиты (Нежить)");
+						} else if (roll >= 76 && roll <= 80) {
+							itemApi.changeName("Свиток защиты (Растения)");
+						} else if (roll >= 81 && roll <= 90) {
+							itemApi.changeName("Свиток защиты (Феи)");
+						} else {
+							itemApi.changeName("Свиток защиты (Элементали)");
+						}
 					}
-					if (unique) {
+					if (request.getUnique()) {
 						if (names.contains(itemApi.getName().getRus())) {
 							count++;
 							continue;
