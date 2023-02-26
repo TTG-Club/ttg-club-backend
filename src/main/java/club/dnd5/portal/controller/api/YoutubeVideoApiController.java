@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.YoutubeVideoApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.YoutubeVideosRepository;
@@ -34,13 +35,7 @@ public class YoutubeVideoApiController {
 	@Operation(summary = "Get last added video")
 	@GetMapping(value = "/last")
 	public ResponseEntity<YoutubeVideoApi> getLastVideo() {
-		YoutubeVideo video = youtubeVideosRepository.findLastAdded();
-
-		if (video != null) {
-			return ResponseEntity.ok(new YoutubeVideoApi(video));
-		}
-
-		return ResponseEntity.internalServerError().build();
+		return ResponseEntity.ok(new YoutubeVideoApi(youtubeVideosRepository.findLastAdded().orElseThrow(PageNotFoundException::new)));
 	}
 
 	@Operation(summary = "Adding new video")
