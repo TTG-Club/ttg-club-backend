@@ -184,11 +184,11 @@ public class AuthApiController {
 	@Operation(summary = "Check token exist")
 	@GetMapping("/token/validate")
 	public TokenValidationApi existToken(@RequestParam String token) {
-		Optional<VerificationToken> vereficationToken = verificationTokenRepository.findByToken(token);
-		if (!vereficationToken.isPresent()) {
+		Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+		if (!verificationToken.isPresent()) {
 			return new TokenValidationApi(false, "Неверный токен");
 		}
-		if (vereficationToken.get().getExpiryDate().before(new Date(Calendar.getInstance().getTime().getTime()))){
+		if (verificationToken.get().getExpiryDate().before(new Date(Calendar.getInstance().getTime().getTime()))){
 			return new TokenValidationApi(false, "Время использование токена истекло!");
 		}
 		return new TokenValidationApi(true, "");
