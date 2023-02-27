@@ -41,7 +41,7 @@ public class SpellController {
 		model.addAttribute("metaTitle", String.format("%s (%s)", spell.getName(), spell.getEnglishName()) + " | Заклинания D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, spell.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s %s, %s", (spell.getLevel() == 0 ? "Заговор" : spell.getLevel() + " уровень"), spell.getName(), spell.getSchool().getName()));
-		model.addAttribute("metaImage", String.format("https://image.ttg.club:8089/magic/%s.png", StringUtils.capitalize(spell.getSchool().name().toLowerCase())));
+		model.addAttribute("metaImage", String.format("https://img.ttg.club/magic/%s.png", StringUtils.capitalize(spell.getSchool().name().toLowerCase())));
 		model.addAttribute("menuTitle", "Заклинания");
 		return "spa";
 	}

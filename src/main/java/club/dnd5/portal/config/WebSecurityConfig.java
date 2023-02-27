@@ -83,6 +83,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         .antMatchers("/swagger-resources/**").permitAll()
         .antMatchers("/swagger-ui.html").permitAll()
         .antMatchers(HttpMethod.GET, "/**").permitAll()
+        .antMatchers(HttpMethod.HEAD, "/**").permitAll()
         .anyRequest()
         .authenticated();
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -105,7 +106,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 			 .addMapping("/**")
 			 .allowedOrigins(
 				 "https://ttg.club/",
-				 "https://dev.ttg.club/"
+				 "https://dev.ttg.club/",
+				 "https://transfer.ttg.club/",
+				 "http://transfer.ttg.club/"
+
 			 )
 			 .allowedMethods("*")
 			 .allowCredentials(true);

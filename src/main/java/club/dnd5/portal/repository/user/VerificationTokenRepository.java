@@ -6,8 +6,10 @@ import org.springframework.stereotype.Repository;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.VerificationToken;
 
+import java.util.Optional;
+
 @Repository
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
-    VerificationToken findByToken(String token);
+    Optional<VerificationToken> findByToken(String token);
     VerificationToken findByUser(User user);
 }

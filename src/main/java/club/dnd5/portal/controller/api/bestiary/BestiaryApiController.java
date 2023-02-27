@@ -1,46 +1,21 @@
 package club.dnd5.portal.controller.api.bestiary;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.servlet.http.HttpServletResponse;
-
-
-import club.dnd5.portal.dto.api.bestiary.BeastFilter;
-import club.dnd5.portal.exception.PageNotFoundException;
-
-import club.dnd5.portal.model.DamageType;
-import club.dnd5.portal.model.creature.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
+import club.dnd5.portal.dto.api.bestiary.BeastFilter;
 import club.dnd5.portal.dto.api.bestiary.BeastlRequesApi;
-import club.dnd5.portal.model.CreatureSize;
-import club.dnd5.portal.model.CreatureType;
-import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.dto.fvtt.export.FBeastiary;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.dto.fvtt.plutonium.FBeast;
+import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.CreatureSize;
+import club.dnd5.portal.model.CreatureType;
+import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.creature.*;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
@@ -48,6 +23,22 @@ import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.datatables.mapping.Column;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.Search;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Tag(name = "Bestiary", description = "The Bestiary API")
 @RestController
@@ -117,7 +108,7 @@ public class BestiaryApiController {
 			}
 		}
 		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
-		if (!filter.map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
+		if (filter.isPresent() && filter.map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
 		}
 		if (!filter.map(BeastFilter::getChallengeRatings).orElseGet(Collections::emptyList).isEmpty()) {
