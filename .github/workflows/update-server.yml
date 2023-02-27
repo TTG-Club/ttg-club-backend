@@ -24,21 +24,21 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            docker stop devdnd5club && docker rm devdnd5club
+            docker stop ttg-app-dev && docker rm ttg-app-dev
             docker pull magistrus/dnd5club:latest
             docker run \
-              --network dev-dnd5-mysql-new \
-              --name devdnd5club \
-              -p 9393:8080 \
+              --network ttg-network-dev \
+              --name ttg-app-dev \
+              -p 9090:8080 \
               -d \
               -e spring.profiles.active=dev \
               -e frontend.application.sha=$(echo -n $(uuidgen) | shasum -a 256 | tr -d "\n *-") \
-              -e dbhost=mysql-dev \
+              -e dbhost=ttg-db-dev \
               -e dbport=3306 \
-              -e dbuser=${{ secrets.DB_USER  }} \
+              -e dbuser=${{ secrets.DB_USER }} \
               -e dbpassword=${{ secrets.DB_PASSWORD }} \
               -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
               -e dbname=dnd5 magistrus/dnd5club
@@ -53,21 +53,21 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            docker stop dnd5club && docker rm dnd5club
+            docker stop ttg-app-prod && docker rm ttg-app-prod
             docker pull magistrus/dnd5club:latest
             docker run \
-              --network dnd5-mysql-new \
-              --name dnd5club \
-              -p 9090:8080 \
+              --network ttg-network-prod \
+              --name ttg-app-prod \
+              -p 9393:8080 \
               -d \
               -e spring.profiles.active=prod \
               -e frontend.application.sha=$(echo -n $(uuidgen) | shasum -a 256 | tr -d "\n *-") \
-              -e dbhost=mysql-new \
-              -e dbport=3306 \
-              -e dbuser=${{ secrets.DB_USER  }} \
+              -e dbhost=ttg-db-prod \
+              -e dbport=23306 \
+              -e dbuser=${{ secrets.DB_USER }} \
               -e dbpassword=${{ secrets.DB_PASSWORD }} \
               -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
               -e dbname=dnd5 magistrus/dnd5club
