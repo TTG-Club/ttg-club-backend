@@ -105,7 +105,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 			 .addMapping("/**")
 			 .allowedOrigins(
 				 "https://ttg.club/",
-				 "https://*.ttg.club/"
+				 "https://dev.ttg.club/",
+				 "https://transfer.ttg.club/",
+				 "http://transfer.ttg.club/"
+
 			 )
 			 .allowedMethods("*")
 			 .allowCredentials(true);
