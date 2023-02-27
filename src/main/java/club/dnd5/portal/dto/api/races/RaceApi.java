@@ -40,9 +40,9 @@ public class RaceApi {
 			url = String.format("/races/%s/%s", race.getParent().getUrlName(), race.getUrlName());
 		}
 		type = new SourceTypeApi(race.getBook().getType().getName(), race.getBook().getType().ordinal());
-		image = String.format("https://image.ttg.club:8089/races/background/race-%s.webp", race.getEnglishName().replace(' ', '-').toLowerCase());
+		image = String.format("https://img.ttg.club/races/background/race-%s.webp", race.getEnglishName().replace(' ', '-').toLowerCase());
 		if (race.getParent() != null) {
-			image = String.format("https://image.ttg.club:8089/races/background/race-%s.webp", race.getParent().getEnglishName().replace(' ', '-').toLowerCase());
+			image = String.format("https://img.ttg.club/races/background/race-%s.webp", race.getParent().getEnglishName().replace(' ', '-').toLowerCase());
 		}
 		abilities = race.getAbilityValueBonuses()
 				.stream()
