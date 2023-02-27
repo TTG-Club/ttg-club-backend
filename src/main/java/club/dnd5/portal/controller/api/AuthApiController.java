@@ -1,5 +1,7 @@
 package club.dnd5.portal.controller.api;
 
+import java.sql.Date;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -8,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import club.dnd5.portal.dto.api.TokenValidationApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -178,9 +181,16 @@ public class AuthApiController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/token/exist")
-	public ResponseEntity<?> existToken(String token) {
-		verificationTokenRepository.findByToken(token).orElseThrow(PageNotFoundException::new);
-		return ResponseEntity.ok().build();
+	@Operation(summary = "Check token exist")
+	@GetMapping("/token/validate")
+	public TokenValidationApi existToken(@RequestParam String token) {
+		Optional<VerificationToken> vereficationToken = verificationTokenRepository.findByToken(token);
+		if (!vereficationToken.isPresent()) {
+			return new TokenValidationApi(false, "Неверный токен");
+		}
+		if (vereficationToken.get().getExpiryDate().before(new Date(Calendar.getInstance().getTime().getTime()))){
+			return new TokenValidationApi(false, "Время использование токена истекло!");
+		}
+		return new TokenValidationApi(true, "");
 	}
 }
