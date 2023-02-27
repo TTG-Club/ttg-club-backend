@@ -1,34 +1,12 @@
 package club.dnd5.portal.controller.api;
 
-import java.sql.Date;
-import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Optional;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import club.dnd5.portal.dto.api.TokenValidationApi;
-import club.dnd5.portal.exception.PageNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
 import club.dnd5.portal.dto.api.UserApi;
 import club.dnd5.portal.dto.user.ChangePassword;
 import club.dnd5.portal.dto.user.LoginDto;
 import club.dnd5.portal.dto.user.SignUpDto;
 import club.dnd5.portal.dto.user.UserDto;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.VerificationToken;
@@ -40,6 +18,25 @@ import club.dnd5.portal.security.JwtTokenProvider;
 import club.dnd5.portal.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.sql.Date;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Optional;
 
 @Tag(name = "User", description = "The User API")
 @RestController
