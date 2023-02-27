@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import club.dnd5.portal.dto.api.UserApi;
 import club.dnd5.portal.dto.user.ChangePassword;
@@ -58,7 +55,7 @@ public class AuthApiController {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Autowired
 	private VerificationTokenRepository verificationTokenRepository;
 
@@ -147,20 +144,18 @@ public class AuthApiController {
 		}
 		return ResponseEntity.ok().build();
 	}
-	
+
 	@Operation(summary = "Change password by token")
 	@PostMapping("/change/password")
 	public ResponseEntity<?> changePassword(@RequestBody ChangePassword passwordDto) {
 		if (passwordDto.getResetToken() != null) {
-			VerificationToken token = verificationTokenRepository.findByToken(passwordDto.getResetToken());
-			if (token != null) {
-				User user = token.getUser();
-				user.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
-				userRepository.save(user);
-				token.setExpiryDate(VerificationToken.calculateExpiryDate(0));
-				verificationTokenRepository.save(token);
-				return ResponseEntity.ok().build();
-			}
+			VerificationToken token = verificationTokenRepository.findByToken(passwordDto.getResetToken()).orElseThrow(PageNotFoundException::new);
+			User user = token.getUser();
+			user.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
+			userRepository.save(user);
+			token.setExpiryDate(VerificationToken.calculateExpiryDate(0));
+			verificationTokenRepository.save(token);
+			return ResponseEntity.ok().build();
 		}
 		else if (passwordDto.getUserToken() != null) {
 			String userName = tokenProvider.getUsernameFromJWT(passwordDto.getUserToken());
@@ -174,12 +169,18 @@ public class AuthApiController {
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
-	
+
 	@Operation(summary = "Send token for reset password by email")
 	@GetMapping("/change/password")
-	public ResponseEntity<UserApi> resetUserPassword(String email) {
+	public ResponseEntity<UserApi> changeUserPassword(String email) {
 		Optional<User> user = userRepository.findByEmail(email);
 		emailService.changePassword(user.get());
+		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/token/exist")
+	public ResponseEntity<?> existToken(String token) {
+		verificationTokenRepository.findByToken(token).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok().build();
 	}
 }

@@ -7,6 +7,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.validation.Valid;
 
+import club.dnd5.portal.exception.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -61,6 +62,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public VerificationToken getVerificationToken(String token) {
-		return tokenRepository.findByToken(token);
+		return tokenRepository.findByToken(token).orElseThrow(PageNotFoundException::new);
 	}
 }

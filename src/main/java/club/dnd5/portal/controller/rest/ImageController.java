@@ -27,6 +27,7 @@ public class ImageController {
 	public String getImage(@PathVariable ImageType type, @PathVariable Integer id) {
 		return repo.findAllByTypeAndRefId(type, id).stream().findFirst().orElse(getDefault(type));
 	}
+
 	@GetMapping("/images/{type}/{id}")
 	public Collection<String> getImages(@PathVariable ImageType type, @PathVariable Integer id) {
 		Collection<String> images = repo.findAllByTypeAndRefId(type, id);
