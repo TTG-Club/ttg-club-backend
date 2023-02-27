@@ -76,7 +76,7 @@ public class SpellApiController {
 		Specification<Spell> specification = null;
 
 		DataTablesInput input = new DataTablesInput();
-		List<Column> columns = new ArrayList<Column>(3);
+		List<Column> columns = new ArrayList<>(3);
 		Column column = new Column();
 		column.setData("name");
 		column.setName("name");
@@ -404,7 +404,7 @@ public class SpellApiController {
 		durationFilter.setValues(values);
 		otherFilters.add(durationFilter);
 
-		otherFilters.add(getCompomemtsFilter());
+		otherFilters.add(getComponentsFilter());
 
 		filters.setOther(otherFilters);
 		return filters;
@@ -421,7 +421,7 @@ public class SpellApiController {
 		}
 		else {
 			otherFilters.add(getLevelsFilter(heroClass.getSpellcasterType().getMaxSpellLevel()));
-		}		otherFilters.add(getCompomemtsFilter());
+		}		otherFilters.add(getComponentsFilter());
 		otherFilters.add(getSchoolsFilter());
 
 		List<FilterApi> customFilters = new ArrayList<>();
@@ -454,7 +454,7 @@ public class SpellApiController {
 		else {
 			otherFilters.add(getLevelsFilter(heroClass.getSpellcasterType().getMaxSpellLevel()));
 		}
-		otherFilters.add(getCompomemtsFilter());
+		otherFilters.add(getComponentsFilter());
 		otherFilters.add(getSchoolsFilter());
 
 		List<FilterApi> customFilters = new ArrayList<>();
@@ -499,7 +499,7 @@ public class SpellApiController {
 		return schoolSpellFilter;
 	}
 
-	private FilterApi getCompomemtsFilter() {
+	private FilterApi getComponentsFilter() {
 		FilterApi componentsSpellFilter = new FilterApi("Компоненты", "components");
 		List<FilterValueApi> componentValues = new ArrayList<>();
 		componentValues.add(new FilterValueApi("вербальный", "1"));

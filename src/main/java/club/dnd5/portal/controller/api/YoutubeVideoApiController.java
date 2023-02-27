@@ -13,18 +13,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Tag(name = "Youtube", description = "The Youtube API")
 @RestController
 @RequestMapping(value = "/api/v1/youtube")
 public class YoutubeVideoApiController {
+	private static final Set<String> ROLES = new HashSet<>(Arrays.asList("MODERATOR", "ADMIN"));
+
 	@Autowired
 	YoutubeVideosRepository youtubeVideosRepository;
 	@Autowired
@@ -46,10 +52,10 @@ public class YoutubeVideoApiController {
 			return ResponseEntity.badRequest().body("Youtube video ID is incorrect!");
 		}
 
-		User user = getCurrentUser();
-		boolean roleSuccess = user.getRoles().stream().anyMatch(role -> (role.getName().equals("MODERATOR") || role.getName().equals("ADMIN")));
 
-		if (!roleSuccess) {
+		SecurityContext context = SecurityContextHolder.getContext();
+
+		if (!context.getAuthentication().getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(ROLES::contains)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission!");
 		}
 
@@ -62,6 +68,7 @@ public class YoutubeVideoApiController {
 			video.setOrder(0);
 		}
 
+		User user = getCurrentUser();
 		video.setUser(user);
 		video.setCreated(LocalDateTime.now());
 
@@ -73,7 +80,6 @@ public class YoutubeVideoApiController {
 	private User getCurrentUser() {
 		SecurityContext context = SecurityContextHolder.getContext();
 		String userName = context.getAuthentication().getName();
-
 		return userRepository.findByEmailOrUsername(userName, userName)
 				.orElseThrow(() -> new UsernameNotFoundException(userName));
 	}
