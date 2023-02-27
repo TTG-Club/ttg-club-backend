@@ -2,10 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}" th:data-theme="'theme-' + ${themeName}">
 	<head>
 	 	<th:block th:fragment="mainLayout" >
-			<th:block th:unless="${profile eq 'prod'}">
-				<meta name="build-sha" th:content="${version}">
-				<meta name="build-type" th:content="${profile}">
-			</th:block>
+            <meta name="build-sha" th:content="${version}">
+            <meta th:if="${profile eq 'prod'}" name="build-type" th:content="${profile}">
 
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
