@@ -144,7 +144,7 @@ public class MagicItem {
 		case COMMON:
 			return "(1к6 + 1) * 10";
 		case UNCOMMON:
-			return "(1к6 + 1) * 100";
+			return "(1к6) * 100";
 		case RARE:
 			return "2к10 * 1000";
 		case VERY_RARE:
