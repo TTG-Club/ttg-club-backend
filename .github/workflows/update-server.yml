@@ -66,7 +66,7 @@ jobs:
               -e spring.profiles.active=prod \
               -e frontend.application.sha=$(echo -n $(uuidgen) | shasum -a 256 | tr -d "\n *-") \
               -e dbhost=ttg-db-prod \
-              -e dbport=23306 \
+              -e dbport=3306 \
               -e dbuser=${{ secrets.DB_USER }} \
               -e dbpassword=${{ secrets.DB_PASSWORD }} \
               -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
