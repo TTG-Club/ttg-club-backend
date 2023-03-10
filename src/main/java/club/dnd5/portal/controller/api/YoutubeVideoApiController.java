@@ -3,6 +3,7 @@ package club.dnd5.portal.controller.api;
 import club.dnd5.portal.dto.api.YoutubeVideoApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.YoutubeVideo;
+import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.YoutubeVideosRepository;
 import club.dnd5.portal.repository.user.RoleRepository;
@@ -35,8 +36,6 @@ public class YoutubeVideoApiController {
 	YoutubeVideosRepository youtubeVideosRepository;
 	@Autowired
 	UserRepository userRepository;
-	@Autowired
-	RoleRepository roleRepository;
 
 	@Operation(summary = "Get last added video")
 	@GetMapping(value = "/last")
@@ -52,10 +51,8 @@ public class YoutubeVideoApiController {
 			return ResponseEntity.badRequest().body("Youtube video ID is incorrect!");
 		}
 
-
-		SecurityContext context = SecurityContextHolder.getContext();
-
-		if (!context.getAuthentication().getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(ROLES::contains)) {
+		User user = getCurrentUser();
+		if (!user.getRoles().stream().map(Role::getName).anyMatch(ROLES::contains)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission!");
 		}
 
@@ -68,7 +65,6 @@ public class YoutubeVideoApiController {
 			video.setOrder(0);
 		}
 
-		User user = getCurrentUser();
 		video.setUser(user);
 		video.setCreated(LocalDateTime.now());
 
