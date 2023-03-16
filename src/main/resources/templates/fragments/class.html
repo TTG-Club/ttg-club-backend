@@ -60,7 +60,7 @@
 									th:data-tippy-url="|/classes/feature/${trait.id}|"
                                    v-tippy="'Думаю...'"
 								></a>
-								<a th:if=${trait.architype} th:href="${'#c' + trait.id}" th:utext="|${trait.name.toLowerCase()}${iter.last or iter.size eq 1 ? '': ', '}|"></a>
+								<a th:if=${trait.architype} th:href="${'#arc'}" th:utext="|${trait.name.toLowerCase()}${iter.last or iter.size eq 1 ? '': ', '}|"></a>
 							</th:block></td>
 						<td th:each="featureLevel : *{featureLevelDefenitions}" th:with="byLevel = ${featureLevel.getByLevel(level)}"><th:block th:if="${featureLevel.prefix ne null and byLevel gt 0}"
 								th:text="${featureLevel.prefix}"
@@ -128,8 +128,8 @@
 				</div>
 			</details>
 		</th:block>
+		<span id="arc"/>
 		<th:block th:each="archetype : *{archetypes}">
-			<details class="spoiler feet_show archetype_item" th:classappend="${archetype.book.type.name() eq 'CUSTOM' ? 'custom_source hide_block': archetype.book.type.name() eq 'SETTING' ? 'setting_source hide_block':''}" th:data-arch-source="${archetype.book.source}">
 				<summary class="h4 header_separator">
 					<span th:text="${archetype.name}"></span><span class="tip" th:text="${archetype.book.source}" th:title="${archetype.book.name}"></span>
 				</summary>
