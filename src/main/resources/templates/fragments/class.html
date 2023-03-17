@@ -60,7 +60,10 @@
 									th:data-tippy-url="|/classes/feature/${trait.id}|"
                                    v-tippy="'Думаю...'"
 								></a>
-								<a th:if=${trait.architype} th:href="${'#arc'}" th:utext="|${trait.name.toLowerCase()}${iter.last or iter.size eq 1 ? '': ', '}|"></a>
+								<a th:if=${trait.architype} th:href="${'#arc'}" th:utext="|${trait.name.toLowerCase()}${iter.last or iter.size eq 1 ? '': ', '}|"
+								   th:data-tippy-url="|/classes/feature/${trait.id}|"
+								   v-tippy="'Думаю...'"
+								></a>
 							</th:block></td>
 						<td th:each="featureLevel : *{featureLevelDefenitions}" th:with="byLevel = ${featureLevel.getByLevel(level)}"><th:block th:if="${featureLevel.prefix ne null and byLevel gt 0}"
 								th:text="${featureLevel.prefix}"
