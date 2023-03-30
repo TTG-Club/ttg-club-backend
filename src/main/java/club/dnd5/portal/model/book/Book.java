@@ -38,6 +38,7 @@ public class Book implements Serializable, Comparable<Book>{
 	private TypeBook type;
 
 	private Integer year;
+	private Boolean legacy;
 
 	public Book(String source) {
 		this.source = source;

@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @JsonInclude(Include.NON_NULL)
 
 @NoArgsConstructor
@@ -22,6 +24,7 @@ public class SourceApi {
 	@NotNull
 	private String name;
 	private Boolean homebrew;
+	private Boolean legacy;
 	private Short page;
 
 	public SourceApi(String  shortName, String type, String name) {
@@ -36,11 +39,14 @@ public class SourceApi {
 		if (book.getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
+		if (Objects.nonNull(legacy)) {
+			legacy = Boolean.TRUE;
+		}
 	}
 
 	public SourceApi(Book book, Short page) {
 		this(book);
-		if (page != null) {
+		if (Objects.nonNull(page)) {
 			this.page = page;
 		}
 	}
