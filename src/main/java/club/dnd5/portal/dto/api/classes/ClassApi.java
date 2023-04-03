@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import club.dnd5.portal.model.book.TypeBook;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -51,7 +52,13 @@ public class ClassApi {
 					.collect(Collectors.toList());
 		}
 		if (heroClass.isSidekick()) {
-			group = new GroupApi("Напарники", (byte) 0);
+			group = new GroupApi("Напарники", (byte) 2);
+		}
+		else if (heroClass.getBook().getType() == TypeBook.CUSTOM) {
+			group = new GroupApi("Homebrew", (byte) 0);
+		}
+		else if (heroClass.getBook().getType() == TypeBook.TEST) {
+			group = new GroupApi("Материал для тестирования", (byte) 1);
 		}
 		if (request.getFilter() != null && request.getFilter().getBooks() != null && !request.getFilter().getBooks().isEmpty()) {
 			Set<String> books = new HashSet<>(request.getFilter().getBooks());

@@ -46,30 +46,25 @@ public class ClassApiController {
 	@Autowired
 	private ImageRepository imageRepository;
 
-	@PostMapping("/api/v1/filters/classes")
-	public FilterApi getClassFilter() {
-		return getClassFilters();
-	}
-
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
 		Specification<HeroClass> specification = null;
 		if (request.getFilter() != null) {
 			if (!CollectionUtils.isEmpty(request.getFilter().getHitdice())) {
-				specification = SpecificationUtil.getAndSpecification(specification,
+				specification = SpecificationUtil.getAndSpecification(null,
 						(root, query, cb) -> root.get("diceHp").in(request.getFilter().getHitdice()));
 			}
 		}
 		if (request.getSearch() != null && request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
 			return classRepo.findAll(specification)
 					.stream()
-					.map(cclass -> new ClassApi(cclass, request))
+					.map(clazz -> new ClassApi(clazz, request))
 					.filter(c -> !c.getArchetypes().isEmpty())
 					.collect(Collectors.toList());
 		}
 		return classRepo.findAll(specification)
 				.stream()
-				.map(cclass -> new ClassApi(cclass, request))
+				.map(clazz -> new ClassApi(clazz, request))
 				.filter(c -> request.getFilter() != null ?
 						request.getFilter().getBooks().contains(c.getSource().getShortName()) || (c.isSidekick() && request.getFilter().getBooks().contains("TCE"))
 						: true)
@@ -91,7 +86,10 @@ public class ClassApiController {
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.SUBCLASS, archetype.getId());
 		return ResponseEntity.ok(new ClassDetailApi(archetype, images, request));
 	}
-
+	@PostMapping("/api/v1/filters/classes")
+	public FilterApi getClassFilter() {
+		return getClassFilters();
+	}
 	private FilterApi getClassFilters() {
 		FilterApi filters = new FilterApi();
 		List<FilterApi> classSources = new ArrayList<>();
