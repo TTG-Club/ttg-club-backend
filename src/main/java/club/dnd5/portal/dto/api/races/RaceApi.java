@@ -5,6 +5,7 @@ import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.dto.api.classes.SourceTypeApi;
+import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.races.Race;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -55,6 +56,12 @@ public class RaceApi {
 				.filter(r -> !r.isView())
 				.map(RaceApi::new)
 				.collect(Collectors.toList());
+		}
+		if (race.getBook().getType() == TypeBook.CUSTOM) {
+			group = new GroupApi("Расы Homebrew", (byte) 0);
+		}
+		else if (race.getBook().getType() == TypeBook.TEST) {
+			group = new GroupApi("Расы Unearthed Arcana", (byte) 1);
 		}
 	}
 }
