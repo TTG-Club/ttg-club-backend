@@ -51,14 +51,14 @@ public class ClassApi {
 					.stream().map(NamedListApi::new)
 					.collect(Collectors.toList());
 		}
-		if (heroClass.isSidekick()) {
-			group = new GroupApi("Напарники", (byte) 2);
-		}
-		else if (heroClass.getBook().getType() == TypeBook.CUSTOM) {
-			group = new GroupApi("Homebrew", (byte) 0);
+		if (heroClass.getBook().getType() == TypeBook.CUSTOM) {
+			group = new GroupApi("Классы Homebrew", (byte) 0);
 		}
 		else if (heroClass.getBook().getType() == TypeBook.TEST) {
-			group = new GroupApi("Материал для тестирования", (byte) 1);
+			group = new GroupApi("Классы из UA", (byte) 1);
+		}
+		if (heroClass.isSidekick()) {
+			group = new GroupApi("Напарники", (byte) 2);
 		}
 		if (request.getFilter() != null && request.getFilter().getBooks() != null && !request.getFilter().getBooks().isEmpty()) {
 			Set<String> books = new HashSet<>(request.getFilter().getBooks());
