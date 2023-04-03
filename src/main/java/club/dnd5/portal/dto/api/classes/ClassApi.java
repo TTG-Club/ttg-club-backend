@@ -52,13 +52,13 @@ public class ClassApi {
 					.collect(Collectors.toList());
 		}
 		if (heroClass.getBook().getType() == TypeBook.CUSTOM) {
-			group = new GroupApi("Классы Homebrew", (byte) 0);
+			group = new GroupApi("Классы Homebrew", (byte) 2);
 		}
 		else if (heroClass.getBook().getType() == TypeBook.TEST) {
 			group = new GroupApi("Классы из UA", (byte) 1);
 		}
 		if (heroClass.isSidekick()) {
-			group = new GroupApi("Напарники", (byte) 2);
+			group = new GroupApi("Напарники", (byte) 0);
 		}
 		if (request.getFilter() != null && request.getFilter().getBooks() != null && !request.getFilter().getBooks().isEmpty()) {
 			Set<String> books = new HashSet<>(request.getFilter().getBooks());
