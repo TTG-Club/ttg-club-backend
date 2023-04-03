@@ -58,15 +58,15 @@ public class ClassApiController {
 		if (request.getSearch() != null && request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
 			return classRepo.findAll(specification)
 					.stream()
-					.map(clazz -> new ClassApi(clazz, request))
+					.map(classObject -> new ClassApi(classObject, request))
 					.filter(c -> !c.getArchetypes().isEmpty())
 					.collect(Collectors.toList());
 		}
 		return classRepo.findAll(specification)
 				.stream()
-				.map(clazz -> new ClassApi(clazz, request))
-				.filter(c -> request.getFilter() != null ?
-						request.getFilter().getBooks().contains(c.getSource().getShortName()) || (c.isSidekick() && request.getFilter().getBooks().contains("TCE"))
+				.map(classObject -> new ClassApi(classObject, request))
+				.filter(classApi -> request.getFilter() != null ?
+						request.getFilter().getBooks().contains(classApi.getSource().getShortName()) || (classApi.isSidekick() && request.getFilter().getBooks().contains("TCE"))
 						: true)
 				.collect(Collectors.toList());
 	}
