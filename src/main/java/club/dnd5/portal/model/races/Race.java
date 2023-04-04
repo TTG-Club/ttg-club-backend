@@ -49,7 +49,7 @@ public class Race implements Serializable {
 	private Integer id;
 	private String name;
 	private String altName;
-
+	private String url;
 	@Column(unique = true)
 	private String englishName;
 	private Integer minAge;
