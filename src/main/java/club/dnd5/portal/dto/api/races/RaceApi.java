@@ -14,6 +14,7 @@ import lombok.Setter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
@@ -57,11 +58,14 @@ public class RaceApi {
 				.map(RaceApi::new)
 				.collect(Collectors.toList());
 		}
-		if (race.getBook().getType() == TypeBook.CUSTOM) {
-			group = new GroupApi("Расы Homebrew", (byte) 0);
-		}
-		else if (race.getBook().getType() == TypeBook.TEST) {
-			group = new GroupApi("Расы Unearthed Arcana", (byte) 1);
+		if (Objects.nonNull(race.getOrigin())) {
+			group = new GroupApi("Происхождения", (byte) 0);
+		} else if (race.getBook().getSource().equals("MPMM")) {
+			group = new GroupApi("Расы из Монстры Мультивселенной", (byte) 1);
+		} else if (race.getBook().getType() == TypeBook.TEST) {
+			group = new GroupApi("Расы Unearthed Arcana", (byte) 2);
+		} else if (race.getBook().getType() == TypeBook.CUSTOM) {
+			group = new GroupApi("Расы Homebrew", (byte) 3);
 		}
 	}
 }
