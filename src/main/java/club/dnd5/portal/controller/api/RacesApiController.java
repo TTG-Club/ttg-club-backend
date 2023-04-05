@@ -79,7 +79,7 @@ public class RacesApiController {
 				(root, query, cb) -> cb.isNull(root.get("parent")));
 		}
 
-		if (request.getFilter()!=null) {
+		if (request.getFilter() != null) {
 			for (String ability : request.getFilter().getAbilities()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<AbilityType, Race> join = root.join("bonuses", JoinType.LEFT);
