@@ -24,7 +24,6 @@ import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.InfoPagesRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.classes.RaceRepository;
 import club.dnd5.portal.repository.datatable.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

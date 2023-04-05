@@ -6,7 +6,7 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.classes.RaceRepository;
+import club.dnd5.portal.repository.datatable.RaceRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;

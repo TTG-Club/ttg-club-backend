@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import club.dnd5.portal.repository.datatable.RaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +21,6 @@ import club.dnd5.portal.model.tavern.TavernaName;
 import club.dnd5.portal.model.tavern.TavernaPrefixName;
 import club.dnd5.portal.model.tavern.TavernaType;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.classes.RaceRepository;
 import club.dnd5.portal.repository.tavern.AtmosphereRepoditory;
 import club.dnd5.portal.repository.tavern.DrinkEffectsRepository;
 import club.dnd5.portal.repository.tavern.RandomEventRepository;
@@ -36,7 +36,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Controller
 public class TavernToolController {
 	private static final Random rnd = new Random();
-	private static final List<HabitatType> habitates = EnumSet.of(HabitatType.SWAMP, HabitatType.CITY,
+	private static final List<HabitatType> ENVIRONMENTS = EnumSet.of(HabitatType.SWAMP, HabitatType.CITY,
 			HabitatType.MOUNTAIN, HabitatType.VILLAGE, HabitatType.UNDERGROUND, HabitatType.ARCTIC, HabitatType.WATERS,
 			HabitatType.DESERT, HabitatType.GRASSLAND, HabitatType.FOREST, HabitatType.TROPICS).stream()
 			.collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class TavernToolController {
 	private TavernaDrinkRepository drinkRepo;
 	@Autowired
 	private DrinkEffectsRepository drinkEffectRepo;
-	
+
 	private Set<String> generatedNames = new HashSet<>();
 
 	@GetMapping("/tools/tavern")
@@ -137,14 +137,14 @@ public class TavernToolController {
 		}
 		return tavernName;
 	}
-	
-	@GetMapping("/tools/tavern/habitates/")
-	public String getHabitates(Model model) {
-		model.addAttribute("selected",  habitates.get(rnd.nextInt(habitates.size())));
-		model.addAttribute("habitates",  habitates);
-		return "tools/tavern :: habitates";
+
+	@GetMapping("/tools/tavern/environment/")
+	public String getEnvironment(Model model) {
+		model.addAttribute("selected",  ENVIRONMENTS.get(rnd.nextInt(ENVIRONMENTS.size())));
+		model.addAttribute("environments", ENVIRONMENTS);
+		return "tools/tavern :: environments";
 	}
-	
+
 	@GetMapping("/tools/tavern/atmosphere/")
 	@ResponseBody
 	public String getAtmosphere() {

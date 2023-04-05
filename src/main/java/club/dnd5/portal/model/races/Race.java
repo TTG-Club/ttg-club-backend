@@ -47,9 +47,9 @@ public class Race implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	private String url;
 	private String name;
 	private String altName;
-	private String url;
 	@Column(unique = true)
 	private String englishName;
 	private Integer minAge;

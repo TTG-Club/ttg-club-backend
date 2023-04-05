@@ -14,7 +14,8 @@ import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.races.Race;
 
 @Repository
-public interface RaceRepository extends JpaRepository<Race, String>, JpaSpecificationExecutor {
+public interface RaceRepository extends JpaRepository<Race, Integer>, JpaSpecificationExecutor {
+	Optional<Race> findByUrl(String url);
 	Optional<Race> findByEnglishName(String name);
 
 	@Query("SELECT r FROM Race r WHERE r.parent.englishName = :raceName AND r.englishName = :subraceName")
