@@ -1,21 +1,20 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.dto.api.GroupApi;
+import club.dnd5.portal.dto.api.SourceApi;
+import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.model.classes.archetype.Archetype;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import club.dnd5.portal.model.book.TypeBook;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import club.dnd5.portal.dto.api.GroupApi;
-import club.dnd5.portal.dto.api.SourceApi;
-import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.model.classes.archetype.Archetype;
-import lombok.Getter;
-import lombok.Setter;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -51,24 +50,25 @@ public class ClassApi {
 					.stream().map(NamedListApi::new)
 					.collect(Collectors.toList());
 		}
-		if (heroClass.getBook().getType() == TypeBook.CUSTOM) {
-			group = new GroupApi("Классы Homebrew", (byte) 2);
-		}
-		else if (heroClass.getBook().getType() == TypeBook.TEST) {
-			group = new GroupApi("Классы из UA", (byte) 1);
-		}
-		if (heroClass.isSidekick()) {
-			group = new GroupApi("Напарники", (byte) 0);
-		}
 		if (request.getFilter() != null && request.getFilter().getBooks() != null && !request.getFilter().getBooks().isEmpty()) {
 			Set<String> books = new HashSet<>(request.getFilter().getBooks());
  			archetypes = archetypes.stream().filter(a -> books.contains(a.getSource().getShortName())).collect(Collectors.toList());
 		}
-		if (!heroClass.isSidekick()) {
+		if (heroClass.getBook().getType() == TypeBook.OFFICAL) {
 			icon = String.format("class-%s", heroClass.getEnglishName().replace(' ', '-').toLowerCase());
 		}
 		if (heroClass.getArchetypeName() != null) {
 			archetypeName = heroClass.getArchetypeName();
+		}
+		switch (heroClass.getBook().getType()) {
+			case TEST:
+				group = new GroupApi("Классы из UA", (byte) 1);
+			case CUSTOM:
+				group = new GroupApi("Классы Homebrew", (byte) 2);
+			default:
+				if (heroClass.isSidekick()) {
+					group = new GroupApi("Напарники", (byte) 0);
+				}
 		}
 		sidekick = heroClass.isSidekick();
 		image = String.format("https://img.ttg.club/classes/background/class-%s.webp", heroClass.getEnglishName().replace(' ', '-').toLowerCase());
