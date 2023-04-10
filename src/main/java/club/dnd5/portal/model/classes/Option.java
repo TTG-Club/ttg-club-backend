@@ -74,7 +74,7 @@ public class Option {
 		BOMB_FORMULA("Формулы бомб", "Alchemist", true),
 		DISCOVERIES("Открытия","Alchemist", true),
 		TRANSPLANTS("Трансплантаты","Alchemist", true),
-		BONUS_DISCIPLINES("Трансплантаты","Mystic", false),
+		BONUS_DISCIPLINES("Псионические дисциплины","Mystic", false),
 		PSIONIC_TALANT("Псионические таланты", "Mystic", false);
 
 		private String name;
