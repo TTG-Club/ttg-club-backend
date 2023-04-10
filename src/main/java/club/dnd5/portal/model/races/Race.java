@@ -43,7 +43,7 @@ import lombok.Setter;
 @Table(name = "races")
 public class Race implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -75,12 +75,12 @@ public class Race implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, columnDefinition = "varchar(255) default MEDIUM")
 	private CreatureSize size;
-	
+
 	@Enumerated(EnumType.STRING)
 	private CreatureType type;
-	
+
 	private Integer darkvision;
-	
+
 	@Column(columnDefinition = "int default 30")
 	private int speed;
 	private Integer fly;
@@ -93,7 +93,12 @@ public class Race implements Serializable {
 	@OneToMany(mappedBy = "race", fetch = FetchType.LAZY)
 	private List<RaceNickname> nicknames;
 	private boolean view = true;
-	
+
+	/**
+	 * Происхождение
+	 */
+	private Boolean origin = true;
+
 	@OneToMany
 	@JoinColumn(name = "race_id")
 	private List<AbilityBonus> bonuses;
@@ -101,9 +106,9 @@ public class Race implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "race_spells", joinColumns = @JoinColumn(name = "race_id"))
 	private List<Spell> spells;
-	
+
 	private String icon;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
@@ -116,11 +121,11 @@ public class Race implements Serializable {
 		}
 		return name;
 	}
-	
+
 	public String getCapitalizeName() {
 		return StringUtils.capitalize(name);
 	}
-	
+
 	public String getAbilityBonuses() {
 		if (bonuses.size() == 6) {
 			return "+1 к каждой характеристике";
@@ -131,7 +136,7 @@ public class Race implements Serializable {
 		return bonuses.stream()
 				.map(b -> {
 					if (b.getAbility() == AbilityType.CHOICE_UNIQUE || b.getAbility() == AbilityType.CHOICE || b.getAbility() == AbilityType.ONE) {
-						return String.format("%s %+d", b.getAbility().getCyrilicName(), b.getBonus()); 
+						return String.format("%s %+d", b.getAbility().getCyrilicName(), b.getBonus());
 					}
 					else if (b.getAbility() == AbilityType.CHOICE_DOUBLE) {
 						return String.format("%s", b.getAbility().getCyrilicName());
@@ -154,11 +159,11 @@ public class Race implements Serializable {
 		}
 		return String.format("%d фт.", speed);
 	}
-	
+
 	public List<AbilityBonus> getAbilityValueBonuses() {
 		return bonuses;
 	}
-	
+
 	public String getFullNameAbilityBonuses() {
 		if (bonuses.size() == 6) {
 			return "+1 к каждой характеристике";
@@ -167,7 +172,7 @@ public class Race implements Serializable {
 				.map(b -> String.format("%s %+d", b.getAbility().getCyrilicName(), b.getBonus()))
 				.collect(Collectors.joining(", "));
 	}
-	
+
 	public String getCapName() {
 		return StringUtils.capitalize(name.toLowerCase());
 	}
@@ -210,17 +215,17 @@ public class Race implements Serializable {
 		return names.stream().collect(Collectors.groupingBy(RaceName::getSex,
 				Collectors.mapping(RaceName::getName, Collectors.toCollection(TreeSet::new))));
 	}
-	
+
 	public List<RaceNickname> getAllNicknames() {
 		return Stream.concat(nicknames.stream(), parent == null ? Stream.empty() : parent.getNicknames().stream()).collect(Collectors.toList());
 	}
-	
+
 	public Map<Sex, Set<String>> getAllNames() {
 		return Stream.concat(names.stream(), parent == null ? Stream.empty() : parent.names.stream())
 				.collect(Collectors.groupingBy(RaceName::getSex,
 						Collectors.mapping(RaceName::getName, Collectors.toCollection(TreeSet::new))));
 	}
-	
+
 	public Map<NicknameType, Set<String>> getNicknamesGroup() {
 		return nicknames.stream()
 				.collect(Collectors.groupingBy(RaceNickname::getType,
