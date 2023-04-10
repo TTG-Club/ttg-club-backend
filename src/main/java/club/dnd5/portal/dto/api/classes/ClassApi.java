@@ -54,7 +54,7 @@ public class ClassApi {
 			Set<String> books = new HashSet<>(request.getFilter().getBooks());
  			archetypes = archetypes.stream().filter(a -> books.contains(a.getSource().getShortName())).collect(Collectors.toList());
 		}
-		if (heroClass.getBook().getType() == TypeBook.OFFICAL) {
+		if (heroClass.getBook().getType() == TypeBook.OFFICAL && !heroClass.isSidekick()) {
 			icon = String.format("class-%s", heroClass.getEnglishName().replace(' ', '-').toLowerCase());
 		}
 		if (heroClass.getArchetypeName() != null) {

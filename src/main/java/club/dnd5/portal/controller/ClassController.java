@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Hidden
 @Controller
 public class ClassController {
-	private static final String BASE_URL = "https://ttg.club/classe";
+	private static final String BASE_URL = "https://ttg.club/classes";
 
 	private static final String[] prerequisites = { "Нет", " 5", " 6", " 7", " 9", "11", "12", "15", "17", "18" };
 
