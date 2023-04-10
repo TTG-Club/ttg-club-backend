@@ -63,12 +63,15 @@ public class ClassApi {
 		switch (heroClass.getBook().getType()) {
 			case TEST:
 				group = new GroupApi("Классы из UA", (byte) 1);
+				break;
 			case CUSTOM:
 				group = new GroupApi("Классы Homebrew", (byte) 2);
+				break;
 			default:
 				if (heroClass.isSidekick()) {
 					group = new GroupApi("Напарники", (byte) 0);
 				}
+				break;
 		}
 		sidekick = heroClass.isSidekick();
 		image = String.format("https://img.ttg.club/classes/background/class-%s.webp", heroClass.getEnglishName().replace(' ', '-').toLowerCase());

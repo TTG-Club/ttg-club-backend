@@ -33,19 +33,19 @@ public class Option {
 	private String name;
 	private String altName;
 	private String englishName;
-	
+
 	@ElementCollection(targetClass = OptionType.class)
 	@JoinTable(name = "option_types", joinColumns = @JoinColumn(name = "option_id"))
 	@Column(name = "option_type", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private List<OptionType> optionTypes;
-	
+
 	private String prerequisite;
 	private Integer level;
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
@@ -54,7 +54,7 @@ public class Option {
 	@AllArgsConstructor
 	@Getter
 	public enum OptionType {
-		WILD_SHAPE("Формы Дикого Облика: Друид", "Druid", false), 
+		WILD_SHAPE("Формы Дикого Облика: Друид", "Druid", false),
 		ARCANE_SHOT("Магические выстрелы: Воин Мистический Лучник", "Fighter", "Arcane_Archer", false),
 		METAMAGIC("Метамагия: Чародей", "Sorcerer", false),
 		ELDRITCH_INVOCATION("Воззвания: Колдун","Warlock", false),
@@ -64,25 +64,30 @@ public class Option {
 		RUNE("Руны: Рунический рыцарь", "Fighter", "Rune", false),
 		MANEUVER("Маневры: Воин Мастер боевых искуств", "Fighter","Battle_Master", false),
 		FIGHTING_STYLE("Боевые стили: Воин", "Fighter", false),
-		FIGHTING_STYLE_RANGER("Боевые стили: Следопыт", "Ranger", false), 
+		FIGHTING_STYLE_RANGER("Боевые стили: Следопыт", "Ranger", false),
 		FIGHTING_STYLE_PALADIN("Боевые стили: Паладин", "Paladin", false),
 		FIGHTING_STYLE_BARD("Боевые стили: Бард Колллегии Мечей", "Bard", "Swords", false),
 		FIGHTING_STYLE_BLOODHANTER("Боевые стили: Кровавый охотник", "Blood Hunter", true),
 		BLOOD_CURSE("Проклятья крови: Кровавый охотник", "Blood Hunter", true),
 		MUTAGEN("Мутагены: Кровавый охотник Ордена мутантов", "Blood Hunter", true),
-		PHILOSOPHICAL_SCHOOL("Философские школы: Волшебник Философ Академии","Wizard", true);
-		
+		PHILOSOPHICAL_SCHOOL("Философские школы: Волшебник Философ Академии","Wizard", true),
+		BOMB_FORMULA("Формулы бомб", "Alchemist", true),
+		DISCOVERIES("Открытия","Alchemist", true),
+		TRANSPLANTS("Трансплантаты","Alchemist", true),
+		BONUS_DISCIPLINES("Трансплантаты","Mystic", false),
+		PSIONIC_TALANT("Псионические таланты", "Mystic", false);
+
 		private String name;
 		private String className;
 		private String arhetypeName;
 		private boolean homebrew;
-		
+
 		OptionType(String name, String className, boolean homebrew){
 			this.name = name;
 			this.className = className;
 			this.homebrew = homebrew;
 		}
-		
+
 		public static OptionType parse(String type) {
 			return Arrays.asList(values()).stream()
 					.filter(t -> t.name.equals(type))
@@ -94,7 +99,7 @@ public class Option {
 			return name.substring(0, name.indexOf(":"));
 		}
 	}
-	
+
 	public String getUrlName() {
 		return englishName.toLowerCase().replace(' ', '_');
 	}
