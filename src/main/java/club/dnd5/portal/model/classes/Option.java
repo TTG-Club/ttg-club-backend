@@ -96,7 +96,7 @@ public class Option {
 		}
 
 		public String getDisplayName() {
-			return name.contains(":")? name.substring(0, name.indexOf(":")) : name;
+			return name.contains(":") ? name.substring(0, name.indexOf(":")) : name;
 		}
 	}
 
