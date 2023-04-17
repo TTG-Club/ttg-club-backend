@@ -2,6 +2,7 @@ package club.dnd5.portal.dto.api.spell;
 
 import javax.validation.constraints.NotNull;
 
+import club.dnd5.portal.model.splells.SpellTag;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -12,6 +13,9 @@ import club.dnd5.portal.model.splells.Spell;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -29,6 +33,7 @@ public class SpellApi {
 	protected ComponentsApi components = new ComponentsApi();
 	protected Boolean ritual;
 	protected Boolean concentration;
+	private Set<String> tags;
 	@NotNull
 	protected String url;
 	@NotNull
@@ -39,10 +44,10 @@ public class SpellApi {
 		level = spell.getLevel();
 		school = spell.getSchool().getName();
 		if (spell.getVerbalComponent()) {
-			components.setV(Boolean.TRUE);	
+			components.setV(Boolean.TRUE);
 		}
 		if (spell.getSomaticComponent()) {
-			components.setS(Boolean.TRUE);	
+			components.setS(Boolean.TRUE);
 		}
 		if (spell.getMaterialComponent()) {
 			components.setM(Boolean.TRUE);
@@ -55,6 +60,9 @@ public class SpellApi {
 		}
 		if (spell.getAdditionalType() != null) {
 			additionalType = spell.getAdditionalType();
+		}
+		if (!tags.isEmpty()) {
+			tags = spell.getTags().stream().map(SpellTag::getName).collect(Collectors.toSet());
 		}
 		url = String.format("/spells/%s", spell.getUrlName());
 		source = new SourceApi(spell.getBook());
