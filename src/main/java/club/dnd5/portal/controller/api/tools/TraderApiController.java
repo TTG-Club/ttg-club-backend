@@ -25,7 +25,7 @@ import club.dnd5.portal.model.items.Weapon;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ItemMagicTableRepository;
 import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
+import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -36,12 +36,12 @@ public class TraderApiController {
 	@Autowired
 	private MagicItemDatatableRepository magicItemRepo;
 	@Autowired
-	private SpellDatatableRepository spellRepo;
+	private SpellRepository spellRepo;
 	@Autowired
 	private WeaponDatatableRepository weaponRepo;
 	@Autowired
 	private ItemMagicTableRepository mtRepo;
-	
+
 	@GetMapping("/api/v1/tools/trader")
 	public List<NameValueApi> getMagicLevels(){
 		List<NameValueApi> magicLevels = new ArrayList<>(3);
@@ -50,7 +50,7 @@ public class TraderApiController {
 		magicLevels.add(new NameValueApi("Много", 2));
 		return magicLevels;
 	}
-	
+
 	@PostMapping("/api/v1/tools/trader")
 	public List<MagicItemApi> getItems(@RequestBody RequestTraderApi reques){
 		int coef = 0;
@@ -74,12 +74,12 @@ public class TraderApiController {
 		list.addAll(getMagicItems(reques.getPersuasion() + coef, 41, 1000, "З", 4, reques.getUnique()));
 		return list;
 	}
-	
+
 	private List<MagicItemApi> getMagicItems(Integer persuasion,
 			int start,
 			int end,
 			String tableName,
-			int count, 
+			int count,
 			boolean unique) {
 		if (persuasion == null) {
 			persuasion = 1;
@@ -516,10 +516,10 @@ public class TraderApiController {
 							itemApi.changeName("Красный корунд (элементаль огня)");
 							break;
 						}
-						
+
 					} else if (itemApi.getName().getRus().contains("Свиток защиты")) {
 						//int roll = Dice.d100.roll();
-						
+
 					}
 					if (unique) {
 						if (names.contains(itemApi.getName().getRus())) {
