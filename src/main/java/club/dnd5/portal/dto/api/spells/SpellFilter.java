@@ -20,14 +20,14 @@ import lombok.Setter;
 public class SpellFilter {
 	@JsonProperty("book")
 	private List<String> books;
-	
+
 	@JsonProperty("level")
 	private List<Integer> levels;
 
-	@JsonProperty("class") 
+	@JsonProperty("class")
     private List<String> myclass;
 
-    @JsonProperty("school") 
+    @JsonProperty("school")
     private List<String> schools;
 
     private List<String> timecast;
@@ -39,7 +39,7 @@ public class SpellFilter {
     private List<String> concentration;
     @JsonProperty("damageType")
     private List<String> damageTypes;
-
+	private List<String> tags;
     private Boolean homebrew;
     private Boolean settings;
 }

@@ -1,47 +1,17 @@
 package club.dnd5.portal.controller.api;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-
-import club.dnd5.portal.dto.api.RequestApi;
-import club.dnd5.portal.dto.api.spells.SearchRequest;
-import club.dnd5.portal.dto.api.spells.SpellFilter;
-import club.dnd5.portal.dto.api.wiki.RuleApi;
-import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.rule.Rule;
-import club.dnd5.portal.model.splells.SpellTag;
-import club.dnd5.portal.util.SortUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.spell.ReferenceClassApi;
 import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequesApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.dto.api.spells.SpellFilter;
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.TimeUnit;
 import club.dnd5.portal.model.book.Book;
@@ -51,20 +21,40 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.model.splells.SpellTag;
 import club.dnd5.portal.model.splells.TimeCast;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
+import club.dnd5.portal.util.SortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Tag(name = "Spell", description = "The Spell API")
+@PropertySource("spell.properties")
 @RestController
 public class SpellApiController {
 	private static final String[][] classesMap = { { "1", "Бард" }, { "2", "Волшебник" }, { "3", "Друид" },
@@ -77,6 +67,34 @@ public class SpellApiController {
 	private ClassRepository classRepository;
 	@Autowired
 	private ArchetypeSpellRepository archetypeSpellRepository;
+	@Autowired
+	private Environment env;
+	private List<FilterValueApi> timecasts;
+	private List<FilterValueApi> distancies;
+	@PostConstruct
+	public void init() {
+		timecasts = new ArrayList<>();
+		String[] names = env.getProperty("spell.time-cast.names").split(",");
+		String[] englishNames = env.getProperty("spell.time-cast.names.english").split(",");
+		for (int i = 0; i < names.length; i++) {
+			timecasts.add(FilterValueApi
+				.builder()
+				.label(names[i])
+				.key(englishNames[i])
+				.build()
+			);
+		}
+		names = env.getProperty("spell.distance.names").split(",");
+		distancies = new ArrayList<>();
+		for (int i = 0; i < names.length; i++) {
+			distancies.add(FilterValueApi
+				.builder()
+				.label(names[i])
+				.key(names[i])
+				.build()
+			);
+		}
+	}
 
 	@Operation(summary = "Gets all spells")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -113,18 +131,23 @@ public class SpellApiController {
 					return cb.and(join.get("id").in(request.getFilter().getMyclass()));
 				});
 			}
-			if (request.getFilter().getSchools()!= null && !request.getFilter().getSchools().isEmpty()) {
+			if (!filter.map(SpellFilter::getSchools).orElse(Collections.emptyList()).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
-					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools().stream().map(MagicSchool::valueOf).collect(Collectors.toList())));
+					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools().stream()
+						.map(MagicSchool::valueOf)
+						.collect(Collectors.toList())));
 			}
-			if (request.getFilter().getDamageTypes() != null && !request.getFilter().getDamageTypes().isEmpty()) {
+			if (!filter.map(SpellFilter::getDamageTypes).orElse(Collections.emptyList()).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<DamageType, Spell> join = root.join("damageType", JoinType.LEFT);
 					query.distinct(true);
-					return join.in(request.getFilter().getDamageTypes().stream().map(DamageType::valueOf).collect(Collectors.toList()));
+					return join.in(request.getFilter().getDamageTypes()
+						.stream()
+						.map(DamageType::valueOf)
+						.collect(Collectors.toList()));
 				});
 			}
-			if (request.getFilter().getRitual() != null && !request.getFilter().getRitual().isEmpty()) {
+			if (!filter.map(SpellFilter::getRitual).orElse(Collections.emptyList()).isEmpty()) {
 				if(request.getFilter().getRitual().contains("yes")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
 							(root, query, cb) -> cb.equal(root.get("ritual"), true));
@@ -295,16 +318,12 @@ public class SpellApiController {
 		otherFilters.add(getSchoolsFilter());
 
 		FilterApi ritualFilter = new FilterApi("Ритуал", "ritual");
-		List<FilterValueApi> values = new ArrayList<>(2);
-		values.add(new FilterValueApi("да", "yes"));
-		values.add(new FilterValueApi("нет", "no"));
+		List<FilterValueApi> values = Arrays.asList(new FilterValueApi("да", "yes"), new FilterValueApi("нет", "no"));
 		ritualFilter.setValues(values);
 		otherFilters.add(ritualFilter);
 
 		FilterApi concentrationFilter = new FilterApi("Концентрация", "concentration");
-		values = new ArrayList<>(2);
-		values.add(new FilterValueApi("требуется", "yes"));
-		values.add(new FilterValueApi("не требуется", "no"));
+		values = Arrays.asList(new FilterValueApi("требуется", "yes"), new FilterValueApi("не требуется", "no"));
 		concentrationFilter.setValues(values);
 		otherFilters.add(concentrationFilter);
 
@@ -315,7 +334,7 @@ public class SpellApiController {
 				 .collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
 
-		FilterApi tagsFilter = new FilterApi("Тэг", "tag");
+		FilterApi tagsFilter = new FilterApi("Тэги", "tag");
 		tagsFilter.setValues(
 			Arrays.stream(SpellTag.values())
 				.map(value -> new FilterValueApi(value.getName(), value.name()))
@@ -323,40 +342,11 @@ public class SpellApiController {
 		otherFilters.add(tagsFilter);
 
 		FilterApi timecastFilter = new FilterApi("Время накладывания", "timecast");
-		values = new ArrayList<>();
-		values.add(new FilterValueApi("бонусное действие", "1 BONUS"));
-		values.add(new FilterValueApi("реакция", "1 REACTION"));
-		values.add(new FilterValueApi("действие", "1 ACTION"));
-		values.add(new FilterValueApi("ход", "1 ROUND"));
-		values.add(new FilterValueApi("1 минута", "1 MINUTE"));
-		values.add(new FilterValueApi("10 минут", "10 MINUTE"));
-		values.add(new FilterValueApi("1 час", "1 HOUR"));
-		values.add(new FilterValueApi("8 час", "8 HOUR"));
-		values.add(new FilterValueApi("12 час", "12 HOUR"));
-		values.add(new FilterValueApi("24 час", "24 HOUR"));
-		timecastFilter.setValues(values);
+		timecastFilter.setValues(timecasts);
 		otherFilters.add(timecastFilter);
 
 		FilterApi distanceFilter = new FilterApi("Дистанция", "distance");
-		values = new ArrayList<>();
-		values.add(new FilterValueApi("на себя", "На себя"));
-		values.add(new FilterValueApi("касание", "Касание"));
-		values.add(new FilterValueApi("5 футов", "5 футов"));
-		values.add(new FilterValueApi("10 футов", "10 футов"));
-		values.add(new FilterValueApi("25 футов", "25 футов"));
-		values.add(new FilterValueApi("30 футов", "30 футов"));
-		values.add(new FilterValueApi("40 футов", "40 футов"));
-		values.add(new FilterValueApi("50 футов", "50 футов"));
-		values.add(new FilterValueApi("60 футов", "60 футов"));
-		values.add(new FilterValueApi("90 футов", "90 футов"));
-		values.add(new FilterValueApi("100 футов", "100 футов"));
-		values.add(new FilterValueApi("150 футов", "150 футов"));
-		values.add(new FilterValueApi("300 футов", "300 футов"));
-		values.add(new FilterValueApi("400 футов", "400 футов"));
-		values.add(new FilterValueApi("1000 футов", "1000 футов"));
-		values.add(new FilterValueApi("1 миля", "1 миля"));
-		values.add(new FilterValueApi("500 миль", "500 миль"));
-		distanceFilter.setValues(values);
+		distanceFilter.setValues(distancies);
 		otherFilters.add(distanceFilter);
 
 		FilterApi durationFilter = new FilterApi("Длительность", "duration");
@@ -393,7 +383,8 @@ public class SpellApiController {
 		}
 		else {
 			otherFilters.add(getLevelsFilter(heroClass.getSpellcasterType().getMaxSpellLevel()));
-		}		otherFilters.add(getComponentsFilter());
+		}
+		otherFilters.add(getComponentsFilter());
 		otherFilters.add(getSchoolsFilter());
 
 		List<FilterApi> customFilters = new ArrayList<>();
