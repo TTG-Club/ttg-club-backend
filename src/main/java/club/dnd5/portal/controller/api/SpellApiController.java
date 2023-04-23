@@ -71,6 +71,7 @@ public class SpellApiController {
 	private Environment env;
 	private List<FilterValueApi> timecasts;
 	private List<FilterValueApi> distancies;
+	private List<FilterValueApi> durations;
 	@PostConstruct
 	public void init() {
 		timecasts = new ArrayList<>();
@@ -88,6 +89,16 @@ public class SpellApiController {
 		distancies = new ArrayList<>();
 		for (int i = 0; i < names.length; i++) {
 			distancies.add(FilterValueApi
+				.builder()
+				.label(names[i])
+				.key(names[i])
+				.build()
+			);
+		}
+		names = env.getProperty("spell.duration.names").split(",");
+		durations = new ArrayList<>();
+		for (int i = 0; i < names.length; i++) {
+			durations.add(FilterValueApi
 				.builder()
 				.label(names[i])
 				.key(names[i])
@@ -133,7 +144,8 @@ public class SpellApiController {
 			}
 			if (!filter.map(SpellFilter::getSchools).orElse(Collections.emptyList()).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
-					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools().stream()
+					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools()
+						.stream()
 						.map(MagicSchool::valueOf)
 						.collect(Collectors.toList())));
 			}
@@ -350,20 +362,7 @@ public class SpellApiController {
 		otherFilters.add(distanceFilter);
 
 		FilterApi durationFilter = new FilterApi("Длительность", "duration");
-		values = new ArrayList<>();
-		values.add(new FilterValueApi("Мгновенная", "Мгновенная"));
-		values.add(new FilterValueApi("1 раунд", "1 раунд"));
-		values.add(new FilterValueApi("1 минута", "1 минута"));
-		values.add(new FilterValueApi("10 минут", "10 минут"));
-		values.add(new FilterValueApi("1 час", "1 час"));
-		values.add(new FilterValueApi("8 часов", "8 часов"));
-		values.add(new FilterValueApi("12 часов", "12 часов"));
-		values.add(new FilterValueApi("24 часа", "24 часа"));
-		values.add(new FilterValueApi("1 день", "1 день"));
-		values.add(new FilterValueApi("7 дней", "7 дней"));
-		values.add(new FilterValueApi("10 дней", "10 дней"));
-		values.add(new FilterValueApi("1 год", "1 год"));
-		durationFilter.setValues(values);
+		durationFilter.setValues(durations);
 		otherFilters.add(durationFilter);
 
 		otherFilters.add(getComponentsFilter());
