@@ -29,9 +29,11 @@ public class SearchRepository {
 
 	public List<SearchApi> search(String searchText, Integer page, Integer limit) {
 		Query query = entityManager.createNativeQuery(
-			"SELECT fts.name, fts.english_name, fts.section, fts.url, fts.description, b.source, b.type, b.name book_name FROM full_text_search fts " +
+			"SELECT fts.name, fts.english_name, fts.section, fts.url, fts.description, b.source, b.type, b.name book_name " +
+				    "FROM full_text_search fts " +
 					"JOIN books b ON fts.source = b.source " +
-					"WHERE LOWER(fts.name) LIKE :name OR LOWER(fts.alt_name) LIKE :name OR LOWER(fts.english_name) LIKE :name");
+					"WHERE LOWER(fts.name) LIKE :name OR LOWER(fts.alt_name) LIKE :name OR LOWER(fts.english_name) LIKE :name " +
+				    "ORDER BY LENGTH(fts.name)");
 		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
 
 		if (limit != null) {
