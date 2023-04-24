@@ -35,6 +35,15 @@ public class RaceDetailApi extends RaceApi {
 		type = race.getType().getCyrilicName();
 		size = race.getSize().getCyrilicName();
 		speed.add(new NameValueApi(null, race.getSpeed()));
+		if (Objects.nonNull(race.getFly())) {
+			speed.add(new NameValueApi("летая", race.getFly()));
+		}
+		if (Objects.nonNull(race.getClimb())) {
+			speed.add(new NameValueApi("лазая", race.getClimb()));
+		}
+		if (Objects.nonNull(race.getSwim())) {
+			speed.add(new NameValueApi("плавая", race.getSwim()));
+		}
 		darkvision = race.getDarkvision();
 		if (!race.getSubRaces().isEmpty()) {
 			subraces = race.getSubRaces()
