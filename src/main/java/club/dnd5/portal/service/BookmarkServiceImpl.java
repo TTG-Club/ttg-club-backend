@@ -1,11 +1,10 @@
 package club.dnd5.portal.service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +15,9 @@ import club.dnd5.portal.repository.user.BookmarkRepository;
 
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
+	@Autowired
+	private SpellDatatableRepository spellRepository;
+
 	@Autowired
 	private BookmarkRepository bookmarkRepository;
 
@@ -34,9 +36,15 @@ public class BookmarkServiceImpl implements BookmarkService {
 		entityBookmark.setUser(user);
 		entityBookmark.setUuid(getNewUUID());
 		entityBookmark.setName(bookmark.getName());
-		entityBookmark.setPrefix(bookmark.getPrefix());
-		
-		if (bookmark.getOrder() != null) {
+		if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("spells")) {
+			String englishName = bookmark.getUrl().substring(9);
+			Optional<Spell> option = spellRepository.findByEnglishName(englishName.replace('_', ' '));
+			if (option.isPresent()) {
+				entityBookmark.setPrefix(String.valueOf(option.get().getLevel()));
+			}
+		}
+
+		if (Objects.nonNull(bookmark.getOrder())) {
 			entityBookmark.setOrder(bookmark.getOrder());
 		} else if (bookmark.getParentUUID() != null) {
 			entityBookmark.setOrder(
@@ -69,14 +77,14 @@ public class BookmarkServiceImpl implements BookmarkService {
 					chields.forEach(b -> {
 						if (b.getOrder() >= bookmark.getOrder() && b.getOrder() < saved.get().getOrder()) {
 							b.incrementOrder();
-						} 
+						}
 					});
 				}
 				else {
 					chields.forEach(b -> {
 						if (b.getOrder() <= bookmark.getOrder()) {
 							b.decrimentOrder();
-						} 
+						}
 					});
 				}
 				bookmarkRepository.saveAll(chields);
