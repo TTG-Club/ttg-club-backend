@@ -6,7 +6,7 @@
             <meta th:unless="${profile eq 'prod'}" name="build-type" th:content="${profile}">
 
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+            <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <meta name="author" content="Peterko - https://www.behance.net/peterko, Magistrus" />
 
             <meta name="robots" th:content="${profile eq 'prod' ? 'all' : 'noindex'}" />
