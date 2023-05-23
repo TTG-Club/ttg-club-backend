@@ -62,7 +62,7 @@ public enum DamageType {
 	public static Set<DamageType> getImmunity()
 	{
 		return EnumSet.of(BLUDGEONING, PIERCING, SLASHING, FAIR, COLD, LIGHTNING, POISON, ACID, SOUND, NECTOTIC,
-				RADIANT, PHYSICAL, NO_ADMANTIT, FORCE);
+				RADIANT, PHYSICAL, NO_ADMANTIT, FORCE, PSYCHIC);
 	}
 
 	public static Set<DamageType> getSpecial()
