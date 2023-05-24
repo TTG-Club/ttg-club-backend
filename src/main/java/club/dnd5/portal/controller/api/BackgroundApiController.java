@@ -122,7 +122,10 @@ public class BackgroundApiController {
 
 	@PostMapping(value = "/api/v1/backgrounds/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<BackgroundDetailApi> getBackground(@PathVariable String englishName) {
-		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		List<Background> backgrounds = backgroundRepository.findByEnglishName(englishName.replace('_', ' '));
+		Background background = backgrounds.stream()
+			.sorted(Comparator.comparing(Background::getBook))
+			.findFirst().orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(new BackgroundDetailApi(background));
 	}
 

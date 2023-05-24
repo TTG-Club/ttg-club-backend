@@ -15,7 +15,8 @@ import club.dnd5.portal.model.book.TypeBook;
 
 @Repository
 public interface BackgroundDatatableRepository extends DataTablesRepository<Background, Integer> {
-	Optional<Background> findByEnglishName(String name);
+	List<Background> findByEnglishName(String name);
+	Optional<Background> findByEnglishNameAndBookSource(String name, String source);
 
 	@Query("SELECT c.book FROM Background c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);

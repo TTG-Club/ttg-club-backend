@@ -40,7 +40,7 @@ public class Background {
 	private String name;
 	private String englishName;
 	private String altName;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String toolOwnership;
 
@@ -52,7 +52,7 @@ public class Background {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private List<SkillType> skills;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String otherSkills;
 
@@ -65,29 +65,30 @@ public class Background {
 	private String description;
 
 	private String language;
-	
+
 	@ManyToMany
 	private List<Language> languages;
-	
+
 	private int startMoney;
-	
+
 	@OneToMany
 	@JoinColumn(name = "background_id")
 	private List<Personalization> personalizations;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String personalization;
-	
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
 	private LifeStyle lifeStyle;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
 	private Short page;
-	
-	public String getCapitalazeName() {
+	private Boolean deprecated;
+
+	public String getCapitalizeName() {
 		return StringUtils.capitalizeWords(name.toLowerCase());
 	}
 

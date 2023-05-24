@@ -213,9 +213,12 @@ public class MetaApiController {
 		return meta;
 	}
 
-	@GetMapping(value = "/api/v1/meta/backgrounds/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public MetaApi getBackgroundMeta(@PathVariable String englishName) {
-		Background background = backgroundRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+	@GetMapping(value = "/api/v1/meta/backgrounds/{englishName}/{source}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MetaApi getBackgroundMeta(@PathVariable String englishName, @PathVariable String source) {
+		Background background = backgroundRepository.findByEnglishNameAndBookSource(
+			englishName.replace('_', ' '),
+			source)
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(background.getName() + " | Предыстории персонажей D&D 5e");
 		meta.setDescription(String.format("%s (%s) - предыстория персонажа по D&D 5 редакции", background.getName(), background.getEnglishName()));

@@ -2,6 +2,7 @@ package club.dnd5.portal.dto.api.classes;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,8 +29,9 @@ public class BackgroundDetailApi extends BackgroundApi {
 	private Integer startGold;
 	private String description;
 	private String personalization;
-	
+
 	private SourceApi source;
+	private List<SourceApi> sources;
 
 	public BackgroundDetailApi(Background background) {
 		super(background);
