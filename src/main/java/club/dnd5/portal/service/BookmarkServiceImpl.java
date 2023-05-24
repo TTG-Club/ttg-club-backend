@@ -36,14 +36,13 @@ public class BookmarkServiceImpl implements BookmarkService {
 		entityBookmark.setUser(user);
 		entityBookmark.setUuid(getNewUUID());
 		entityBookmark.setName(bookmark.getName());
-		if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("spells")) {
-			String englishName = bookmark.getUrl().substring(9);
-			Optional<Spell> option = spellRepository.findByEnglishName(englishName.replace('_', ' '));
+		if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("/spells/")) {
+			String englishName = bookmark.getUrl().replace("/spells/", "").replace('_', ' ');
+			Optional<Spell> option = spellRepository.findByEnglishName(englishName);
 			if (option.isPresent()) {
 				entityBookmark.setPrefix(String.valueOf(option.get().getLevel()));
 			}
 		}
-
 		if (Objects.nonNull(bookmark.getOrder())) {
 			entityBookmark.setOrder(bookmark.getOrder());
 		} else if (bookmark.getParentUUID() != null) {
