@@ -58,13 +58,16 @@
             <link rel="apple-touch-icon" sizes="512x512" href="/style/icons/512.png">
 
             <!-- Vue App -->
-            <script defer="defer" th:src="@{|/js/runtime.js?v=${version}|}"></script>
-            <script defer="defer" th:src="@{|/js/chunk-vendors.js?v=${version}|}"></script>
-            <script defer="defer" th:src="@{|/js/app.js?v=${version}|}"></script>
+            <script th:src="@{|/js/safari-nomodule-fix.js?v=${version}|}" type="module"></script>
+            <script defer="defer" th:src="@{|/js/runtime.js?v=${version}|}" type="module"></script>
+            <script defer="defer" th:src="@{|/js/chunk-vendors.js?v=${version}|}" type="module"></script>
+            <script defer="defer" th:src="@{|/js/app.js?v=${version}|}" type="module"></script>
+            <script defer="defer" th:src="@{|/js/runtime-legacy.js?v=${version}|}" nomodule></script>
+            <script defer="defer" th:src="@{|/js/chunk-vendors-legacy.js?v=${version}|}" nomodule></script>
+            <script defer="defer" th:src="@{|/js/app-legacy.js?v=${version}|}" nomodule></script>
             <!-- End Vue App -->
 
             <!-- Core CSS -->
-            <link rel="stylesheet preload" as="style" th:href="@{|/css/chunk-vendors.css?v=${version}|}" />
             <link rel="stylesheet preload" as="style" th:href="@{|/css/app.css?v=${version}|}" />
             <!-- End Core CSS -->
 
