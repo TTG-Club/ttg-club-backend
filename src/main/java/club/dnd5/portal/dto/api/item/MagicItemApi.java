@@ -30,6 +30,7 @@ public class MagicItemApi extends ItemApi {
 		if (item.getCustomization()) {
 			customization = item.getCustomization();
 		}
+		setPrice(item.getRarity().getRandomPrice(item));
 	}
 
 	public void setRarity(Rarity rarity) {
