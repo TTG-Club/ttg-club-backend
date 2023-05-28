@@ -20,7 +20,4 @@ public class RequestTraderApi {
 	private Integer persuasion;
 	@Schema(description = "Показывать только уникальные предметы", defaultValue = "true")
 	private Boolean unique;
-	@Schema(description = "Правило расчета цены PHB или XGE", defaultValue = "PHB")
-
-	private String priceRule;
 }
