@@ -41,7 +41,7 @@ public class TraderApiController {
 	private ItemMagicTableRepository mtRepo;
 
 	@GetMapping("/api/v1/tools/trader")
-	public TraderApi getMagicLevels(){
+	public TraderApi getTrader(){
 		TraderApi traderApi = new TraderApi();
 		List<NameValueApi> magicLevels = new ArrayList<>(3);
 		magicLevels.add(new NameValueApi("Мало", 0));
