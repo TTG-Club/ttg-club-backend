@@ -26,7 +26,7 @@ public class MagicItemDetailApi extends MagicItemApi {
 	private Boolean customization;
 	private Collection<String> detailType;
 	private Collection<String> detailCustamization;
-	private CostApi cost;
+	private PriceApi cost;
 	private Collection<String> images;
 
 	public MagicItemDetailApi(MagicItem item) {
@@ -59,7 +59,7 @@ public class MagicItemDetailApi extends MagicItemApi {
 			detailCustamization.add(item.getCustSpecial());
 		}
 		if (item.getRarity() != Rarity.UNKNOWN && item.getRarity() != Rarity.VARIES){
-			cost = new CostApi(item);
+			cost = new PriceApi(item);
 		}
 	}
 }

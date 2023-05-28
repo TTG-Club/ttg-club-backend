@@ -41,7 +41,7 @@ public class TraderApiController {
 	private WeaponDatatableRepository weaponRepo;
 	@Autowired
 	private ItemMagicTableRepository mtRepo;
-	
+
 	@GetMapping("/api/v1/tools/trader")
 	public List<NameValueApi> getMagicLevels(){
 		List<NameValueApi> magicLevels = new ArrayList<>(3);
@@ -50,37 +50,38 @@ public class TraderApiController {
 		magicLevels.add(new NameValueApi("Много", 2));
 		return magicLevels;
 	}
-	
+
 	@PostMapping("/api/v1/tools/trader")
-	public List<MagicItemApi> getItems(@RequestBody RequestTraderApi reques){
+	public List<MagicItemApi> getItems(@RequestBody RequestTraderApi traderApi){
 		int coef = 0;
-		if (reques.getMagicLevel() == 0) {
+		if (traderApi.getMagicLevel() == 0) {
 			coef = -10;
-		} else if (reques.getMagicLevel() == 2) {
+		} else if (traderApi.getMagicLevel() == 2) {
 			coef = 10;
 		}
-		if (reques.getUnique() == null) {
-			reques.setUnique(Boolean.FALSE);
+		if (traderApi.getUnique() == null) {
+			traderApi.setUnique(Boolean.FALSE);
 		}
 		List<MagicItemApi> list = new ArrayList<>();
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 1, 5, "А", 6, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 6, 10, "Б", 4, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 11, 15, "В", 4, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 16, 20, "Г", 4, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 21, 25, "Д", 4, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 26, 30, "Е", 4, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 31, 35, "Е1", 4, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 36, 40, "Ж", 4, reques.getUnique()));
-		list.addAll(getMagicItems(reques.getPersuasion() + coef, 41, 1000, "З", 4, reques.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 1, 5, "А", 6, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 6, 10, "Б", 4, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 11, 15, "В", 4, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 16, 20, "Г", 4, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 21, 25, "Д", 4, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 26, 30, "Е", 4, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 31, 35, "Е1", 4, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 36, 40, "Ж", 4, traderApi.getUnique()));
+		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 41, 1000, "З", 4, traderApi.getUnique()));
 		return list;
 	}
-	
-	private List<MagicItemApi> getMagicItems(Integer persuasion,
-			int start,
-			int end,
-			String tableName,
-			int count, 
-			boolean unique) {
+
+	private List<MagicItemApi> getMagicItems(
+		Integer persuasion,
+		final int start,
+		final int end,
+		final String tableName,
+		int count,
+		final boolean unique) {
 		if (persuasion == null) {
 			persuasion = 1;
 		}
@@ -89,20 +90,19 @@ public class TraderApiController {
 		if (persuasion >= start) {
 			for (int i = 0; i < 1 + rnd.nextInt(count); i++) {
 				int ri = Dice.roll(Dice.d100);
-				// System.out.println("table= " + tableName + " in " + ri);
 				MagicThingTable mt = mtRepo.findOne(ri, tableName);
 				if (mt != null) {
 					MagicItemApi itemApi = new MagicItemApi(mt.getMagicThing());
-					itemApi.setPrice(getCost(mt.getMagicThing().getRarity()));
+					itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing()));
 					if (tableName.equals("Б")) {
 						if (ri == 91) {
-							int zap = Dice.roll(4, Dice.d4);
-							itemApi.changeName("(дополнительных заплаток " + zap + ")");
+							int zap = Dice.d4.roll(4);
+							itemApi.updateName("(дополнительных заплаток " + zap + ")");
 						}
 					}
 					if (tableName.equals("В")) {
 						if (ri >= 82 && ri <= 84) {
-							String effect = "";
+							String effect;
 							int er = Dice.roll(Dice.d100);
 							if (er <= 15) {
 								effect = "веер";
@@ -117,134 +117,132 @@ public class TraderApiController {
 							} else {
 								effect = "якорь";
 							}
-							itemApi.changeName("(Эффект: " + effect + ")");
+							itemApi.updateName("(Эффект: " + effect + ")");
 						} else if (ri >= 85 && ri <= 87) {
-							String effect = "";
+							String effect;
 							int er = Dice.roll(Dice.d100);
 							if (er <= 10) {
-								effect = "Аберрации";
+								effect = "от аберраций";
 							} else if (er <= 20) {
-								effect = "Звери";
+								effect = "от зверей";
 							} else if (er <= 45) {
-								effect = "Исчадия";
+								effect = "от исчадий";
 							} else if (er <= 55) {
-								effect = "Небожителиь";
+								effect = "от небожителей";
 							} else if (er <= 75) {
-								effect = "Нежить";
+								effect = "от нежити";
 							} else if (er <= 80) {
-								effect = "Растения";
+								effect = "от растений";
 							} else if (er <= 90) {
-								effect = "Феи";
-							} else if (er <= 100) {
-								effect = "Элементали";
+								effect = "от фей";
 							} else {
-								effect = "якорь";
+								effect = "от элементалей";
 							}
-							itemApi.changeName("(Вид существ: " + effect + ")");
+							itemApi.updateName("(Вид существ: " + effect + ")");
 						} else if (ri >= 88 && ri <= 89) {
-							itemApi.changeName(String.format("(Бобов: %d)", Dice.roll(2, Dice.d4)));
+							itemApi.updateName(String.format("(Бобов: %d)", Dice.roll(2, Dice.d4)));
 						}
 					}
 					if (tableName.equals("E")) {
 						switch (ri) {
 						case 66:
-							itemApi.changeName("(кольчуга)");
-							itemApi.setPrice(Rarity.getCostDMG(mt.getMagicThing().getRarity()) + 75);
+							itemApi.updateName("(кольчуга)");
+							itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing(), 75));
 							break;
 						case 67:
-							itemApi.changeName("(кольчужная рубаха)");
-							itemApi.setPrice(Rarity.getCostDMG(mt.getMagicThing().getRarity()) + 50);
+							itemApi.updateName("(кольчужная рубаха)");
+							itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing(),  50));
 							break;
 						case 68:
-							itemApi.changeName("(чещуйчатый доспех)");
-							itemApi.setPrice(Rarity.getCostDMG(mt.getMagicThing().getRarity()) + 50);
+							itemApi.updateName("(чещуйчатый доспех)");
+							itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing(), 50));
 							break;
 						}
 					}
 					if (tableName.equals("E1")) {
 						switch (ri) {
 						case 15:
-							itemApi.changeName("(кираса)");
-							itemApi.setPrice(Rarity.getCostDMG(mt.getMagicThing().getRarity()) + 400);
+							itemApi.updateName("(кираса)");
+							itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing(), + 400));
 							break;
 						case 16:
-							itemApi.changeName("(наборной доспех)");
-							itemApi.setPrice(Rarity.getCostDMG(mt.getMagicThing().getRarity()) + 200);
+							itemApi.updateName("(наборной доспех)");
+							itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing(), 200));
 							break;
 						case 35:
-							itemApi.changeName("(кожаный)");
+							itemApi.updateName("(кожаный)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 10);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(10));
 							break;
 						case 36:
-							itemApi.changeName("(кольчуга)");
+							itemApi.updateName("(кольчуга)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 75);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(75));
 							break;
 						case 37:
-							itemApi.changeName("(кольчужная рубаха)");
+							itemApi.updateName("(кольчужная рубаха)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 50);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(50));
 							break;
 						case 38:
-							itemApi.changeName("(чешуйчатый)");
+							itemApi.updateName("(чешуйчатый)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 50);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(50));
 							break;
 						case 60:
-							itemApi.changeName(getResistenceType());
+							itemApi.updateName(getResistanceType());
 							break;
 						}
 					}
 					if (tableName.equals("Ж")) {
 						switch (ri) {
 						case 55:
-							itemApi.changeName("(латы)");
-							itemApi.setPrice(Rarity.getCostDMG(mt.getMagicThing().getRarity()) + 1500);
+							itemApi.updateName("(латы)");
+							itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing(), 1500));
 							break;
 						case 56:
-							itemApi.changeName("(полулаты)");
-							itemApi.setPrice(Rarity.getCostDMG(mt.getMagicThing().getRarity()) + 750);
+							itemApi.updateName("(полулаты)");
+							itemApi.setPrice(Rarity.getRandomPrice(mt.getMagicThing(), 750));
 							break;
 						case 65:
-							itemApi.changeName("(кираса)");
+							itemApi.updateName("(кираса)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 400);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(400));
 							break;
 						case 66:
-							itemApi.changeName("(кираса)");
+							itemApi.updateName("(наборный)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 400);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(200));
 							break;
 						case 67:
-							itemApi.changeName("(проклёпанная кожа)");
+							itemApi.updateName("(проклёпанная кожа)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 400);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(400));
 							break;
 						case 68:
-							itemApi.changeName("(кожаный)");
+							itemApi.updateName("(кожаный)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.RARE) + 10);
+							itemApi.setPrice(Rarity.RARE.getRandomPrice(10));
 							break;
 						case 69:
-							itemApi.changeName("(кольчуга)");
+							itemApi.updateName("(кольчуга)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.RARE) + 75);
+							itemApi.setPrice(Rarity.RARE.getRandomPrice(75));
 							break;
 						case 70:
-							itemApi.changeName("(кольчужная рубаха)");
+							itemApi.updateName("(кольчужная рубаха)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.RARE) + 50);
+							itemApi.setPrice(Rarity.RARE.getRandomPrice(50));
 							break;
 						case 71:
-							itemApi.changeName("(чешуйчатый)");
+							itemApi.updateName("(чешуйчатый)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.RARE) + 50);
+							itemApi.setPrice(Rarity.RARE.getRandomPrice(50));
 							break;
 						case 89:
-							String aligment = Alignment.values()[rnd.nextInt(Alignment.values().length)]
+							String alignment = Alignment.values()[rnd.nextInt(Alignment.values().length)]
 									.getCyrilicName();
-							itemApi.changeName("(Мировоззрение: " + aligment + ")");
+							itemApi.updateName("(Мировоззрение: " + alignment + ")");
 							break;
 						case 91:
 							int rg = Dice.roll(Dice.d20);
@@ -257,7 +255,7 @@ public class TraderApiController {
 								golemType = "Каменный";
 							else if (rg >= 9 && rg <= 20)
 								golemType = "Мясной (из плоти)";
-							itemApi.changeName(String.format("(%s)", golemType));
+							itemApi.updateName(String.format("(%s)", golemType));
 							break;
 						}
 					}
@@ -265,207 +263,207 @@ public class TraderApiController {
 						switch (ri) {
 						case 42:
 						case 43:
-							itemApi.changeName("(латы)");
+							itemApi.updateName("(латы)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 1500);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(1_500));
 							break;
 						case 44:
 						case 45:
-							itemApi.changeName("(полулаты)");
+							itemApi.updateName("(полулаты)");
 							itemApi.setRarity(Rarity.UNCOMMON);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 750);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(750));
 							break;
 						case 46:
 						case 47:
-							itemApi.changeName("(чешуйчатый)");
+							itemApi.updateName("(чешуйчатый)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.UNCOMMON) + 50);
+							itemApi.setPrice(Rarity.UNCOMMON.getRandomPrice(50));
 							break;
 						case 48:
 						case 49:
-							itemApi.changeName("(кираса)");
+							itemApi.updateName("(кираса)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.RARE) + 400);
+							itemApi.setPrice(Rarity.RARE.getRandomPrice(400));
 							break;
 						case 50:
 						case 51:
-							itemApi.changeName("(наборной)");
+							itemApi.updateName("(наборной)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.RARE) + 200);
+							itemApi.setPrice(Rarity.RARE.getRandomPrice(200));
 							break;
 						case 52:
 						case 53:
-							itemApi.changeName("(проклёпанная кожа)");
+							itemApi.updateName("(проклёпанная кожа)");
 							itemApi.setRarity(Rarity.RARE);
-							itemApi.setPrice(getCost(Rarity.RARE) + 45);
+							itemApi.setPrice(Rarity.RARE.getRandomPrice(45));
 							break;
 						case 54:
 						case 55:
-							itemApi.changeName("(кожаный)");
+							itemApi.updateName("(кожаный)");
 							itemApi.setRarity(Rarity.VERY_RARE);
-							itemApi.setPrice(getCost(Rarity.VERY_RARE) + 10);
+							itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(10));
 							break;
 						case 56:
 						case 57:
-							itemApi.changeName("(кольчуга)");
+							itemApi.updateName("(кольчуга)");
 							itemApi.setRarity(Rarity.VERY_RARE);
-							itemApi.setPrice(getCost(Rarity.VERY_RARE) + 75);
+							itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(75));
 							break;
 						case 58:
 						case 59:
-							itemApi.changeName("(кольчужная рубаха)");
+							itemApi.updateName("(кольчужная рубаха)");
 							itemApi.setRarity(Rarity.VERY_RARE);
-							itemApi.setPrice(getCost(Rarity.VERY_RARE) + 50);
+							itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(50));
 							break;
 						case 76:
 							switch (Dice.roll(Dice.d12)) {
 							case 1:
 							case 2:
-								itemApi.changeName("(полулаты)");
+								itemApi.updateName("(полулаты)");
 								itemApi.setRarity(Rarity.RARE);
-								itemApi.setPrice(getCost(Rarity.RARE) + 750);
+								itemApi.setPrice(Rarity.RARE.getRandomPrice(750));
 								break;
 							case 3:
 							case 4:
-								itemApi.changeName("(латы)");
+								itemApi.updateName("(латы)");
 								itemApi.setRarity(Rarity.RARE);
-								itemApi.setPrice(getCost(Rarity.RARE) + 1500);
+								itemApi.setPrice(Rarity.RARE.getRandomPrice(1_500));
 								break;
 							case 5:
 							case 6:
-								itemApi.changeName("(проклёпанная кожа)");
+								itemApi.updateName("(проклёпанная кожа)");
 								itemApi.setRarity(Rarity.VERY_RARE);
-								itemApi.setPrice(getCost(Rarity.VERY_RARE) + 750);
+								itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(45));
 								break;
 							case 7:
 							case 8:
-								itemApi.changeName("(кираса)");
+								itemApi.updateName("(кираса)");
 								itemApi.setRarity(Rarity.VERY_RARE);
-								itemApi.setPrice(getCost(Rarity.VERY_RARE) + 750);
+								itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(400));
 								break;
 							case 9:
 							case 10:
-								itemApi.changeName("(набороной)");
+								itemApi.updateName("(набороной)");
 								itemApi.setRarity(Rarity.VERY_RARE);
-								itemApi.setPrice(getCost(Rarity.VERY_RARE) + 750);
+								itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(200));
 								break;
 							case 11:
-								itemApi.changeName("(полулаты)");
+								itemApi.updateName("(полулаты)");
 								itemApi.setRarity(Rarity.VERY_RARE);
-								itemApi.setPrice(getCost(Rarity.VERY_RARE) + 750);
+								itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(750));
 								break;
 							case 12:
-								itemApi.changeName("(латы)");
+								itemApi.updateName("(латы)");
 								itemApi.setRarity(Rarity.VERY_RARE);
-								itemApi.setPrice(getCost(Rarity.VERY_RARE) + 1550);
+								itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(1_500));
 								break;
 							}
 							break;
 						}
 					}
 					if (itemApi.getName().getRus().startsWith("Боеприпасы")) {
-						int rb = Dice.roll(Dice.d12);
+						int rb = Dice.d12.roll();
 						if (rb <= 6) {
-							itemApi.changeName("(стрелы)");
+							itemApi.updateName("(стрелы)");
 						} else if (rb < 9) {
-							itemApi.changeName("(болты)");
+							itemApi.updateName("(болты)");
 						} else if (rb < 10) {
-							itemApi.changeName("(дротики)");
+							itemApi.updateName("(дротики)");
 						} else if (rb < 11) {
-							itemApi.changeName("(снаряды для пращи)");
+							itemApi.updateName("(снаряды для пращи)");
 						}
 					} else if (itemApi.getName().getRus().contains("Свиток заклинания")) {
 						if (itemApi.getName().getRus().contains("заговор")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 0, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("1")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 1, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("2")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 2, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("3")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 3, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("4")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 4, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("5")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 5, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("6")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 6, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("7")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 7, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("8")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 8, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 						if (itemApi.getName().getRus().contains("9")) {
 							List<Spell> spells = spellRepo.findByLevelAndBook_type((byte) 9, TypeBook.OFFICAL);
 							Spell spell = spells.get(rnd.nextInt(spells.size()));
 							itemApi.setSpell(new SpellApi(spell));
-							itemApi.changeName(String.format("(%s)", spell.getName().toLowerCase()));
+							itemApi.updateName(String.format("(%s)", spell.getName().toLowerCase()));
 						}
 					} else if (itemApi.getName().getRus().contains("Оружие")) {
 						List<Weapon> weapons = weaponRepo.findAll();
 						Weapon weapon = weapons.get(rnd.nextInt(weapons.size()));
-						itemApi.changeName(" (" + weapon.getName().toLowerCase() + ")");
+						itemApi.updateName(" (" + weapon.getName().toLowerCase() + ")");
 					} else if (tableName.equals("Е1") && ri >= 12 && ri <= 14) {
 						switch (Dice.roll(Dice.d8)) {
 						case 1:
-							itemApi.changeName("(Бронзовый грифон)");
+							itemApi.updateName("(Бронзовый грифон)");
 							break;
 						case 2:
-							itemApi.changeName("(Эбеновая муха)");
+							itemApi.updateName("(Эбеновая муха)");
 							break;
 						case 3:
-							itemApi.changeName("(Золотые львы)");
+							itemApi.updateName("(Золотые львы)");
 							break;
 						case 4:
-							itemApi.changeName("(Костяные козлы)");
+							itemApi.updateName("(Костяные козлы)");
 							break;
 						case 5:
-							itemApi.changeName("(Мраморный слон)");
+							itemApi.updateName("(Мраморный слон)");
 							break;
 						case 6:
 						case 7:
-							itemApi.changeName("(Ониксовая собака)");
+							itemApi.updateName("(Ониксовая собака)");
 							break;
 						case 8:
-							itemApi.changeName("(Серпентиновая сова)");
+							itemApi.updateName("(Серпентиновая сова)");
 							break;
 						}
 					} else if (itemApi.getName().getRus().contains("Зелье сопротивления")) {
-						String resistType = getResistenceType();
+						String resistType = getResistanceType();
 						switch (resistType) {
 						case "(звуку)":
 							itemApi = new MagicItemApi(magicItemRepo.findById(86).get());
@@ -499,27 +497,45 @@ public class TraderApiController {
 							break;
 						}
 					} else if (itemApi.getName().getRus().contains("Доспех cопротивления")) {
-						itemApi.changeName(getResistenceType());
+						itemApi.updateName(getResistanceType());
 					}
 					else if (itemApi.getName().getRus().contains("Камень элементаля")) {
 						switch(Dice.roll(Dice.d4)) {
 						case 1:
-							itemApi.changeName("Изумруд	(элементаль воды)");
+							itemApi.updateName("Изумруд	(элементаль воды)");
 							break;
 						case 2:
-							itemApi.changeName("Синий сапфир элементаль воздуха");
+							itemApi.updateName("Синий сапфир элементаль воздуха");
 							break;
 						case 3:
-							itemApi.changeName("Жёлтый бриллиант (элементаль земли)");
+							itemApi.updateName("Жёлтый бриллиант (элементаль земли)");
 							break;
 						case 4:
-							itemApi.changeName("Красный корунд (элементаль огня)");
+							itemApi.updateName("Красный корунд (элементаль огня)");
 							break;
 						}
-						
+
 					} else if (itemApi.getName().getRus().contains("Свиток защиты")) {
-						//int roll = Dice.d100.roll();
-						
+						int roll = Dice.d100.roll();
+						String effect;
+						if (roll <= 10) {
+							effect = "от аберраций";
+						} else if (roll <= 20) {
+							effect = "от зверей";
+						} else if (roll <= 45) {
+							effect = "от исчадий";
+						} else if (roll <= 55) {
+							effect = "от небожителей";
+						} else if (roll <= 75) {
+							effect = "от нежити";
+						} else if (roll <= 80) {
+							effect = "от растений";
+						} else if (roll <= 90) {
+							effect = "от фей";
+						} else {
+							effect = "от элементалей";
+						}
+						itemApi.updateName(effect);
 					}
 					if (unique) {
 						if (names.contains(itemApi.getName().getRus())) {
@@ -535,8 +551,8 @@ public class TraderApiController {
 		return list;
 	}
 
-	private String getResistenceType() {
-		switch (Dice.roll(Dice.d10)) {
+	private String getResistanceType() {
+		switch (Dice.d10.roll()) {
 		case 1:
 			return "(звуку)";
 		case 2:
@@ -559,22 +575,5 @@ public class TraderApiController {
 			return "(яду)";
 		}
 		return "";
-	}
-
-	private int getCost(Rarity rarity) {
-		switch (rarity) {
-		case COMMON:
-			return Dice.roll(Dice.d6) * 10;
-		case UNCOMMON:
-			return Dice.roll(Dice.d6) * 100;
-		case RARE:
-			return Dice.roll(2, Dice.d10) * 1000;
-		case VERY_RARE:
-			return Dice.roll(Dice.d4) * 10000;
-		case LEGENDARY:
-			return Dice.roll(2, Dice.d6) * 25000;
-		default:
-			return 0;
-		}
 	}
 }
