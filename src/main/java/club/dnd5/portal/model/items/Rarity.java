@@ -60,42 +60,40 @@ public enum Rarity {
 		float consumable = consumed ? 2 : 1;
 		switch (rarity) {
 			case COMMON:
-				price.setDmg(String.format("%.0f зм.", RND.nextInt(101) / consumable + bonus));
+				price.setDmg(String.format("%.0f", RND.nextInt(101) / consumable + bonus));
 				break;
 			case UNCOMMON:
-				price.setDmg(String.format("%.0f зм.", (101 + RND.nextInt(501)) / consumable + bonus));
+				price.setDmg(String.format("%.0f", (101 + RND.nextInt(501)) / consumable + bonus));
 				break;
 			case RARE:
-				price.setDmg(String.format("%.0f зм.", (501 + RND.nextInt(5001)) / consumable + bonus));
+				price.setDmg(String.format("%.0f", (501 + RND.nextInt(5001)) / consumable + bonus));
 				break;
 			case VERY_RARE:
-				price.setDmg(String.format("%.0f зм.", (5001 + RND.nextInt(50_000)) / consumable + bonus));
+				price.setDmg(String.format("%.0f", (5001 + RND.nextInt(50_000)) / consumable + bonus));
 				break;
 			case LEGENDARY:
-				price.setDmg(String.format("%.0f зм.", (50_000 + RND.nextInt(200_000)) / consumable + bonus));
+				price.setDmg(String.format("%.0f", (50_000 + RND.nextInt(200_000)) / consumable + bonus));
 				break;
 			default:
-				price.setDmg("не определена");
 				break;
 		}
 		switch (rarity) {
 			case COMMON:
-				price.setXge(String.format("%.0f зм.", (Dice.d6.roll() + 1) * 10 / consumable + bonus));
+				price.setXge(String.format("%.0f", (Dice.d6.roll() + 1) * 10 / consumable + bonus));
 				break;
 			case UNCOMMON:
-				price.setXge(String.format("%.0f зм.", (Dice.d6.roll() + 1) * 100 / consumable + bonus));
+				price.setXge(String.format("%.0f", (Dice.d6.roll() + 1) * 100 / consumable + bonus));
 				break;
 			case RARE:
-				price.setXge(String.format("%.0f зм.", Dice.d10.roll(2) * 1_000 / consumable + bonus));
+				price.setXge(String.format("%.0f", Dice.d10.roll(2) * 1_000 / consumable + bonus));
 				break;
 			case VERY_RARE:
-				price.setXge(String.format("%.0f зм.",(Dice.d4.roll() + 1) * 10_000 /consumable + bonus));
+				price.setXge(String.format("%.0f",(Dice.d4.roll() + 1) * 10_000 /consumable + bonus));
 				break;
 			case LEGENDARY:
-				price.setXge(String.format("%.0f зм.", Dice.d6.roll(2) * 25_000 / consumable + bonus));
+				price.setXge(String.format("%.0f", Dice.d6.roll(2) * 25_000 / consumable + bonus));
 				break;
 			default:
-				price.setDmg("не определена");
 				break;
 		}
 		return price;
