@@ -1,11 +1,9 @@
 package club.dnd5.portal.controller.api.tools;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
+import club.dnd5.portal.dto.api.SourceApi;
+import club.dnd5.portal.dto.api.tools.TraderApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,12 +41,18 @@ public class TraderApiController {
 	private ItemMagicTableRepository mtRepo;
 
 	@GetMapping("/api/v1/tools/trader")
-	public List<NameValueApi> getMagicLevels(){
+	public TraderApi getMagicLevels(){
+		TraderApi traderApi = new TraderApi();
 		List<NameValueApi> magicLevels = new ArrayList<>(3);
 		magicLevels.add(new NameValueApi("Мало", 0));
 		magicLevels.add(new NameValueApi("Норма", 1));
 		magicLevels.add(new NameValueApi("Много", 2));
-		return magicLevels;
+		traderApi.setMagicLevels(magicLevels);
+		traderApi.setSources(Arrays.asList(
+			new SourceApi("DMG", "Руководство мастера"),
+			new SourceApi("XGE", "Руководство Занатара обо всем")
+		));
+		return traderApi;
 	}
 
 	@PostMapping("/api/v1/tools/trader")

@@ -24,6 +24,12 @@ public class SourceApi {
 	private Boolean homebrew;
 	private Short page;
 
+	public SourceApi(String  shortName, String name) {
+		this.shortName = shortName;
+		this.name = name;
+		homebrew = Boolean.FALSE;
+	}
+
 	public SourceApi(String  shortName, String type, String name) {
 		this.shortName = shortName;
 		this.name = name;
