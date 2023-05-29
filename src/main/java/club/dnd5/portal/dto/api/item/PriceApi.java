@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@JsonInclude(Include.NON_NULL)
-
 @NoArgsConstructor
 @Getter
 @Setter
