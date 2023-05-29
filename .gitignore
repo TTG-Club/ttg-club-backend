@@ -5,6 +5,7 @@ target/
 
 # Frontend Build
 /src/main/resources/static/
+/src/main/resources/templates/spa.html
 
 # IDE Settings
 .idea

@@ -1,14 +1,12 @@
 package club.dnd5.portal.controller;
 
-import java.io.InputStream;
-
-import javax.servlet.http.HttpServletResponse;
-
+import io.swagger.v3.oas.annotations.Hidden;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import io.swagger.v3.oas.annotations.Hidden;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 
 @Hidden
 @Controller
@@ -18,14 +16,14 @@ public class RobotsController {
 		InputStream resourceAsStream = null;
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
-			resourceAsStream = classLoader.getResourceAsStream("robot.txt");
-			response.addHeader("Content-disposition", "filename=robot.txt");
+			resourceAsStream = classLoader.getResourceAsStream("robots.txt");
+			response.addHeader("Content-disposition", "filename=robots.txt");
 			response.setContentType("text/plain");
 			IOUtils.copy(resourceAsStream, response.getOutputStream());
 			response.flushBuffer();
 		} catch (Exception e) {
-			
-		} 
+
+		}
 	}
 
 	@GetMapping("/manifest.json")
@@ -33,13 +31,13 @@ public class RobotsController {
 		InputStream resourceAsStream = null;
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
-			resourceAsStream = classLoader.getResourceAsStream("manifest.json");
+			resourceAsStream = classLoader.getResourceAsStream("static/manifest.json");
 			response.addHeader("Content-disposition", "filename=manifest.json");
 			response.setContentType("text/plain");
 			IOUtils.copy(resourceAsStream, response.getOutputStream());
 			response.flushBuffer();
 		} catch (Exception e) {
-			
+
 		}
 	}
 
@@ -54,7 +52,7 @@ public class RobotsController {
 			IOUtils.copy(resourceAsStream, response.getOutputStream());
 			response.flushBuffer();
 		} catch (Exception e) {
-			
+
 		}
 	}
 }
