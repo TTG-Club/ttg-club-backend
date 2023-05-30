@@ -133,7 +133,7 @@
 		</th:block>
 		<th:block th:each="feature : ${features}">
 			<details th:if="${feature.child eq null}" open th:data-arch-source="${feature.optional eq 1 ? 'TCE':''}">
-				<summary class="h4 header_separator" th:id="${'c'+feature.id}"><span th:text="${feature.name}"></span></summary>
+				<summary class="h4 header_separator" th:id="${'c'+feature.id}"><span th:utext="${feature.name}"></span></summary>
 				<div class="content">
 					<p class="caption_text" th:text="${feature.type}"></p>
 					<div th:utext="${feature.description}"></div>
@@ -173,7 +173,7 @@
 					</table>
 					<div th:each="feature : ${archetype.feats}">
 						<h4 class="header_separator" th:id="${'c'+feature.id}">
-							<span th:text="${feature.capitalizeName}"/>
+							<span th:utext="${feature.name}"/>
 						</h4>
 						<p class="caption_text" th:text="${feature.displayLevel}"></p>
 						<div th:utext="${feature.description}"></div>
