@@ -144,7 +144,7 @@ public class TraderApiController {
 							}
 							itemApi.updateName("(Вид существ: " + effect + ")");
 						} else if (ri >= 88 && ri <= 89) {
-							itemApi.updateName(String.format("(Бобов: %d)", Dice.roll(2, Dice.d4)));
+							itemApi.updateName(String.format("(Бобов: %d)", Dice.d4.roll(2)));
 						}
 					}
 					if (tableName.equals("E")) {
@@ -320,7 +320,7 @@ public class TraderApiController {
 							itemApi.setPrice(Rarity.VERY_RARE.getRandomPrice(50));
 							break;
 						case 76:
-							switch (Dice.roll(Dice.d12)) {
+							switch (Dice.d12.roll()) {
 							case 1:
 							case 2:
 								itemApi.updateName("(полулаты)");
@@ -504,7 +504,7 @@ public class TraderApiController {
 						itemApi.updateName(getResistanceType());
 					}
 					else if (itemApi.getName().getRus().contains("Камень элементаля")) {
-						switch(Dice.roll(Dice.d4)) {
+						switch(Dice.d4.roll()) {
 						case 1:
 							itemApi.updateName("Изумруд	(элементаль воды)");
 							break;
