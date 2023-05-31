@@ -62,7 +62,7 @@ public class ClassFetureDto {
 		child = feature.getChild();
 		type+= ", умение " + StringUtils.capitalizeWords(className.toLowerCase());
 		if (feature.getOptional() == 1) {
-			optional = "Эта опция представлена в книге «<b>Котёл Таши со всякой всячиной</b>». Всё в этой книге <b>опционально</b>: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.";
+			optional = "";
 		}
 		order = 2;
 	}
