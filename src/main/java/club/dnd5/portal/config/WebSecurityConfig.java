@@ -119,6 +119,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 		super.configure(web);
 //		web.ignoring().antMatchers("/resources/**");
 		web.httpFirewall(new AnnotatingHttpFirewall());
-		return;
 	}
 }

@@ -72,7 +72,6 @@ public class RacesApiController {
 
 		columns.add(column);
 		if (request.getOrders()!=null && !request.getOrders().isEmpty()) {
-
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 				List<Order> orders = request.getOrders().stream()
 						.map(
@@ -102,7 +101,6 @@ public class RacesApiController {
 				input.getSearch().setValue(request.getSearch().getValue());
 				input.getSearch().setRegex(Boolean.FALSE);
 			}
-
 		} else {
 			specification = SpecificationUtil.getAndSpecification(specification,
 				(root, query, cb) -> cb.isNull(root.get("parent")));
@@ -133,12 +131,14 @@ public class RacesApiController {
 						specification, (root, query, cb) -> cb.isNotNull(root.get("climb")));
 			}
 		}
-		return raceRepository.findAll(input, specification, specification, RaceApi::new).getData();
+		return raceRepository.findAll(input, specification, specification,
+			race -> new RaceApi(race, request.getFilter().getBooks())).getData();
 	}
 
 	@PostMapping(value = "/api/v1/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<RaceDetailApi> getRace(@PathVariable String englishName) {
-		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		RaceDetailApi raceApi = new RaceDetailApi(race);
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {

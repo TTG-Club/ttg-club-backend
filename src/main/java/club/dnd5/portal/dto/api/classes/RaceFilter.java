@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,5 +20,5 @@ public class RaceFilter {
 	List<String> abilities;
 	List<String> skills;
 	@JsonProperty("book")
-	private List<String> books;
+	private Set<String> books;
 }

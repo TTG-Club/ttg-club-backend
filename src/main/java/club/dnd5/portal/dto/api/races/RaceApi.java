@@ -12,9 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
@@ -33,8 +31,8 @@ public class RaceApi {
 
 	private String image;
 
-	public RaceApi(Race race) {
-		name = new NameApi(race.getCapitalazeName(), race.getEnglishName());
+	public RaceApi(Race race, Set<String> books) {
+		name = new NameApi(race.getName(), race.getEnglishName());
 		if (race.getParent() == null) {
 			url = String.format("/races/%s", race.getUrlName());
 		}
@@ -52,11 +50,20 @@ public class RaceApi {
 				.collect(Collectors.toList());
 		source = new SourceApi(race.getBook());
 		if (!race.getSubRaces().isEmpty()) {
-			subraces = race.getSubRaces()
-				.stream()
-				.filter(r -> !r.isView())
-				.map(RaceApi::new)
-				.collect(Collectors.toList());
+			if (books.isEmpty()) {
+				subraces = race.getSubRaces()
+					.stream()
+					.filter(r -> !r.isView())
+					.map(race1 -> new RaceApi(race1, books))
+					.collect(Collectors.toList());
+			} else {
+				subraces = race.getSubRaces()
+					.stream()
+					.filter(r -> !r.isView())
+					.filter(r -> books.contains(r.getBook().getSource()))
+					.map(race1 -> new RaceApi(race1, books))
+					.collect(Collectors.toList());
+			}
 		}
 		if (Objects.nonNull(race.getOrigin())) {
 			group = new GroupApi("Происхождения", (byte) 0);
@@ -67,5 +74,8 @@ public class RaceApi {
 		} else if (race.getBook().getType() == TypeBook.CUSTOM) {
 			group = new GroupApi("Расы Homebrew", (byte) 3);
 		}
+	}
+	public RaceApi(Race race) {
+		this(race, Collections.emptySet());
 	}
 }
