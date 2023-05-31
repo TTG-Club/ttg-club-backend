@@ -50,20 +50,12 @@ public class RaceApi {
 				.collect(Collectors.toList());
 		source = new SourceApi(race.getBook());
 		if (!race.getSubRaces().isEmpty()) {
-			if (books.isEmpty()) {
-				subraces = race.getSubRaces()
-					.stream()
-					.filter(r -> !r.isView())
-					.map(race1 -> new RaceApi(race1, books))
-					.collect(Collectors.toList());
-			} else {
-				subraces = race.getSubRaces()
-					.stream()
-					.filter(r -> !r.isView())
-					.filter(r -> books.contains(r.getBook().getSource()))
-					.map(race1 -> new RaceApi(race1, books))
-					.collect(Collectors.toList());
-			}
+			subraces = race.getSubRaces()
+				.stream()
+				.filter(r -> !r.isView())
+				.filter(r -> books.isEmpty() ? true : books.contains(r.getBook().getSource()))
+				.map(race1 -> new RaceApi(race1, books))
+				.collect(Collectors.toList());
 		}
 		if (Objects.nonNull(race.getOrigin())) {
 			group = new GroupApi("Происхождения", (byte) 0);
