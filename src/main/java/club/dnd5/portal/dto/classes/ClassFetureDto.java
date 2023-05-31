@@ -24,9 +24,7 @@ public class ClassFetureDto {
 
 	public ClassFetureDto(HeroClassTrait feature, String className) {
 		id = feature.getId();
-		name = StringUtils.capitalizeWords(feature.getName().toLowerCase()).replace(" И ", " и ")
-				.replace(" Или ", " или ").replace(" За ", " за ").replace(" С ", " с ").replace(" На ", " на ")
-				.replace(" От ", " от ").replace(" По ", " по ").replace(" Над ", " над ").replace(" В ", " в ");
+		name = feature.getName();
 		level = feature.getLevel();
 		description = feature.getDescription();
 		type = String.valueOf(feature.getLevel());
@@ -59,7 +57,7 @@ public class ClassFetureDto {
 			className = "Бойца Напарника";
 		}
 		else {
-			className += "а"; 
+			className += "а";
 		}
 		child = feature.getChild();
 		type+= ", умение " + StringUtils.capitalizeWords(className.toLowerCase());
@@ -68,9 +66,7 @@ public class ClassFetureDto {
 
 	public ClassFetureDto(ArchetypeTrait feature, String archetypeName) {
 		id = feature.getId();
-		name = StringUtils.capitalizeWords(feature.getName().toLowerCase()).replace(" И ", " и ")
-				.replace(" Или ", " или ").replace(" За ", " за ").replace(" С ", " с ").replace(" На ", " на ")
-				.replace(" От ", " от ").replace(" По ", " по ").replace(" Над ", " над ").replace(" В ", " в ");
+		name = feature.getName();
 		level = feature.getLevel();
 		description = feature.getDescription();
 		type = String.valueOf(feature.getLevel());
