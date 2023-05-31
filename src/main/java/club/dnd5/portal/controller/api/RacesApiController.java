@@ -2,6 +2,7 @@ package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.classes.RaceFilter;
 import club.dnd5.portal.dto.api.classes.RaceRequestApi;
 import club.dnd5.portal.dto.api.races.RaceApi;
 import club.dnd5.portal.dto.api.races.RaceDetailApi;
@@ -132,7 +133,11 @@ public class RacesApiController {
 			}
 		}
 		return raceRepository.findAll(input, specification, specification,
-			race -> new RaceApi(race, request.getFilter().getBooks())).getData();
+			race -> new RaceApi(race, Optional.of(request)
+				.map(RaceRequestApi::getFilter)
+				.map(RaceFilter::getBooks)
+				.orElse(Collections.emptySet())))
+			.getData();
 	}
 
 	@PostMapping(value = "/api/v1/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
