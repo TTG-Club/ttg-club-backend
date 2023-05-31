@@ -4,7 +4,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.background.Personalization;
 import club.dnd5.portal.model.background.PersonalizationType;
-import club.dnd5.portal.repository.datatable.BackgroundDatatableRepository;
+import club.dnd5.portal.repository.datatable.BackgroundRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,7 +24,7 @@ public class BackgroundController {
 	private static final String BASE_URL = "https://ttg.club/backgrounds";
 
 	@Autowired
-	private BackgroundDatatableRepository repository;
+	private BackgroundRepository repository;
 
 	@GetMapping("/backgrounds")
 	public String getBackgrounds(Model model) {
