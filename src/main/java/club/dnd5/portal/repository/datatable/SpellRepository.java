@@ -1,11 +1,10 @@
 package club.dnd5.portal.repository.datatable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import club.dnd5.portal.model.background.Background;
-import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,7 +15,7 @@ import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.splells.Spell;
 
 @Repository
-public interface SpellDatatableRepository extends DataTablesRepository<Spell, Integer> {
+public interface SpellRepository extends JpaRepository<Spell, Integer>, JpaSpecificationExecutor<Spell> {
 	Optional<Spell> findByEnglishName(String name);
 
 	List<Spell> findByLevelAndBook_type(byte level, TypeBook type);

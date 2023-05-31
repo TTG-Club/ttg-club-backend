@@ -58,7 +58,7 @@ public class MetaApiController {
 	private BackgroundDatatableRepository backgroundRepository;
 
 	@Autowired
-	private SpellDatatableRepository spellRepository;
+	private SpellRepository spellRepository;
 
 	@Autowired
 	private OptionDatatableRepository optionRepository;

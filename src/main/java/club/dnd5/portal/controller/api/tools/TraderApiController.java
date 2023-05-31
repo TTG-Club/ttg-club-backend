@@ -23,7 +23,7 @@ import club.dnd5.portal.model.items.Weapon;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ItemMagicTableRepository;
 import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
+import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -34,7 +34,7 @@ public class TraderApiController {
 	@Autowired
 	private MagicItemDatatableRepository magicItemRepo;
 	@Autowired
-	private SpellDatatableRepository spellRepo;
+	private SpellRepository spellRepo;
 	@Autowired
 	private WeaponDatatableRepository weaponRepo;
 	@Autowired

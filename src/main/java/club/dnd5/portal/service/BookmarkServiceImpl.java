@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
+import club.dnd5.portal.repository.datatable.SpellRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import club.dnd5.portal.repository.user.BookmarkRepository;
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
 	@Autowired
-	private SpellDatatableRepository spellRepository;
+	private SpellRepository spellRepository;
 	@Autowired
 	private BestiaryDatatableRepository bestiaryRepository;
 	@Autowired

@@ -3,7 +3,7 @@ package club.dnd5.portal.controller;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
+import club.dnd5.portal.repository.datatable.SpellRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,7 @@ public class SpellController {
 	private static final String BASE_URL = "https://ttg.club/spells";
 
 	@Autowired
-	private SpellDatatableRepository repository;
+	private SpellRepository repository;
 	@Autowired
 	private ArchetypeSpellRepository archetypeSpellRepository;
 
