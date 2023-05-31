@@ -41,6 +41,17 @@ public class RuleApiController {
 
 	@PostMapping(value = "/api/v1/rules", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RuleApi> getRules(@RequestBody RuleRequestApi request) {
+		Specification<Rule> specification = null;
+		Optional<RuleRequestApi> optionalRequest = Optional.ofNullable(request);
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+			specification = SpecificationUtil.getSearch(request);
+		}
+		if (request.getFilter() != null) {
+			if (!request.getFilter().getCategory().isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(
+					specification, (root, query, cb) -> root.get("type").in(request.getFilter().getCategory()));
+			}
+		}
 		Sort sort = Sort.unsorted();
 		if (!CollectionUtils.isEmpty(request.getOrders())) {
 			sort = SortUtil.getSort(request);
@@ -48,24 +59,6 @@ public class RuleApiController {
 		Pageable pageable = null;
 		if (request.getPage() != null && request.getLimit() != null) {
 			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Specification<Rule> specification = null;
-		Optional<RuleRequestApi> optionalRequest = Optional.ofNullable(request);
-		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
-			if (optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
-				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
-			} else {
-				String likeSearch = "%" + request.getSearch().getValue() + "%";
-				specification = (root, query, cb) -> cb.or(cb.like(root.get("altName"), likeSearch),
-					cb.like(root.get("englishName"), likeSearch),
-					cb.like(root.get("name"), likeSearch));
-			}
-		}
-		if (request.getFilter() != null) {
-			if (!request.getFilter().getCategory().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(
-					specification, (root, query, cb) -> root.get("type").in(request.getFilter().getCategory()));
-			}
 		}
 		Collection<Rule> rules;
 		if (pageable == null) {
