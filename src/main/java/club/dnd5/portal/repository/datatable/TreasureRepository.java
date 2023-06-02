@@ -1,20 +1,18 @@
 package club.dnd5.portal.repository.datatable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.items.Treasure;
+import club.dnd5.portal.model.items.TreasureType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.book.TypeBook;
-import club.dnd5.portal.model.items.Treasure;
-import club.dnd5.portal.model.items.TreasureType;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TreasureRepository extends JpaRepository<Treasure, Integer>, JpaSpecificationExecutor<Treasure> {

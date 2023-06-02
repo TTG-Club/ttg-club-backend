@@ -1,38 +1,13 @@
 package club.dnd5.portal.controller.api.wiki;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-
-import club.dnd5.portal.dto.api.RequestApi;
-import club.dnd5.portal.dto.api.spells.SearchRequest;
-import club.dnd5.portal.dto.api.wiki.RuleApi;
-import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.rule.Rule;
-import club.dnd5.portal.util.SortUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.MediaType;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.api.wiki.GodApi;
 import club.dnd5.portal.dto.api.wiki.GodDetailApi;
 import club.dnd5.portal.dto.api.wiki.GodRequestApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -44,8 +19,25 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.GodRepository;
 import club.dnd5.portal.repository.datatable.PantheonGodRepository;
+import club.dnd5.portal.util.SortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Tag(name = "God", description = "The God API")
 @RestController

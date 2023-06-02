@@ -1,24 +1,24 @@
 package club.dnd5.portal.controller.api.item;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-
+import club.dnd5.portal.dto.api.FilterApi;
+import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
-import club.dnd5.portal.dto.api.item.MagicItemApi;
+import club.dnd5.portal.dto.api.item.ItemApi;
+import club.dnd5.portal.dto.api.item.ItemRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
-import club.dnd5.portal.model.items.MagicItem;
+import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.items.Treasure;
+import club.dnd5.portal.model.items.TreasureType;
+import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.repository.datatable.TreasureRepository;
 import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
@@ -26,18 +26,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import club.dnd5.portal.dto.api.FilterApi;
-import club.dnd5.portal.dto.api.FilterValueApi;
-import club.dnd5.portal.dto.api.item.ItemApi;
-import club.dnd5.portal.dto.api.item.ItemRequestApi;
-import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.book.TypeBook;
-import club.dnd5.portal.model.items.Treasure;
-import club.dnd5.portal.model.items.TreasureType;
-import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.repository.datatable.TreasureRepository;
-import club.dnd5.portal.util.SpecificationUtil;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Tag(name = "Treasure", description = "The Treasure API")
 @RestController

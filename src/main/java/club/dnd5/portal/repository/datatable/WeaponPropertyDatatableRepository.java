@@ -1,14 +1,13 @@
 package club.dnd5.portal.repository.datatable;
 
-import java.util.List;
-
-import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import club.dnd5.portal.model.items.WeaponProperty;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import club.dnd5.portal.model.items.WeaponProperty;
+import java.util.List;
 
 @Repository
-public interface WeaponPropertyDatatableRepository extends DataTablesRepository<WeaponProperty, Integer> {
+public interface WeaponPropertyDatatableRepository extends JpaRepository<WeaponProperty, Integer> {
 	List<WeaponProperty> findAll();
 
 	WeaponProperty findByEnglishName(String englishName);
