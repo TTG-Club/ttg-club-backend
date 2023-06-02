@@ -4,7 +4,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
+import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,7 +20,7 @@ public class BestiaryController {
 	private static final String BASE_URL = "https://ttg.club/bestiary";
 
 	@Autowired
-	private BestiaryDatatableRepository repository;
+	private BestiaryRepository repository;
 
 	@Autowired
 	private ImageRepository imageRepo;

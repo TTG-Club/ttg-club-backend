@@ -52,7 +52,7 @@ public class MetaApiController {
 	private RaceRepository raceRepository;
 
 	@Autowired
-	private TraitDatatableRepository traitRepository;
+	private TraitRepository traitRepository;
 
 	@Autowired
 	private BackgroundRepository backgroundRepository;
@@ -76,7 +76,7 @@ public class MetaApiController {
 	private MagicItemDatatableRepository magicItemRepository;
 
 	@Autowired
-	private BestiaryDatatableRepository bestiaryItemRepository;
+	private BestiaryRepository bestiaryItemRepository;
 
 	@Autowired
 	private ScreenDatatableRepository screenRepository;

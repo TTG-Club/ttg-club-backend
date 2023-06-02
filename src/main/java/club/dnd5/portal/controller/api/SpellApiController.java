@@ -44,7 +44,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -178,13 +177,13 @@ public class SpellApiController {
 		if (request.getPage() != null && request.getLimit() != null) {
 			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 		}
-		Collection<Spell> rules;
+		Collection<Spell> spells;
 		if (pageable == null) {
-			rules = spellRepository.findAll(specification, sort);
+			spells = spellRepository.findAll(specification, sort);
 		} else {
-			rules = spellRepository.findAll(specification, pageable).toList();
+			spells = spellRepository.findAll(specification, pageable).toList();
 		}
-		return rules
+		return spells
 			.stream()
 			.map(SpellApi::new)
 			.collect(Collectors.toList());

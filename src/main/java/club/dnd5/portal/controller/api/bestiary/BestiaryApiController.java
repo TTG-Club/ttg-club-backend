@@ -2,10 +2,14 @@ package club.dnd5.portal.controller.api.bestiary;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
 import club.dnd5.portal.dto.api.bestiary.BeastFilter;
 import club.dnd5.portal.dto.api.bestiary.BeastlRequesApi;
+import club.dnd5.portal.dto.api.spell.SpellApi;
+import club.dnd5.portal.dto.api.spell.SpellRequesApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.fvtt.export.FBeastiary;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.dto.fvtt.plutonium.FBeast;
@@ -19,17 +23,22 @@ import club.dnd5.portal.model.creature.*;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
+import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
+import club.dnd5.portal.util.SortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
@@ -44,7 +53,7 @@ import java.util.stream.IntStream;
 @RestController
 public class BestiaryApiController {
 	@Autowired
-	private BestiaryDatatableRepository beastRepository;
+	private BestiaryRepository beastRepository;
 
 	@Autowired
 	private TagBestiaryDatatableRepository tagRepository;
@@ -55,57 +64,9 @@ public class BestiaryApiController {
 	@PostMapping(value = "/api/v1/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BeastApi> getBestiary(@RequestBody BeastlRequesApi request) {
 		Specification<Creature> specification = null;
-
-		DataTablesInput input = new DataTablesInput();
-		List<Column> columns = new ArrayList<>(3);
-		Column column = new Column();
-		column.setData("name");
-		column.setName("name");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		column.setSearch(new Search("", Boolean.FALSE));
-		columns.add(column);
-
-		column = new Column();
-		column.setData("englishName");
-		column.setName("englishName");
-		column.setSearch(new Search("", Boolean.FALSE));
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		columns.add(column);
-
-		column = new Column();
-		column.setData("altName");
-		column.setName("altName");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.FALSE);
-
-		columns.add(column);
-		if (request.getOrders()!=null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-						.map(
-							order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-						)
-						.collect(Collectors.toList());
-				query.orderBy(orders);
-				return cb.and();
-			});
-		}
-		input.setColumns(columns);
-		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
-		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());
-		}
-		if (request.getSearch() != null) {
-			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
-				if (request.getSearch().getExact() != null && request.getSearch().getExact()) {
-					specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
-				} else {
-					input.getSearch().setValue(request.getSearch().getValue());
-					input.getSearch().setRegex(Boolean.FALSE);
-				}
-			}
+		Optional<BeastlRequesApi> spellRequest = Optional.ofNullable(request);
+		if (!spellRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+			specification = SpecificationUtil.getSearch(request);
 		}
 		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
 		if (filter.isPresent() && filter.map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
@@ -235,7 +196,24 @@ public class BestiaryApiController {
 			}
 			specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 		}
-		return beastRepository.findAll(input, specification, specification, BeastApi::new).getData();
+		Sort sort = Sort.unsorted();
+		if (!CollectionUtils.isEmpty(request.getOrders())) {
+			sort = SortUtil.getSort(request);
+		}
+		Pageable pageable = null;
+		if (request.getPage() != null && request.getLimit() != null) {
+			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
+		}
+		Collection<Creature> creatures;
+		if (pageable == null) {
+			creatures = beastRepository.findAll(specification, sort);
+		} else {
+			creatures = beastRepository.findAll(specification, pageable).toList();
+		}
+		return creatures
+			.stream()
+			.map(BeastApi::new)
+			.collect(Collectors.toList());
 	}
 
 	@PostMapping(value = "/api/v1/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
