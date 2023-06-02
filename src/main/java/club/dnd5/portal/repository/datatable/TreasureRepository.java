@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,7 +17,7 @@ import club.dnd5.portal.model.items.Treasure;
 import club.dnd5.portal.model.items.TreasureType;
 
 @Repository
-public interface TreasureDatatableRepository extends DataTablesRepository<Treasure, Integer> {
+public interface TreasureRepository extends JpaRepository<Treasure, Integer>, JpaSpecificationExecutor<Treasure> {
 	Optional<Treasure> findByEnglishName(String name);
 	List<Treasure> findAllByCostAndType(int cost, TreasureType type);
 	List<Treasure> findAllByTypeIn(Set<TreasureType> types);

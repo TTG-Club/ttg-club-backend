@@ -23,7 +23,7 @@ public class TraitController {
 		model.addAttribute("metaTitle", "Черты (Traits) D&D 5e");
 		model.addAttribute("menuTitle", "Черты");
 		model.addAttribute("metaUrl", BASE_URL);
-		model.addAttribute("metaDescription", "Списко черт персонажей по D&D 5 редакции");
+		model.addAttribute("metaDescription", "Список черт персонажей по D&D 5 редакции");
 		return "spa";
 	}
 

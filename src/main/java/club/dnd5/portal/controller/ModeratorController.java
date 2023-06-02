@@ -25,7 +25,7 @@ import club.dnd5.portal.repository.datatable.BestiaryRepository;
 
 public class ModeratorController {
 	@Autowired
-	private BestiaryRepository repo;
+	private BestiaryRepository bestiaryRepository;
 
 	@GetMapping ("/profile/beast")
 	public String getProfileForm(Model model) {
@@ -80,7 +80,7 @@ public class ModeratorController {
 		model.addAttribute("armorTypes", ArmorType.getCreatures());
 		model.addAttribute("habitates", HabitatType.values());
 
-		Creature beast = repo.findById(id).get();
+		Creature beast = bestiaryRepository.findById(id).get();
 		model.addAttribute("beastForm", new BeastForm(beast));
 		return "user/admin/edit_beast";
 	}

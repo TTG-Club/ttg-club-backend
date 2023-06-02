@@ -7,8 +7,6 @@ import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
 import club.dnd5.portal.dto.api.bestiary.BeastFilter;
 import club.dnd5.portal.dto.api.bestiary.BeastlRequesApi;
-import club.dnd5.portal.dto.api.spell.SpellApi;
-import club.dnd5.portal.dto.api.spell.SpellRequesApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.fvtt.export.FBeastiary;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
@@ -32,9 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +38,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,8 +58,8 @@ public class BestiaryApiController {
 	@PostMapping(value = "/api/v1/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BeastApi> getBestiary(@RequestBody BeastlRequesApi request) {
 		Specification<Creature> specification = null;
-		Optional<BeastlRequesApi> spellRequest = Optional.ofNullable(request);
-		if (!spellRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}
 		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
@@ -73,7 +67,8 @@ public class BestiaryApiController {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
 		}
 		if (!filter.map(BeastFilter::getChallengeRatings).orElseGet(Collections::emptyList).isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> root.get("challengeRating").in(request.getFilter().getChallengeRatings()));
+			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> root.get("challengeRating")
+				.in(request.getFilter().getChallengeRatings()));
 		}
 		if (!filter.map(BeastFilter::getTypes).orElseGet(Collections::emptyList).isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(

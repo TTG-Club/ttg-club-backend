@@ -33,9 +33,9 @@ public class YoutubeVideoApiController {
 	private static final Set<String> ROLES = new HashSet<>(Arrays.asList("MODERATOR", "ADMIN"));
 
 	@Autowired
-	YoutubeVideosRepository youtubeVideosRepository;
+	private YoutubeVideosRepository youtubeVideosRepository;
 	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
 
 	@Operation(summary = "Get last added video")
 	@GetMapping(value = "/last")

@@ -24,7 +24,6 @@ import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.InfoPagesRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.classes.RaceRepository;
 import club.dnd5.portal.repository.datatable.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,28 +60,28 @@ public class MetaApiController {
 	private SpellRepository spellRepository;
 
 	@Autowired
-	private OptionDatatableRepository optionRepository;
+	private OptionRepository optionRepository;
 
 	@Autowired
-	private WeaponDatatableRepository weaponRepository;
+	private WeaponRepository weaponRepository;
 
 	@Autowired
 	private ArmorRepository armorRepository;
 
 	@Autowired
-	private ItemDatatableRepository itemRepository;
+	private ItemRepository itemRepository;
 
 	@Autowired
-	private MagicItemDatatableRepository magicItemRepository;
+	private MagicItemRepository magicItemRepository;
 
 	@Autowired
 	private BestiaryRepository bestiaryItemRepository;
 
 	@Autowired
-	private ScreenDatatableRepository screenRepository;
+	private ScreenRepository screenRepository;
 
 	@Autowired
-	private GodDatatableRepository godRepository;
+	private GodRepository godRepository;
 
 	@Autowired
 	private RuleRepository ruleRepository;

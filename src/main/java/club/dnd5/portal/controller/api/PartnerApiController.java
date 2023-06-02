@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/partners")
 public class PartnerApiController {
 	@Autowired
-	PartnersRepository partnersRepository;
+	private PartnersRepository partnersRepository;
 
 	@GetMapping
 	@ResponseStatus(code = HttpStatus.OK)

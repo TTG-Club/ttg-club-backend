@@ -12,7 +12,7 @@ import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.classes.ArchetypeTraitRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
-import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
+import club.dnd5.portal.repository.datatable.OptionRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -43,7 +43,7 @@ public class ClassController {
 	@Autowired
 	private ImageRepository imageRepository;
 	@Autowired
-	private OptionDatatableRepository optionRepository;
+	private OptionRepository optionRepository;
 
 	@GetMapping("/classes")
 	public String getClasses(Model model) {

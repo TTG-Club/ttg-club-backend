@@ -6,7 +6,7 @@ import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.spell.ReferenceClassApi;
 import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.spell.SpellDetailApi;
-import club.dnd5.portal.dto.api.spell.SpellRequesApi;
+import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
@@ -64,10 +64,10 @@ public class SpellApiController {
 
 	@Operation(summary = "Gets all spells")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<SpellApi> getSpells(@RequestBody SpellRequesApi request) {
+	public List<SpellApi> getSpells(@RequestBody SpellRequestApi request) {
 		Specification<Spell> specification = null;
-		Optional<SpellRequesApi> spellRequest = Optional.ofNullable(request);
-		if (!spellRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}
 		if (request.getFilter() != null) {

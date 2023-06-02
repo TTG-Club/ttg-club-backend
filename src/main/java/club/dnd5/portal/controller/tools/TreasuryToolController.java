@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Controller
 public class TreasuryToolController {
-
 	@GetMapping("/tools/treasury")
 	public String getTreasuryTool(Model model) {
 		model.addAttribute("metaTitle", "Генератор сокровищницы");

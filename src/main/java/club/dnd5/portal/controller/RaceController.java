@@ -6,7 +6,7 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.classes.RaceRepository;
+import club.dnd5.portal.repository.datatable.RaceRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,8 +29,6 @@ public class RaceController {
 	@Autowired
 	private ImageRepository imageRepository;
 
-	@Autowired
-	private ImageRepository imageRepo;
 
 	@GetMapping("/races")
 	public String getRaces(Model model) {
@@ -48,7 +45,7 @@ public class RaceController {
 		model.addAttribute("metaTitle", race.getName() + " | Расы и происхождения D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.getCapitalazeName()));
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, race.getId());
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}
@@ -67,7 +64,7 @@ public class RaceController {
 		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.getUrlName(), subRace.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.getName()));
 		model.addAttribute("menuTitle", "Расы и происхождения");
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.RACE, subRace.getId());
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}

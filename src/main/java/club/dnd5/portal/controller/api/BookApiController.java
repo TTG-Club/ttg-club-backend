@@ -47,14 +47,7 @@ public class BookApiController {
 	@Operation(summary = "Gets all books")
 	@PostMapping(value = "/api/v1/books", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BookApi> getBooks(@RequestBody BookRequestApi request) {
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
+
 		Specification<Book> specification = null;
 		Optional<BookRequestApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
@@ -76,6 +69,14 @@ public class BookApiController {
 				query.orderBy(orders);
 				return cb.and();
 			});
+		}
+		Sort sort = Sort.unsorted();
+		if (!CollectionUtils.isEmpty(request.getOrders())) {
+			sort = SortUtil.getSort(request);
+		}
+		Pageable pageable = null;
+		if (request.getPage() != null && request.getLimit() != null) {
+			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 		}
 		Collection<Book> books;
 		if (pageable == null) {

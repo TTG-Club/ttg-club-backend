@@ -16,7 +16,7 @@ public class ArmorController {
 	private static final String BASE_URL = "https://ttg.club/armors";
 
 	@Autowired
-	private ArmorRepository repository;
+	private ArmorRepository armorRepository;
 
 	@GetMapping("/armors")
 	public String getArmors(Model model) {
@@ -29,7 +29,7 @@ public class ArmorController {
 
 	@GetMapping("/armors/{name}")
 	public String getArmor(Model model, @PathVariable String name) {
-		Armor armor = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		Armor armor = armorRepository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Доспехи D&D 5e", armor.getName(), armor.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, armor.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - доспехи по D&D 5 редакции", armor.getName(), armor.getEnglishName()));

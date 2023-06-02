@@ -20,7 +20,7 @@ public class BestiaryController {
 	private static final String BASE_URL = "https://ttg.club/bestiary";
 
 	@Autowired
-	private BestiaryRepository repository;
+	private BestiaryRepository bestiaryRepository;
 
 	@Autowired
 	private ImageRepository imageRepo;
@@ -36,7 +36,7 @@ public class BestiaryController {
 
 	@GetMapping("/bestiary/{name}")
 	public String getCreature(Model model, @PathVariable String name) {
-		Creature beast = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
+		Creature beast = bestiaryRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, beast.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));

@@ -28,10 +28,10 @@ import club.dnd5.portal.model.items.TreasureType;
 import club.dnd5.portal.model.items.Weapon;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ItemMagicTableRepository;
-import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
+import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import club.dnd5.portal.repository.datatable.TreasureDatatableRepository;
-import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
+import club.dnd5.portal.repository.datatable.TreasureRepository;
+import club.dnd5.portal.repository.datatable.WeaponRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Tools", description = "The tools API")
@@ -39,15 +39,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class TreasuryApiController {
 	public static final Random rnd = new Random();
 	@Autowired
-	private MagicItemDatatableRepository magicItemRepo;
+	private MagicItemRepository magicItemRepo;
 	@Autowired
 	private SpellRepository spellRepo;
 	@Autowired
-	private WeaponDatatableRepository weaponRepo;
+	private WeaponRepository weaponRepo;
 	@Autowired
 	private ItemMagicTableRepository mtRepo;
 	@Autowired
-	private TreasureDatatableRepository treasureRepo;
+	private TreasureRepository treasureRepo;
 
 	@PostMapping("/api/v1/tools/treasury")
 	public TreasuryApi getItems(@RequestBody RequestTreasuryApi request) {
