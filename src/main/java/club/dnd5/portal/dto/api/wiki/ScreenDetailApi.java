@@ -1,17 +1,17 @@
 package club.dnd5.portal.dto.api.wiki;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.screen.Screen;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -28,13 +28,14 @@ public class ScreenDetailApi extends ScreenApi {
         url = String.format("/screens/%s", screen.getUrlName());
         order = screen.getOrdering();
 
-        if (screen.getParent() != null) {
+        if (Objects.isNull(screen.getParent())) {
             source = new SourceApi(screen.getBook());
             description = screen.getDescription();
             parent = new ScreenDetailApi(screen.getParent());
             parent.setDescription(null);
             parent.setChields(null);
         } else {
+			description = screen.getDescription();
             chields = screen.getChields()
                     .stream()
                     .map(ScreenApi::new)
