@@ -35,7 +35,9 @@ public class ScreenDetailApi extends ScreenApi {
             parent.setDescription(null);
             parent.setChields(null);
         } else {
-			description = screen.getDescription();
+			if (Objects.nonNull(screen.getDescription())) {
+				description = screen.getDescription();
+			}
             chields = screen.getChields()
                     .stream()
                     .map(ScreenApi::new)
