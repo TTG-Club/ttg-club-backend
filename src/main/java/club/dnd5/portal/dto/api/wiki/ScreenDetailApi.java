@@ -28,7 +28,7 @@ public class ScreenDetailApi extends ScreenApi {
         url = String.format("/screens/%s", screen.getUrlName());
         order = screen.getOrdering();
 
-        if (Objects.isNull(screen.getParent())) {
+        if (Objects.nonNull(screen.getParent())) {
             source = new SourceApi(screen.getBook());
             description = screen.getDescription();
             parent = new ScreenDetailApi(screen.getParent());
