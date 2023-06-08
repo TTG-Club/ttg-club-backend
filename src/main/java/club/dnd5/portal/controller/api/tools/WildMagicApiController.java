@@ -19,24 +19,24 @@ import club.dnd5.portal.model.splells.WildMagic;
 import club.dnd5.portal.repository.datatable.WildMagicRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "Tools", description = "The tools API")
+@Tag(name = "Tools", description = "Генерация дикой магии")
 @RestController
 public class WildMagicApiController {
 	public static final Random rnd = new Random();
-	
+
 	@Autowired
 	private WildMagicRepository repo;
-	
+
 	@GetMapping("/api/v1/tools/wildmagic")
 	public Collection<SourceApi> getItems() {
 		return repo.finAllBook().stream().map(SourceApi::new).collect(Collectors.toList());
 	}
-	
+
 	@PostMapping("/api/v1/tools/wildmagic")
-	public Collection<WildMagicApi> getItems(@RequestBody RequestWildMagicApi reques) {
-		Collection<WildMagicApi> wildMagics = new ArrayList<WildMagicApi>(reques.getCount());
-		List<WildMagic> items = repo.findAllByBook(reques.getSources());
-		for (int i = 0; i < reques.getCount(); i++) {
+	public Collection<WildMagicApi> getItems(@RequestBody RequestWildMagicApi request) {
+		Collection<WildMagicApi> wildMagics = new ArrayList<WildMagicApi>(request.getCount());
+		List<WildMagic> items = repo.findAllByBook(request.getSources());
+		for (int i = 0; i < request.getCount(); i++) {
 			wildMagics.add(new WildMagicApi(items.get(rnd.nextInt(items.size()))));
 		}
 		return wildMagics;

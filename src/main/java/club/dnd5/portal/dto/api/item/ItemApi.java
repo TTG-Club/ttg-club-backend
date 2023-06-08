@@ -25,12 +25,12 @@ public class ItemApi {
 	protected TypeApi type;
 	private Object price;
 	protected SourceApi source;
-	
+
 	public ItemApi(Equipment item) {
 		name = new NameApi(item.getName(), item.getEnglishName());
 		url = String.format("/items/%s", item.getEnglishName().toLowerCase().replace(' ', '_'));
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
-			homebrew = Boolean.TRUE;	
+			homebrew = Boolean.TRUE;
 		}
 	}
 
@@ -38,14 +38,14 @@ public class ItemApi {
 		name = new NameApi(item.getName(), item.getEnglishName());
 		url = String.format("/items/magic/%s", item.getEnglishName().toLowerCase().replace(' ', '_'));
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
-			homebrew = Boolean.TRUE;	
+			homebrew = Boolean.TRUE;
 		}
 	}
 
 	public ItemApi(Treasure item) {
 		name = new NameApi(item.getName(), item.getEnglishName());
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
-			homebrew = Boolean.TRUE;	
+			homebrew = Boolean.TRUE;
 		}
 		type = new TypeApi(item.getType().getName(), item.getType().ordinal());
 		if (item.getCost() != null && item.getCost() != 0) {
@@ -53,8 +53,8 @@ public class ItemApi {
 		}
 		source = new SourceApi(item.getBook());
 	}
-	
-	public void changeName(String newName) {
-		name.setRus(String.format("%s %s", name.getRus(), newName));
+
+	public void updateName(String suffix) {
+		name.setRus(String.format("%s %s", name.getRus(), suffix));
 	}
 }

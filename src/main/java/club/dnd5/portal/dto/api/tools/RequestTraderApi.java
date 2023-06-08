@@ -18,6 +18,6 @@ public class RequestTraderApi {
 	private Integer magicLevel;
 	@Schema(description = "The Persuasion (Charisma) roll results", defaultValue = "10")
 	private Integer persuasion;
-	@Schema(description = "Show only unique magic items", defaultValue = "true")
+	@Schema(description = "Показывать только уникальные предметы", defaultValue = "true")
 	private Boolean unique;
 }

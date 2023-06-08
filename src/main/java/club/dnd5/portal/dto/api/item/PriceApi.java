@@ -8,15 +8,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@JsonInclude(Include.NON_NULL)
-
 @NoArgsConstructor
 @Getter
 @Setter
-public class CostApi {
+public class PriceApi {
 	private String dmg;
 	private String xge;
-	public CostApi(MagicItem item) {
+	public PriceApi(MagicItem item) {
 		dmg = item.getRangeCostDMG();
 		if (item.isConsumed()) {
 			xge = String.format("(%s) / 2", item.getRangeCostXGE());

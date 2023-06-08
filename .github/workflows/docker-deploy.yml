@@ -39,6 +39,9 @@ jobs:
           name: front-app-${{ github.run_id }}
           path: ./src/main/resources/static/
 
+      - name: Copy SPA html
+        run: mv ./src/main/resources/static/index.html ./src/main/resources/templates/spa.html
+
       - uses: actions/setup-java@v3
         with:
           distribution: adopt

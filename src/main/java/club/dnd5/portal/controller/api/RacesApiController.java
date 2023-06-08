@@ -2,6 +2,7 @@ package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.classes.RaceFilter;
 import club.dnd5.portal.dto.api.classes.RaceRequestApi;
 import club.dnd5.portal.dto.api.races.RaceApi;
 import club.dnd5.portal.dto.api.races.RaceDetailApi;
@@ -72,7 +73,6 @@ public class RacesApiController {
 
 		columns.add(column);
 		if (request.getOrders()!=null && !request.getOrders().isEmpty()) {
-
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 				List<Order> orders = request.getOrders().stream()
 						.map(
@@ -102,7 +102,6 @@ public class RacesApiController {
 				input.getSearch().setValue(request.getSearch().getValue());
 				input.getSearch().setRegex(Boolean.FALSE);
 			}
-
 		} else {
 			specification = SpecificationUtil.getAndSpecification(specification,
 				(root, query, cb) -> cb.isNull(root.get("parent")));
@@ -133,13 +132,25 @@ public class RacesApiController {
 						specification, (root, query, cb) -> cb.isNotNull(root.get("climb")));
 			}
 		}
-		return raceRepository.findAll(input, specification, specification, RaceApi::new).getData();
+		return raceRepository.findAll(input, specification, specification,
+			race -> new RaceApi(race, Optional.of(request)
+				.map(RaceRequestApi::getFilter)
+				.map(RaceFilter::getBooks)
+				.orElse(Collections.emptySet())))
+			.getData();
 	}
 
 	@PostMapping(value = "/api/v1/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<RaceDetailApi> getRace(@PathVariable String englishName) {
-		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
-		RaceDetailApi raceApi = new RaceDetailApi(race);
+	public ResponseEntity<RaceDetailApi> getRace(
+		@PathVariable String englishName,
+		@RequestBody RaceRequestApi request) {
+		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
+		RaceDetailApi raceApi = new RaceDetailApi(race, Optional.of(request)
+			.map(RaceRequestApi::getFilter)
+			.map(RaceFilter::getBooks)
+			.orElse(Collections.emptySet()
+		));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			raceApi.setImages(images);
@@ -148,9 +159,12 @@ public class RacesApiController {
 	}
 
 	@PostMapping(value = "/api/v1/races/{englishRaceName}/{englishSubraceName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public RaceDetailApi getSubrace(@PathVariable String englishRaceName, @PathVariable String englishSubraceName) {
+	public RaceDetailApi getSubrace(
+		@PathVariable String englishRaceName,
+		@PathVariable String englishSubraceName,
+		@RequestBody RaceRequestApi request) {
 		Optional<Race> race = raceRepository.findBySubrace(englishRaceName.replace('_', ' '), englishSubraceName.replace('_', ' '));
-		RaceDetailApi raceApi = new RaceDetailApi(race.get());
+		RaceDetailApi raceApi = new RaceDetailApi(race.get(), Optional.of(request).map(RaceRequestApi::getFilter).map(RaceFilter::getBooks).orElse(Collections.emptySet()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
 		if (!images.isEmpty()) {
 			raceApi.setImages(images);

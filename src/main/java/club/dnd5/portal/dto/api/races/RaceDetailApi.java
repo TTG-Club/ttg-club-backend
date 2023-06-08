@@ -28,8 +28,8 @@ public class RaceDetailApi extends RaceApi {
 	private Integer darkvision;
 	protected Collection<RaceSkillApi> skills;
 
-	public RaceDetailApi(Race race) {
-		super(race);
+	public RaceDetailApi(Race race, Set<String> books) {
+		super(race, books);
 		description = race.getDescription();
 		url = null;
 		type = race.getType().getCyrilicName();
@@ -48,7 +48,8 @@ public class RaceDetailApi extends RaceApi {
 		if (!race.getSubRaces().isEmpty()) {
 			subraces = race.getSubRaces()
 				.stream()
-				.map(RaceDetailApi::new)
+				.filter(r -> books.isEmpty()? true : books.contains(r.getBook().getSource()))
+				.map(race1 -> new RaceDetailApi(race1, books))
 				.collect(Collectors.toList());
 		}
 		fillSkill(race);
