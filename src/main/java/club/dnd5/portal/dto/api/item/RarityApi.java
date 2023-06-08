@@ -18,15 +18,22 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class RarityApi {
+public class RarityApi implements Comparable<RarityApi> {
 	private String type;
 	@JsonProperty("short")
 	private String shortName;
 	private String name;
-	
+
 	public RarityApi(Rarity rarity) {
 		type = rarity.name().toLowerCase().replace('_', '-');
 		shortName = rarity.getShort();
 		name = rarity.getCyrilicName();
+	}
+
+	@Override
+	public int compareTo(RarityApi rarity) {
+		return Rarity.valueOf(type.toLowerCase()
+			.replace('-', '_')).ordinal() - Rarity.valueOf(
+			rarity.type.toLowerCase().replace('-', '_')).ordinal();
 	}
 }
