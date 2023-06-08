@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.thymeleaf.util.StringUtils;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,19 +70,15 @@ public class ClassController {
 	public String getArchetype(Model model, @PathVariable String name, @PathVariable String archetype, HttpServletRequest request) {
 		String englishName = name.replace("_", " ");
 		HeroClass heroClass = classRepository.findByEnglishName(englishName).orElseThrow(PageNotFoundException::new);
-		Optional<Archetype> selectedArchetype = heroClass.getArchetypes().stream()
+		Archetype selectedArchetype = heroClass.getArchetypes().stream()
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetype.replace('_', ' ')))
-				.findFirst();
-		if (!selectedArchetype.isPresent()) {
-			request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, "404");
-			return "forward: /error";
-		}
+				.findFirst().orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",
-				StringUtils.capitalize(selectedArchetype.get().getName().toLowerCase()), heroClass.getCapitalazeName(), heroClass.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, heroClass.getUrlName(), selectedArchetype.get().getUrlName()));
+				StringUtils.capitalize(selectedArchetype.getName().toLowerCase()), heroClass.getCapitalazeName(), heroClass.getEnglishName()));
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, heroClass.getUrlName(), selectedArchetype.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s - описание %s класса %s из D&D 5 редакции",
-				selectedArchetype.get().getName(), heroClass.getArchetypeName(), heroClass.getCapitalazeName()));
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.SUBCLASS, selectedArchetype.get().getId());
+				selectedArchetype.getName(), heroClass.getArchetypeName(), heroClass.getCapitalazeName()));
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.SUBCLASS, selectedArchetype.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
 		}

@@ -1,19 +1,11 @@
 package club.dnd5.portal.controller.api.tools;
 
-import java.util.*;
-
-import club.dnd5.portal.dto.api.SourceApi;
-import club.dnd5.portal.dto.api.tools.TraderApi;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.NameValueApi;
+import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.tools.RequestTraderApi;
+import club.dnd5.portal.dto.api.tools.TraderApi;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.TypeBook;
@@ -26,6 +18,14 @@ import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Tag(name = "Tools", description = "The tools API")
 @RestController
@@ -76,7 +76,10 @@ public class TraderApiController {
 		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 31, 35, "Е1", 4, traderApi.getUnique()));
 		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 36, 40, "Ж", 4, traderApi.getUnique()));
 		list.addAll(getMagicItems(traderApi.getPersuasion() + coef, 41, 1000, "З", 4, traderApi.getUnique()));
-		return list;
+		return list
+			.stream()
+			.sorted(Comparator.comparing(MagicItemApi::getRarity))
+			.collect(Collectors.toList());
 	}
 
 	private List<MagicItemApi> getMagicItems(
