@@ -32,8 +32,8 @@ public class RarityApi implements Comparable<RarityApi> {
 
 	@Override
 	public int compareTo(RarityApi rarity) {
-		return Rarity.valueOf(type.toLowerCase()
+		return Rarity.valueOf(type.toUpperCase()
 			.replace('-', '_')).ordinal() - Rarity.valueOf(
-			rarity.type.toLowerCase().replace('-', '_')).ordinal();
+			rarity.type.toUpperCase().replace('-', '_')).ordinal();
 	}
 }
