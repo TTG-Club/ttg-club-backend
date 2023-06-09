@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
 
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import club.dnd5.portal.dto.api.item.ArmorApi;
 import club.dnd5.portal.dto.api.item.ArmorDetailApi;
-import club.dnd5.portal.dto.api.item.ArmorRequesApi;
+import club.dnd5.portal.dto.api.item.ArmorRequestApi;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.items.Armor;
 import club.dnd5.portal.model.splells.Spell;
@@ -42,27 +41,13 @@ public class ArmorApiController {
 	private ArmorRepository armorRepository;
 
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<ArmorApi> getItem(@RequestBody ArmorRequesApi request) {
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null && request.getLimit() != -1) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
+	public List<ArmorApi> getItem(@RequestBody ArmorRequestApi request) {
 		Specification<Armor> specification = null;
-		Optional<ArmorRequesApi> optionalRequest = Optional.ofNullable(request);
+		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
-			if (optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
-				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
-			} else {
-				String likeSearch = "%" + request.getSearch().getValue() + "%";
-				specification = (root, query, cb) -> cb.or(cb.like(root.get("altName"), likeSearch),
-					cb.like(root.get("englishName"), likeSearch),
-					cb.like(root.get("name"), likeSearch));
-			}
+			specification = SpecificationUtil.getSearch(request);
 		}
+
 		if (request.getFilter() != null) {
 			if (!request.getFilter().getBooks().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
@@ -71,16 +56,13 @@ public class ArmorApiController {
 				});
 			}
 		}
-		if (request.getOrders()!=null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-						.map(
-							order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-						)
-						.collect(Collectors.toList());
-				query.orderBy(orders);
-				return cb.and();
-			});
+		Sort sort = Sort.unsorted();
+		if (!CollectionUtils.isEmpty(request.getOrders())) {
+			sort = SortUtil.getSort(request);
+		}
+		Pageable pageable = null;
+		if (request.getPage() != null && request.getLimit() != null && request.getLimit() != -1) {
+			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 		}
 		Collection<Armor> armors;
 		if (pageable == null) {

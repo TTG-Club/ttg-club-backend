@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Hidden
 @Controller
+@Deprecated
 public class ConditionController {
 	@GetMapping("/conditions")
 	public String getConditions(Model model) {

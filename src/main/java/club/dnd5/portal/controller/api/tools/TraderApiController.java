@@ -14,9 +14,9 @@ import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.items.Weapon;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ItemMagicTableRepository;
-import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
-import club.dnd5.portal.repository.datatable.SpellDatatableRepository;
-import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
+import club.dnd5.portal.repository.datatable.MagicItemRepository;
+import club.dnd5.portal.repository.datatable.SpellRepository;
+import club.dnd5.portal.repository.datatable.WeaponRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,11 +32,11 @@ import java.util.stream.Collectors;
 public class TraderApiController {
 	private static final Random rnd = new Random();
 	@Autowired
-	private MagicItemDatatableRepository magicItemRepo;
+	private MagicItemRepository magicItemRepo;
 	@Autowired
-	private SpellDatatableRepository spellRepo;
+	private SpellRepository spellRepo;
 	@Autowired
-	private WeaponDatatableRepository weaponRepo;
+	private WeaponRepository weaponRepo;
 	@Autowired
 	private ItemMagicTableRepository mtRepo;
 

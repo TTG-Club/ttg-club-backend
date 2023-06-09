@@ -2,7 +2,7 @@ package club.dnd5.portal.controller;
 
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.trait.Trait;
-import club.dnd5.portal.repository.datatable.TraitDatatableRepository;
+import club.dnd5.portal.repository.datatable.TraitRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,14 +16,14 @@ public class TraitController {
 	private static final String BASE_URL = "https://ttg.club/traits";
 
 	@Autowired
-	private TraitDatatableRepository repository;
+	private TraitRepository repository;
 
 	@GetMapping({"/traits", "/feats"})
 	public String getTraits(Model model) {
 		model.addAttribute("metaTitle", "Черты (Traits) D&D 5e");
 		model.addAttribute("menuTitle", "Черты");
 		model.addAttribute("metaUrl", BASE_URL);
-		model.addAttribute("metaDescription", "Списко черт персонажей по D&D 5 редакции");
+		model.addAttribute("metaDescription", "Список черт персонажей по D&D 5 редакции");
 		return "spa";
 	}
 

@@ -2,10 +2,12 @@ package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.classes.RaceFilter;
 import club.dnd5.portal.dto.api.classes.RaceRequestApi;
 import club.dnd5.portal.dto.api.races.RaceApi;
 import club.dnd5.portal.dto.api.races.RaceDetailApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
@@ -13,16 +15,18 @@ import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.RaceDatatableRepository;
+import club.dnd5.portal.repository.datatable.RaceRepository;
+import club.dnd5.portal.util.SortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,56 +41,22 @@ import java.util.stream.Collectors;
 @RestController
 public class RacesApiController {
 	@Autowired
-	private RaceDatatableRepository raceRepository;
+	private RaceRepository raceRepository;
 
 	@Autowired
 	private ImageRepository imageRepository;
 
 	@PostMapping(value = "/api/v1/races", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RaceApi> getRaces(@RequestBody RaceRequestApi request) {
-		Specification<Race> specification = null;
+		Specification<Race> specification;
 
-		DataTablesInput input = new DataTablesInput();
-		List<Column> columns = new ArrayList<Column>(3);
-		Column column = new Column();
-		column.setData("name");
-		column.setName("name");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		column.setSearch(new Search("", Boolean.FALSE));
-		columns.add(column);
-
-		column = new Column();
-		column.setData("englishName");
-		column.setName("englishName");
-		column.setSearch(new Search("", Boolean.FALSE));
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		columns.add(column);
-
-		column = new Column();
-		column.setData("altName");
-		column.setName("altName");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.FALSE);
-
-		columns.add(column);
-		if (request.getOrders()!=null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-						.map(
-							order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-						)
-						.collect(Collectors.toList());
-				query.orderBy(orders);
-				return cb.and();
-			});
+		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+			specification = SpecificationUtil.getSearch(request);
+		} else {
+			specification = Specification.where((root, query, cb) -> cb.isNull(root.get("parent")));
 		}
-		input.setColumns(columns);
-		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
-		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());
-		}
+
 		if (request.getFilter() != null && request.getFilter().getBooks() != null && !request.getFilter().getBooks().isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 				Join<Book, Race> join = root.join("book", JoinType.INNER);
@@ -95,19 +64,7 @@ public class RacesApiController {
 			});
 		}
 
-		if (request.getSearch() != null && request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
-			if (request.getSearch().getExact() != null && request.getSearch().getExact()) {
-				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
-			} else {
-				input.getSearch().setValue(request.getSearch().getValue());
-				input.getSearch().setRegex(Boolean.FALSE);
-			}
-		} else {
-			specification = SpecificationUtil.getAndSpecification(specification,
-				(root, query, cb) -> cb.isNull(root.get("parent")));
-		}
-
-		if (request.getFilter()!=null) {
+		if (request.getFilter() != null) {
 			for (String ability : request.getFilter().getAbilities()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<AbilityType, Race> join = root.join("bonuses", JoinType.LEFT);
@@ -132,12 +89,28 @@ public class RacesApiController {
 						specification, (root, query, cb) -> cb.isNotNull(root.get("climb")));
 			}
 		}
-		return raceRepository.findAll(input, specification, specification,
-			race -> new RaceApi(race, Optional.of(request)
+		Sort sort = Sort.unsorted();
+		if (!CollectionUtils.isEmpty(request.getOrders())) {
+			sort = SortUtil.getSort(request);
+		}
+		Pageable pageable = null;
+		if (request.getPage() != null && request.getLimit() != null) {
+			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
+		}
+		Collection<Race> races;
+		if (pageable == null) {
+			races = raceRepository.findAll(specification, sort);
+		} else {
+			races = raceRepository.findAll(specification, pageable).toList();
+		}
+		return races
+			.stream()
+			.map(race -> new RaceApi(race, Optional.of(request)
 				.map(RaceRequestApi::getFilter)
 				.map(RaceFilter::getBooks)
-				.orElse(Collections.emptySet())))
-			.getData();
+				.orElse(Collections.emptySet()))
+			)
+			.collect(Collectors.toList());
 	}
 
 	@PostMapping(value = "/api/v1/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)

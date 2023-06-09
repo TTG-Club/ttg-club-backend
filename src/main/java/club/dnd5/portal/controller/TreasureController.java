@@ -1,6 +1,6 @@
 package club.dnd5.portal.controller;
 
-import club.dnd5.portal.repository.datatable.TreasureDatatableRepository;
+import club.dnd5.portal.repository.datatable.TreasureRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,15 +8,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.naming.directory.InvalidAttributesException;
-
 @Hidden
 @Controller
 public class TreasureController {
 	private static final String BASE_URL = "https://ttg.club/treasures";
 
 	@Autowired
-	private TreasureDatatableRepository repository;
+	private TreasureRepository repository;
 
 	@GetMapping("/treasures")
 	public String getItems(Model model) {

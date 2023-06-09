@@ -1,13 +1,12 @@
 package club.dnd5.portal.repository.datatable;
 
-import java.util.Collection;
-
-import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import club.dnd5.portal.model.creature.CreatureRace;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import club.dnd5.portal.model.creature.CreatureRace;
+import java.util.Collection;
 
 @Repository
-public interface TagBestiaryDatatableRepository extends DataTablesRepository<CreatureRace, Integer> {
-	Collection<CreatureRace> findByOrderByName(); 
+public interface TagBestiaryDatatableRepository extends JpaRepository<CreatureRace, Integer> {
+	Collection<CreatureRace> findByOrderByName();
 }

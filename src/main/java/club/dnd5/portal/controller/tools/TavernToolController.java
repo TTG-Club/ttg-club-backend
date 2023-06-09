@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import club.dnd5.portal.repository.datatable.RaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +21,6 @@ import club.dnd5.portal.model.tavern.TavernaName;
 import club.dnd5.portal.model.tavern.TavernaPrefixName;
 import club.dnd5.portal.model.tavern.TavernaType;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.classes.RaceRepository;
 import club.dnd5.portal.repository.tavern.AtmosphereRepoditory;
 import club.dnd5.portal.repository.tavern.DrinkEffectsRepository;
 import club.dnd5.portal.repository.tavern.RandomEventRepository;
@@ -63,7 +63,7 @@ public class TavernToolController {
 	private TavernaDrinkRepository drinkRepo;
 	@Autowired
 	private DrinkEffectsRepository drinkEffectRepo;
-	
+
 	private Set<String> generatedNames = new HashSet<>();
 
 	@GetMapping("/tools/tavern")
@@ -137,14 +137,14 @@ public class TavernToolController {
 		}
 		return tavernName;
 	}
-	
+
 	@GetMapping("/tools/tavern/habitates/")
 	public String getHabitates(Model model) {
 		model.addAttribute("selected",  habitates.get(rnd.nextInt(habitates.size())));
 		model.addAttribute("habitates",  habitates);
 		return "tools/tavern :: habitates";
 	}
-	
+
 	@GetMapping("/tools/tavern/atmosphere/")
 	@ResponseBody
 	public String getAtmosphere() {

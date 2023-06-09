@@ -25,15 +25,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 public class MadnessApiController {
 	public static final Random rnd = new Random();
-	
+
 	@Autowired
-	private MadnessRepository repo;
-	
+	private MadnessRepository madnessRepository;
+
 	@GetMapping("/api/v1/tools/madness")
 	public Collection<NameValueApi> getItems() {
 		return Arrays.stream(MadnessType.values()).map(t -> new NameValueApi(t.getCyrilicName(), t.name())).collect(Collectors.toList());
 	}
-	
+
 	@PostMapping("/api/v1/tools/madness")
 	public Collection<MadnessApi> getItems(@RequestBody RequestMadnessApi reques) {
 		MadnessType madnessType;
@@ -44,7 +44,7 @@ public class MadnessApiController {
 			madnessType = MadnessType.valueOf(reques.getType());
 		}
 		Collection<MadnessApi> madness = new ArrayList<MadnessApi>(reques.getCount());
-		List<Madness> items = repo.findByMadnessType(madnessType);
+		List<Madness> items = madnessRepository.findByMadnessType(madnessType);
 		for (int i = 0; i < reques.getCount(); i++) {
 			madness.add(new MadnessApi(items.get(rnd.nextInt(items.size()))));
 		}

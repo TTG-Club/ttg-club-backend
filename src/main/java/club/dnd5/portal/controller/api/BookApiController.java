@@ -1,26 +1,20 @@
 package club.dnd5.portal.controller.api;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Order;
-
+import club.dnd5.portal.dto.api.BookApi;
+import club.dnd5.portal.dto.api.BookRequestApi;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
-import club.dnd5.portal.dto.api.wiki.RuleApi;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.SortUtil;
-import com.sun.xml.bind.v2.schemagen.episode.SchemaBindings;
+import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +24,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import club.dnd5.portal.dto.api.BookApi;
-import club.dnd5.portal.dto.api.BookRequestApi;
-import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.repository.datatable.BookRepository;
-import club.dnd5.portal.util.SpecificationUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import javax.persistence.criteria.Order;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Tag(name = "Book", description = "The Book API")
 @RestController
@@ -47,14 +39,7 @@ public class BookApiController {
 	@Operation(summary = "Gets all books")
 	@PostMapping(value = "/api/v1/books", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BookApi> getBooks(@RequestBody BookRequestApi request) {
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
+
 		Specification<Book> specification = null;
 		Optional<BookRequestApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
@@ -76,6 +61,14 @@ public class BookApiController {
 				query.orderBy(orders);
 				return cb.and();
 			});
+		}
+		Sort sort = Sort.unsorted();
+		if (!CollectionUtils.isEmpty(request.getOrders())) {
+			sort = SortUtil.getSort(request);
+		}
+		Pageable pageable = null;
+		if (request.getPage() != null && request.getLimit() != null) {
+			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 		}
 		Collection<Book> books;
 		if (pageable == null) {

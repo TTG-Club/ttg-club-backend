@@ -2,7 +2,7 @@ package club.dnd5.portal.controller;
 
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.items.Equipment;
-import club.dnd5.portal.repository.datatable.ItemDatatableRepository;
+import club.dnd5.portal.repository.datatable.ItemRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,7 +19,7 @@ public class ItemController {
 	private static final String BASE_URL = "https://ttg.club/items";
 
 	@Autowired
-	private ItemDatatableRepository repository;
+	private ItemRepository repository;
 
 	@GetMapping("/items")
 	public String getItems(Model model) {
