@@ -13,18 +13,15 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.datatable.TraitRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,22 +91,8 @@ public class TraitApiController {
 				}
 			}
 		}
-
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<Trait> traits;
-		if (pageable == null) {
-			traits = traitRepository.findAll(specification, sort);
-		} else {
-			traits = traitRepository.findAll(specification, pageable).toList();
-		}
-		return traits
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return traitRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(TraitApi::new)
 			.collect(Collectors.toList());

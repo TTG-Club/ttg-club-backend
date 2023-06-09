@@ -12,16 +12,13 @@ import club.dnd5.portal.model.items.Treasure;
 import club.dnd5.portal.model.items.TreasureType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.TreasureRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Tag(name = "Treasure", description = "The Treasure API")
@@ -70,21 +70,8 @@ public class TreasureApiController {
 				return cb.and();
 			});
 		}
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null && request.getLimit() != -1) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<Treasure> items;
-		if (pageable == null) {
-			items = treasuryRepository.findAll(specification, sort);
-		} else {
-			items = treasuryRepository.findAll(specification, pageable).toList();
-		}
-		return items
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return treasuryRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(ItemApi::new)
 			.collect(Collectors.toList());

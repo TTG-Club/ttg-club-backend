@@ -17,13 +17,11 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.OptionRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -94,21 +92,8 @@ public class OptionApiController {
 				return cb.and();
 			});
 		}
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<Option> options;
-		if (pageable == null) {
-			options = optionRepository.findAll(specification, sort);
-		} else {
-			options = optionRepository.findAll(specification, pageable).toList();
-		}
-		return options
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return optionRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(OptionApi::new)
 			.collect(Collectors.toList());

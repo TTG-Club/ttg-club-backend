@@ -17,16 +17,13 @@ import club.dnd5.portal.model.items.WeaponProperty;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,21 +91,8 @@ public class WeaponApiController {
 				}
 			}
 		}
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null && request.getLimit() != -1) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<Weapon> items;
-		if (pageable == null) {
-			items = weaponRepository.findAll(specification, sort);
-		} else {
-			items = weaponRepository.findAll(specification, pageable).toList();
-		}
-		return items
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return weaponRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(WeaponApi::new)
 			.collect(Collectors.toList());

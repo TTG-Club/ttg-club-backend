@@ -15,18 +15,15 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.BackgroundRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -79,21 +76,8 @@ public class BackgroundApiController {
 				return cb.and();
 			});
 		}
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<Background> rules;
-		if (pageable == null) {
-			rules = backgroundRepository.findAll(specification, sort);
-		} else {
-			rules = backgroundRepository.findAll(specification, pageable).toList();
-		}
-		return rules
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return backgroundRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(BackgroundApi::new)
 			.collect(Collectors.toList());

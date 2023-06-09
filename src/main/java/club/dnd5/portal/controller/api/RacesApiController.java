@@ -16,17 +16,14 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -89,21 +86,8 @@ public class RacesApiController {
 						specification, (root, query, cb) -> cb.isNotNull(root.get("climb")));
 			}
 		}
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getLimit()) && request.getLimit() !=-1) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<Race> races;
-		if (pageable == null) {
-			races = raceRepository.findAll(specification, sort);
-		} else {
-			races = raceRepository.findAll(specification, pageable).toList();
-		}
-		return races
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return raceRepository.findAll(specification, pageable)
 			.stream()
 			.map(race -> new RaceApi(race, Optional.of(request)
 				.map(RaceRequestApi::getFilter)

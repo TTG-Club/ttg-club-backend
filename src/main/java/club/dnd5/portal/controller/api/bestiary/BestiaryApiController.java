@@ -23,17 +23,14 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
@@ -191,21 +188,8 @@ public class BestiaryApiController {
 			}
 			specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 		}
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<Creature> creatures;
-		if (pageable == null) {
-			creatures = beastRepository.findAll(specification, sort);
-		} else {
-			creatures = beastRepository.findAll(specification, pageable).toList();
-		}
-		return creatures
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return beastRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(BeastApi::new)
 			.collect(Collectors.toList());

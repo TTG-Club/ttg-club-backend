@@ -1,32 +1,14 @@
 package club.dnd5.portal.controller.api.item;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.servlet.http.HttpServletResponse;
-
+import club.dnd5.portal.dto.api.FilterApi;
+import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
-import club.dnd5.portal.dto.api.item.*;
+import club.dnd5.portal.dto.api.item.MagicItemApi;
+import club.dnd5.portal.dto.api.item.MagicItemDetailApi;
+import club.dnd5.portal.dto.api.item.MagicItemRequesApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.items.Equipment;
-import club.dnd5.portal.util.SortUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
-
-import club.dnd5.portal.dto.api.FilterApi;
-import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.image.ImageType;
@@ -36,8 +18,22 @@ import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Tag(name = "Magic Item", description = "The Magic Item API")
 @RestController
@@ -108,21 +104,8 @@ public class MagicItemApiController {
 				return cb.and();
 			});
 		}
-		Sort sort = Sort.unsorted();
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
-		}
-		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null && request.getLimit() != -1) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
-		}
-		Collection<MagicItem> items;
-		if (pageable == null) {
-			items = magicItemRepository.findAll(specification, sort);
-		} else {
-			items = magicItemRepository.findAll(specification, pageable).toList();
-		}
-		return items
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return magicItemRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(MagicItemApi::new)
 			.collect(Collectors.toList());
