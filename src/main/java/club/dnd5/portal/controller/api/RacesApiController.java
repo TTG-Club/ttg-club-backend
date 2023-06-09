@@ -94,7 +94,7 @@ public class RacesApiController {
 			sort = SortUtil.getSort(request);
 		}
 		Pageable pageable = null;
-		if (request.getPage() != null && request.getLimit() != null) {
+		if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getLimit()) && request.getLimit() !=-1) {
 			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 		}
 		Collection<Race> races;
