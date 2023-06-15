@@ -16,23 +16,28 @@
 		<span th:utext="*{description}"></span>
 		<h4 class="header_separator"><span th:text="*{skillName}"></span></h4>
 		<div th:utext="*{skillDescription}"></div>
-		<h4 th:unless="${tables.empty}" class="header_separator"><span>Персонализация</span></h4>
+		<h4 th:unless="${tables.empty}" class="header_separator"><span>Персонализация</span>
+		</h4>
 		<div th:if="*{personalization}" th:utext="*{personalization}"></div>
 		<th:block th:each="type : ${tables}">
-		<table th:unless="${tables.empty}" class="table">
-				<thead>
+			<div class="table-responsive">
+				<table th:unless="${tables.empty}" class="dnd5_table">
+					<thead>
 					<tr>
 						<th th:text="|к${type.value.size}|"></th>
-						<th th:text="${type.key.name}" style="text-align: left;"></th>
+						<th th:text="${type.key.name}"
+							style="text-align: left;"></th>
 					</tr>
-				</thead>
-				<tbody>
+					</thead>
+					<tbody>
 					<tr th:each="value, status : ${type.value}">
-						<td th:text="${status.index + 1}" style="text-align: center;"></td>
+						<td th:text="${status.index + 1}"
+							style="text-align: center;"></td>
 						<td th:utext="${value.text}"></td>
 					</tr>
-				</tbody>
-		</table>
+					</tbody>
+				</table>
+			</div>
 		</th:block>
 	</th:block>
 </body>
