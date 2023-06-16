@@ -1,4 +1,4 @@
-package club.dnd5.portal.dto.api;
+package club.dnd5.portal.dto.api.youtube;
 
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.User;
@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 public class YoutubeVideoApi {
 	@NotNull
 	private String id;
+	@NotNull
+	private String name;
 	private User user;
 	private boolean active;
 	private int order;
@@ -25,6 +27,7 @@ public class YoutubeVideoApi {
 
 	public YoutubeVideoApi(YoutubeVideo video) {
 		id = video.getId();
+		name = video.getName();
 		active = video.isActive();
 		order = video.getOrder();
 		created = video.getCreated();

@@ -16,6 +16,7 @@ public class YoutubeVideo {
 	@Id
 	@Column(columnDefinition="varchar(12)")
 	private String id;
+	private String name;
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
