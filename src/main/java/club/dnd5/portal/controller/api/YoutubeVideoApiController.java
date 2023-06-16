@@ -55,7 +55,7 @@ public class YoutubeVideoApiController {
 
 		Pageable pageable = null;
 
-		if (request.getPage() != null && request.getLimit() != null) {
+		if (request.getPage() != null && request.getLimit() != null && request.getLimit() != -1) {
 			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
 		}
 
