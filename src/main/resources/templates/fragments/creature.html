@@ -164,11 +164,11 @@
 			<span th:each="habitat, iter : *{habitates}" th:text="${iter.last ? habitat.name : habitat.name + ', '}"></span>
 		</p>
 		<details th:if="*{description}">
-			<summary class="h4 header_separator"><span>Описание</span></summary>
+			<summary class="h4"><span>Описание</span></summary>
 			<div class="content" th:if="*{description}" th:utext="*{description}"></div>
 		</details>
 		<details th:each="race : *{races}">
-			<summary class="h4 header_separator"><span th:text="${race.name}">Описание родительского типа</span></summary>
+			<summary class="h4"><span th:text="${race.name}">Описание родительского типа</span></summary>
 			<div class="content" th:utext="${race.description}"></div>
 		</details>
 	</div>
