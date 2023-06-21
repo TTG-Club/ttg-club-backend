@@ -59,7 +59,7 @@ public class SpellApiController {
 	@Autowired
 	private ArchetypeSpellRepository archetypeSpellRepository;
 
-	@Operation(summary = "Gets all spells")
+	@Operation(summary = "Список заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<SpellApi> getSpells(@RequestBody SpellRequestApi request) {
 		Specification<Spell> specification = null;
@@ -173,7 +173,7 @@ public class SpellApiController {
 			.collect(Collectors.toList());
 	}
 
-	@Operation(summary = "Gets spell by english name")
+	@Operation(summary = "Получение заклинания по английскому названию")
 	@ApiResponses(value = {
 		  @ApiResponse(responseCode = "200", description = "Found the spell",
 		    content = { @Content(mediaType = "application/json",
@@ -197,7 +197,7 @@ public class SpellApiController {
 		return ResponseEntity.ok(spellApi);
 	}
 
-	@Operation(summary = "Gets filters for spells")
+	@Operation(summary = "Список заклинаний")
 	@CrossOrigin
 	@GetMapping(value = "/api/fvtt/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSpells(String search, String exact){
@@ -212,6 +212,18 @@ public class SpellApiController {
 					cb.like(root.get("name"), likeSearch));
 			}
 		}
+		return new SpellsFvtt(spellRepository.findAll(specification)
+			.stream()
+			.map(SpellFvtt::new)
+			.collect(Collectors.toList())
+		);
+	}
+
+	@Operation(summary = "Список SRD заклинаний")
+	@CrossOrigin
+	@GetMapping(value = "/api/fvtt/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
+	public SpellsFvtt getSrdSpells(){
+		Specification<Spell> specification = (root, query, cb) -> cb.isNotNull(root.get("srd"));
 		return new SpellsFvtt(spellRepository.findAll(specification)
 			.stream()
 			.map(SpellFvtt::new)
