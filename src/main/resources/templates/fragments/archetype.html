@@ -108,7 +108,6 @@
 			<details th:if="${feature.child eq null}" open th:classappend="${feature.prefix eq 'a'? 'feet_show' : ''}">
 				<summary class="h4" th:classappend="${feature.prefix eq 'a' or feature.prefix eq 'ad' ? 'archetype_feet' : ''}" th:id="|${feature.prefix}${feature.id}|">
 					<span th:text="${feature.name}"></span>
-					<span th:if="${feature.optional}" class="tip" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</span>
 				</summary>
 				<div class="content">
 					<div class="caption_text" th:text="${feature.type}"></div>

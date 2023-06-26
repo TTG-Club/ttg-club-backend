@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Setter
 public class SpellFvtt implements Serializable {
 	private static final long serialVersionUID = 6266015163866595679L;
-	private long id;
+	private String id;
 	private String name;
     private String englishName;
     private String altName;
@@ -48,7 +48,7 @@ public class SpellFvtt implements Serializable {
     private Meta meta;
 
 	public SpellFvtt(Spell spell) {
-		this.id = spell.getId();
+		this.id = spell.getEnglishName().toLowerCase().replace(' ', '_');
 		this.name = spell.getName();
 		this.englishName = spell.getEnglishName();
 		this.level = spell.getLevel();
