@@ -166,13 +166,13 @@ public class ClassController {
 
 	@GetMapping("/classes/{englishName}/architype/name")
 	@ResponseBody
-	public String getArchitypeName(@PathVariable String englishName) {
+	public String getArchetypeName(@PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		return heroClass.getArchetypeName();
 	}
 
 	@GetMapping("/classes/{englishName}/architypes/list")
-	public String getArchitypeList(Model model, @PathVariable String englishName) {
+	public String getArchetypeList(Model model, @PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("archetypeName", heroClass.getArchetypeName());
 		model.addAttribute("archetypes", heroClass.getArchetypes().stream().sorted(Comparator.comparing(Archetype::getBook)).collect(Collectors.toList()));
