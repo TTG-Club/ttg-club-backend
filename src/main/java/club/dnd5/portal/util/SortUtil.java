@@ -21,7 +21,7 @@ public class SortUtil {
 		);
 	}
 
-	private static Sort.Order getOrder(Order order) {
+	public static Sort.Order getOrder(Order order) {
 		return order.getDirection().equalsIgnoreCase("asc") ? Sort.Order.asc(order.getField()) : Sort.Order.desc(order.getField());
 	}
 }

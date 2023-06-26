@@ -8,6 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @JsonInclude(Include.NON_NULL)
 
 @NoArgsConstructor
@@ -18,4 +22,11 @@ public class Order {
     private String field;
 	@Schema(description = "The order direction: ASC or DESC", defaultValue = "asc")
     private String direction;
+
+	public Order(String pair) {
+		List<String> strings = Arrays.stream(pair.split(" ")).collect(Collectors.toList());
+
+		this.field = strings.get(0);
+		this.direction = strings.get(1);
+	}
 }

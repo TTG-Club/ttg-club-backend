@@ -1,9 +1,7 @@
 package club.dnd5.portal.controller.api;
 
-import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.ResponseApi;
-import club.dnd5.portal.dto.api.spells.SearchRequest;
-import club.dnd5.portal.dto.api.youtube.YoutubeRequestApi;
+import club.dnd5.portal.dto.api.spells.Order;
 import club.dnd5.portal.dto.api.youtube.YoutubeVideoApi;
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.Role;
@@ -28,7 +26,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.criteria.Order;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,67 +38,59 @@ public class YoutubeVideoApiController {
 
 	@Autowired
 	private YoutubeVideosRepository youtubeVideosRepository;
+
 	@Autowired
 	private UserRepository userRepository;
 
 	@Operation(summary = "Get added video")
-	@PostMapping
-	public ResponseEntity<ResponseApi<YoutubeVideoApi>> getLastVideo(@RequestBody YoutubeRequestApi request) {
-		Sort sort = Sort.unsorted();
+	@GetMapping
+	public ResponseEntity<ResponseApi<YoutubeVideoApi>> getVideos(
+		@RequestParam(required = false, defaultValue = "0") Integer page,
+		@RequestParam(required = false, defaultValue = "-1") Integer limit,
+		@RequestParam(required = false) String search,
+		@RequestParam(required = false) List<String> order,
+		@RequestParam(required = false) Boolean onlyActive
+	) {
+		Sort sort;
 
-		if (!CollectionUtils.isEmpty(request.getOrders())) {
-			sort = SortUtil.getSort(request);
+		if (!CollectionUtils.isEmpty(order)) {
+			sort = Sort.by(
+				order
+					.stream()
+					.filter(Objects::nonNull)
+					.map(Order::new)
+					.map(SortUtil::getOrder)
+					.collect(Collectors.toList())
+			);
+		} else {
+			sort = Sort.unsorted();
 		}
 
 		Pageable pageable = null;
 
-		if (request.getPage() != null && request.getLimit() != null && request.getLimit() != -1) {
-			pageable = PageRequest.of(request.getPage(), request.getLimit(), sort);
+		if (page != null && limit != null && limit != -1) {
+			pageable = PageRequest.of(page, limit, sort);
 		}
 
 		Specification<YoutubeVideo> specification = null;
-		Optional<YoutubeRequestApi> optionalRequest = Optional.ofNullable(request);
 
-		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
-			if (optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
-				specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
-			} else {
-				String likeSearch = "%" + request.getSearch().getValue() + "%";
-				specification = (root, query, cb) -> cb.like(root.get("name"), likeSearch);
-			}
+		if (search != null) {
+			specification = (root, query, cb) -> cb.like(root.get("name"), "%" + search + "%");
 		}
 
-		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-					.map(
-						order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-					)
-					.collect(Collectors.toList());
-
-				query.orderBy(orders);
-
-				return cb.and();
-			});
-		}
-
-		Boolean active = null;
-
-		if (request.getFilter() != null && request.getFilter().getActive() != null) {
-			active = request.getFilter().getActive();
-
+		if (onlyActive != null) {
 			specification = SpecificationUtil.getAndSpecification(
 				specification,
-				(root, query, cb) -> cb.equal(root.get("active"), request.getFilter().getActive())
+				(root, query, cb) -> cb.equal(root.get("active"), onlyActive)
 			);
 		}
 
 		long count;
 
-		if (active == null) {
-			count = youtubeVideosRepository.count();
+		if (onlyActive != null) {
+			count = youtubeVideosRepository.countByActive(onlyActive);
 		} else {
-			count = youtubeVideosRepository.countByActive(active);
+			count = youtubeVideosRepository.count();
 		}
 
 		Collection<YoutubeVideo> videos;
@@ -127,7 +116,7 @@ public class YoutubeVideoApiController {
 
 	@Operation(summary = "Adding new video")
 	@SecurityRequirement(name = "Bearer Authentication")
-	@PostMapping("/add")
+	@PostMapping
 	public ResponseEntity<?> addVideo(@RequestBody YoutubeVideoApi videoApi) {
 		User user = getCurrentUser();
 
@@ -164,35 +153,48 @@ public class YoutubeVideoApiController {
 
 	@Operation(summary = "Update video")
 	@SecurityRequirement(name = "Bearer Authentication")
-	@PutMapping(path = "/{id}")
-	public ResponseEntity<?> addVideo(@PathVariable String id) {
-		if (id.length() != 11) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Youtube video ID is incorrect!");
-		}
-
+	@PatchMapping
+	public ResponseEntity<?> updateVideos(@RequestBody YoutubeVideoApi videoApi) {
 		User user = getCurrentUser();
 
 		if (!user.getRoles().stream().map(Role::getName).anyMatch(ROLES::contains)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission!");
 		}
 
-		Optional<YoutubeVideo> oldVideo = youtubeVideosRepository.findById(id);
+		if (videoApi.getId() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Video hasn't ID");
+		}
+
+		Optional<YoutubeVideo> oldVideo = youtubeVideosRepository.findById(videoApi.getId());
 
 		if (!oldVideo.isPresent()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Video with current ID is not exist");
 		}
 
-		YoutubeVideo video = new YoutubeVideo();
+		YoutubeVideo video = oldVideo.get();
 
-		video.setId(id);
-		video.setActive(true);
-		video.setOrder(0);
-		video.setUser(oldVideo.get().getUser());
-		video.setCreated(oldVideo.get().getCreated());
+		video.setName(videoApi.getName());
 
-		YoutubeVideo saved = youtubeVideosRepository.save(video);
+		return ResponseEntity.status(HttpStatus.OK).body(new YoutubeVideoApi(youtubeVideosRepository.save(video)));
+	}
 
-		return ResponseEntity.status(HttpStatus.OK).body(new YoutubeVideoApi(saved));
+	@Operation(summary = "Remove video")
+	@SecurityRequirement(name = "Bearer Authentication")
+	@DeleteMapping
+	public ResponseEntity<?> removeVideo(@RequestParam String id) {
+		User user = getCurrentUser();
+
+		if (!user.getRoles().stream().map(Role::getName).anyMatch(ROLES::contains)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission!");
+		}
+
+		if (id.length() != 11) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Youtube video ID is incorrect!");
+		}
+
+		youtubeVideosRepository.deleteById(id);
+
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
 	private User getCurrentUser() {
