@@ -3,6 +3,7 @@ package club.dnd5.portal.controller.api;
 import club.dnd5.portal.dto.api.ResponseApi;
 import club.dnd5.portal.dto.api.spells.Order;
 import club.dnd5.portal.dto.api.youtube.YoutubeVideoApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
@@ -165,13 +166,8 @@ public class YoutubeVideoApiController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Video hasn't ID");
 		}
 
-		Optional<YoutubeVideo> oldVideo = youtubeVideosRepository.findById(videoApi.getId());
-
-		if (!oldVideo.isPresent()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Video with current ID is not exist");
-		}
-
-		YoutubeVideo video = oldVideo.get();
+		YoutubeVideo video = youtubeVideosRepository.findById(videoApi.getId())
+			.orElseThrow(PageNotFoundException::new);
 
 		video.setName(videoApi.getName());
 
