@@ -19,7 +19,7 @@ public class RuleController {
 	private static final String BASE_URL = "https://ttg.club/rules";
 
 	@Autowired
-	private RuleRepository repository;
+	private RuleRepository ruleRepository;
 
 	@GetMapping("/rules")
 	public String getRules(Model model) {
@@ -32,7 +32,7 @@ public class RuleController {
 
 	@GetMapping("/rules/{name}")
 	public String getRule(Model model, @PathVariable String name, HttpServletRequest request) {
-		Rule rule = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		Rule rule = ruleRepository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s | %s | Правила и термины [Rules] D&D 5e", rule.getName(), rule.getType()));
 		model.addAttribute("metaDescription", String.format("%s (%s) Правила и термины по D&D 5 редакции", rule.getName(), rule.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, rule.getUrlName()));
@@ -42,7 +42,7 @@ public class RuleController {
 
 	@GetMapping("/rules/fragment/{id}")
 	public String getMagicRuleFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		model.addAttribute("rule", repository.findById(id).orElseThrow(InvalidAttributesException::new));
+		model.addAttribute("rule", ruleRepository.findById(id).orElseThrow(InvalidAttributesException::new));
 		return "fragments/rule :: view";
 	}
 }

@@ -45,19 +45,19 @@
 			</div>
 		</div>
 		<details th:each="feature : ${features}" open>
-			<summary class="h4 header_separator"><span th:utext="${feature.name}"></span></summary>
+			<summary class="h4"><span th:utext="${feature.name}"></span></summary>
 			<div class="content">
 				<div th:utext="${feature.description}"></div>
 			</div>
 		</details>
 		<details th:each="feature : ${subFeatures}" open>
-			<summary class="h4 header_separator archetype_feet"><span th:utext="${feature.name}"></span></summary>
+			<summary class="h4 archetype_feet"><span th:utext="${feature.name}"></span></summary>
 			<div class="content">
 				<div th:utext="${feature.description}"></div>
 			</div>
 		</details>
 		<details th:each="feature : ${notFeatures}">
-			<summary class="h4 header_separator">
+			<summary class="h4">
 				<span th:utext="${feature.name}"></span>
 			</summary>
 			<div class="content">
@@ -65,7 +65,7 @@
 			</div>
 		</details>
 		<details th:unless="*{names.empty}">
-			<summary class="h4 header_separator">
+			<summary class="h4">
 				<span>Имена</span>
 			</summary>
 			<p th:each="nameElement , iterStat: *{names}">
@@ -82,7 +82,7 @@
 			</p>
 		</details>
 		<details>
-			<summary class="h4 header_separator">
+			<summary class="h4">
 				<span>Описание</span>
 			</summary>
 			<div class="content">
@@ -92,7 +92,7 @@
 		<h4 th:unless="*{subRaces.empty}">Разновидности</h4>
 		<th:block th:unless="*{subRaces.empty}" th:each="subRace : *{subRaces}">
 			<details class="spoiler feet_show" th:classappend="${subRace.book.type.name() eq 'CUSTOM' ? 'custom_source hide_block': subRace.book.type.name() eq 'SETTING' ? 'setting_source hide_block':''}">
-				<summary class="h4 header_separator">
+				<summary class="h4">
 					<span th:text="${subRace.name}"></span><span class="tip" th:text="${subRace.book.source}" th:title="${subRace.book.name}"></span>
 				</summary>
 				<div class="content">

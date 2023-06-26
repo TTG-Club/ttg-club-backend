@@ -3,7 +3,7 @@ package club.dnd5.portal.controller;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.Option.OptionType;
-import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
+import club.dnd5.portal.repository.datatable.OptionRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,7 @@ public class OptionController {
 	private static final String BASE_URL = "https://ttg.club/options";
 
 	@Autowired
-	private OptionDatatableRepository repository;
+	private OptionRepository repository;
 
 	private Map<String, String> classIcons = new HashMap<>();
 

@@ -21,12 +21,12 @@ import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.creature.Condition;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.creature.HabitatType;
-import club.dnd5.portal.repository.datatable.BestiaryDatatableRepository;
+import club.dnd5.portal.repository.datatable.BestiaryRepository;
 
 public class ModeratorController {
 	@Autowired
-	private BestiaryDatatableRepository repo;
-	
+	private BestiaryRepository bestiaryRepository;
+
 	@GetMapping ("/profile/beast")
 	public String getProfileForm(Model model) {
 		model.addAttribute("sizes", CreatureSize.getFilterSizes());
@@ -51,7 +51,7 @@ public class ModeratorController {
 	public String getActionForm(Model model) {
 		return "user/admin/feature :: action";
 	}
-	
+
 	@GetMapping ("/profile/beast/reaction")
 	public String getReactionForm(Model model) {
 		return "user/admin/feature :: reaction";
@@ -61,12 +61,12 @@ public class ModeratorController {
 	public String getBonusActionForm(Model model) {
 		return "user/admin/feature :: bonus";
 	}
-	
+
 	@GetMapping ("/profile/beast/legendary")
 	public String getLegendaryActionForm(Model model) {
 		return "user/admin/feature :: legendary";
 	}
-	
+
 	@GetMapping("/admin/bestiary/{id}")
 	public String getBeastForm(Model model, @PathVariable Integer id) {
 		model.addAttribute("sizes", CreatureSize.getFilterSizes());
@@ -79,12 +79,12 @@ public class ModeratorController {
 		model.addAttribute("hitDices", Dice.getCreatures());
 		model.addAttribute("armorTypes", ArmorType.getCreatures());
 		model.addAttribute("habitates", HabitatType.values());
-	
-		Creature beast = repo.findById(id).get();
-		model.addAttribute("beastForm", new BeastForm(beast)); 
+
+		Creature beast = bestiaryRepository.findById(id).get();
+		model.addAttribute("beastForm", new BeastForm(beast));
 		return "user/admin/edit_beast";
 	}
-	
+
 	@Transactional
 	@PostMapping("/admin/bestiary/{id}")
 	public String updateBeast(Model model, @PathVariable Integer id, BeastForm beastForm, @RequestParam Map<String, String> params) {

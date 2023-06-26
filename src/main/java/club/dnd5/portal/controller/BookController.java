@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class BookController {
 	@Autowired
-	private BookRepository repository;
+	private BookRepository bookRepository;
 
 	@GetMapping("/books")
 	public String getRules(Model model) {
@@ -26,7 +26,7 @@ public class BookController {
 
 	@GetMapping("/books/{name}")
 	public String getRule(Model model, @PathVariable String name) {
-		Book book = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
+		Book book = bookRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Источники (Books) D&D 5e", book.getName(), book.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("https://ttg.club/books/%s", book.getUrlName()));
 		model.addAttribute("selectedBook", "name");
