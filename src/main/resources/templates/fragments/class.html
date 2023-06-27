@@ -149,7 +149,7 @@
 			<details class="spoiler feet_show archetype_item" th:classappend="${archetype.book.type.name() eq 'CUSTOM' ? 'custom_source hide_block': archetype.book.type.name() eq 'SETTING' ? 'setting_source hide_block':''}" th:data-arch-source="${archetype.book.source}">
 				<summary class="h4">
 					<span th:text="${archetype.name}"></span>
-					<span class="tip source-data" th:text="${archetype.book.source}" th:title="${archetype.book.name}"></span>
+					<span class="source-data tip" th:v-tippy="|'${archetype.book.name}'|" th:text="${archetype.book.source}" th:title="${archetype.book.name}"></span>
 				</summary>
 				<div class="content">
 					<div th:utext="${archetype.description}"></div>
