@@ -109,7 +109,7 @@
 				<summary class="h4" th:classappend="${feature.prefix eq 'a' or feature.prefix eq 'ad' ? 'archetype_feet' : ''}" th:id="|${feature.prefix}${feature.id}|">
 					<span th:text="${feature.name}"></span>
 					<span class="optional-rules" th:if="${feature.optional}"> (опционально)</span>
-					<span class="source-data" th:text="${feature.book.source}">Test</span>
+					<span class="source-data" th:if="${feature.book}" th:text="${feature.book.source}">Source</span>
 				</summary>
 				<div class="content">
 					<div class="caption_text" th:text="${feature.type}"></div>

@@ -136,7 +136,7 @@
 				<summary class="h4" th:id="${'c'+feature.id}">
 					<span th:utext="${feature.name}"></span>
 					<span th:if="${feature.optional}" class="tip optional-rules" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</span>
-					<span class="source-data" th:text="${feature.book.source}">Test</span>
+					<span class="source-data" th:text="${feature.book.source}">Source</span>
 				</summary>
 				<div class="content">
 					<p class="caption_text" th:text="${feature.type}"></p>
