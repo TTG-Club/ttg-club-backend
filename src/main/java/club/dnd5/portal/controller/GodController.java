@@ -4,7 +4,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.god.God;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.GodDatatableRepository;
+import club.dnd5.portal.repository.datatable.GodRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,7 +21,7 @@ public class GodController {
 	private static final String BASE_URL = "https://ttg.club/gods";
 
 	@Autowired
-	private GodDatatableRepository repository;
+	private GodRepository repository;
 
 	@Autowired
 	private ImageRepository imageRepo;

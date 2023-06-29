@@ -13,6 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ArmorRequesApi extends RequestApi {
-    public ArmorFilter filter;
+public class ItemRequestApi extends RequestApi {
+    public ItemFilter filter;
 }

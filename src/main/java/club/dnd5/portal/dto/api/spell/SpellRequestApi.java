@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SpellRequesApi extends RequestApi {
+public class SpellRequestApi extends RequestApi {
 	@Schema(description = "Spell filter", defaultValue = "null")
     public SpellFilter filter;
 }

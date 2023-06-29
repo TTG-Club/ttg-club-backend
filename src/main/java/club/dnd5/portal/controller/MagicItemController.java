@@ -4,7 +4,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.items.MagicItem;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
+import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,7 +20,7 @@ public class MagicItemController {
 	private static final String BASE_URL = "https://ttg.club/items/magic";
 
 	@Autowired
-	private MagicItemDatatableRepository repository;
+	private MagicItemRepository repository;
 
 	@Autowired
 	private ImageRepository imageRepo;

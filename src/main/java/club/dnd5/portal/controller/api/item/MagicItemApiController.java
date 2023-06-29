@@ -1,32 +1,14 @@
 package club.dnd5.portal.controller.api.item;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.servlet.http.HttpServletResponse;
-
-import club.dnd5.portal.dto.fvtt.export.FCreature;
-import club.dnd5.portal.exception.PageNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.item.MagicItemDetailApi;
 import club.dnd5.portal.dto.api.item.MagicItemRequesApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.dto.fvtt.export.FCreature;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.image.ImageType;
@@ -35,63 +17,40 @@ import club.dnd5.portal.model.items.MagicThingType;
 import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.MagicItemDatatableRepository;
+import club.dnd5.portal.repository.datatable.MagicItemRepository;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Tag(name = "Magic Item", description = "The Magic Item API")
 @RestController
 public class MagicItemApiController {
 	@Autowired
-	private MagicItemDatatableRepository magicItemRepository;
+	private MagicItemRepository magicItemRepository;
 	@Autowired
-	private ImageRepository imageRepo;
+	private ImageRepository imageRepository;
 
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<MagicItemApi> getItems(@RequestBody MagicItemRequesApi request) {
 		Specification<MagicItem> specification = null;
-
-		DataTablesInput input = new DataTablesInput();
-		List<Column> columns = new ArrayList<>(3);
-		Column column = new Column();
-		column.setData("name");
-		column.setName("name");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		column.setSearch(new Search("", Boolean.FALSE));
-		columns.add(column);
-
-		column = new Column();
-		column.setData("englishName");
-		column.setName("englishName");
-		column.setSearch(new Search("", Boolean.FALSE));
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		columns.add(column);
-
-		column = new Column();
-		column.setData("altName");
-		column.setName("altName");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.FALSE);
-		columns.add(column);
-
-		input.setColumns(columns);
-		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
-		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());
+		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+			specification = SpecificationUtil.getSearch(request);
 		}
-		if (request.getSearch() != null) {
-			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
-				if (request.getSearch().getExact() != null && request.getSearch().getExact()) {
-					specification = (root, query, cb) -> cb.equal(root.get("name"),
-							request.getSearch().getValue().trim().toUpperCase());
-				} else {
-					input.getSearch().setValue(request.getSearch().getValue());
-					input.getSearch().setRegex(Boolean.FALSE);
-				}
-			}
-		}
+
 		if (request.getFilter() != null) {
 			if (!request.getFilter().getBooks().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
@@ -105,7 +64,10 @@ public class MagicItemApiController {
 			}
 			if (!request.getFilter().getType().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
-					(root, query, cb) -> root.get("type").in(request.getFilter().getType().stream().map(MagicThingType::valueOf).collect(Collectors.toList())));
+					(root, query, cb) -> root.get("type").in(request.getFilter().getType()
+						.stream()
+						.map(MagicThingType::valueOf)
+						.collect(Collectors.toList())));
 			}
 			if (!request.getFilter().getCustomization().isEmpty()) {
 				if (request.getFilter().getCustomization().contains("1")) {
@@ -142,14 +104,18 @@ public class MagicItemApiController {
 				return cb.and();
 			});
 		}
-		return magicItemRepository.findAll(input, specification, specification, MagicItemApi::new).getData();
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return magicItemRepository.findAll(specification, pageable).toList()
+			.stream()
+			.map(MagicItemApi::new)
+			.collect(Collectors.toList());
 	}
 
 	@PostMapping(value = "/api/v1/items/magic/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MagicItemDetailApi getItem(@PathVariable String englishName) {
 		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MagicItemDetailApi itemApi = new MagicItemDetailApi(item);
-		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.MAGIC_ITEM, item.getId());
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.MAGIC_ITEM, item.getId());
 		if (!images.isEmpty()) {
 			itemApi.setImages(images);
 		}

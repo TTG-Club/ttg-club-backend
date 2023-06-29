@@ -4,7 +4,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.background.Personalization;
 import club.dnd5.portal.model.background.PersonalizationType;
-import club.dnd5.portal.repository.datatable.BackgroundDatatableRepository;
+import club.dnd5.portal.repository.datatable.BackgroundRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,7 +24,7 @@ public class BackgroundController {
 	private static final String BASE_URL = "https://ttg.club/backgrounds";
 
 	@Autowired
-	private BackgroundDatatableRepository repository;
+	private BackgroundRepository backgroundRepository;
 
 	@GetMapping("/backgrounds")
 	public String getBackgrounds(Model model) {
@@ -37,7 +37,7 @@ public class BackgroundController {
 
 	@GetMapping("/backgrounds/{name}")
 	public String getBackGround(Model model, @PathVariable String name) {
-		Background background = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
+		Background background = backgroundRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", background.getName() + " | Предыстории персонажей D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL,  background.getUrlName()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - предыстория персонажа по D&D 5 редакции", background.getName(), background.getEnglishName()));
@@ -47,7 +47,7 @@ public class BackgroundController {
 
 	@GetMapping("/backgrounds/fragment/{id}")
 	public String getBackgroundFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		Background background = repository.findById(id).orElseThrow(InvalidAttributesException::new);
+		Background background = backgroundRepository.findById(id).orElseThrow(InvalidAttributesException::new);
 		model.addAttribute("background", background);
 		Map<PersonalizationType, List<Personalization>> tables = background.getPersonalizations().stream()
 				.collect(Collectors.groupingBy(Personalization::getType, () -> new EnumMap<>(PersonalizationType.class), Collectors.toList()));

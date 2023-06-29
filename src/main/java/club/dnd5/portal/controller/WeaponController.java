@@ -2,7 +2,7 @@ package club.dnd5.portal.controller;
 
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.items.Weapon;
-import club.dnd5.portal.repository.datatable.WeaponDatatableRepository;
+import club.dnd5.portal.repository.datatable.WeaponRepository;
 import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class WeaponController {
 	private static final String BASE_URL = "https://ttg.club/weapons";
 
 	@Autowired
-	private WeaponDatatableRepository repository;
+	private WeaponRepository repository;
 
 	@Autowired
 	private WeaponPropertyDatatableRepository propertyRepository;

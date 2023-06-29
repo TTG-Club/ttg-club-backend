@@ -1,20 +1,24 @@
 package club.dnd5.portal.controller.api.item;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-
+import club.dnd5.portal.dto.api.FilterApi;
+import club.dnd5.portal.dto.api.FilterValueApi;
+import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.item.ItemApi;
+import club.dnd5.portal.dto.api.item.ItemDetailApi;
+import club.dnd5.portal.dto.api.item.ItemRequestApi;
+import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.items.Equipment;
+import club.dnd5.portal.model.items.EquipmentType;
+import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.repository.datatable.ItemRepository;
+import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.Search;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,69 +26,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import club.dnd5.portal.dto.api.FilterApi;
-import club.dnd5.portal.dto.api.FilterValueApi;
-import club.dnd5.portal.dto.api.item.ItemApi;
-import club.dnd5.portal.dto.api.item.ItemDetailApi;
-import club.dnd5.portal.dto.api.item.ItemRequesApi;
-import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.book.TypeBook;
-import club.dnd5.portal.model.items.Equipment;
-import club.dnd5.portal.model.items.EquipmentType;
-import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.repository.datatable.ItemDatatableRepository;
-import club.dnd5.portal.util.SpecificationUtil;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Tag(name = "Item", description = "The Item API")
 @RestController
 public class ItemApiController {
 	@Autowired
-	private ItemDatatableRepository itemRepository;
+	private ItemRepository itemRepository;
 
 	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<ItemApi> getItem(@RequestBody ItemRequesApi request) {
+	public List<ItemApi> getItem(@RequestBody ItemRequestApi request) {
 		Specification<Equipment> specification = null;
-
-		DataTablesInput input = new DataTablesInput();
-		List<Column> columns = new ArrayList<Column>(3);
-		Column column = new Column();
-		column.setData("name");
-		column.setName("name");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		column.setSearch(new Search("", Boolean.FALSE));
-		columns.add(column);
-
-		column = new Column();
-		column.setData("englishName");
-		column.setName("englishName");
-		column.setSearch(new Search("", Boolean.FALSE));
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.TRUE);
-		columns.add(column);
-
-		column = new Column();
-		column.setData("altName");
-		column.setName("altName");
-		column.setSearchable(Boolean.TRUE);
-		column.setOrderable(Boolean.FALSE);
-		columns.add(column);
-
-		input.setColumns(columns);
-		input.setLength(request.getLimit() != null ? request.getLimit() : -1);
-		if (request.getPage() != null && request.getLimit()!=null) {
-			input.setStart(request.getPage() * request.getLimit());
-		}
-		if (request.getSearch() != null) {
-			if (request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
-				if (request.getSearch().getExact() != null && request.getSearch().getExact()) {
-					specification = (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
-				} else {
-					input.getSearch().setValue(request.getSearch().getValue());
-					input.getSearch().setRegex(Boolean.FALSE);
-				}
-			}
+		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
+		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
+			specification = SpecificationUtil.getSearch(request);
 		}
 		if (request.getFilter() != null) {
 			if (!request.getFilter().getBooks().isEmpty()) {
@@ -112,7 +71,11 @@ public class ItemApiController {
 				return cb.and();
 			});
 		}
-		return itemRepository.findAll(input, specification, specification, ItemApi::new).getData();
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return itemRepository.findAll(specification, pageable).toList()
+			.stream()
+			.map(ItemApi::new)
+			.collect(Collectors.toList());
 	}
 
 	@PostMapping(value = "/api/v1/items/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -1,11 +1,10 @@
 package club.dnd5.portal.repository.datatable;
 
-import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import club.dnd5.portal.model.classes.HeroClass;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import club.dnd5.portal.model.classes.HeroClass;
-
 @Repository
-public interface ClassDataRepository extends DataTablesRepository<HeroClass, String> {
+public interface ClassDataRepository extends JpaRepository<HeroClass, String> {
 
 }

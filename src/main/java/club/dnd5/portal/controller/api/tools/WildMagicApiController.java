@@ -25,17 +25,17 @@ public class WildMagicApiController {
 	public static final Random rnd = new Random();
 
 	@Autowired
-	private WildMagicRepository repo;
+	private WildMagicRepository wildMagicRepository;
 
 	@GetMapping("/api/v1/tools/wildmagic")
 	public Collection<SourceApi> getItems() {
-		return repo.finAllBook().stream().map(SourceApi::new).collect(Collectors.toList());
+		return wildMagicRepository.finAllBook().stream().map(SourceApi::new).collect(Collectors.toList());
 	}
 
 	@PostMapping("/api/v1/tools/wildmagic")
 	public Collection<WildMagicApi> getItems(@RequestBody RequestWildMagicApi request) {
 		Collection<WildMagicApi> wildMagics = new ArrayList<WildMagicApi>(request.getCount());
-		List<WildMagic> items = repo.findAllByBook(request.getSources());
+		List<WildMagic> items = wildMagicRepository.findAllByBook(request.getSources());
 		for (int i = 0; i < request.getCount(); i++) {
 			wildMagics.add(new WildMagicApi(items.get(rnd.nextInt(items.size()))));
 		}

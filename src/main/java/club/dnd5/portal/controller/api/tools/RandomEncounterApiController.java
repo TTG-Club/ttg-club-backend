@@ -28,12 +28,12 @@ public class RandomEncounterApiController {
 	public static final Random rnd = new Random();
 
 	@Autowired
-	private RandomEncounterRepository repo;
+	private RandomEncounterRepository repository;
 	@Autowired
 	private RandomEncounterTableRepository repoTable;
 
 	@GetMapping("/api/v1/tools/encounters")
-	public RandomEncounterInputApi getItems() { 
+	public RandomEncounterInputApi getItems() {
 		return new RandomEncounterInputApi(HabitatType.types());
 	}
 
@@ -49,9 +49,9 @@ public class RandomEncounterApiController {
 		} else {
 			enviroment = HabitatType.valueOf(reques.getEnvironment());
 		}
-		Optional<RandomEncounterRow> encounter = repo.findOne(Dice.d100.roll(), reques.getLevel(), enviroment);
+		Optional<RandomEncounterRow> encounter = repository.findOne(Dice.d100.roll(), reques.getLevel(), enviroment);
 		if (encounter.isPresent()) {
-			return ResponseEntity.ok(new RandomEncounterApi(encounter.get()));	
+			return ResponseEntity.ok(new RandomEncounterApi(encounter.get()));
 		} else {
 			RandomEncounterApi randomEncounter = new RandomEncounterApi();
 			randomEncounter.setDescription("Нет случайных столкновений");

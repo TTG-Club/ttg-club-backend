@@ -106,36 +106,54 @@
 		<div th:replace="fragments/class :: classInfo2(${selectedArchetype.englishName})"></div>
 		<th:block th:each="feature : ${features}">
 			<details th:if="${feature.child eq null}" open th:classappend="${feature.prefix eq 'a'? 'feet_show' : ''}">
-				<summary class="h4 header_separator" th:classappend="${feature.prefix eq 'a' or feature.prefix eq 'ad' ? 'archetype_feet' : ''}" th:id="|${feature.prefix}${feature.id}|"><span th:text="${feature.name}"></span></summary>
+				<summary class="h4" th:classappend="${feature.prefix eq 'a' or feature.prefix eq 'ad' ? 'archetype_feet' : ''}" th:id="|${feature.prefix}${feature.id}|">
+					<span th:text="${feature.name}"></span>
+					<span class="optional-rules tip" th:if="${feature.optional}" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</span>
+					<span class="source-data tip" th:v-tippy="|'${feature.book.name}'|" th:if="${feature.book}" th:text="${feature.book.source}">Source</span>
+				</summary>
 				<div class="content">
 					<div class="caption_text" th:text="${feature.type}"></div>
 					<p th:utext="${feature.description}"></p>
 					<div th:if="${feature.prefix eq 'ad'}" align="center">
-						<table th:unless=${archetypeSpells.empty}>
-							<thead>
+						<div class="table-responsive">
+							<table class="dnd5_table"
+								   th:unless=${archetypeSpells.empty}>
+								<thead>
 								<tr>
-									<th align="center" th:unless="${heroClass.id eq 5}" class="text-center">Уровень<br>[[${heroClass.genitiveName}]]
+									<th align="center"
+										th:unless="${heroClass.id eq 5}"
+										class="text-center">Уровень<br>[[${heroClass.genitiveName}]]
 									</th>
-									<th align="center" th:if="${heroClass.id eq 5}" class="text-center">Уровень<br>заклинания
+									<th align="center"
+										th:if="${heroClass.id eq 5}"
+										class="text-center">Уровень<br>заклинания
 									</th>
 									<th align="left">Заклинания</th>
 								</tr>
-							</thead>
-							<tr th:each="element : ${selectedArchetype.levelSpells}">
-								<td align="center" th:text="${element.key}"></td>
-								<td>
-                                    <th:block th:each="spell, iterStat : ${element.value}">
-                                        <detail-tooltip th:url="|/spells/${spell.spell.englishName}|" type="spell">
-                                            <a class="tip_spell" th:href="@{'/spells/' + ${spell.spell.englishName}}" th:text="${spell.spell.fullName}"></a>
-                                        </detail-tooltip>
-										<span th:if="${spell.advenced}" th:text="| (${spell.advenced})|"></span>
-										<span th:if="${not iterStat.last}">, </span>
-									</th:block>
-                                </td>
-							</tr>
-							<tbody>
-							</tbody>
-						</table>
+								</thead>
+								<tr th:each="element : ${selectedArchetype.levelSpells}">
+									<td align="center"
+										th:text="${element.key}"></td>
+									<td>
+										<th:block
+												th:each="spell, iterStat : ${element.value}">
+											<detail-tooltip
+													th:url="|/spells/${spell.spell.englishName}|"
+													type="spell">
+												<a class="tip_spell"
+												   th:href="@{'/spells/' + ${spell.spell.englishName}}"
+												   th:text="${spell.spell.fullName}"></a>
+											</detail-tooltip>
+											<span th:if="${spell.advenced}"
+												  th:text="| (${spell.advenced})|"></span>
+											<span th:if="${not iterStat.last}">, </span>
+										</th:block>
+									</td>
+								</tr>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</details>

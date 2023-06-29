@@ -12,7 +12,7 @@ import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.classes.ArchetypeTraitRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
-import club.dnd5.portal.repository.datatable.OptionDatatableRepository;
+import club.dnd5.portal.repository.datatable.OptionRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -42,7 +42,7 @@ public class ClassController {
 	@Autowired
 	private ImageRepository imageRepository;
 	@Autowired
-	private OptionDatatableRepository optionRepository;
+	private OptionRepository optionRepository;
 
 	@GetMapping("/classes")
 	public String getClasses(Model model) {
@@ -166,13 +166,13 @@ public class ClassController {
 
 	@GetMapping("/classes/{englishName}/architype/name")
 	@ResponseBody
-	public String getArchitypeName(@PathVariable String englishName) {
+	public String getArchetypeName(@PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		return heroClass.getArchetypeName();
 	}
 
 	@GetMapping("/classes/{englishName}/architypes/list")
-	public String getArchitypeList(Model model, @PathVariable String englishName) {
+	public String getArchetypeList(Model model, @PathVariable String englishName) {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("archetypeName", heroClass.getArchetypeName());
 		model.addAttribute("archetypes", heroClass.getArchetypes().stream().sorted(Comparator.comparing(Archetype::getBook)).collect(Collectors.toList()));
@@ -199,9 +199,9 @@ public class ClassController {
 		feature.setDescription(archetype.getDescription());
 		feature.setName(archetype.getName());
 		feature.setPrefix("ad");
-		if (archetype.getBook() != null) {
-			feature.setType(heroClass.getArchetypeName() + ". Источник: " + archetype.getBook().getName()
-					+ (archetype.getPage() == null ? "" : ", стр. " + archetype.getPage()));
+		feature.setBook(archetype.getBook());
+		if (Objects.nonNull(archetype.getBook())) {
+			feature.setType(heroClass.getArchetypeName());
 		}
 		features.add(feature);
 		archetype.getFeats().stream()
