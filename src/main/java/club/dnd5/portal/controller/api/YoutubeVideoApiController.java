@@ -50,7 +50,7 @@ public class YoutubeVideoApiController {
 		@RequestParam(required = false, defaultValue = "-1") Integer limit,
 		@RequestParam(required = false) String search,
 		@RequestParam(required = false) List<String> order,
-		@RequestParam(required = false) Boolean onlyActive
+		@RequestParam(required = false) Boolean activeStatus
 	) {
 		Sort sort;
 
@@ -79,20 +79,14 @@ public class YoutubeVideoApiController {
 			specification = (root, query, cb) -> cb.like(root.get("name"), "%" + search + "%");
 		}
 
-		if (onlyActive != null) {
+		if (activeStatus != null) {
 			specification = SpecificationUtil.getAndSpecification(
 				specification,
-				(root, query, cb) -> cb.equal(root.get("active"), onlyActive)
+				(root, query, cb) -> cb.equal(root.get("active"), activeStatus)
 			);
 		}
 
-		long count;
-
-		if (onlyActive != null) {
-			count = youtubeVideosRepository.countByActive(onlyActive);
-		} else {
-			count = youtubeVideosRepository.count();
-		}
+		long count = getCount(activeStatus);
 
 		Collection<YoutubeVideo> videos;
 
@@ -119,11 +113,7 @@ public class YoutubeVideoApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@PostMapping
 	public ResponseEntity<?> addVideo(@RequestBody YoutubeVideoApi videoApi) {
-		User user = getCurrentUser();
-
-		if (!user.getRoles().stream().map(Role::getName).anyMatch(ROLES::contains)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission");
-		}
+		checkUserPermissions();
 
 		if (videoApi.getId().isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Video ID is incorrect");
@@ -138,6 +128,8 @@ public class YoutubeVideoApiController {
 		if (oldVideo.isPresent()) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Video with current ID is already exist");
 		}
+
+		User user = getCurrentUser();
 
 		YoutubeVideo newVideo = new YoutubeVideo();
 
@@ -156,11 +148,7 @@ public class YoutubeVideoApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@PatchMapping
 	public ResponseEntity<?> updateVideos(@RequestBody YoutubeVideoApi videoApi) {
-		User user = getCurrentUser();
-
-		if (!user.getRoles().stream().map(Role::getName).anyMatch(ROLES::contains)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission!");
-		}
+		checkUserPermissions();
 
 		if (videoApi.getId() == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Video hasn't ID");
@@ -178,11 +166,7 @@ public class YoutubeVideoApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@DeleteMapping
 	public ResponseEntity<?> removeVideo(@RequestParam String id) {
-		User user = getCurrentUser();
-
-		if (!user.getRoles().stream().map(Role::getName).anyMatch(ROLES::contains)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission!");
-		}
+		checkUserPermissions();
 
 		if (id.length() != 11) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Youtube video ID is incorrect!");
@@ -193,10 +177,53 @@ public class YoutubeVideoApiController {
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
+	@Operation()
+	@SecurityRequirement(name = "Bearer Authentication")
+	@GetMapping("/count")
+	public long getVideoCount(@RequestParam(required = false) Boolean active) {
+		return getCount(active);
+	}
+
+	@Operation(summary = "Change video active status")
+	@SecurityRequirement(name = "Bearer Authentication")
+	@PatchMapping("/active")
+	public ResponseEntity<?> changeVideoActiveStatus(@RequestParam String id, @RequestParam Boolean activeStatus) {
+		checkUserPermissions();
+
+		YoutubeVideo video = youtubeVideosRepository.findById(id)
+			.orElseThrow(PageNotFoundException::new);
+
+		if (video.isActive() == activeStatus) {
+			return ResponseEntity.status(HttpStatus.OK).build();
+		}
+
+		video.setActive(activeStatus);
+
+		youtubeVideosRepository.save(video);
+
+		return ResponseEntity.status(HttpStatus.OK).build();
+	}
+
 	private User getCurrentUser() {
 		SecurityContext context = SecurityContextHolder.getContext();
 		String userName = context.getAuthentication().getName();
 		return userRepository.findByEmailOrUsername(userName, userName)
 			.orElseThrow(() -> new UsernameNotFoundException(userName));
+	}
+
+	private void checkUserPermissions() {
+		User user = getCurrentUser();
+
+		if (user.getRoles().stream().map(Role::getName).noneMatch(ROLES::contains)) {
+			throw new RuntimeException("You don't have permission!");
+		}
+	}
+
+	private long getCount(Boolean active) {
+		if (active != null) {
+			return youtubeVideosRepository.countByActive(active);
+		} else {
+			return youtubeVideosRepository.count();
+		}
 	}
 }
