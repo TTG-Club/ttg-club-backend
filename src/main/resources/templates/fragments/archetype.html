@@ -111,10 +111,9 @@
 					<span class="source-data tip" th:v-tippy="|'${feature.book.name}'|" th:if="${feature.book}" th:text="${feature.book.source}">Source</span>
 				</summary>
 				<div class="content">
-
 					<div class="caption_text">
 						<span  th:text="${feature.type}"></span>
-						<span class="optional-rules tip" th:if="${feature.optional}" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</span>
+						<a href="/rules/optional_class_features" class="optional-rules tip" th:if="${feature.optional}" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</a>
 					</div>
 					<p th:utext="${feature.description}"></p>
 					<div th:if="${feature.prefix eq 'ad'}" align="center">
