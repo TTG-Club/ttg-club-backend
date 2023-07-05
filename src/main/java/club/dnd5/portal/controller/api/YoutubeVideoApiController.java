@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -111,6 +112,7 @@ public class YoutubeVideoApiController {
 
 	@Operation(summary = "Adding new video")
 	@SecurityRequirement(name = "Bearer Authentication")
+	@Transactional
 	@PostMapping
 	public ResponseEntity<?> addVideo(@RequestBody YoutubeVideoApi videoApi) {
 		checkUserPermissions();
@@ -146,6 +148,7 @@ public class YoutubeVideoApiController {
 
 	@Operation(summary = "Update video")
 	@SecurityRequirement(name = "Bearer Authentication")
+	@Transactional
 	@PatchMapping
 	public ResponseEntity<?> updateVideos(@RequestBody YoutubeVideoApi videoApi) {
 		checkUserPermissions();
@@ -186,6 +189,7 @@ public class YoutubeVideoApiController {
 
 	@Operation(summary = "Change video active status")
 	@SecurityRequirement(name = "Bearer Authentication")
+	@Transactional
 	@PatchMapping("/active")
 	public ResponseEntity<?> changeVideoActiveStatus(@RequestParam String id, @RequestParam Boolean activeStatus) {
 		checkUserPermissions();
