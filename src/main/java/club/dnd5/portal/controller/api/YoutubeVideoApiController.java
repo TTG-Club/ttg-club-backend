@@ -136,7 +136,7 @@ public class YoutubeVideoApiController {
 		newVideo.setId(videoApi.getId());
 		newVideo.setName(videoApi.getName());
 		newVideo.setUser(user);
-		newVideo.setActive(Boolean.TRUE);
+		newVideo.setActive(Boolean.FALSE);
 		newVideo.setCreated(LocalDateTime.now());
 
 		YoutubeVideo saved = youtubeVideosRepository.save(newVideo);
