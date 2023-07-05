@@ -1,4 +1,4 @@
-package club.dnd5.portal.dto.api.youtube;
+package club.dnd5.portal.dto.api;
 
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.User;

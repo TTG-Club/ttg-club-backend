@@ -2,7 +2,7 @@ package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.ResponseApi;
 import club.dnd5.portal.dto.api.spells.Order;
-import club.dnd5.portal.dto.api.youtube.YoutubeVideoApi;
+import club.dnd5.portal.dto.api.YoutubeVideoApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.Role;
