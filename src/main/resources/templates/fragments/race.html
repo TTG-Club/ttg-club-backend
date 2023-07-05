@@ -93,7 +93,8 @@
 		<th:block th:unless="*{subRaces.empty}" th:each="subRace : *{subRaces}">
 			<details class="spoiler feet_show" th:classappend="${subRace.book.type.name() eq 'CUSTOM' ? 'custom_source hide_block': subRace.book.type.name() eq 'SETTING' ? 'setting_source hide_block':''}">
 				<summary class="h4">
-					<span th:text="${subRace.name}"></span><span class="tip" th:text="${subRace.book.source}" th:title="${subRace.book.name}"></span>
+					<span th:text="${subRace.name}"></span>
+					<span class="source-data tip" th:text="${subRace.book.source}" th:title="${subRace.book.name}"></span>
 				</summary>
 				<div class="content">
 					<div th:utext="${subRace.description}"></div>

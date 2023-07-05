@@ -199,9 +199,9 @@ public class ClassController {
 		feature.setDescription(archetype.getDescription());
 		feature.setName(archetype.getName());
 		feature.setPrefix("ad");
-		if (archetype.getBook() != null) {
-			feature.setType(heroClass.getArchetypeName() + ". Источник: " + archetype.getBook().getName()
-					+ (archetype.getPage() == null ? "" : ", стр. " + archetype.getPage()));
+		feature.setBook(archetype.getBook());
+		if (Objects.nonNull(archetype.getBook())) {
+			feature.setType(heroClass.getArchetypeName());
 		}
 		features.add(feature);
 		archetype.getFeats().stream()

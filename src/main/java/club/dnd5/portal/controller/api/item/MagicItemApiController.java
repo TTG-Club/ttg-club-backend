@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -93,16 +92,6 @@ public class MagicItemApiController {
 					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isNull(root.get("charge")));
 				}
 			}
-		}
-		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-						.map(order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField()))
-								: cb.desc(root.get(order.getField())))
-						.collect(Collectors.toList());
-				query.orderBy(orders);
-				return cb.and();
-			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
 		return magicItemRepository.findAll(specification, pageable).toList()
@@ -179,7 +168,7 @@ public class MagicItemApiController {
 		return filters;
 	}
 
-	@GetMapping("//api/fvtt/v1/magic-item/{id}")
+	@GetMapping("/api/fvtt/v1/magic-item/{id}")
 	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
 		MagicItem item = magicItemRepository.findById(id).get();
 		response.setContentType("application/json");

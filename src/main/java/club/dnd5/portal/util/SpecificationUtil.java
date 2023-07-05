@@ -22,12 +22,23 @@ public final class SpecificationUtil {
 	}
 	public static <T> Specification<T> getSearch(RequestApi request) {
 		if (Optional.of(request).map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
-			return (root, query, cb) -> cb.equal(root.get("name"), request.getSearch().getValue().trim().toUpperCase());
+			return (root, query, cb) -> cb.equal(
+				root.get("name"),
+				request.getSearch().getValue().trim().toUpperCase()
+			);
 		} else {
-			String likeSearch = "%" + request.getSearch().getValue() + "%";
-			return  (root, query, cb) -> cb.or(cb.like(root.get("altName"), likeSearch),
-				cb.like(root.get("englishName"), likeSearch),
-				cb.like(root.get("name"), likeSearch));
+			String likeSearch = "%" + Optional.of(request)
+				.map(RequestApi::getSearch)
+				.map(SearchRequest::getValue)
+				.orElse("")
+				.trim()
+				.toUpperCase() + "%";
+			return  (root, query, cb) ->
+				cb.or(
+					cb.like(cb.upper(root.get("altName")), likeSearch),
+					cb.like(cb.upper(root.get("englishName")), likeSearch),
+					cb.like(cb.upper(root.get("name")), likeSearch)
+				);
 		}
 	}
 }

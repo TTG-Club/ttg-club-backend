@@ -1,12 +1,12 @@
 package club.dnd5.portal.dto.classes;
 
-import org.thymeleaf.util.StringUtils;
-
+import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.thymeleaf.util.StringUtils;
 
 @Getter
 @Setter
@@ -21,6 +21,7 @@ public class ClassFetureDto {
 	private String optional;
 	private String prefix;
 	private String description;
+	private Book book;
 
 	public ClassFetureDto(HeroClassTrait feature, String className) {
 		id = feature.getId();
@@ -64,6 +65,7 @@ public class ClassFetureDto {
 		if (feature.getOptional() == 1) {
 			optional = "";
 		}
+		book = feature.getBook();
 		order = 2;
 	}
 
@@ -88,5 +90,6 @@ public class ClassFetureDto {
 		prefix ="a";
 		type += ", умение " + archetypeName;
 		order = 1;
+		book = feature.getBook();
 	}
 }

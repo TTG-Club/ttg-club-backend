@@ -1,21 +1,12 @@
 package club.dnd5.portal.model.classes.archetype;
 
-import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import org.thymeleaf.util.StringUtils;
-
+import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.splells.Spell;
 import lombok.Getter;
+import org.thymeleaf.util.StringUtils;
+
+import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Entity
@@ -29,13 +20,17 @@ public class ArchetypeTrait {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 	private String child;
-	
+
 	@ManyToOne
 	private Archetype archetype;
-	
+
 	@OneToMany(fetch = FetchType.LAZY)
 	private List<Spell> spells;
-	
+
+	@ManyToOne
+	@JoinColumn(name = "source")
+	private Book book;
+
 	public String getCapitalizeName() {
 		return StringUtils.capitalizeWords(name.toLowerCase());
 	}

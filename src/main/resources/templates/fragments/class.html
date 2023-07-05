@@ -135,10 +135,13 @@
 			<details th:if="${feature.child eq null}" open th:data-arch-source="${feature.optional eq 1 ? 'TCE':''}">
 				<summary class="h4" th:id="${'c'+feature.id}">
 					<span th:utext="${feature.name}"></span>
-					<span th:if="${feature.optional}" class="tip" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</span>
+					<span class="source-data tip" th:v-tippy="|'${feature.book.name}'|" th:text="${feature.book.source}">Source</span>
 				</summary>
 				<div class="content">
-					<p class="caption_text" th:text="${feature.type}"></p>
+					<div class="caption_text">
+						<span th:text="${feature.type}"></span>
+						<a href="/rules/optional_class_features" th:if="${feature.optional}" class="tip optional-rules" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</a>
+					</div>
 					<div th:utext="${feature.description}"></div>
 				</div>
 			</details>
@@ -147,7 +150,8 @@
 		<th:block th:each="archetype : *{archetypes}">
 			<details class="spoiler feet_show archetype_item" th:classappend="${archetype.book.type.name() eq 'CUSTOM' ? 'custom_source hide_block': archetype.book.type.name() eq 'SETTING' ? 'setting_source hide_block':''}" th:data-arch-source="${archetype.book.source}">
 				<summary class="h4">
-					<span th:text="${archetype.name}"></span><span class="tip" th:text="${archetype.book.source}" th:title="${archetype.book.name}"></span>
+					<span th:text="${archetype.name}"></span>
+					<span class="source-data tip" th:text="${archetype.book.source}" th:title="${archetype.book.name}"></span>
 				</summary>
 				<div class="content">
 					<div th:utext="${archetype.description}"></div>
