@@ -203,9 +203,7 @@ public class YoutubeVideoApiController {
 
 		video.setActive(activeStatus);
 
-		youtubeVideosRepository.save(video);
-
-		return ResponseEntity.status(HttpStatus.OK).build();
+		return ResponseEntity.status(HttpStatus.OK).body(new YoutubeVideoApi(youtubeVideosRepository.save(video)));
 	}
 
 	private User getCurrentUser() {
