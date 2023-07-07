@@ -11,7 +11,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SearchResultApi {
+public class ResponseApi<T> {
 	private long count;
-	private Collection<SearchApi> list;
+	private Collection<T> list;
 }
