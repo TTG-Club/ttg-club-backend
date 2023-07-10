@@ -64,12 +64,13 @@ public class Option {
 		TRANSPLANTS("Трансплантаты","Alchemist", true),
 		BONUS_DISCIPLINES("Псионические дисциплины","Mystic", false),
 		PSIONIC_TALANT("Псионические таланты", "Mystic", false),
-		ACADEMIC_DISCIPLINES("Научные дисциплины", "Savant", true);
+		ACADEMIC_DISCIPLINES("Научные дисциплины", "Savant", true),
+		TOTEMS("Тотемы", "Shaman", true);
 
-		private String name;
-		private String className;
+		private final String name;
+		private final  String className;
 		private String arhetypeName;
-		private boolean homebrew;
+		private final boolean homebrew;
 
 		OptionType(String name, String className, boolean homebrew){
 			this.name = name;
@@ -78,7 +79,7 @@ public class Option {
 		}
 
 		public static OptionType parse(String type) {
-			return Arrays.asList(values()).stream()
+			return Arrays.stream(values())
 					.filter(t -> t.name.equals(type))
 					.findFirst()
 					.orElseThrow(IllegalArgumentException::new);
