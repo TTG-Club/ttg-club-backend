@@ -1,9 +1,9 @@
 package club.dnd5.portal.model.god;
 
-import java.util.Arrays;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
@@ -59,6 +59,12 @@ public enum Rank {
 			return "полу - ";
 		}
 	},
+	QUASI ("квази-бог"){
+		@Override
+		public String getName(GodSex sex) {
+			return "квази - ";
+		}
+	},
 	DEAD("мертвое божество") {
 		@Override
 		public String getName(GodSex sex) {
@@ -72,11 +78,11 @@ public enum Rank {
 			}
 		}
 	};
-	
-	private String name;
-	
+
+	private final String name;
+
 	public abstract String getName(GodSex sex);
-	
+
 	public static Rank parse(String value) {
 		return Arrays.stream(values()).filter(r -> r.getName().equals(value)).findFirst().orElseThrow(IllegalArgumentException::new);
 	}
