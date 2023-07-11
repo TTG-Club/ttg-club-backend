@@ -1,11 +1,8 @@
 package club.dnd5.portal.util;
 
 public final class ChallengeRating {
-	//private static int[] sections = { 10, 25, 50, 100, 200, 450, 700, 1100, 1800, 2300, 2900, 3900, 5000, 5900, 7200, 8400, 10000, 11500, 18000, 20000, 22000, 25000};
-	//private static String[] crs = { "1/8", "1/4", "1/2" };
-
 	private ChallengeRating() {
-	};
+	}
 
 	public static String getCR(int exp) {
 		String expStr = "0";
@@ -79,5 +76,54 @@ public final class ChallengeRating {
 			expStr = "30";
 		}
 		return expStr;
+	}
+
+	/**
+	 * // CR 0-4   → БМ=2
+	 * // CR 5-8   → БМ=3
+	 * // CR 9-12  → БМ=4
+	 * // CR 13-16 → БМ=5
+	 * // CR 17-20 → БМ=6
+	 * // CR 21-24 → БМ=7
+	 * // CR 25-28 → БМ=8
+	 * // CR 29-30 → БМ=9
+	 */
+	public static String getProficiencyBonus(String CR) {
+		switch (CR) {
+			case "5":
+			case "6":
+			case "7":
+			case "8":
+				return "3";
+			case "9":
+			case "10":
+			case "11":
+			case "12":
+				return "4";
+			case "13":
+			case "14":
+			case "15":
+			case "16":
+				return "5";
+			case "17":
+			case "18":
+			case "19":
+			case "20":
+				return "6";
+			case "21":
+			case "22":
+			case "23":
+			case "24":
+				return "7";
+			case "25":
+			case "26":
+			case "27":
+			case "28":
+				return "8";
+			case "29":
+			case "30":
+				return "9";
+		}
+		return "2";
 	}
 }

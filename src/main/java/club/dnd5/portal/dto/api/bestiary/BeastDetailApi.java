@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class BeastDetailApi extends BeastApi {
 	private int id;
 	private Integer experience;
+	private String proficiencyBonus;
 	private SizeApi size;
 	private String alignment;
 	private Byte armorClass;
@@ -70,6 +71,8 @@ public class BeastDetailApi extends BeastApi {
 		if (!"—".equals(beast.getChallengeRating())){
 			experience = beast.getExp();
 		}
+		proficiencyBonus = beast.getProficiencyBonus();
+
 		alignment = beast.getAligment();
 		armorClass = beast.getAC();
 		setType(new TypeDetailApi(beast));
