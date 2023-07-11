@@ -1,39 +1,16 @@
 package club.dnd5.portal.model.creature;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
-import club.dnd5.portal.model.AbilityType;
-import club.dnd5.portal.model.Alignment;
-import club.dnd5.portal.model.ArmorType;
-import club.dnd5.portal.model.CreatureSize;
-import club.dnd5.portal.model.CreatureType;
-import club.dnd5.portal.model.DamageType;
-import club.dnd5.portal.model.Dice;
-import club.dnd5.portal.model.Language;
-import club.dnd5.portal.model.SkillType;
+import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.util.ChallengeRating;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Существо
@@ -78,23 +55,22 @@ public class Creature {
 	@Enumerated(EnumType.ORDINAL)
 	private Dice diceHp;
 
-	@Column(nullable = true)
 	private Short bonusHP;
 
 	private String suffixHP;
 
 	private byte speed = 30;
-	@Column(nullable = true)
+
 	private Short flySpeed;
-	@Column(nullable = true)
+
 	private Short hover;
-	@Column(nullable = true)
+
 	private Short swimmingSpped;
-	@Column(nullable = true)
+
 	private Short climbingSpeed;
-	@Column(nullable = true)
+
 	private Short diggingSpeed;
-	@Column(nullable = true)
+
 	private String speedText;
 
 	// Абилки
@@ -142,6 +118,8 @@ public class Creature {
 	// уровень опасности
 	private String challengeRating;
 
+	private String proficiencyBonus;
+
 	// спаброски
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "creature_id")
@@ -160,7 +138,7 @@ public class Creature {
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	private List<Action> actions;
-	
+
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creature_id")
 	private List<CreatureSpell> spells;
@@ -170,17 +148,17 @@ public class Creature {
 
 	@Column(columnDefinition = "TEXT")
 	private String legendary;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String reaction;
-	
+
 	@ManyToMany
 	private List<CreatureRace> races;
-	
+
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creature_id")
 	private List<Spellcater> spellcasters;
-	
+
 	@ElementCollection
 	@Enumerated(EnumType.STRING)
 	private List<HabitatType> habitates;
@@ -193,28 +171,25 @@ public class Creature {
 	@JoinColumn(name = "source")
 	private Book book;
 	private Short page;
-	
+
 	private String img;
-	
+
 	public void addFeat(CreatureFeat feat) {
 		feats.add(feat);
-	}
-	public void addAction(Action action) {
-		actions.add(action);
 	}
 
 	public String getSizeName() {
 		return size.getSizeName(type);
 	}
-	
+
 	public String getAligment() {
 		return alignment.getName(type);
 	}
-	
+
 	public Alignment getAligmentRaw(){
 		return alignment;
 	}
-	
+
 	public String strengthText() {
 		return getFormatAbility(strength);
 	}
@@ -272,7 +247,7 @@ public class Creature {
 		}
 		return String.format("%d%s%s%d", countDiceHp, diceHp.name(),  bonusHP>=0 ? "+" : "-", Math.abs(bonusHP));
 	}
-	
+
 	public String getSense() {
 		List<String> sense = new ArrayList<>(5);
 		if (blindsight != null) {
@@ -295,7 +270,7 @@ public class Creature {
 		if (vibration != null) {
 			sense.add(String.format("чувство вибрации %d фт.", vibration));
 		}
-		return sense.stream().collect(Collectors.joining(", "));
+		return String.join(", ", sense);
 	}
 
 	public String getAllSpeed() {
@@ -312,19 +287,21 @@ public class Creature {
 				+ (diggingSpeed == null ? "" : String.format(", burrow %d ft.", diggingSpeed))
 				+ (climbingSpeed == null ? "" : String.format(", climb %d ft.", climbingSpeed));
 	}
-	
+
 	public List<Action> getActions(ActionType type){
-		return actions.stream().filter(a -> a.getActionType() == type).collect(Collectors.toList());
+		return actions.stream()
+			.filter(a -> a.getActionType() == type)
+			.collect(Collectors.toList());
 	}
-	
+
 	public List<Action> getActions(){
  		return actions;
 	}
-	
+
 	public List<Action> getReactions(){
 		return actions.stream().filter(a -> a.getActionType() == ActionType.REACTION).collect(Collectors.toList());
 	}
-	
+
 	public List<Action> getBonusActions(){
 		return actions.stream().filter(a -> a.getActionType() == ActionType.BONUS).collect(Collectors.toList());
 	}
@@ -332,11 +309,11 @@ public class Creature {
 	public List<Action> getLegendaries(){
 		return actions.stream().filter(a -> a.getActionType() == ActionType.LEGENDARY).collect(Collectors.toList());
 	}
-	
+
 	public Byte getSavingThrow(AbilityType abilityType) {
 		return savingThrows.stream().filter(st-> st.getAbility() == abilityType).map(SavingThrow::getBonus).findFirst().orElse(null);
 	}
-	
+
 	public Byte getSkillBonus(SkillType skillType) {
 		return skills.stream().filter(st-> st.getType() == skillType).map(Skill::getBonus).findFirst().orElse(null);
 	}
@@ -347,5 +324,12 @@ public class Creature {
 
 	public String getUrlName() {
 		return englishName.toLowerCase().replace(' ', '_');
+	}
+
+	public String getProficiencyBonus() {
+		if (Objects.isNull(proficiencyBonus)) {
+			return ChallengeRating.getProficiencyBonus(challengeRating);
+		}
+		return proficiencyBonus;
 	}
 }
