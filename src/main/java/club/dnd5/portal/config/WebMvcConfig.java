@@ -11,7 +11,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import nz.net.ultraq.thymeleaf.LayoutDialect;
 
 @Configuration
-public class WebFlowWithMvcConfig implements WebMvcConfigurer {
+public class WebMvcConfig implements WebMvcConfigurer {
 	@Bean
 	@Description("Thymeleaf template resolver serving HTML 5")
 	public ClassLoaderTemplateResolver templateResolver() {

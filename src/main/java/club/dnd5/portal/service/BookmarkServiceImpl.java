@@ -1,19 +1,18 @@
 package club.dnd5.portal.service;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
+import club.dnd5.portal.dto.api.bookmark.BookmarkApi;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.model.user.Bookmark;
+import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
+import club.dnd5.portal.repository.user.BookmarkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import club.dnd5.portal.dto.api.bookmark.BookmarkApi;
-import club.dnd5.portal.model.user.Bookmark;
-import club.dnd5.portal.model.user.User;
-import club.dnd5.portal.repository.user.BookmarkRepository;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
@@ -47,9 +46,9 @@ public class BookmarkServiceImpl implements BookmarkService {
 			}
 		} else if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("/bestiary/")) {
 			String englishName = bookmark.getUrl().replace("/bestiary/", "").replace('_', ' ');
-			Optional<Creature> option = bestiaryRepository.findByEnglishName(englishName);
-			if (option.isPresent()) {
-				entityBookmark.setPrefix(String.valueOf(option.get().getChallengeRating()));
+			List<Creature> beasts = bestiaryRepository.findByEnglishName(englishName);
+			if (!beasts.isEmpty()) {
+				entityBookmark.setPrefix(String.valueOf(beasts.get(0).getChallengeRating()));
 			}
 		}
 

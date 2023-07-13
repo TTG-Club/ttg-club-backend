@@ -197,8 +197,21 @@ public class BestiaryApiController {
 
 	@PostMapping(value = "/api/v1/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BeastDetailApi getBeast(@PathVariable String englishName) {
-		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
-			.orElseThrow(PageNotFoundException::new);
+		List<Creature> beasts = beastRepository.findByEnglishName(englishName.replace('_', ' '));
+		if (beasts.isEmpty()) {
+			throw new PageNotFoundException();
+		}
+		Creature beast = beasts.get(0);
+		BeastDetailApi beastApi = new BeastDetailApi(beast);
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
+		if (!images.isEmpty()) {
+			beastApi.setImages(images);
+		}
+		return beastApi;
+	}
+	@PostMapping(value = "/api/v1/bestiary/{englishName}/{source}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public BeastDetailApi getBeast(@PathVariable String englishName, @PathVariable String source) {
+		Creature beast = beastRepository.findByEnglishNameAndSource(englishName.replace('_', ' '), source).orElseThrow(PageNotFoundException::new);
 		BeastDetailApi beastApi = new BeastDetailApi(beast);
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {
@@ -219,7 +232,7 @@ public class BestiaryApiController {
 	@CrossOrigin
 	@GetMapping("/api/fvtt/v1/bestiary")
 	public FBeastiary getCreatures(){
-		List<FBeast> list = ((Collection<Creature>) beastRepository.findAll())
+		List<FBeast> list = beastRepository.findAll()
 				.stream()
 				.map(FBeast::new)
 				.collect(Collectors.toList());

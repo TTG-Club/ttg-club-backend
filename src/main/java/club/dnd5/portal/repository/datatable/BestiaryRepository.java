@@ -14,8 +14,13 @@ import java.util.Optional;
 
 @Repository
 public interface BestiaryRepository extends JpaRepository<Creature, Integer>, JpaSpecificationExecutor<Creature> {
-	Optional<Creature> findByEnglishName(String name);
+	List<Creature> findByEnglishName(String name);
 
 	@Query("SELECT c.book FROM Creature c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
+
+	@Query("SELECT c FROM Creature c WHERE c.englishName = :englishName AND c.book.source = :source ORDER BY c.book.year")
+	Optional<Creature> findByEnglishNameAndSource(
+		@Param("englishName") String englishName,
+		@Param("source") String source);
 }

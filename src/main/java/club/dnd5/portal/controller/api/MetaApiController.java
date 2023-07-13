@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -362,11 +363,20 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBeastMeta(@PathVariable String englishName) {
-		Creature beast = bestiaryItemRepository.findByEnglishName(englishName.replace('_', ' '))
-			.orElseThrow(PageNotFoundException::new);
+		List<Creature> beasts = bestiaryItemRepository.findByEnglishName(englishName.replace('_', ' '));
+		if (beasts.isEmpty()) {
+			throw new PageNotFoundException();
+		}
+		Creature beast = beasts.get(0);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
-		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));
+		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s",
+			beast.getName(),
+			beast.getEnglishName(),
+			beast.getSizeName(),
+			beast.getType().getCyrilicName(),
+			beast.getAligment(),
+			beast.getChallengeRating()));
 		meta.setMenu("Бестиарий");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {

@@ -16,6 +16,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
@@ -60,6 +61,7 @@ public class BeastDetailApi extends BeastApi {
 	private Collection<String> environment;
 	private Collection<String> images;
 	private LairApi lair;
+	private List<SourceApi> sources;
 
 	public BeastDetailApi(Creature beast) {
 		super(beast);
