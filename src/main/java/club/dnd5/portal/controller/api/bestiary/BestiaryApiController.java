@@ -3,6 +3,7 @@ package club.dnd5.portal.controller.api.bestiary;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
 import club.dnd5.portal.dto.api.bestiary.BeastFilter;
@@ -203,6 +204,14 @@ public class BestiaryApiController {
 		}
 		Creature beast = beasts.get(0);
 		BeastDetailApi beastApi = new BeastDetailApi(beast);
+		if (beasts.size() > 1) {
+			beastApi.setSources(
+				beasts
+				.stream()
+				.map(Creature::getBook)
+				.map(SourceApi::new)
+				.collect(Collectors.toList()));
+		}
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {
 			beastApi.setImages(images);
