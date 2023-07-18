@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CreatureDto {
-	private int id; 
+	private int id;
 	private String name;
 	private String englishName;
 	private String altName;
@@ -39,7 +39,7 @@ public class CreatureDto {
 		altName = creature.getAltName();
 		englishName = creature.getEnglishName();
 		size = creature.getSize().getSizeName(creature.getType()) + " (" + StringUtils.capitalize(creature.getSize().name().toLowerCase()) + " - " + creature.getSize().getCell() + ")";
-		type = creature.getType().getCyrilicName();
+		type = creature.getType().getCyrillicName();
 		englishType = creature.getType().name().toLowerCase();
 		alignment = creature.getAligment();
 		habitates = creature.getHabitates().stream().map(HabitatType::getName).collect(Collectors.joining(", "));

@@ -267,14 +267,14 @@ public class BestiaryApiController {
 		FilterApi typeFilter = new FilterApi("Тип существа", "type");
 		typeFilter.setValues(
 				CreatureType.getFilterTypes().stream()
-				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+				 .map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(typeFilter);
 
 		FilterApi sizeFilter = new FilterApi("Размер существа", "size");
 		sizeFilter.setValues(
 				CreatureSize.getFilterSizes().stream()
-				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+				 .map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(sizeFilter);
 
