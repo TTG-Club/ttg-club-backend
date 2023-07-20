@@ -21,10 +21,10 @@ public class BeastApi {
 	private String challengeRating;
 	protected String url;
 	protected SourceApi source;
-	
+
 	public BeastApi(Creature beast) {
 		name = new NameApi(beast.getName(), beast.getEnglishName());
-		type = beast.getType().getCyrilicName();
+		type = beast.getType().getCyrillicName();
 		challengeRating = beast.getChallengeRating();
 		url = String.format("/bestiary/%s", beast.getUrlName());
 		source = new SourceApi(beast.getBook());

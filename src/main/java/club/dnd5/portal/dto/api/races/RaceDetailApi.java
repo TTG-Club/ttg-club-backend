@@ -1,20 +1,15 @@
 package club.dnd5.portal.dto.api.races;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.model.races.Race;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -32,8 +27,8 @@ public class RaceDetailApi extends RaceApi {
 		super(race, books);
 		description = race.getDescription();
 		url = null;
-		type = race.getType().getCyrilicName();
-		size = race.getSize().getCyrilicName();
+		type = race.getType().getCyrillicName();
+		size = race.getSize().getCyrillicName();
 		speed.add(new NameValueApi(null, race.getSpeed()));
 		if (Objects.nonNull(race.getFly())) {
 			speed.add(new NameValueApi("летая", race.getFly()));

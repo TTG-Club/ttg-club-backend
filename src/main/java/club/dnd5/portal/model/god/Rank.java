@@ -3,8 +3,6 @@ package club.dnd5.portal.model.god;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-
 @Getter
 @AllArgsConstructor
 public enum Rank {
@@ -84,6 +82,11 @@ public enum Rank {
 	public abstract String getName(GodSex sex);
 
 	public static Rank parse(String value) {
-		return Arrays.stream(values()).filter(r -> r.getName().equals(value)).findFirst().orElseThrow(IllegalArgumentException::new);
+		for (Rank rank: values()) {
+			if (rank.getName().equals(value)) {
+				return rank;
+			}
+		}
+		throw new IllegalArgumentException();
 	}
 }

@@ -39,7 +39,7 @@ public class BestiaryController {
 		Creature beast = bestiaryRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, beast.getUrlName()));
-		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));
+		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrillicName(), beast.getAligment(), beast.getChallengeRating()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());

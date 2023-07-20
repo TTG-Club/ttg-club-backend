@@ -366,7 +366,7 @@ public class MetaApiController {
 			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
-		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrilicName(), beast.getAligment(), beast.getChallengeRating()));
+		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrillicName(), beast.getAligment(), beast.getChallengeRating()));
 		meta.setMenu("Бестиарий");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {
