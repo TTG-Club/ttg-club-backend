@@ -1,9 +1,5 @@
 package club.dnd5.portal.dto.fvtt.export;
 
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.ActionDataType;
@@ -11,6 +7,10 @@ import club.dnd5.portal.model.creature.ActionType;
 import club.dnd5.portal.model.creature.CreatureFeat;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Queue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Getter
 @Setter
@@ -123,7 +123,10 @@ public class FItemSystem {
 
 	public FItemSystem(Action action) {
 		parseRecharge(action.getName());
-		description = new FDiscription(action.getDescription().replace("href=\"/", "href=\"/https://ttg.club/"));
+		description = new FDiscription(action
+			.getDescription()
+			.replace("href=\"/", "href=\"/https://ttg.club/")
+			.replace("&nbsp;", " "));
 		activation = new FActivation(action.getActionType().name().toLowerCase(), (byte) 1, "");
 		duration = new FDuration();
 		target = new FTarget();
@@ -159,10 +162,14 @@ public class FItemSystem {
 		armor = new FArmor();
 
 		Queue<String> damageTypes = FDamageType.parse(action.getDescription());
-		Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");
+		Pattern patternDamageFormula = Pattern.compile(">\\d+к\\d+(\\s\\+\\s\\d+){0,}<");
 		Matcher matcher = patternDamageFormula.matcher(action.getDescription());
 		while (matcher.find()) {
-			String damageFormula = matcher.group().replace("к", "d").replace("−", "-");
+			String damageFormula = matcher.group()
+				.replace("к", "d")
+				.replace("−", "-")
+				.replace(">", "")
+				.replace("<", "");
 			if (damage.getParts().isEmpty()) {
 				String damageType = damageTypes.poll();
 				damage.addDamage(damageFormula, damageType);

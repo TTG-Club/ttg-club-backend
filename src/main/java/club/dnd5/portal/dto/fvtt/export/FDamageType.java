@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public enum FDamageType {
 	piercing("колющий", "колющего", "колющим"),
-	slashing("дробящий", "дробяшего", "дробящим"),
+	slashing("дробящий", "дробящего", "дробящим"),
 	bludgeoning("рубящий", "рубящего", "рубящим"),
 
 	thunder("звуком", "громом"),
