@@ -36,7 +36,7 @@ public class FItemSystem {
     private String attackBonus = "";
     private String chatFlavor = "";
     private FCritical critical = new FCritical();
-    private FItemDamage damage = new FItemDamage();;
+    private FItemDamage damage = new FItemDamage();
     private FRecharge recharge = new FRecharge();
     private String formula = "";
     private FSave save = new FSave();
@@ -162,21 +162,15 @@ public class FItemSystem {
 		armor = new FArmor();
 
 		Queue<String> damageTypes = FDamageType.parse(action.getDescription());
-		Pattern patternDamageFormula = Pattern.compile(">\\d+к\\d+(\\s\\+\\s\\d+){0,}<");
+		Pattern patternDamageFormula = Pattern.compile("\\\"\\d+к\\d+(\\s\\+\\s\\d+){0,}\\\"");
 		Matcher matcher = patternDamageFormula.matcher(action.getDescription());
 		while (matcher.find()) {
 			String damageFormula = matcher.group()
 				.replace("к", "d")
 				.replace("−", "-")
-				.replace(">", "")
-				.replace("<", "");
-			if (damage.getParts().isEmpty()) {
-				String damageType = damageTypes.poll();
-				damage.addDamage(damageFormula, damageType);
-			} else {
-				String damageType = damageTypes.poll();
-				damage.addDamage(damageFormula, damageType);
-			}
+				.replace("\"", "");
+			String damageType = damageTypes.poll();
+			damage.addDamage(damageFormula, damageType);
 		}
 		hp = new FIHP();
 		properties = new FWeaponProperties();
