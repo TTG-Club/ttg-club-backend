@@ -1,34 +1,20 @@
 package club.dnd5.portal.dto.fvtt.plutonium;
 
+import club.dnd5.portal.dto.fvtt.export.*;
+import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.creature.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import club.dnd5.portal.model.DamageType;
-import club.dnd5.portal.model.creature.Action;
-import club.dnd5.portal.model.creature.ActionType;
-import club.dnd5.portal.model.creature.Condition;
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.creature.HabitatType;
-import club.dnd5.portal.dto.fvtt.export.FAltArt;
-import club.dnd5.portal.dto.fvtt.export.FLegendary;
-import club.dnd5.portal.dto.fvtt.export.FLegendaryGroup;
-import club.dnd5.portal.dto.fvtt.export.FSoundClip;
-import club.dnd5.portal.dto.fvtt.export.FSpeed;
-import club.dnd5.portal.dto.fvtt.export.FSpellcasting;
-import club.dnd5.portal.dto.fvtt.export.FVariant;
-import club.dnd5.portal.dto.fvtt.export.FVersion;
-import club.dnd5.portal.dto.fvtt.export.FvSave;
-import club.dnd5.portal.dto.fvtt.export.FvSkill;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @JsonInclude(Include.NON_NULL)
 @Getter
@@ -227,28 +213,28 @@ public class FBeast {
 					.collect(Collectors.toList());
 		}
 		for (Action action : creature.getActions()) {
-			if (action.getDescription().toLowerCase().contains("дробящий урон")) {
+			if (action.getDescription().toLowerCase().matches("дробящий урон?а")) {
 				damageTags.add("B");
 			}
-			if (action.getDescription().toLowerCase().contains("колющий урон")) {
+			if (action.getDescription().toLowerCase().matches("колющий урон")) {
 				damageTags.add("P");
 			}
-			if (action.getDescription().toLowerCase().contains("рубящий урон")) {
+			if (action.getDescription().toLowerCase().matches("рубящий урон")) {
 				damageTags.add("S");
 			}
-			if (action.getDescription().toLowerCase().contains("урон огнём")) {
+			if (action.getDescription().toLowerCase().matches("урон огнём")) {
 				damageTags.add("F");
 			}
-			if (action.getDescription().toLowerCase().contains("урон излучением")) {
+			if (action.getDescription().toLowerCase().matches("урон?а излучением")) {
 				damageTags.add("R");
 			}
-			if (action.getDescription().toLowerCase().contains("урон некротической энергией")) {
+			if (action.getDescription().toLowerCase().matches("урон некротической энергией")) {
 				damageTags.add("N");
 			}
-			if (action.getDescription().toLowerCase().contains("урон силовым полем")) {
+			if (action.getDescription().toLowerCase().matches("урон силовым полем")) {
 				damageTags.add("F");
 			}
-			if (action.getDescription().toLowerCase().contains("урон ядом")) {
+			if (action.getDescription().toLowerCase().matches("урон?а ядом")) {
 				damageTags.add("I");
 			}
 		}
