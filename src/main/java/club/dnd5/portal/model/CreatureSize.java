@@ -58,7 +58,7 @@ public enum CreatureSize {
 	public String getCell() {
 		switch (this) {
 		case TINY: return "1/4 клетки";
-		case SMALL: return "1/2 клетки";
+		case SMALL: return "1 клетка";
 		case MEDIUM: return "1 клетка";
 		case LARGE: return "2x2 клетки";
 		case HUGE: return "3x3 клетки";
