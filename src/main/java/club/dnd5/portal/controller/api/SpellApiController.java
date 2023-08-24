@@ -136,7 +136,7 @@ public class SpellApiController {
 					String[] parts = timecast.split("\\s");
 					int time = Integer.valueOf(parts[0]);
 					TimeUnit unit = TimeUnit.valueOf(parts[1]);
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+					specification = SpecificationUtil.getOrSpecification(specification, (root, query, cb) -> {
 						Join<TimeCast, Spell> join = root.join("times", JoinType.INNER);
 						query.distinct(true);
 						return cb.and(cb.equal(join.get("number"), time), cb.equal(join.get("unit"), unit));
