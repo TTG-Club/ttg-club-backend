@@ -18,7 +18,7 @@ import club.dnd5.portal.security.JwtTokenProvider;
 import club.dnd5.portal.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +30,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.sql.Date;
@@ -38,34 +37,22 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Tag(name = "User", description = "The User API")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthApiController {
-	@Autowired
-	private AuthenticationManager authenticationManager;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private RoleRepository roleRepository;
-
-	@Autowired
-	private JwtTokenProvider tokenProvider;
-
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-
-	@Autowired
-	private VerificationTokenRepository verificationTokenRepository;
-
-	@Autowired
-	private EmailService emailService;
+	private final AuthenticationManager authenticationManager;
+	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
+	private final JwtTokenProvider tokenProvider;
+	private final PasswordEncoder passwordEncoder;
+	private final VerificationTokenRepository verificationTokenRepository;
+	private final EmailService emailService;
 
 	@Operation(summary = "User authorization by nickname or email address")
 	@PostMapping("/signin")
-	public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto loginDto, HttpServletResponse response) {
 		try {
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));

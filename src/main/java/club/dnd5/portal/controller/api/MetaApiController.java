@@ -26,7 +26,7 @@ import club.dnd5.portal.repository.InfoPagesRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -38,58 +38,27 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Meta", description = "The meta API")
 @RestController
 public class MetaApiController {
-	@Autowired
-	private ImageRepository imageRepository;
-
-	@Autowired
-	private ClassRepository classRepository;
-
-	@Autowired
-	private RaceRepository raceRepository;
-
-	@Autowired
-	private TraitRepository traitRepository;
-
-	@Autowired
-	private BackgroundRepository backgroundRepository;
-
-	@Autowired
-	private SpellRepository spellRepository;
-
-	@Autowired
-	private OptionRepository optionRepository;
-
-	@Autowired
-	private WeaponRepository weaponRepository;
-
-	@Autowired
-	private ArmorRepository armorRepository;
-
-	@Autowired
-	private ItemRepository itemRepository;
-
-	@Autowired
-	private MagicItemRepository magicItemRepository;
-
-	@Autowired
-	private BestiaryRepository bestiaryItemRepository;
-
-	@Autowired
-	private ScreenRepository screenRepository;
-
-	@Autowired
-	private GodRepository godRepository;
-
-	@Autowired
-	private RuleRepository ruleRepository;
-
-	@Autowired
-	private BookRepository bookRepository;
-	@Autowired
-	private InfoPagesRepository infoPagesRepository;
+	private final ImageRepository imageRepository;
+	private final ClassRepository classRepository;
+	private final RaceRepository raceRepository;
+	private final TraitRepository traitRepository;
+	private final BackgroundRepository backgroundRepository;
+	private final SpellRepository spellRepository;
+	private final OptionRepository optionRepository;
+	private final WeaponRepository weaponRepository;
+	private final ArmorRepository armorRepository;
+	private final ItemRepository itemRepository;
+	private final MagicItemRepository magicItemRepository;
+	private final BestiaryRepository bestiaryItemRepository;
+	private final ScreenRepository screenRepository;
+	private final GodRepository godRepository;
+	private final RuleRepository ruleRepository;
+	private final BookRepository bookRepository;
+	private final InfoPagesRepository infoPagesRepository;
 
 	@GetMapping(value = "/api/v1/meta/*", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getNotMapping() {

@@ -131,10 +131,10 @@ public class SpellApiController {
 							(root, query, cb) -> cb.equal(root.get("consumable"), false));
 				}
 			}
-			if (request.getFilter().getTimecast() !=null && !request.getFilter().getTimecast().isEmpty()) {
+			if (request.getFilter().getTimecast() != null && !request.getFilter().getTimecast().isEmpty()) {
 				for (String timecast : request.getFilter().getTimecast()) {
 					String[] parts = timecast.split("\\s");
-					int time = Integer.valueOf(parts[0]);
+					int time = Integer.parseInt(parts[0]);
 					TimeUnit unit = TimeUnit.valueOf(parts[1]);
 					specification = SpecificationUtil.getOrSpecification(specification, (root, query, cb) -> {
 						Join<TimeCast, Spell> join = root.join("times", JoinType.INNER);
@@ -143,7 +143,7 @@ public class SpellApiController {
 					});
 				}
 			}
-			if (request.getFilter().getDistance()!= null && !request.getFilter().getDistance().isEmpty()) {
+			if (request.getFilter().getDistance() != null && !request.getFilter().getDistance().isEmpty()) {
 				Specification<Spell> addSpec = null;
 				for (String distance : request.getFilter().getDistance()) {
 					addSpec = SpecificationUtil.getOrSpecification(addSpec,

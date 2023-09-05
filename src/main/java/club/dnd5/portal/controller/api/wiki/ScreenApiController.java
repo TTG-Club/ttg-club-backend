@@ -13,7 +13,7 @@ import club.dnd5.portal.repository.datatable.ScreenRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -29,15 +29,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Screen", description = "The Screen API")
 @RestController
 public class ScreenApiController {
-	@Autowired
-	private ScreenRepository screenRepository;
+	private final ScreenRepository screenRepository;
 
 	@PostMapping(value = "/api/v1/screens", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ScreenApi> getScreens(@RequestBody ScreenRequestApi request) {
-		Specification<Screen> specification = null;
+		Specification<Screen> specification;
 
 		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {

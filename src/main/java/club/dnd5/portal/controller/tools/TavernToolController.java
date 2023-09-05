@@ -1,19 +1,5 @@
 package club.dnd5.portal.controller.tools;
 
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import club.dnd5.portal.repository.datatable.RaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.races.Sex;
 import club.dnd5.portal.model.tavern.Atmosphere;
@@ -21,48 +7,38 @@ import club.dnd5.portal.model.tavern.TavernaName;
 import club.dnd5.portal.model.tavern.TavernaPrefixName;
 import club.dnd5.portal.model.tavern.TavernaType;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.tavern.AtmosphereRepoditory;
-import club.dnd5.portal.repository.tavern.DrinkEffectsRepository;
-import club.dnd5.portal.repository.tavern.RandomEventRepository;
-import club.dnd5.portal.repository.tavern.TavernaDishRepository;
-import club.dnd5.portal.repository.tavern.TavernaDrinkRepository;
-import club.dnd5.portal.repository.tavern.TavernaNameRepository;
-import club.dnd5.portal.repository.tavern.TavernaPrefixNameRepository;
-import club.dnd5.portal.repository.tavern.TopicDiscussedRepository;
-import club.dnd5.portal.repository.tavern.VisitorRepository;
+import club.dnd5.portal.repository.datatable.RaceRepository;
+import club.dnd5.portal.repository.tavern.*;
 import io.swagger.v3.oas.annotations.Hidden;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
 @Hidden
 @Controller
 public class TavernToolController {
 	private static final Random rnd = new Random();
-	private static final List<HabitatType> habitates = EnumSet.of(HabitatType.SWAMP, HabitatType.CITY,
+	private static final Set<HabitatType> habitats = EnumSet.of(HabitatType.SWAMP, HabitatType.CITY,
 			HabitatType.MOUNTAIN, HabitatType.VILLAGE, HabitatType.UNDERGROUND, HabitatType.ARCTIC, HabitatType.WATERS,
-			HabitatType.DESERT, HabitatType.GRASSLAND, HabitatType.FOREST, HabitatType.TROPICS).stream()
-			.collect(Collectors.toList());
+			HabitatType.DESERT, HabitatType.GRASSLAND, HabitatType.FOREST, HabitatType.TROPICS);
 
-	@Autowired
-	private TavernaNameRepository nameRepo;
-	@Autowired
-	private TavernaPrefixNameRepository prefixRepo;
-	@Autowired
-	private RaceRepository raceRepo;
-	@Autowired
-	private AtmosphereRepoditory atmosphereRepo;
-	@Autowired
-	private TopicDiscussedRepository topicRepo;
-	@Autowired
-	private RandomEventRepository eventRepo;
-	@Autowired
-	private VisitorRepository visitorRepo;
-	@Autowired
-	private ClassRepository classRepo;
-	@Autowired
-	private TavernaDishRepository dishRepo;
-	@Autowired
-	private TavernaDrinkRepository drinkRepo;
-	@Autowired
-	private DrinkEffectsRepository drinkEffectRepo;
+	private final TavernaNameRepository nameRepo;
+	private final TavernaPrefixNameRepository prefixRepo;
+	private final RaceRepository raceRepo;
+	private final AtmosphereRepoditory atmosphereRepo;
+	private final TopicDiscussedRepository topicRepo;
+	private final RandomEventRepository eventRepo;
+	private final VisitorRepository visitorRepo;
+	private final ClassRepository classRepo;
+	private final TavernaDishRepository dishRepo;
+	private final TavernaDrinkRepository drinkRepo;
+	private final DrinkEffectsRepository drinkEffectRepo;
 
 	private Set<String> generatedNames = new HashSet<>();
 
@@ -139,9 +115,9 @@ public class TavernToolController {
 	}
 
 	@GetMapping("/tools/tavern/habitates/")
-	public String getHabitates(Model model) {
-		model.addAttribute("selected",  habitates.get(rnd.nextInt(habitates.size())));
-		model.addAttribute("habitates",  habitates);
+	public String getHabitats(Model model) {
+		//model.addAttribute("selected",  habitats.get(rnd.nextInt(habitats.size())));
+		model.addAttribute("habitates", habitats);
 		return "tools/tavern :: habitates";
 	}
 

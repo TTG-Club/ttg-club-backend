@@ -20,7 +20,7 @@ import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -37,14 +37,12 @@ import javax.persistence.criteria.Order;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Class Option", description = "The Class Option API")
 @RestController
 public class OptionApiController {
-	@Autowired
-	private OptionRepository optionRepository;
-
-	@Autowired
-	private ClassRepository classRepository;
+	private final OptionRepository optionRepository;
+	private final ClassRepository classRepository;
 
 	@PostMapping(value = "/api/v1/options", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<OptionApi> getOptions(@RequestBody OptionRequesApi request) {
@@ -168,8 +166,12 @@ public class OptionApiController {
 	public FilterApi getByArchitypeFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();
 
-		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
-		Archetype archetype = heroClass.getArchetypes().stream().filter(a -> a.getEnglishName().equalsIgnoreCase(englishArchetypeName.replace('_', ' '))).findFirst().get();
+		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
+		Archetype archetype = heroClass.getArchetypes()
+			.stream()
+			.filter(a -> a.getEnglishName().equalsIgnoreCase(englishArchetypeName.replace('_', ' ')))
+			.findFirst().get();
 
 		List<FilterApi> otherFilters = new ArrayList<>();
 		otherFilters.add(getLevelsFilter(heroClass.getOptionType()));

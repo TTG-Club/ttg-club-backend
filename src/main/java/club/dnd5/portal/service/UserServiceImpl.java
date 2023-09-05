@@ -5,18 +5,16 @@ import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.VerificationToken;
 import club.dnd5.portal.repository.user.UserRepository;
 import club.dnd5.portal.repository.user.VerificationTokenRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private VerificationTokenRepository tokenRepository;
+	private final UserRepository userRepository;
+	private final VerificationTokenRepository tokenRepository;
 
 	@Override
 	public Optional<User> findByUsername(String username) {

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.thymeleaf.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,7 +66,7 @@ public class ClassController {
 	}
 
 	@GetMapping("/classes/{name}/{archetype}")
-	public String getArchetype(Model model, @PathVariable String name, @PathVariable String archetype, HttpServletRequest request) {
+	public String getArchetype(Model model, @PathVariable String name, @PathVariable String archetype) {
 		String englishName = name.replace("_", " ");
 		HeroClass heroClass = classRepository.findByEnglishName(englishName).orElseThrow(PageNotFoundException::new);
 		Archetype selectedArchetype = heroClass.getArchetypes().stream()
@@ -95,7 +94,8 @@ public class ClassController {
 			.map(f -> new ClassFetureDto(f, heroClass.getName()))
 			.forEach(f -> features.add(f));
 		Map<Integer, Set<ClassFetureDto>> archetypeTraits = heroClass.getArchetypes()
-				.stream().flatMap(a -> a.getFeats().stream())
+				.stream()
+				.flatMap(a -> a.getFeats().stream())
 				.collect(
 						Collectors.groupingBy(
 								f -> f.getArchetype().getId(),

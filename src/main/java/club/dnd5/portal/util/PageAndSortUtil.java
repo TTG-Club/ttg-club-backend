@@ -8,6 +8,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Objects;
 
+/**
+ * Сортировка и пейджинацйия
+ */
 public class PageAndSortUtil {
 	public static Pageable getPageable(RequestApi request) {
 		Sort sort = Sort.unsorted();

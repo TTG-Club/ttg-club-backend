@@ -1,15 +1,5 @@
 package club.dnd5.portal.controller.api.tools;
 
-import java.util.Optional;
-import java.util.Random;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.tools.RandomEncounterApi;
 import club.dnd5.portal.dto.api.tools.RandomEncounterInputApi;
 import club.dnd5.portal.dto.api.tools.RandomEncounterTableApi;
@@ -17,20 +7,28 @@ import club.dnd5.portal.dto.api.tools.RequestRandomEncounterApi;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.encounters.RandomEncounterRow;
-import club.dnd5.portal.model.encounters.RandomEncounterеTable;
+import club.dnd5.portal.model.encounters.RandomEncounterTable;
 import club.dnd5.portal.repository.datatable.RandomEncounterRepository;
 import club.dnd5.portal.repository.datatable.RandomEncounterTableRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+import java.util.Random;
+
+@RequiredArgsConstructor
 @Tag(name = "Tools", description = "The Tools API")
 @RestController
 public class RandomEncounterApiController {
 	public static final Random rnd = new Random();
 
-	@Autowired
-	private RandomEncounterRepository repository;
-	@Autowired
-	private RandomEncounterTableRepository repoTable;
+	private final RandomEncounterRepository repository;
+	private final RandomEncounterTableRepository repoTable;
 
 	@GetMapping("/api/v1/tools/encounters")
 	public RandomEncounterInputApi getItems() {
@@ -61,7 +59,7 @@ public class RandomEncounterApiController {
 
 	@PostMapping("/api/v1/tools/encounters/table")
 	public ResponseEntity<RandomEncounterTableApi> getTable(@RequestBody RequestRandomEncounterApi reques) {
-		Optional<RandomEncounterеTable> table = repoTable.findByLevelAndType(reques.getLevel(),
+		Optional<RandomEncounterTable> table = repoTable.findByLevelAndType(reques.getLevel(),
 				HabitatType.valueOf(reques.getEnvironment()));
 		if (table.isPresent()) {
 			RandomEncounterTableApi raTable = new RandomEncounterTableApi(table.get());

@@ -7,7 +7,7 @@ import club.dnd5.portal.model.Madness;
 import club.dnd5.portal.model.MadnessType;
 import club.dnd5.portal.repository.MadnessRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Tools", description = "The Madness API")
 @RestController
 public class MadnessApiController {
 	public static final Random rnd = new Random();
 
-	@Autowired
-	private MadnessRepository madnessRepository;
+	private final MadnessRepository madnessRepository;
 
 	@GetMapping("/api/v1/tools/madness")
 	public Collection<NameValueApi> getItems() {
@@ -41,7 +41,7 @@ public class MadnessApiController {
 		} else {
 			madnessType = MadnessType.valueOf(reques.getType());
 		}
-		Collection<MadnessApi> madness = new ArrayList<MadnessApi>(reques.getCount());
+		Collection<MadnessApi> madness = new ArrayList<>(reques.getCount());
 		List<Madness> items = madnessRepository.findByMadnessType(madnessType);
 		for (int i = 0; i < reques.getCount(); i++) {
 			madness.add(new MadnessApi(items.get(rnd.nextInt(items.size()))));

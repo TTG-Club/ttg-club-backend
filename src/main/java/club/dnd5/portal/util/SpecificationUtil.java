@@ -6,6 +6,9 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Optional;
 
+/**
+ * Получение спецификаций
+ */
 public final class SpecificationUtil {
 	public static <T> Specification<T> getAndSpecification(Specification<T> specification, Specification<T> addSpecification) {
 		if (specification == null) {

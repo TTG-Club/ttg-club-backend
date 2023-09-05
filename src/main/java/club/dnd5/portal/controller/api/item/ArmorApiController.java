@@ -13,7 +13,7 @@ import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -28,11 +28,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Armor", description = "The Armor API")
 @RestController
 public class ArmorApiController {
-	@Autowired
-	private ArmorRepository armorRepository;
+	private final ArmorRepository armorRepository;
 
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ArmorApi> getItem(@RequestBody ArmorRequestApi request) {

@@ -1,29 +1,5 @@
 package club.dnd5.portal.controller.api.bookmark;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.bookmark.BookmarkApi;
 import club.dnd5.portal.dto.api.bookmark.CategoryApi;
 import club.dnd5.portal.model.BookmarkCategory;
@@ -33,15 +9,28 @@ import club.dnd5.portal.service.BookmarkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Bookmark", description = "The Bookmark API")
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
+@Tag(name = "Закладки", description = "API закладок")
 @RestController
 @RequestMapping("/api/v1/bookmarks")
 public class BookmarkApiController {
-	@Autowired
-	private BookmarkService service;
-	@Autowired
-	private UserRepository userRepository;
+	private final BookmarkService service;
+	private final UserRepository userRepository;
 
 	@Operation(summary = "Gets all user bookmarks")
 	@SecurityRequirement(name = "Bearer Authentication")

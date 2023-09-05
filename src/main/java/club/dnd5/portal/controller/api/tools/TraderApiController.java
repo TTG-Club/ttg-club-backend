@@ -18,7 +18,7 @@ import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,18 +27,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Tools", description = "The tools API")
 @RestController
 public class TraderApiController {
 	private static final Random rnd = new Random();
-	@Autowired
-	private MagicItemRepository magicItemRepo;
-	@Autowired
-	private SpellRepository spellRepo;
-	@Autowired
-	private WeaponRepository weaponRepo;
-	@Autowired
-	private ItemMagicTableRepository mtRepo;
+
+	private final MagicItemRepository magicItemRepo;
+	private final SpellRepository spellRepo;
+	private final WeaponRepository weaponRepo;
+	private final ItemMagicTableRepository mtRepo;
 
 	@GetMapping("/api/v1/tools/trader")
 	public TraderApi getTrader(){

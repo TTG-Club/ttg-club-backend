@@ -11,7 +11,7 @@ import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Book", description = "The Book API")
 @RestController
 public class BookApiController {
-	@Autowired
-	private BookRepository bookRepository;
+	private final BookRepository bookRepository;
 
 	@Operation(summary = "Gets all books")
 	@PostMapping(value = "/api/v1/books", produces = MediaType.APPLICATION_JSON_VALUE)

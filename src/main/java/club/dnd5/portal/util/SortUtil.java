@@ -7,6 +7,9 @@ import org.springframework.data.domain.Sort;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Сортировка
+ */
 public class SortUtil {
 	public static Sort getSort(RequestApi request) {
 		if (request.getOrders() == null) {
