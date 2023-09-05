@@ -2,6 +2,7 @@ package club.dnd5.portal.dto.api.bestiary;
 
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.SourceApi;
+import club.dnd5.portal.dto.api.UrlApi;
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.DamageType;
@@ -31,7 +32,7 @@ public class BeastDetailApi extends BeastApi {
 	private SizeApi size;
 	private String alignment;
 	private Byte armorClass;
-	private Collection<String> armors;
+	private Collection<UrlApi> armors;
 	private String armorText;
 	private HitPointsApi hits;
 	private Collection<NameValueApi> speed;
@@ -77,7 +78,10 @@ public class BeastDetailApi extends BeastApi {
 		armorClass = beast.getAC();
 		setType(new TypeDetailApi(beast));
 		if (!beast.getArmorTypes().isEmpty()) {
-			armors = beast.getArmorTypes().stream().map(ArmorType::getCyrillicName).collect(Collectors.toList());
+			armors = beast.getArmorTypes()
+				.stream()
+				.map(UrlApi::new)
+				.collect(Collectors.toList());
 		}
 		if (beast.getBonusAC() != null) {
 			armorText = beast.getBonusAC();
