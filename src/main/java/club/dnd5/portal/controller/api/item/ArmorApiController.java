@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Armor", description = "The Armor API")
+@Tag(name = "Доспехи (броня)", description = "The Armor API")
 @RestController
 public class ArmorApiController {
 	private final ArmorRepository armorRepository;

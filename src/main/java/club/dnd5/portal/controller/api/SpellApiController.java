@@ -86,7 +86,10 @@ public class SpellApiController {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<DamageType, Spell> join = root.join("damageType", JoinType.LEFT);
 					query.distinct(true);
-					return join.in(request.getFilter().getDamageTypes().stream().map(DamageType::valueOf).collect(Collectors.toList()));
+					return join.in(request.getFilter().getDamageTypes()
+						.stream()
+						.map(DamageType::valueOf)
+						.collect(Collectors.toList()));
 				});
 			}
 			if (request.getFilter().getRitual() != null && !request.getFilter().getRitual().isEmpty()) {
