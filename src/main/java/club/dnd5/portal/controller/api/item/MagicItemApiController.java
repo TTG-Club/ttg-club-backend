@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Magic Item", description = "The Magic Item API")
+@Tag(name = "Магические предметы", description = "The Magic Item API")
 @RestController
 public class MagicItemApiController {
 	private final MagicItemRepository magicItemRepository;

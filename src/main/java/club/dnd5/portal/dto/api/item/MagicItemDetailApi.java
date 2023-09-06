@@ -1,20 +1,19 @@
 package club.dnd5.portal.dto.api.item;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import club.dnd5.portal.dto.api.UrlApi;
+import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.model.items.MagicItem;
 import club.dnd5.portal.model.items.Rarity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.model.items.Armor;
-import club.dnd5.portal.model.items.MagicItem;
-import club.dnd5.portal.model.items.Weapon;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -24,7 +23,7 @@ import lombok.Setter;
 public class MagicItemDetailApi extends MagicItemApi {
 	private String description;
 	private Boolean customization;
-	private Collection<String> detailType;
+	private Collection<UrlApi> detailType;
 	private Collection<String> detailCustamization;
 	private PriceApi cost;
 	private Collection<String> images;
@@ -34,26 +33,26 @@ public class MagicItemDetailApi extends MagicItemApi {
 		url = null;
 		description = item.getDescription();
 		if (item.getCustomization()) {
-			customization = item.getCustomization();
+			customization = Boolean.TRUE;
 		}
 		if (!item.getArmors().isEmpty()) {
-			detailType = item.getArmors().stream().map(Armor::getName).map(String::toLowerCase).collect(Collectors.toList());
+			detailType = item.getArmors().stream().map(UrlApi::new).collect(Collectors.toList());
 		}
 		if (!item.getWeapons().isEmpty()) {
-			detailType = item.getWeapons().stream().map(Weapon::getName).map(String::toLowerCase).collect(Collectors.toList());
+			detailType = item.getWeapons().stream().map(UrlApi::new).collect(Collectors.toList());
 		}
-		if (item.getSpecial() !=null) {
+		if (Objects.nonNull(item.getSpecial())) {
 			if (detailType == null) {
 				detailType = new ArrayList<>();
 			}
-			detailType.add(item.getSpecial());
+			detailType.add(new UrlApi(item.getSpecial()));
 		}
 
 		if (!item.getCustClasses().isEmpty()) {
 			detailCustamization = item.getCustClasses().stream().map(HeroClass::getAblativeName).collect(Collectors.toList());
 		}
-		if (item.getCustSpecial() != null) {
-			if (detailCustamization == null) {
+		if (Objects.nonNull(item.getCustSpecial())) {
+			if (Objects.isNull(detailCustamization)) {
 				detailCustamization = new ArrayList<>(1);
 			}
 			detailCustamization.add(item.getCustSpecial());
