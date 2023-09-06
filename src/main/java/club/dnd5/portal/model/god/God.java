@@ -1,27 +1,14 @@
 package club.dnd5.portal.model.god;
 
-import java.util.List;
-import java.util.Locale;
-
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.HtmlConverter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -49,6 +36,9 @@ public class God {
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
+	@Column(columnDefinition = "TEXT")
+	private String alternativeDescription;
+
 	private String symbol;
 	private String nicknames;
 
