@@ -1,8 +1,8 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.ResponseApi;
-import club.dnd5.portal.dto.api.spells.Order;
 import club.dnd5.portal.dto.api.YoutubeVideoApi;
+import club.dnd5.portal.dto.api.spells.Order;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.Role;
@@ -14,7 +14,7 @@ import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -32,17 +32,15 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Youtube", description = "The Youtube API")
 @RestController
 @RequestMapping(value = "/api/v1/youtube")
 public class YoutubeVideoApiController {
 	private static final Set<String> ROLES = new HashSet<>(Arrays.asList("MODERATOR", "ADMIN"));
 
-	@Autowired
-	private YoutubeVideosRepository youtubeVideosRepository;
-
-	@Autowired
-	private UserRepository userRepository;
+	private final YoutubeVideosRepository youtubeVideosRepository;
+	private final UserRepository userRepository;
 
 	@Operation(summary = "Get added video")
 	@GetMapping

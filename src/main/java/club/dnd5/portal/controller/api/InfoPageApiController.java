@@ -6,18 +6,16 @@ import club.dnd5.portal.model.InfoPage;
 import club.dnd5.portal.repository.InfoPagesRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
+@RequiredArgsConstructor
 @Tag(name = "Info page", description = "The info page API")
 @RestController
 @RequestMapping("/api/v1/info")
 public class InfoPageApiController {
-	@Autowired
-	private InfoPagesRepository infoPagesRepository;
+	private final InfoPagesRepository infoPagesRepository;
 
 	@Operation(summary = "Check is info page exist", tags = "info page exist")
 	@PostMapping("/{url}")

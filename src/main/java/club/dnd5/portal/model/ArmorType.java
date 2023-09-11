@@ -1,44 +1,59 @@
 package club.dnd5.portal.model;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.EnumSet;
+import java.util.Set;
+
+/**
+ * Типы доспехов
+ */
 @Getter
 @AllArgsConstructor
 public enum ArmorType {
-	NATURAL("природный доспех"), // 0
-	LEATHER("кожанный доспех"), // 1
-	HIDE("шкурный доспех"), // 2
-	CHAINMAIL("кольчужная рубаха"), //3 
-	RING_MAIL("колечный доспех"),
-	SCRAPPY("лоскутный доспех"), // 4
-	SCALED("чешуйчатый доспех"), //5 
-	RIVETED_LEATHER("проклёпаная кожа"), //7
-	CHAIN_MAIL("кольчуга"), // 8
-	BREASTPLATE("нагрудник"), // 9
-	HALF_PLATE("полулаты"), // 10
-	PLATE("латный доспех"), // 11
-	
-	PLATE_HALF("пластинчатый доспех"), // 12 
-	CUIRASS("кираса"), //13
-	
-	BONECRAFT("костяной доспех"), //14
-	MAGE_ARMOR("с доспехами мага"), //15
-	
-	SHIELD("щит"), // 16
-	SCRAPS("обломки доспеха"),
-	SPLINT("наборный доспех"),
-	; // 17;
+	NATURAL("природный доспех", null), // 0
+	LEATHER("кожанный доспех", "leather_armor"), // 1
+	HIDE("шкурный доспех", "hide_armor"), // 2
+	CHAINMAIL("кольчужная рубаха", "chain_shirt"), //3
+	RING_MAIL("кольчатый доспех", "ring_mail_armor"),
+	SCRAPPY("лоскутный доспех", null), // 4
+	SCALED("чешуйчатый доспех", "scale_mail_armor"), //5
+	RIVETED_LEATHER("проклёпаная кожа", "studded_leather_armor"), //7
+	CHAIN_MAIL("кольчуга", "chain_mail"), // 8
+	BREASTPLATE("нагрудник", "breastplate"), // 9
+	HALF_PLATE("полулаты", "half_plate_armor"), // 10
+	PLATE("латный доспех", "plate_armor"), // 11
+
+	PLATE_HALF("пластинчатый доспех", "splint_armor"), // 12
+	CUIRASS("кираса", "breastplate"), //13
+
+	BONECRAFT("костяной доспех", null), //14
+	MAGE_ARMOR("с доспехами мага", null), //15
+
+	SHIELD("щит", "shield"), // 16
+	SCRAPS("обломки доспеха", null),
+	SPLINT("наборный доспех", "splint_armor"); // 17;
 
 	private String cyrillicName;
+	private String englishName;
 
 	public static Set<ArmorType> getCreatures() {
-		return EnumSet.of(NATURAL, LEATHER, RIVETED_LEATHER, HIDE, CHAINMAIL, SCALED, CUIRASS, BREASTPLATE, HALF_PLATE, RING_MAIL, CHAIN_MAIL, PLATE_HALF, PLATE);
+		return EnumSet.of(NATURAL,
+			LEATHER,
+			RIVETED_LEATHER,
+			HIDE,
+			CHAINMAIL,
+			SCALED,
+			CUIRASS,
+			BREASTPLATE,
+			HALF_PLATE,
+			RING_MAIL,
+			CHAIN_MAIL,
+			PLATE_HALF,
+			PLATE);
 	}
-	
+
 	public String getPlutoniumTypeName() {
 		switch (this) {
 		case NATURAL:
@@ -75,7 +90,7 @@ public enum ArmorType {
 			return "";
 		}
 	}
-	
+
 	public byte getArmorClass() {
 		switch (this) {
 		case LEATHER:

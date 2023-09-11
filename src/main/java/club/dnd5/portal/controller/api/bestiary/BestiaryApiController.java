@@ -26,7 +26,7 @@ import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -40,17 +40,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@RequiredArgsConstructor
 @Tag(name = "Bestiary", description = "The Bestiary API")
 @RestController
 public class BestiaryApiController {
-	@Autowired
-	private BestiaryRepository beastRepository;
-
-	@Autowired
-	private TagBestiaryDatatableRepository tagRepository;
-
-	@Autowired
-	private ImageRepository imageRepository;
+	private final BestiaryRepository beastRepository;
+	private final TagBestiaryDatatableRepository tagRepository;
+	private final ImageRepository imageRepository;
 
 	@PostMapping(value = "/api/v1/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BeastApi> getBestiary(@RequestBody BeastlRequesApi request) {
@@ -61,10 +57,12 @@ public class BestiaryApiController {
 		}
 		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
 		if (filter.isPresent() && filter.map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
+			specification = SpecificationUtil.getAndSpecification(specification,
+				(root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
 		}
 		if (!filter.map(BeastFilter::getChallengeRatings).orElseGet(Collections::emptyList).isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> root.get("challengeRating")
+			specification = SpecificationUtil.getAndSpecification(specification,
+				(root, query, cb) -> root.get("challengeRating")
 				.in(request.getFilter().getChallengeRatings()));
 		}
 		if (!filter.map(BeastFilter::getTypes).orElseGet(Collections::emptyList).isEmpty()) {
@@ -208,7 +206,7 @@ public class BestiaryApiController {
 	}
 
 	@GetMapping("/api/fvtt/v1/bestiary/{id}")
-	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
+	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id) {
 		Creature creature = beastRepository.findById(id).orElseThrow(PageNotFoundException::new);
 		response.setContentType("application/json");
 		String file = String.format("attachment; filename=\"%s.json\"", creature.getEnglishName());
@@ -218,11 +216,11 @@ public class BestiaryApiController {
 
 	@CrossOrigin
 	@GetMapping("/api/fvtt/v1/bestiary")
-	public FBeastiary getCreatures(){
-		List<FBeast> list = ((Collection<Creature>) beastRepository.findAll())
-				.stream()
-				.map(FBeast::new)
-				.collect(Collectors.toList());
+	public FBeastiary getCreatures() {
+		List<FBeast> list = beastRepository.findAll()
+			.stream()
+			.map(FBeast::new)
+			.collect(Collectors.toList());
 		return new FBeastiary(list);
 	}
 
@@ -235,8 +233,8 @@ public class BestiaryApiController {
 			if (!books.isEmpty()) {
 				FilterApi filter = new FilterApi(typeBook.getName(), typeBook.name());
 				filter.setValues(books.stream()
-						.map(book -> new FilterValueApi(book.getSource(), book.getSource(),	Boolean.TRUE, book.getName()))
-						.collect(Collectors.toList()));
+					.map(book -> new FilterValueApi(book.getSource(), book.getSource(), Boolean.TRUE, book.getName()))
+					.collect(Collectors.toList()));
 				sources.add(filter);
 			}
 		}
@@ -246,7 +244,8 @@ public class BestiaryApiController {
 
 		FilterApi npcFilter = new FilterApi("Именнованые НИП", "npc");
 		npcFilter.setType("toggle");
-		npcFilter.setValues(Collections.singletonList(new FilterValueApi("показать именованных НИП", "showNpc", Boolean.TRUE)));
+		npcFilter.setValues(Collections.singletonList(
+			new FilterValueApi("показать именованных НИП", "showNpc", Boolean.TRUE)));
 		otherFilters.add(npcFilter);
 
 		FilterApi crFilter = new FilterApi("Уровень опасности", "challengeRating");
@@ -258,7 +257,7 @@ public class BestiaryApiController {
 		values.add(new FilterValueApi("1/4", "1/4"));
 		values.add(new FilterValueApi("1/2", "1/2"));
 		values.addAll(
-				IntStream.rangeClosed(1, 30)
+			IntStream.rangeClosed(1, 30)
 				.mapToObj(value -> new FilterValueApi(String.valueOf(value), value))
 				.collect(Collectors.toList()));
 		crFilter.setValues(values);
@@ -266,23 +265,23 @@ public class BestiaryApiController {
 
 		FilterApi typeFilter = new FilterApi("Тип существа", "type");
 		typeFilter.setValues(
-				CreatureType.getFilterTypes().stream()
-				 .map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
-				 .collect(Collectors.toList()));
+			CreatureType.getFilterTypes().stream()
+				.map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
+				.collect(Collectors.toList()));
 		otherFilters.add(typeFilter);
 
 		FilterApi sizeFilter = new FilterApi("Размер существа", "size");
 		sizeFilter.setValues(
-				CreatureSize.getFilterSizes().stream()
-				 .map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
-				 .collect(Collectors.toList()));
+			CreatureSize.getFilterSizes().stream()
+				.map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
+				.collect(Collectors.toList()));
 		otherFilters.add(sizeFilter);
 
 		FilterApi tagFilter = new FilterApi("Тэги", "tag");
 		tagFilter.setValues(
-				tagRepository.findByOrderByName().stream()
-				 .map(value -> new FilterValueApi(value.getName(), value.getId()))
-				 .collect(Collectors.toList()));
+			tagRepository.findByOrderByName().stream()
+				.map(value -> new FilterValueApi(value.getName(), value.getId()))
+				.collect(Collectors.toList()));
 		otherFilters.add(tagFilter);
 
 		FilterApi moveFilter = new FilterApi("Перемещение", "moving");
@@ -305,22 +304,34 @@ public class BestiaryApiController {
 		otherFilters.add(sanseFilter);
 
 		FilterApi vulnerabilityDamageFilter = new FilterApi("Уязвимость к урону", "vulnerabilityDamage");
-		values = DamageType.getVulnerability().stream().map(damage-> new FilterValueApi(damage.getCyrilicName(), damage.name())).collect(Collectors.toList());
+		values = DamageType.getVulnerability()
+			.stream()
+			.map(damage -> new FilterValueApi(damage.getCyrilicName(), damage.name()))
+			.collect(Collectors.toList());
 		vulnerabilityDamageFilter.setValues(values);
 		otherFilters.add(vulnerabilityDamageFilter);
 
 		FilterApi resistDamageFilter = new FilterApi("Сопротивление к урону", "resistanceDamage");
-		values = DamageType.getResistance().stream().map(damage-> new FilterValueApi(damage.getCyrilicName(), damage.name())).collect(Collectors.toList());
+		values = DamageType.getResistance()
+			.stream()
+			.map(damage -> new FilterValueApi(damage.getCyrilicName(), damage.name()))
+			.collect(Collectors.toList());
 		resistDamageFilter.setValues(values);
 		otherFilters.add(resistDamageFilter);
 
 		FilterApi immunityDamageFilter = new FilterApi("Иммунитет к урону", "immunityDamage");
-		values = DamageType.getImmunity().stream().map(damage-> new FilterValueApi(damage.getCyrilicName(), damage.name())).collect(Collectors.toList());
+		values = DamageType.getImmunity()
+			.stream()
+			.map(damage -> new FilterValueApi(damage.getCyrilicName(), damage.name()))
+			.collect(Collectors.toList());
 		immunityDamageFilter.setValues(values);
 		otherFilters.add(immunityDamageFilter);
 
 		FilterApi immunityConditionFilter = new FilterApi("Иммунитет к состояниям", "immunityCondition");
-		values = Condition.getImmunity().stream().map(condition-> new FilterValueApi(condition.getCyrilicName(), condition.name())).collect(Collectors.toList());
+		values = Condition.getImmunity()
+			.stream()
+			.map(condition -> new FilterValueApi(condition.getCyrilicName(), condition.name()))
+			.collect(Collectors.toList());
 		immunityConditionFilter.setValues(values);
 		otherFilters.add(immunityConditionFilter);
 
@@ -337,9 +348,9 @@ public class BestiaryApiController {
 
 		FilterApi environmentFilter = new FilterApi("Места обитания", "environment");
 		environmentFilter.setValues(
-				HabitatType.allTypes().stream()
-				 .map(value -> new FilterValueApi(value.getName(), value.name()))
-				 .collect(Collectors.toList()));
+			HabitatType.allTypes().stream()
+				.map(value -> new FilterValueApi(value.getName(), value.name()))
+				.collect(Collectors.toList()));
 		otherFilters.add(environmentFilter);
 
 		filters.setOther(otherFilters);

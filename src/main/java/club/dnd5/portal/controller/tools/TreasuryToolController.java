@@ -15,7 +15,6 @@ public class TreasuryToolController {
 		model.addAttribute("metaUrl", "https://ttg.club/tools/treasury");
 		model.addAttribute("metaDescription", "Генерация содержимого сокровищницы");
 		model.addAttribute("menuTitle", "Генератор содержимого сокровищницы");
-
 		return "spa";
 	}
 }

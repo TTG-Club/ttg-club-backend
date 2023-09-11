@@ -1,33 +1,27 @@
 package club.dnd5.portal.controller;
 
 import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.image.ImageType;
-import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
+@RequiredArgsConstructor
 @Hidden
 @Controller
 public class RaceController {
 	private static final String BASE_URL = "https://ttg.club/races";
 
-	@Autowired
-	private RaceRepository raceRepository;
-
-	@Autowired
-	private ImageRepository imageRepository;
+	private final RaceRepository raceRepository;
+	private final ImageRepository imageRepository;
 
 
 	@GetMapping("/races")
@@ -40,7 +34,7 @@ public class RaceController {
 	}
 
 	@GetMapping("/races/{name}")
-	public String getRace(Model model, @PathVariable String name, HttpServletRequest request) {
+	public String getRace(Model model, @PathVariable String name) {
 		Race race = raceRepository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", race.getName() + " | Расы и происхождения D&D 5e");
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.getUrlName()));
@@ -54,8 +48,9 @@ public class RaceController {
 	}
 
 	@GetMapping("/races/{raceEnglishName}/{subraceEnglishName}")
-	public String getSubraceList(Model model, @PathVariable String raceEnglishName, @PathVariable String subraceEnglishName, HttpServletRequest request) {
-		Race race = raceRepository.findByEnglishName(raceEnglishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+	public String getSubraceList(Model model, @PathVariable String raceEnglishName, @PathVariable String subraceEnglishName) {
+		Race race = raceRepository.findByEnglishName(raceEnglishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		Race subRace = race.getSubRaces()
 			.stream()
 			.filter(r -> r.getEnglishName().equalsIgnoreCase(subraceEnglishName.replace('_', ' ')))
@@ -70,59 +65,5 @@ public class RaceController {
 		}
 		model.addAttribute("menuTitle", "Расы и происхождения");
 		return "spa";
-	}
-
-	@GetMapping("/races/fragment/{id}")
-	public String getFragmentRace(Model model, @PathVariable Integer id) {
-		Race race = raceRepository.findById(id).get();
-		List<Feature> features =  race.getFeatures().stream().filter(Feature::isFeature).collect(Collectors.toList());
-		model.addAttribute("features", features);
-		List<Feature> notFeatures =  race.getFeatures().stream().filter(Feature::isNotFeature).collect(Collectors.toList());
-		model.addAttribute("notFeatures", notFeatures);
-		model.addAttribute("race", race);
-		model.addAttribute("selectedRaceName", "--- Выбор подрасы ---");
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
-		model.addAttribute("images", images);
-		if (!images.isEmpty()) {
-			model.addAttribute("metaImage", images.iterator().next());
-		}
-		return "fragments/race :: view";
-	}
-
-	@GetMapping("/races/{raceName}/subrace/{subraceName}")
-	public String getFragmentSubraces(Model model, @PathVariable String raceName, @PathVariable String subraceName) {
-		model.addAttribute("abilities", AbilityType.values());
-		Race subRace = raceRepository.findBySubrace(raceName.replace("_", " "), subraceName.replace("_", " ")).orElseThrow(IllegalArgumentException::new);
-		final Set<Integer> replaceFeatureIds = subRace.getFeatures().stream().map(Feature::getReplaceFeatureId).filter(Objects::nonNull).collect(Collectors.toSet());
-		model.addAttribute("features",
-				subRace.getParent().getFeatures()
-				.stream()
-				.filter(feature -> !replaceFeatureIds.contains(feature.getId()))
-				.filter(feature -> feature.isFeature())
-				.collect(Collectors.toList()));
-		model.addAttribute("subFeatures", subRace.getFeatures().stream()
-				.filter(f -> f.isFeature())
-				.collect(Collectors.toList()));
-		List<Feature> notFeatures =  subRace.getParent().getFeatures().stream().filter(Feature::isNotFeature).collect(Collectors.toList());
-		model.addAttribute("notFeatures", notFeatures);
-		model.addAttribute("race", subRace);
-		model.addAttribute("selectedSubrace", subRace.getEnglishName());
-		model.addAttribute("selectedRaceName", subRace.getName());
-
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.getId());
-		model.addAttribute("images", images);
-		if (!images.isEmpty()) {
-			model.addAttribute("metaImage", images.iterator().next());
-		}
-		return "fragments/race :: view";
-	}
-
-	@GetMapping("/races/{englishName}/subraces/list")
-	public String getArchitypeList(Model model,@PathVariable String englishName) {
-		Race race = raceRepository.findByEnglishName(englishName.replace("_", " ")).orElseThrow(IllegalArgumentException::new);
-		model.addAttribute("images", imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId()));
-		model.addAttribute("race", race);
-		model.addAttribute("subraces", race.getSubRaces());
-		return "fragments/subraces_list :: sub_menu";
 	}
 }

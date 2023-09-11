@@ -6,7 +6,7 @@ import club.dnd5.portal.model.items.MagicItem;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,16 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Collection;
 
+@RequiredArgsConstructor
 @Hidden
 @Controller
 public class MagicItemController {
 	private static final String BASE_URL = "https://ttg.club/items/magic";
 
-	@Autowired
-	private MagicItemRepository repository;
-
-	@Autowired
-	private ImageRepository imageRepo;
+	private final MagicItemRepository repository;
+	private final ImageRepository imageRepo;
 
 	@GetMapping("/items/magic")
 	public String getMagicItems(Model model) {

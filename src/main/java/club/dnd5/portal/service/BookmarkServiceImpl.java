@@ -1,28 +1,23 @@
 package club.dnd5.portal.service;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.repository.datatable.BestiaryRepository;
-import club.dnd5.portal.repository.datatable.SpellRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import club.dnd5.portal.dto.api.bookmark.BookmarkApi;
 import club.dnd5.portal.model.user.Bookmark;
 import club.dnd5.portal.model.user.User;
+import club.dnd5.portal.repository.datatable.BestiaryRepository;
+import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.user.BookmarkRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
-	@Autowired
-	private SpellRepository spellRepository;
-	@Autowired
-	private BestiaryRepository bestiaryRepository;
-	@Autowired
-	private BookmarkRepository bookmarkRepository;
+	private final SpellRepository spellRepository;
+	private final BestiaryRepository bestiaryRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	@Override
 	public Collection<BookmarkApi> getBookmarks(User user) {
@@ -41,16 +36,12 @@ public class BookmarkServiceImpl implements BookmarkService {
 		entityBookmark.setName(bookmark.getName());
 		if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("/spells/")) {
 			String englishName = bookmark.getUrl().replace("/spells/", "").replace('_', ' ');
-			Optional<Spell> option = spellRepository.findByEnglishName(englishName);
-			if (option.isPresent()) {
-				entityBookmark.setPrefix(String.valueOf(option.get().getLevel()));
-			}
+			spellRepository.findByEnglishName(englishName)
+				.ifPresent(spell -> entityBookmark.setPrefix(String.valueOf(spell.getLevel())));
 		} else if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("/bestiary/")) {
 			String englishName = bookmark.getUrl().replace("/bestiary/", "").replace('_', ' ');
-			Optional<Creature> option = bestiaryRepository.findByEnglishName(englishName);
-			if (option.isPresent()) {
-				entityBookmark.setPrefix(String.valueOf(option.get().getChallengeRating()));
-			}
+			bestiaryRepository.findByEnglishName(englishName)
+				.ifPresent(creature -> entityBookmark.setPrefix(String.valueOf(creature.getChallengeRating())));
 		}
 
 		if (Objects.nonNull(bookmark.getOrder())) {

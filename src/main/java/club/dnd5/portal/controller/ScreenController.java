@@ -4,21 +4,19 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.screen.Screen;
 import club.dnd5.portal.repository.datatable.ScreenRepository;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.servlet.http.HttpServletRequest;
-
+@RequiredArgsConstructor
 @Hidden
 @Controller
 public class ScreenController {
 	private static final String BASE_URL = "https://ttg.club/screens";
 
-	@Autowired
-	private ScreenRepository repository;
+	private final ScreenRepository repository;
 
 	@GetMapping("/screens")
 	public String getScreens(Model model) {
@@ -30,7 +28,7 @@ public class ScreenController {
 	}
 
 	@GetMapping("/screens/{name}")
-	public String getScreen(Model model, @PathVariable String name, HttpServletRequest request) {
+	public String getScreen(Model model, @PathVariable String name) {
 		Screen screen = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaImage", screen.getIcon());
 		model.addAttribute("metaTitle", String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.getName(), screen.getEnglishName()));

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import club.dnd5.portal.model.encounters.RandomEncounterRow;
-import club.dnd5.portal.model.encounters.RandomEncounterеTable;
+import club.dnd5.portal.model.encounters.RandomEncounterTable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,8 +21,8 @@ public class RandomEncounterTableApi {
 	private String name;
 	private String[] thead = new String[2];
 	private Collection<Collection<String>> tbody;
-	
-	public RandomEncounterTableApi(RandomEncounterеTable table) {
+
+	public RandomEncounterTableApi(RandomEncounterTable table) {
 		name = table.getName();
 		thead[0] = String.format("<dice-roller formula=\"%s\">%s</dice-roller>", table.getFormula(), table.getFormula());
 		thead[1] = "Столкновение";

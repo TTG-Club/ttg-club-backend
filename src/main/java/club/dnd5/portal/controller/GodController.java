@@ -6,25 +6,22 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.GodRepository;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
+@RequiredArgsConstructor
 @Hidden
 @Controller
 public class GodController {
 	private static final String BASE_URL = "https://ttg.club/gods";
 
-	@Autowired
-	private GodRepository repository;
-
-	@Autowired
-	private ImageRepository imageRepo;
+	private final GodRepository repository;
+	private final ImageRepository imageRepo;
 
 	@GetMapping("/gods")
 	public String getGods(Model model) {
@@ -36,7 +33,7 @@ public class GodController {
 	}
 
 	@GetMapping("/gods/{name}")
-	public String getGod(Model model, @PathVariable String name, HttpServletRequest request) {
+	public String getGod(Model model, @PathVariable String name) {
 		God god = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Боги D&D 5e", god.getName(), god.getEnglishName()));
 		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, god.getUrlName()));
