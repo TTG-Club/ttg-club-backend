@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum EquipmentType {
-	ADVENTURING_GEAR("Cнаряжение"),
-	
+	ADVENTURING_GEAR("Снаряжение"),
+
 	EAT_DRINK("Еда и напитки"),
 	TOOL("Инструменты"),
 	SET("Наборы"),
@@ -17,31 +17,31 @@ public enum EquipmentType {
 	FOCUSING("Магическая фокусировка"),
 	DRUID_FOCUS("Фокусировка друидов"),
 	HOLY_SYMBOL("Священный символ"),
-	POISON("Яды и противоядия"), 
-	CLOTHES("Одежда"), 
+	POISON("Яды и противоядия"),
+	CLOTHES("Одежда"),
 	GAME_SET("Игровой набор"),
 	ARTISANS_TOOLS("Инструменты ремесленников"),
 	MUSICAL_INSTRUMENTS("Муз. инструменты"),
 	THROWABLE("Бросаемое"),
 	LIGHT("Освещение"),
-	
+
 	ARMOR("Доспех"),
 	LIGHT_ARMOR("Лёгкий доспех"),
 	MEDIUM_ARMOR("Средний доспех"),
 	HEAVY_ARMOR("Тяжелый доспех"),
-	
+
 	WEAPON("Оружие"),
 	SIMPLE_WEAPON("Простое оружие"),
 	MARTIAL_WEAPON("Воинское оружие"),
 	EXOTIC_WEAPON("Экзотическое оружие"),
-	MELE_WAPON("Рукопашное оружие"), 
+	MELE_WAPON("Рукопашное оружие"),
 	RANGE_WAPON("Дальнобойное оружие"),
 	FIRE_WEAPON("Огнестрельное оружие"),
 	AMMUNITION("Боеприпасы"),
 	SHIELD("Щит"),
 
 	TRADE_GOOD("Товары"),
-	
+
 	MOUNT("Ездовое животное"),
 	VEHICLE_WATER("Транспорт (водный)"),
 	VEHICLE_LAND("Транспорт (наземный)"),
@@ -49,7 +49,7 @@ public enum EquipmentType {
 	VEHICLE_SPELLJAMMER("Транспорт (космический)"),
 	SIEGE_EQUIPMENT("Осадное снаряжение"),
 	;
-	
+
 	private String cyrilicName;
 
 	public static EquipmentType parse(String type) {

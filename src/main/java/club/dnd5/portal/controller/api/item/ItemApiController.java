@@ -110,13 +110,19 @@ public class ItemApiController {
 
 		List<FilterApi> otherFilters = new ArrayList<>();
 
-		FilterApi damageTypeFilter = new FilterApi("Категория", "category");
-		damageTypeFilter.setValues(
-			Arrays.stream(EquipmentType.values())
-				.sorted(Comparator.comparing(EquipmentType::getCyrilicName))
-				.map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
-				.collect(Collectors.toList()));
-		otherFilters.add(damageTypeFilter);
+		List<FilterValueApi> sortedEquipmentTypes = Arrays.stream(EquipmentType.values())
+			.sorted(Comparator.comparing(EquipmentType::getCyrilicName))
+			.map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+			.collect(Collectors.toList());
+
+		FilterApi equipmentTypeFilter = new FilterApi("Категория", "category");
+		equipmentTypeFilter.setValues(sortedEquipmentTypes);
+
+		otherFilters.add(equipmentTypeFilter);
+
+
+
+
 
 		filters.setOther(otherFilters);
 		return filters;
