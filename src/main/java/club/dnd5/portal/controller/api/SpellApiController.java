@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -347,6 +348,14 @@ public class SpellApiController {
 
 		filters.setOther(otherFilters);
 		return filters;
+	}
+	@GetMapping("/api/fvtt/v1/spell/{id}")
+	public ResponseEntity<SpellFvtt> getCreature(HttpServletResponse response, @PathVariable Integer id) {
+		Spell spell = spellRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		response.setContentType("application/json");
+		String file = String.format("attachment; filename=\"%s.json\"", spell.getEnglishName());
+		response.setHeader("Content-Disposition", file);
+		return ResponseEntity.ok(new SpellFvtt(spell));
 	}
 
 	@PostMapping("/api/v1/filters/spells/{englishClassName}")
