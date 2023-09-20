@@ -25,6 +25,7 @@ import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -41,13 +42,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
-@Tag(name = "Bestiary", description = "The Bestiary API")
+@Tag(name = "Бестиарий", description = "API для сущест из бестиария")
 @RestController
 public class BestiaryApiController {
 	private final BestiaryRepository beastRepository;
 	private final TagBestiaryDatatableRepository tagRepository;
 	private final ImageRepository imageRepository;
 
+	@Operation(summary = "Получение краткого списка сушеств")
 	@PostMapping(value = "/api/v1/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BeastApi> getBestiary(@RequestBody BeastlRequesApi request) {
 		Specification<Creature> specification = null;
@@ -193,6 +195,7 @@ public class BestiaryApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Получение сушества по английскому имени")
 	@PostMapping(value = "/api/v1/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BeastDetailApi getBeast(@PathVariable String englishName) {
 		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
@@ -205,6 +208,7 @@ public class BestiaryApiController {
 		return beastApi;
 	}
 
+	@Operation(summary = "Загрузка существа в json в формате FVTT по id")
 	@GetMapping("/api/fvtt/v1/bestiary/{id}")
 	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id) {
 		Creature creature = beastRepository.findById(id).orElseThrow(PageNotFoundException::new);
@@ -214,6 +218,7 @@ public class BestiaryApiController {
 		return ResponseEntity.ok(new FCreature(creature));
 	}
 
+	@Operation(summary = "Загрузка всех существ в json в формате FVTT")
 	@CrossOrigin
 	@GetMapping("/api/fvtt/v1/bestiary")
 	public FBeastiary getCreatures() {
@@ -224,6 +229,7 @@ public class BestiaryApiController {
 		return new FBeastiary(list);
 	}
 
+	@Operation(summary = "Фильтры для бестиария")
 	@PostMapping("/api/v1/filters/bestiary")
 	public FilterApi getFilter() {
 		FilterApi filters = new FilterApi();

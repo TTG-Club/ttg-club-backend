@@ -36,8 +36,8 @@ import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Tag(name = "Боги", description = "API богов")
+@RequiredArgsConstructor
 @RestController
 public class GodApiController {
 	private final GodRepository godRepository;

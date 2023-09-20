@@ -14,6 +14,7 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.TreasureRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,11 +34,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Treasure", description = "The Treasure API")
+@Tag(name = "Сокровища и безделушки", description = "API для сокровищ и безделушек")
 @RestController
 public class TreasureApiController {
 	private final TreasureRepository treasuryRepository;
 
+	@Operation(summary = "Получение списка сокровищ и безделушек")
 	@PostMapping(value = "/api/v1/treasures", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ItemApi> getItem(@RequestBody ItemRequestApi request) {
 		Specification<Treasure> specification = null;
@@ -77,6 +79,7 @@ public class TreasureApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Фильры для сокровищ и безделушек")
 	@PostMapping("/api/v1/filters/treasures")
 	public FilterApi getWeaponsFilter() {
 		FilterApi filters = new FilterApi();

@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Tag(name = "Утилиты", description = "API по генерации товаров у торговца")
 @RequiredArgsConstructor
-@Tag(name = "Tools", description = "The tools API")
 @RestController
 public class TraderApiController {
 	private static final Random rnd = new Random();

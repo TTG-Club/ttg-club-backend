@@ -32,7 +32,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -45,21 +45,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Tag(name = "Spell", description = "The Spell API")
+@Tag(name = "Заклинания", description = "API по заклинаниям")
+@RequiredArgsConstructor
 @RestController
 public class SpellApiController {
 	private static final String[][] classesMap = { { "1", "Бард" }, { "2", "Волшебник" }, { "3", "Друид" },
 			{ "4", "Жрец" }, { "5", "Колдун" }, { "6", "Паладин" }, { "7", "Следопыт" }, { "8", "Чародей" },
 			{ "14", "Изобретатель" } };
 
-	@Autowired
-	private SpellRepository spellRepository;
-	@Autowired
-	private ClassRepository classRepository;
-	@Autowired
-	private ArchetypeSpellRepository archetypeSpellRepository;
+	private final SpellRepository spellRepository;
+	private final ClassRepository classRepository;
+	private final ArchetypeSpellRepository archetypeSpellRepository;
 
-	@Operation(summary = "Список заклинаний")
+	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<SpellApi> getSpells(@RequestBody SpellRequestApi request) {
 		Specification<Spell> specification = null;
@@ -200,7 +198,7 @@ public class SpellApiController {
 		return ResponseEntity.ok(spellApi);
 	}
 
-	@Operation(summary = "Список заклинаний")
+	@Operation(summary = "Список заклинаний в json в формате FVTT")
 	@CrossOrigin
 	@GetMapping(value = "/api/fvtt/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSpells(String search, String exact){
@@ -234,7 +232,7 @@ public class SpellApiController {
 		);
 	}
 
-	@Operation(summary = "Gets spells filter", tags = "spells")
+	@Operation(summary = "Фильтры для заклинаний")
 	@PostMapping("/api/v1/filters/spells")
 	public FilterApi getFilter() {
 		FilterApi filters = new FilterApi();
@@ -349,6 +347,7 @@ public class SpellApiController {
 		return filters;
 	}
 
+	@Operation(summary = "Получение фильтров заклинаний для класса")
 	@PostMapping("/api/v1/filters/spells/{englishClassName}")
 	public FilterApi getByClassFilter(@PathVariable String englishClassName) {
 		FilterApi filters = new FilterApi();
@@ -381,6 +380,7 @@ public class SpellApiController {
 		return filters;
 	}
 
+	@Operation(summary = "Получение фильтров заклинаний для архетипа")
 	@PostMapping("/api/v1/filters/spells/{englishClassName}/{englishArchetypeName}")
 	public FilterApi getByClassFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();

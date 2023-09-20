@@ -36,12 +36,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Background", description = "The BackgroundApi API")
+@Tag(name = "Предыстории", description = "API по предысториям")
 @RestController
 public class BackgroundApiController {
 	private final BackgroundRepository backgroundRepository;
 
-	@Operation(summary = "Gets all backgrounds", tags = "background")
+	@Operation(summary = "Получения краткого списка предисторий")
 	@PostMapping(value = "/api/v1/backgrounds", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BackgroundApi> getBackgrounds(@RequestBody FeatRequestApi request) {
 		Specification<Background> specification = null;

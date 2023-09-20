@@ -16,6 +16,7 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 public class ItemApiController {
 	private final ItemRepository itemRepository;
 
+	@Operation(summary = "Получение краткого списка снаряжения")
 	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ItemApi> getItem(@RequestBody ItemRequestApi request) {
 		Specification<Equipment> specification = null;
@@ -85,6 +87,7 @@ public class ItemApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Получение снаряжения по английскому имени")
 	@PostMapping(value = "/api/v1/items/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemDetailApi getOption(@PathVariable String englishName) {
 		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' '))
@@ -92,6 +95,7 @@ public class ItemApiController {
 		return new ItemDetailApi(item);
 	}
 
+	@Operation(summary = "Получение фильтров для снаряжения")
 	@PostMapping("/api/v1/filters/items")
 	public FilterApi getItemsFilter() {
 		FilterApi filters = new FilterApi();
@@ -119,10 +123,6 @@ public class ItemApiController {
 		equipmentTypeFilter.setValues(sortedEquipmentTypes);
 
 		otherFilters.add(equipmentTypeFilter);
-
-
-
-
 
 		filters.setOther(otherFilters);
 		return filters;
