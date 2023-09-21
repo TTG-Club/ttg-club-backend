@@ -1,11 +1,11 @@
 package club.dnd5.portal.model.items;
 
-import java.util.Arrays;
-import java.util.Random;
-
 import club.dnd5.portal.dto.api.item.PriceApi;
 import club.dnd5.portal.model.Dice;
 import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.Random;
 
 @Getter
 public enum Rarity {
@@ -82,7 +82,8 @@ public enum Rarity {
 				price.setXge(String.format("%.0f", (Dice.d6.roll() + 1) * 10 / consumable + bonus));
 				break;
 			case UNCOMMON:
-				price.setXge(String.format("%.0f", (Dice.d6.roll() + 1) * 100 / consumable + bonus));
+				// https://5e.tools/tables.html#buying%20a%20magic%20item%3b%20magic%20item%20price_xge
+				price.setXge(String.format("%.0f", Dice.d6.roll()  * 100 / consumable + bonus));
 				break;
 			case RARE:
 				price.setXge(String.format("%.0f", Dice.d10.roll(2) * 1_000 / consumable + bonus));

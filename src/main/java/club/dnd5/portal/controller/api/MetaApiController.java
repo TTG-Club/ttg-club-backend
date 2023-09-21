@@ -35,11 +35,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Tag(name = "Метаданные", description = "API для получения метаданных по странице")
 @RequiredArgsConstructor
-@Tag(name = "Meta", description = "The meta API")
 @RestController
 public class MetaApiController {
 	private final ImageRepository imageRepository;
@@ -92,15 +91,16 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/classes/{classEnglishName}/{archetypeEnglishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArchetypeMeta(@PathVariable String classEnglishName, @PathVariable String archetypeEnglishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
-		Optional<Archetype> archetype = heroClass.getArchetypes().stream()
+		Archetype archetype = heroClass.getArchetypes().stream()
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeEnglishName.replace('_', ' ')))
-				.findFirst();
+				.findFirst().orElseThrow(PageNotFoundException::new);
 		meta.setTitle(String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",
-				StringUtils.capitalize(archetype.get().getName().toLowerCase()), heroClass.getName(), heroClass.getEnglishName()));
+				StringUtils.capitalize(archetype.getName().toLowerCase()), heroClass.getName(), heroClass.getEnglishName()));
 		meta.setDescription(String.format("%s - описание %s класса %s из D&D 5 редакции",
-				archetype.get().getName(), heroClass.getArchetypeName(), heroClass.getName()));
+				archetype.getName(), heroClass.getArchetypeName(), heroClass.getName()));
 		meta.setMenu("Классы");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
 		if (!images.isEmpty()) {
@@ -119,12 +119,13 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getRaceMeta(@PathVariable String englishName) {
-		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
+		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
-		meta.setTitle(race.get().getName() + " | Расы и происхождения D&D 5e");
-		meta.setDescription(String.format("%s - раса персонажа по D&D 5 редакции", race.get().getName()));
+		meta.setTitle(race.getName() + " | Расы и происхождения D&D 5e");
+		meta.setDescription(String.format("%s - раса персонажа по D&D 5 редакции", race.getName()));
 		meta.setMenu("Расы и происхождения");
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			meta.setImage(images.iterator().next());
 		}
@@ -133,23 +134,22 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/races/{englishName}/{subrace}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<MetaApi> getSubraceMeta(@PathVariable String englishName, @PathVariable String subrace) {
-		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (race.isPresent()) {
-			Optional<Race> subRace = race.get().getSubRaces()
-				.stream()
-				.filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' ')))
-				.findFirst();
-			MetaApi meta = new MetaApi();
-			meta.setTitle(String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.get().getName()));
-			meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.get().getName()));
-			meta.setMenu("Расы и происхождения");
-			Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.get().getId());
-			if (!images.isEmpty()) {
-				meta.setImage(images.iterator().next());
-			}
-			return ResponseEntity.ok(meta);
+		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
+		Race subRace = race.getSubRaces()
+			.stream()
+			.filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' ')))
+			.findFirst()
+			.orElseThrow(PageNotFoundException::new);
+		MetaApi meta = new MetaApi();
+		meta.setTitle(String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.getName()));
+		meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.getName()));
+		meta.setMenu("Расы и происхождения");
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.getId());
+		if (!images.isEmpty()) {
+			meta.setImage(images.iterator().next());
 		}
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(meta);
 	}
 
 	@GetMapping(value = "/api/v1/meta/traits", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -335,7 +335,9 @@ public class MetaApiController {
 			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
-		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s", beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrillicName(), beast.getAligment(), beast.getChallengeRating()));
+		meta.setDescription(String.format("%s (%s) - %s %s, %s с уровнем опасности %s",
+			beast.getName(), beast.getEnglishName(), beast.getSizeName(), beast.getType().getCyrillicName(),
+			beast.getAligment(), beast.getChallengeRating()));
 		meta.setMenu("Бестиарий");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
 		if (!images.isEmpty()) {
@@ -356,12 +358,14 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/screens/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getScreenMeta(@PathVariable String englishName) {
-		Optional<Screen> screen = screenRepository.findByEnglishName(englishName.replace('_', ' '));
+		Screen screen = screenRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
-		meta.setTitle(String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.get().getName(), screen.get().getEnglishName()));
-		meta.setDescription(String.format("%s (%s) Ширма Мастера Подземелий и Драконов по D&D 5 редакции", screen.get().getName(), screen.get().getEnglishName()));
+		meta.setTitle(String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.getName(), screen.getEnglishName()));
+		meta.setDescription(String.format("%s (%s) Ширма Мастера Подземелий и Драконов по D&D 5 редакции",
+			screen.getName(), screen.getEnglishName()));
 		meta.setMenu("Ширма");
-		meta.setKeywords(screen.get().getAltName() + " " + screen.get().getEnglishName());
+		meta.setKeywords(screen.getAltName() + " " + screen.getEnglishName());
 		return meta;
 	}
 

@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+@Tag(name = "Утилиты", description = "Api для генерация дикой магии")
 @RequiredArgsConstructor
-@Tag(name = "Tools", description = "Генерация дикой магии")
 @RestController
 public class WildMagicApiController {
 	public static final Random rnd = new Random();

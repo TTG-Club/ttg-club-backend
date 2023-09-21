@@ -16,15 +16,13 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -35,13 +33,15 @@ import java.util.stream.Collectors;
 /**
  * Снаряжение и прочее
  */
-@RequiredArgsConstructor
 @Tag(name = "Снаряжение", description = "API снаряжение")
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/items")
 @RestController
 public class ItemApiController {
 	private final ItemRepository itemRepository;
 
-	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Получение краткого списка снаряжения")
+	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ItemApi> getItem(@RequestBody ItemRequestApi request) {
 		Specification<Equipment> specification = null;
 		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
@@ -85,6 +85,7 @@ public class ItemApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Получение снаряжения по английскому имени")
 	@PostMapping(value = "/api/v1/items/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemDetailApi getOption(@PathVariable String englishName) {
 		Equipment item = itemRepository.findByEnglishName(englishName.replace('_', ' '))
@@ -92,6 +93,7 @@ public class ItemApiController {
 		return new ItemDetailApi(item);
 	}
 
+	@Operation(summary = "Получение фильтров для снаряжения")
 	@PostMapping("/api/v1/filters/items")
 	public FilterApi getItemsFilter() {
 		FilterApi filters = new FilterApi();
@@ -110,13 +112,15 @@ public class ItemApiController {
 
 		List<FilterApi> otherFilters = new ArrayList<>();
 
-		FilterApi damageTypeFilter = new FilterApi("Категория", "category");
-		damageTypeFilter.setValues(
-			Arrays.stream(EquipmentType.values())
-				.sorted(Comparator.comparing(EquipmentType::getCyrilicName))
-				.map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
-				.collect(Collectors.toList()));
-		otherFilters.add(damageTypeFilter);
+		List<FilterValueApi> sortedEquipmentTypes = Arrays.stream(EquipmentType.values())
+			.sorted(Comparator.comparing(EquipmentType::getCyrilicName))
+			.map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+			.collect(Collectors.toList());
+
+		FilterApi equipmentTypeFilter = new FilterApi("Категория", "category");
+		equipmentTypeFilter.setValues(sortedEquipmentTypes);
+
+		otherFilters.add(equipmentTypeFilter);
 
 		filters.setOther(otherFilters);
 		return filters;

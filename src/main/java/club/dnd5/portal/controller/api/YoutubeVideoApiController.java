@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Youtube", description = "The Youtube API")
+@Tag(name = "Youtube", description = "API для ссылок на ютуб")
 @RestController
 @RequestMapping(value = "/api/v1/youtube")
 public class YoutubeVideoApiController {
@@ -42,7 +42,7 @@ public class YoutubeVideoApiController {
 	private final YoutubeVideosRepository youtubeVideosRepository;
 	private final UserRepository userRepository;
 
-	@Operation(summary = "Get added video")
+	@Operation(summary = "Получение списка видео")
 	@GetMapping
 	public ResponseEntity<ResponseApi<YoutubeVideoApi>> getVideos(
 		@RequestParam(required = false, defaultValue = "0") Integer page,

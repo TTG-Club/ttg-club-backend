@@ -32,7 +32,7 @@ public class BookmarkApiController {
 	private final BookmarkService service;
 	private final UserRepository userRepository;
 
-	@Operation(summary = "Gets all user bookmarks")
+	@Operation(summary = "Получение списка закладок")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping
 	@ResponseStatus(code = HttpStatus.OK)

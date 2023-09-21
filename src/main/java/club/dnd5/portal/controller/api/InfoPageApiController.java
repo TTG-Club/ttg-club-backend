@@ -10,21 +10,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Информация", description = "API для страниц с информацией")
 @RequiredArgsConstructor
-@Tag(name = "Info page", description = "The info page API")
 @RestController
 @RequestMapping("/api/v1/info")
 public class InfoPageApiController {
 	private final InfoPagesRepository infoPagesRepository;
 
-	@Operation(summary = "Check is info page exist", tags = "info page exist")
+	@Operation(summary = "Проверка сущестования станицы с контентом", tags = "info page exist")
 	@PostMapping("/{url}")
 	public ResponseEntity<?> getPageExist(@PathVariable String url) {
 		InfoPage page = infoPagesRepository.findOneByUrl(url).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(page);
 	}
 
-	@Operation(summary = "Gets info page result", tags = "info page")
+	@Operation(summary = "Возвращает контент страницы по url", tags = "info page")
 	@GetMapping("/{url}")
 	public  ResponseEntity<InfoPageApi> getPage(@PathVariable String url) {
 		InfoPage infoPage = infoPagesRepository.findOneByUrl(url).orElseThrow(PageNotFoundException::new);
