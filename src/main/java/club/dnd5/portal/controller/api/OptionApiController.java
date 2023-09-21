@@ -37,8 +37,8 @@ import javax.persistence.criteria.Order;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Tag(name = "Опции классов и архетипов", description = "API по опций классов и архетипоы")
 @RequiredArgsConstructor
-@Tag(name = "Class Option", description = "The Class Option API")
 @RestController
 public class OptionApiController {
 	private final OptionRepository optionRepository;

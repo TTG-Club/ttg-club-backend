@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 
+@Tag(name = "Утилиты", description = "API по генерации сокровищницы")
 @RequiredArgsConstructor
-@Tag(name = "Tools", description = "The tools API")
 @RestController
 public class TreasuryApiController {
 	public static final Random rnd = new Random();

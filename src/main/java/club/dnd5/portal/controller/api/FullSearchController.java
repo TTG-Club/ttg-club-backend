@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+@Tag(name = "Поиск по сайту", description = "API поиска по сайту")
 @RequiredArgsConstructor
-@Tag(name = "Full search", description = "The search API")
 @RestController
 @RequestMapping("/api/v1/search")
 public class FullSearchController {

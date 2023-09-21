@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Информация", description = "API для страниц с информацией")
 @RequiredArgsConstructor
-@Tag(name = "Info page", description = "The info page API")
 @RestController
 @RequestMapping("/api/v1/info")
 public class InfoPageApiController {
