@@ -17,9 +17,18 @@ public class PageAndSortUtil {
 		if (!CollectionUtils.isEmpty(request.getOrders())) {
 			sort = SortUtil.getSort(request);
 		}
-		if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getLimit()) && request.getLimit() != -1) {
-			return PageRequest.of(request.getPage(), request.getLimit(), sort);
+		if (Objects.nonNull(request.getPage())) {
+			return PageRequest.of(request.getPage(), getLimit(request.getLimit()), sort);
 		}
 		return Pageable.unpaged();
+	}
+
+	private static Integer getLimit(Integer limit) {
+		if (Objects.nonNull(limit) && limit > 0) {
+			return limit;
+		}
+		else {
+			return Integer.MAX_VALUE;
+		}
 	}
 }
