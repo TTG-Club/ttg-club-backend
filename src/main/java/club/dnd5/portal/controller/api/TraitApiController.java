@@ -80,12 +80,12 @@ public class TraitApiController {
 					if (request.getFilter().getRequirements().contains("yes") && !request.getFilter().getRequirements().contains("no")) {
 						specification = SpecificationUtil.getAndSpecification(
 							specification,
-							(root, query, cb) -> cb.notEqual(root.get("requirement"), "Нет")
+							(root, query, cb) -> cb.and(cb.notEqual(root.get("requirement"), "Нет"))
 						);
 					} else if (request.getFilter().getRequirements().contains("no") && !request.getFilter().getRequirements().contains("yes")) {
 						specification = SpecificationUtil.getAndSpecification(
 							specification,
-							(root, query, cb) -> cb.equal(root.get("requirement"), "Нет")
+							(root, query, cb) -> cb.or(cb.equal(root.get("requirement"), "Нет"))
 						);
 					}
 				}
