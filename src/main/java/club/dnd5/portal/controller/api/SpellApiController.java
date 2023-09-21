@@ -62,7 +62,7 @@ public class SpellApiController {
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<SpellApi> getSpells(@RequestBody SpellRequestApi request) {
 		Specification<Spell> specification = null;
-		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
+		Optional<RequestApi> optionalRequest = Optional.of(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}

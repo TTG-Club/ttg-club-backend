@@ -26,13 +26,15 @@ public class FullSearchController {
 
 	private final SearchRepository repository;
 
-	@Operation(summary = "Gets search result", tags = "Full search")
+	@Operation(summary = "Результаты поиска")
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseApi<SearchApi> search(@RequestBody RequestApi request){
-		return new ResponseApi<>(repository.getCount(request.getSearch().getValue()), repository.search(request.getSearch().getValue(), request.getPage(), request.getLimit()));
+		return new ResponseApi<>(repository.getCount(request.getSearch().getValue()), repository.search(request.getSearch().getValue(),
+				request.getPage(),
+				request.getLimit()));
 	}
 
-	@Operation(summary = "Gets search result", tags = "random search")
+	@Operation(summary = "Результаты случайного поиска")
 	@PostMapping(value = "/random", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseApi<SearchApi> random(@RequestBody RequestApi request){
 		long count = repository.getCount("");

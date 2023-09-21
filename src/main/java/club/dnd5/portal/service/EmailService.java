@@ -1,7 +1,9 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.model.user.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,13 +12,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Component
 public class EmailService {
-	@Autowired
-	private Environment environment;
-
-	@Autowired
-	private UserService service;
+	private final Environment environment;
+	@Qualifier("userServiceImpl")
+	private final UserService service;
 
 	@Autowired
 	private JavaMailSender mailSender;

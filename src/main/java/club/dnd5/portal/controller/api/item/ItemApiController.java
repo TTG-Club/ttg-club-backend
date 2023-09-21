@@ -22,10 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -36,14 +33,15 @@ import java.util.stream.Collectors;
 /**
  * Снаряжение и прочее
  */
-@RequiredArgsConstructor
 @Tag(name = "Снаряжение", description = "API снаряжение")
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/items")
 @RestController
 public class ItemApiController {
 	private final ItemRepository itemRepository;
 
 	@Operation(summary = "Получение краткого списка снаряжения")
-	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ItemApi> getItem(@RequestBody ItemRequestApi request) {
 		Specification<Equipment> specification = null;
 		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
