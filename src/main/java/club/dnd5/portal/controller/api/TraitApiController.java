@@ -80,12 +80,12 @@ public class TraitApiController {
 					if (request.getFilter().getRequirements().contains("yes") && !request.getFilter().getRequirements().contains("no")) {
 						specification = SpecificationUtil.getAndSpecification(
 							specification,
-							(root, query, cb) -> cb.and(cb.notEqual(root.get("requirement"), "Нет"), cb.isNotNull(root.get("requirement")))
+							(root, query, cb) -> cb.and(cb.notEqual(root.get("requirement"), "Нет"))
 						);
 					} else if (request.getFilter().getRequirements().contains("no") && !request.getFilter().getRequirements().contains("yes")) {
 						specification = SpecificationUtil.getAndSpecification(
 							specification,
-							(root, query, cb) -> cb.or(cb.equal(root.get("requirement"), "Нет"), cb.isNull(root.get("requirement")))
+							(root, query, cb) -> cb.or(cb.equal(root.get("requirement"), "Нет"))
 						);
 					}
 				}
@@ -96,6 +96,7 @@ public class TraitApiController {
 			.stream()
 			.map(TraitApi::new)
 			.collect(Collectors.toList());
+
 	}
 
 	@Operation(summary = "Получение черты по английскому названию")
