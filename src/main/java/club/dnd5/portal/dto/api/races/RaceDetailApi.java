@@ -75,37 +75,35 @@ public class RaceDetailApi extends RaceApi {
 		raceFeatureName(skills, race.getAllNames(), race.getAllNicknames());
 	}
 
-	//проходимся по коллекции и чекаем имена, и по рейс айди потом добавляем
-
-	//TODO тут меthod сделать который фичи по именам делает
-
 	private void raceFeatureName(Collection<RaceSkillApi> skills, Map<Sex, Set<String>> names, List<RaceNickname> nickNames) {
-		// Create a new Feature
-		Feature feature = new Feature();
-		feature.setName("Имена");
+		String featureName = "Имена";
+		RaceSkillApi existingSkill = skills.stream()
+			.filter(skill -> skill.getName().equals(featureName))
+			.findFirst()
+			.orElse(null);
 
-		// Generate description
-		StringBuilder descriptionBuilder = new StringBuilder();
-		descriptionBuilder.append("Имена:\n");
-
+		StringBuilder descriptionBuilder = new StringBuilder("Имена:\n");
 		names.forEach((sex, nameSet) -> {
 			descriptionBuilder.append(sex.getCyrilicName()).append(":\n");
 			nameSet.forEach(name -> descriptionBuilder.append("- ").append(name).append("\n"));
 		});
 
-		// Update the description if "Имена" already exists
-		for (RaceSkillApi raceSkillApi : skills) {
-			if (raceSkillApi.getName().equals("Имена")) {
-				feature.setDescription(raceSkillApi.getDescription() + descriptionBuilder.toString());
-				skills.remove(raceSkillApi);
-				break;
+		if (!descriptionBuilder.toString().equals("Имена:\n")) {
+			if (existingSkill != null) {
+				// "Имена" feature already exists, update its description
+				existingSkill.setDescription(existingSkill.getDescription() + descriptionBuilder.toString());
+			} else {
+				// "Имена" feature doesn't exist, create a new one
+				Feature feature = new Feature();
+				feature.setName(featureName);
+				feature.setDescription(descriptionBuilder.toString());
+
+				RaceSkillApi raceSkillApi = new RaceSkillApi(feature);
+				skills.add(raceSkillApi);
 			}
 		}
-
-		// Create a new RaceSkillApi with the updated Feature and add it to skills
-		RaceSkillApi raceSkillApi = new RaceSkillApi(feature);
-		skills.add(raceSkillApi);
 	}
+
 
 
 }
