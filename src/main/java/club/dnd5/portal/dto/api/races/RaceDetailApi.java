@@ -82,13 +82,46 @@ public class RaceDetailApi extends RaceApi {
 			.findFirst()
 			.orElse(null);
 
-		StringBuilder descriptionBuilder = new StringBuilder("Имена:\n");
+		StringBuilder descriptionBuilder = new StringBuilder();
+
+
 		names.forEach((sex, nameSet) -> {
-			descriptionBuilder.append(sex.getCyrilicName()).append(":\n");
-			nameSet.forEach(name -> descriptionBuilder.append("- ").append(name).append("\n"));
+			descriptionBuilder.append("<p><strong>")
+				.append(sex.getCyrilicName())
+				.append(" имена:</strong> ")
+				.append(String.join(", ", nameSet))
+				.append("</p>");
 		});
 
-		if (!descriptionBuilder.toString().equals("Имена:\n")) {
+
+
+		if (nickNames != null && !nickNames.isEmpty()) {
+			for (RaceNickname.NicknameType nicknameType : RaceNickname.NicknameType.values()) {
+				String displayName = nicknameType.getDisplay();
+
+				List<String> nicknamesOfType = nickNames.stream()
+					.filter(nickname -> nickname.getType() == nicknameType)
+					.map(RaceNickname::getName)
+					.sorted()  // Sort the nicknames alphabetically
+					.collect(Collectors.toList());
+
+				if (!nicknamesOfType.isEmpty()) {
+					descriptionBuilder.append("<p><strong>")
+						.append(displayName)
+						.append("</strong> ");
+
+					String formattedNicknames = String.join(", ", nicknamesOfType);
+
+					descriptionBuilder.append(formattedNicknames)
+						.append("</p>");
+				}
+			}
+		}
+
+
+
+
+		if (!descriptionBuilder.toString().isEmpty()) {
 			if (existingSkill != null) {
 				// "Имена" feature already exists, update its description
 				existingSkill.setDescription(existingSkill.getDescription() + descriptionBuilder.toString());
