@@ -35,13 +35,12 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "Снаряжение", description = "API снаряжение")
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/items")
 @RestController
 public class ItemApiController {
 	private final ItemRepository itemRepository;
 
-	@Operation(summary = "Получение краткого списка снаряжения")
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation( summary = "Получение краткого списка снаряжения")
+	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ItemApi> getItem(@RequestBody ItemRequestApi request) {
 		Specification<Equipment> specification = null;
 		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
