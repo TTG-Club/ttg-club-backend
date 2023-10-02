@@ -5,6 +5,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -50,12 +51,9 @@ public final class SpecificationUtil {
 	public static <T> Specification<T> combineWithOr(List<Specification<T>> specifications) {
 		Specification<T> combinedSpecification = null;
 		for (Specification<T> specification : specifications) {
-			if (combinedSpecification == null) {
-				combinedSpecification = specification;
-			} else {
-				combinedSpecification = combinedSpecification.or(specification);
-			}
+			combinedSpecification = (Objects.isNull(combinedSpecification)) ? specification : combinedSpecification.or(specification);
 		}
 		return combinedSpecification;
 	}
+
 }
