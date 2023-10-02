@@ -355,7 +355,7 @@ public class SpellApiController {
 		return filters;
 	}
 	@GetMapping("/api/fvtt/v1/spell/{id}")
-	public ResponseEntity<SpellFvtt> getCreature(HttpServletResponse response, @PathVariable Integer id) {
+	public ResponseEntity<SpellFvtt> getSpellFvtt(HttpServletResponse response, @PathVariable Integer id) {
 		Spell spell = spellRepository.findById(id).orElseThrow(PageNotFoundException::new);
 		response.setContentType("application/json");
 		String file = String.format("attachment; filename=\"%s.json\"", spell.getEnglishName());
