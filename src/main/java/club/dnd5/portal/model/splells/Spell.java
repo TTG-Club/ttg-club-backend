@@ -80,16 +80,13 @@ public class Spell {
 	private Short page;
 	private Boolean srd;
 
-	public String getFullName() {
-		return name.toLowerCase() + " [" + englishName.toLowerCase() +"]";
-	}
+	/**
+	 * Иконка для FVTT (относительный путь)
+	 */
+	private String img;
 
 	public String getComponents() {
 		return (verbalComponent ? "В" : "") + (somaticComponent ? "C" : "") + (materialComponent ? "М" : "");
-	}
-
-	public String getTimesDescription() {
-		return "";
 	}
 
 	public String getUrlName() {
