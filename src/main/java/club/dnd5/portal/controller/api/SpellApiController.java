@@ -134,16 +134,23 @@ public class SpellApiController {
 				}
 			}
 			if (request.getFilter().getTimecast() != null && !request.getFilter().getTimecast().isEmpty()) {
+				List<Specification<Spell>> timecastSpecifications = new ArrayList<>();
 				for (String timecast : request.getFilter().getTimecast()) {
 					String[] parts = timecast.split("\\s");
 					int time = Integer.parseInt(parts[0]);
 					TimeUnit unit = TimeUnit.valueOf(parts[1]);
-					specification = SpecificationUtil.getOrSpecification(specification, (root, query, cb) -> {
+					Specification<Spell> timecastSpecification = (root, query, cb) -> {
 						Join<TimeCast, Spell> join = root.join("times", JoinType.INNER);
 						query.distinct(true);
-						return cb.and(cb.equal(join.get("number"), time), cb.equal(join.get("unit"), unit));
-					});
+						return cb.and(
+							cb.equal(join.get("number"), time),
+							cb.equal(join.get("unit"), unit)
+						);
+					};
+					timecastSpecifications.add(timecastSpecification);
 				}
+				Specification<Spell> combinedSpecification = SpecificationUtil.combineWithOr(timecastSpecifications);
+				specification = SpecificationUtil.getAndSpecification(specification, combinedSpecification);
 			}
 			if (request.getFilter().getDistance() != null && !request.getFilter().getDistance().isEmpty()) {
 				Specification<Spell> addSpec = null;

@@ -4,6 +4,8 @@ import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -23,6 +25,7 @@ public final class SpecificationUtil {
 		}
 		return specification.or(addSpecification);
 	}
+
 	public static <T> Specification<T> getSearch(RequestApi request) {
 		if (Optional.of(request).map(RequestApi::getSearch).map(SearchRequest::getExact).orElse(false)) {
 			return (root, query, cb) -> cb.equal(
@@ -36,7 +39,7 @@ public final class SpecificationUtil {
 				.orElse("")
 				.trim()
 				.toUpperCase() + "%";
-			return  (root, query, cb) ->
+			return (root, query, cb) ->
 				cb.or(
 					cb.like(cb.upper(root.get("altName")), likeSearch),
 					cb.like(cb.upper(root.get("englishName")), likeSearch),
@@ -44,4 +47,13 @@ public final class SpecificationUtil {
 				);
 		}
 	}
+
+	public static <T> Specification<T> combineWithOr(List<Specification<T>> specifications) {
+		Specification<T> combinedSpecification = null;
+		for (Specification<T> specification : specifications) {
+			combinedSpecification = (Objects.isNull(combinedSpecification)) ? specification : combinedSpecification.or(specification);
+		}
+		return combinedSpecification;
+	}
+
 }
