@@ -30,13 +30,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -209,13 +209,15 @@ public class BestiaryApiController {
 	}
 
 	@Operation(summary = "Загрузка существа в json в формате FVTT по id")
-	@GetMapping("/api/fvtt/v1/bestiary/{id}")
-	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id) {
+	@GetMapping(value = "/api/fvtt/v1/bestiary/{id}", produces="application/json")
+	public ResponseEntity<FCreature> getCreatureFvtt(@PathVariable Integer id) {
 		Creature creature = beastRepository.findById(id).orElseThrow(PageNotFoundException::new);
-		response.setContentType("application/json");
+		HttpHeaders responseHeaders = new HttpHeaders();
 		String file = String.format("attachment; filename=\"%s.json\"", creature.getEnglishName());
-		response.setHeader("Content-Disposition", file);
-		return ResponseEntity.ok(new FCreature(creature));
+		responseHeaders.set("Content-Disposition", file);
+		return ResponseEntity.ok()
+			.headers(responseHeaders)
+			.body(new FCreature(creature));
 	}
 
 	@Operation(summary = "Загрузка всех существ в json в формате FVTT")
