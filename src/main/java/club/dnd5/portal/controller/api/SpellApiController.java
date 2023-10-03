@@ -237,7 +237,6 @@ public class SpellApiController {
 	@GetMapping(value = "/api/fvtt/v1/bestiary/{id}", produces = "application/json")
 	public ResponseEntity<Fspell> getSpellFvtt(@PathVariable Integer id) {
 		Fspell fspell = spellService.convertFromSpellIntoFspell(id);
-		Spell spell = spellRepository.findById(id).orElseThrow(PageNotFoundException::new);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		String file = String.format("attachment; filename=\"%s.json\"", fspell.getName());
 		responseHeaders.set("Content-Disposition", file);
