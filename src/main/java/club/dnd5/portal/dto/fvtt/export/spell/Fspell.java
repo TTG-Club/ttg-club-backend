@@ -1,7 +1,9 @@
 package club.dnd5.portal.dto.fvtt.export.spell;
 
 import club.dnd5.portal.dto.fvtt.export.*;
+import club.dnd5.portal.dto.fvtt.export.system.FDescription;
 import club.dnd5.portal.dto.fvtt.export.system.FScaling;
+import club.dnd5.portal.dto.fvtt.export.system.FSystemSpell;
 import club.dnd5.portal.dto.fvtt.export.token.FFlags;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +21,6 @@ public class Fspell {
 
 	 private FFlags flags;
 
-	private String description;
 	private String source;
 	private Integer targetValue;
 	private String targetUnits;
@@ -37,6 +38,6 @@ public class Fspell {
 	private Integer level;
 	private String school;
 
-	private FScaling scaling;
+	private FSystemSpell fSystemSpell;
 
 }

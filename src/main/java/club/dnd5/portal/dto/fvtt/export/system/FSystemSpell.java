@@ -10,7 +10,6 @@ public class FSystemSpell {
 	private FComponents components; //++
 	private FMaterials materials; //+
 	private FPreparation preparation; //++
-
 	private FConsume consume;
 	private FCritical critical;
 
