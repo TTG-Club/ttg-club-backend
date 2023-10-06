@@ -3,6 +3,7 @@ package club.dnd5.portal.model.splells;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.model.exporter.JsonStorage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,6 +48,13 @@ public class Spell {
 
 	private String distance;
 
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumns ({
+		@JoinColumn(name = "refId"),
+		@JoinColumn(name = "type")
+	})
+	private JsonStorage spellJson;
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
@@ -77,6 +85,7 @@ public class Spell {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
 	private Short page;
 	private Boolean srd;
 
