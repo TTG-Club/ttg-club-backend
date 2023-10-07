@@ -2,6 +2,7 @@ package club.dnd5.portal.model.creature;
 
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.util.ChallengeRating;
 import lombok.Getter;
 import lombok.Setter;
@@ -170,6 +171,14 @@ public class Creature {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumns ({
+		@JoinColumn(name = "refId"),
+		@JoinColumn(name = "typeJson")
+	})
+	private JsonStorage creatureJson;
+
 	private Short page;
 
 	private String img;

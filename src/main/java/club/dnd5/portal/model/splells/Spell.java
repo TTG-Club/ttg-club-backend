@@ -51,7 +51,7 @@ public class Spell {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumns ({
 		@JoinColumn(name = "refId"),
-		@JoinColumn(name = "type")
+		@JoinColumn(name = "typeJson")
 	})
 	private JsonStorage spellJson;
 

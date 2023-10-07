@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "json_storage")
@@ -20,9 +21,10 @@ public class JsonStorage implements Serializable {
 
 	@Id
 	@Enumerated(value = EnumType.STRING)
-	private JsonType type;
+	private JsonType typeJson;
 
-	@Column(nullable = false, columnDefinition = "TEXT")
+	@Column(nullable = false, columnDefinition = "MEDIUMTEXT")
 	private String jsonData;
+
 }
 
