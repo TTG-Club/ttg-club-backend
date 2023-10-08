@@ -20,7 +20,10 @@ public class MadnessApi {
 	private NameValueApi type;
 	public MadnessApi(Madness madness) {
 		description = madness.getDescription();
-		type = new NameValueApi(madness.getMadnessType().getCyrilicName(), madness.getMadnessType().name());
+		type = NameValueApi.builder()
+			.name(madness.getMadnessType().getCyrilicName())
+			.value(madness.getMadnessType().name())
+			.build();
 		String duration;
 		switch (madness.getMadnessType()) {
 		case SHORT:

@@ -30,7 +30,10 @@ public class MadnessApiController {
 	public Collection<NameValueApi> getItems() {
 		return Arrays
 			.stream(MadnessType.values())
-			.map(t -> new NameValueApi(t.getCyrilicName(), t.name()))
+			.map(type -> NameValueApi.builder()
+				.name(type.getCyrilicName())
+				.value(type.name())
+				.build())
 			.collect(Collectors.toList());
 	}
 
