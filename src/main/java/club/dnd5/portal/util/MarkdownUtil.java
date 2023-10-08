@@ -72,6 +72,7 @@ public class MarkdownUtil {
  		}
 		action.setDescription(description);
 	}
+
 	@Builder
 	public static class Markdown {
 		private String mark;
@@ -86,10 +87,11 @@ public class MarkdownUtil {
 			while (matcherMark.find()) {
 				String group = matcherMark.group();
 				Matcher matcher = Pattern.compile(pattern).matcher(group);
-				matcher.find();
-				String part = matcher.group();
-				description = description.replace(group,
-					String.format(template, part));
+				if(matcher.find()) {
+					String part = matcher.group();
+					description = description.replace(group,
+						String.format(template, part));
+				}
 			}
 			return description;
 		}
