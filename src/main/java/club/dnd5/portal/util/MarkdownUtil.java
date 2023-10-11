@@ -21,16 +21,22 @@ public class MarkdownUtil {
 		Markdown.builder().mark("{@atk r,mw}").template("<em>Дальнобойная или рукопашная атака оружием:</em>").build(),
 		Markdown.builder().mark("{@atk ms}").template("<em>Рукопашная атака заклинанием:</em>").build(),
 		Markdown.builder().mark("{@atk rs}").template("<em>Дальнобойная атака заклинанием:</em>").build(),
-		Markdown.builder().mark("\\{@damage\\s\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
-			.pattern("\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?")
+		Markdown.builder().mark("{@atk r,ms}").template("<em>Дальнобойная или рукопашная атака заклинанием:</em>").build(),
+
+		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\−\\s?\\d+)?\\}")
+			.pattern("\\d+(к|d)\\d+(\\s?\\−\\s?\\d+)?")
 			.template("<dice-roller label=\"Бросок урона\" formula=\"%s\"/>")
 			.build(),
-		Markdown.builder().mark("\\{@heal\\s\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
-			.pattern("\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?")
+		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
+			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
+			.template("<dice-roller label=\"Бросок урона\" formula=\"%s\"/>")
+			.build(),
+		Markdown.builder().mark("\\{@heal\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
+			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
 			.template("<dice-roller label=\"Бросок восстоновления хитов\" formula=\"%s\"/>")
 			.build(),
-		Markdown.builder().mark("\\{@dice\\s\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
-			.pattern("\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?")
+		Markdown.builder().mark("\\{@dice\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
+			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
 			.template("<dice-roller formula=\"%s\"/>")
 			.build(),
 		Markdown.builder().mark("\\{@hit\\s\\d+}")

@@ -21,7 +21,7 @@ public class MarkdownTest {
 
 	@Test
 	void testAttack() {
-		String description = "@{atk mw} @{hit 14} к попаданию, досягаемость 10 фт., одна цель";
+		String description = "@{atk mw} @{hit 3} к попаданию, досягаемость 10 фт., одна цель";
 		MarkdownUtil.Markdown markdown = MarkdownUtil.Markdown
 			.builder().mark("@{atk mw}")
 			.template("<em>Рукопашная атака оружием:</em>")
@@ -33,12 +33,12 @@ public class MarkdownTest {
 
 	@Test
 	void testHit() {
-		String description = "<p>@{atk mw} @{hit 14} к попаданию, досягаемость 10 фт., одна цель.";
+		String description = "<p>@{atk mw} @{hit 3} к попаданию, досягаемость 10 фт., одна цель.";
 		MarkdownUtil.Markdown markdown = MarkdownUtil.Markdown.builder().mark("@\\{hit\\s\\d+}")
 			.pattern("\\d+")
 			.template("<dice-roller label=\"Бросок атаки\" formula=\"к20 + %1$s\">+%1$s</dice-roller>")
 			.build();
-		assertEquals("<p>@{atk mw} <dice-roller label=\"Бросок атаки\" formula=\"к20 + 14\">+14</dice-roller> к попаданию, досягаемость 10 фт., одна цель.",
+		assertEquals("<p>@{atk mw} <dice-roller label=\"Бросок атаки\" formula=\"к20 + 3\">+3</dice-roller> к попаданию, досягаемость 10 фт., одна цель.",
 			markdown.convert(description),
 			"Markdown hit error");
 	}
