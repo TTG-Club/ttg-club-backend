@@ -22,6 +22,7 @@ public class MarkdownUtil {
 		Markdown.builder().mark("{@atk ms}").template("<em>Рукопашная атака заклинанием:</em>").build(),
 		Markdown.builder().mark("{@atk rs}").template("<em>Дальнобойная атака заклинанием:</em>").build(),
 		Markdown.builder().mark("{@atk r,ms}").template("<em>Дальнобойная или рукопашная атака заклинанием:</em>").build(),
+		Markdown.builder().mark("{@h}").template("<em>Попадание:</em>").build(),
 
 		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\−\\s?\\d+)?\\}")
 			.pattern("\\d+(к|d)\\d+(\\s?\\−\\s?\\d+)?")
@@ -43,6 +44,7 @@ public class MarkdownUtil {
 			.pattern("\\d+")
 			.template("<dice-roller label=\"Бросок атаки\" formula=\"к20 + %1$s\">+%1$s</dice-roller>")
 			.build()
+
 	);
 
 	/**

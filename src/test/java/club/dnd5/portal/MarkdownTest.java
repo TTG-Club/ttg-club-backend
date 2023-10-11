@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MarkdownTest {
 	@Test
-	void testDamageConvert() {
-		String description = "цель получает {@damage 1к6+1} дробящего урона и {@damage 6к6} психического урона";
+	void testDamage() {
+		String description = "цель получает ({@damage 19к12}) дробящего урона и {@damage 6к6} психического урона";
 		MarkdownUtil.Markdown markdown = MarkdownUtil.Markdown.builder()
-			.mark("\\{@damage\\s\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
-			.pattern("\\d*(к|d)\\d+(\\s?\\+\\s?\\d+)?")
+			.mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
+			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
 			.template("<dice-roller formula=\"%s\"/>")
 			.build();
-		assertEquals("цель получает <dice-roller formula=\"1к6+1\"/> дробящего урона и <dice-roller formula=\"6к6\"/> психического урона",
+		assertEquals("цель получает (<dice-roller formula=\"19к12\"/>) дробящего урона и <dice-roller formula=\"6к6\"/> психического урона",
 			markdown.convert(description),
 			"Markup damage error");
 	}
