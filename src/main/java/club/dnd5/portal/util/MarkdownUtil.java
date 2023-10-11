@@ -24,9 +24,18 @@ public class MarkdownUtil {
 		Markdown.builder().mark("{@atk r,ms}").template("<em>Дальнобойная или рукопашная атака заклинанием:</em>").build(),
 		Markdown.builder().mark("{@h}").template("<em>Попадание:</em>").build(),
 
+		Markdown.builder().mark("\\{@(b|bold)\\s[А-Яа-я0-9+\\-\\(\\)\\s]+}")
+			.pattern("[А-Яа-я0-9+\\-\\(\\)\\s]+")
+			.template("<strong>%s</strong>")
+			.build(),
+		Markdown.builder().mark("\\{@(i|italic)\\s[А-Яа-я0-9+\\-\\(\\)\\s]+}")
+			.pattern("[А-Яа-я0-9+\\-\\(\\)\\s]+")
+			.template("<em>%s</em>")
+			.build(),
+
 		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\−\\s?\\d+)?\\}")
 			.pattern("\\d+(к|d)\\d+(\\s?\\−\\s?\\d+)?")
-			.template("<dice-roller label=\"Бросок урона\" formula=\"%s\"/>")
+			.template("<dice-roller label=\"Бросок урона\" formula=\"%1$s\"/>%1$s</dice-roller>")
 			.build(),
 		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
