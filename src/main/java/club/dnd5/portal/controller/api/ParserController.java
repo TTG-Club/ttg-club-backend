@@ -40,18 +40,22 @@ public class ParserController {
 			JsonStorage jsonStorage = new JsonStorage();
 			jsonStorage.setJsonData(jsonNode.toString());
 			jsonStorage.setTypeJson(JsonType.SPELL);
+			String[] names = jsonNode.get("name").asText().split("/");
+			jsonStorage.setName(names[1].trim()); //take english parts
 			jsonStorage.setRefId(counter.getAndIncrement());
 			return jsonStorage;
 		}).collect(Collectors.toList()));
 	}
 
-	@PostMapping(value = "/api/v1/creature")
+	@PostMapping(value = "/api/v1/fcreature")
 	public void importCreature(@RequestBody List<JsonNode> request) {
 		AtomicInteger counter = new AtomicInteger(0);
 		jsonStorageRepository.saveAll(request.stream().map(jsonNode -> {
 			JsonStorage jsonStorage = new JsonStorage();
 			jsonStorage.setJsonData(jsonNode.toString());
 			jsonStorage.setTypeJson(JsonType.CREATURE);
+			String[] names = jsonNode.get("name").asText().split("/");
+			jsonStorage.setName(names[1].trim()); //take english parts
 			jsonStorage.setRefId(counter.getAndIncrement());
 			return jsonStorage;
 		}).collect(Collectors.toList()));
