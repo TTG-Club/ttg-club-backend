@@ -18,10 +18,9 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-
 @Entity
 @Table(name = "creatures")
-public class Creature {
+public class Creature implements FoundryCommon {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -144,6 +143,7 @@ public class Creature {
 	@JoinColumn(name = "creature_id")
 	private List<CreatureSpell> spells;
 
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
@@ -171,13 +171,6 @@ public class Creature {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
-
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumns ({
-		@JoinColumn(name = "refId"),
-		@JoinColumn(name = "typeJson")
-	})
-	private JsonStorage creatureJson;
 
 	private Short page;
 

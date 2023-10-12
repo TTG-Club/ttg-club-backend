@@ -1,6 +1,7 @@
 package club.dnd5.portal.model.splells;
 
 import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.FoundryCommon;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.exporter.JsonStorage;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "spells")
-public class Spell {
+public class Spell implements FoundryCommon {
 	public static final int MAX_LEVEL = 9;
 
 	@Id
@@ -48,12 +49,12 @@ public class Spell {
 
 	private String distance;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumns ({
-		@JoinColumn(name = "refId"),
-		@JoinColumn(name = "typeJson")
-	})
-	private JsonStorage spellJson;
+//	@OneToOne(fetch = FetchType.LAZY)
+//	@JoinColumns ({
+//		@JoinColumn(name = "refId"),
+//		@JoinColumn(name = "typeJson")
+//	})
+//	private JsonStorage spellJson;
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
