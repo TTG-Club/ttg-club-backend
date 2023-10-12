@@ -20,6 +20,9 @@ public class JsonStorage implements Serializable {
 	private Integer refId;
 
 	@Id
+	private String name;
+
+	@Id
 	@Enumerated(value = EnumType.STRING)
 	private JsonType typeJson;
 

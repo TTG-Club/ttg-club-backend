@@ -1,11 +1,16 @@
 package club.dnd5.portal.controller.api;
 
 
+import club.dnd5.portal.controller.api.bestiary.BestiaryApiController;
 import club.dnd5.portal.dto.fvtt.export.spell.Fspell;
 import club.dnd5.portal.model.JsonStorageCompositeKey;
 import club.dnd5.portal.model.JsonType;
+import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.exporter.JsonStorage;
+import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.JsonStorageRepository;
+import club.dnd5.portal.repository.datatable.BestiaryRepository;
+import club.dnd5.portal.repository.datatable.SpellRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -23,42 +30,51 @@ public class ParserController {
 
 	private final JsonStorageRepository jsonStorageRepository;
 
-	//		Integer counter = 0;
-//		for (JsonNode jsonNode : request) {
-//			JsonStorage jsonStorage = new JsonStorage();
-//			jsonStorage.setJsonData(jsonNode.toString());
-//			jsonStorage.setTypeJson(JsonType.CREATURE);
-//			jsonStorage.setRefId(counter);
-//			counter++;
-//		}
+	private final BestiaryRepository bestiaryRepository;
+
+	private final SpellRepository spellRepository;
+
+
 
 
 	@PostMapping(value = "/api/v1/fspell")
 	public void importSpells(@RequestBody List<JsonNode> request) {
-		AtomicInteger counter = new AtomicInteger(0);
 		jsonStorageRepository.saveAll(request.stream().map(jsonNode -> {
 			JsonStorage jsonStorage = new JsonStorage();
 			jsonStorage.setJsonData(jsonNode.toString());
 			jsonStorage.setTypeJson(JsonType.SPELL);
-			String[] names = jsonNode.get("name").asText().split("/");
-			jsonStorage.setName(names[1].trim()); //take english parts
-			jsonStorage.setRefId(counter.getAndIncrement());
-			return jsonStorage;
-		}).collect(Collectors.toList()));
+			String name = jsonNode.get("name").asText().split("/")[1].trim().replaceAll("-", " ");
+			System.out.println("Name - " + name);
+			Optional<Spell> spellOptional = spellRepository.findByEnglishName(name);
+			if (spellOptional.isPresent()) {
+				Integer idSpell = spellOptional.get().getId();
+				jsonStorage.setName(name);
+				jsonStorage.setRefId(idSpell);
+				return jsonStorage;
+			} else {
+				return null;
+			}
+		}).filter(Objects::nonNull).collect(Collectors.toList()));
 	}
 
 	@PostMapping(value = "/api/v1/fcreature")
 	public void importCreature(@RequestBody List<JsonNode> request) {
-		AtomicInteger counter = new AtomicInteger(0);
 		jsonStorageRepository.saveAll(request.stream().map(jsonNode -> {
 			JsonStorage jsonStorage = new JsonStorage();
 			jsonStorage.setJsonData(jsonNode.toString());
 			jsonStorage.setTypeJson(JsonType.CREATURE);
-			String[] names = jsonNode.get("name").asText().split("/");
-			jsonStorage.setName(names[1].trim()); //take english parts
-			jsonStorage.setRefId(counter.getAndIncrement());
-			return jsonStorage;
-		}).collect(Collectors.toList()));
+			String name = jsonNode.get("name").asText().split("/")[1].trim();
+			System.out.println("Name - " + name);
+			Optional<Creature> creatureOptional = bestiaryRepository.findByEnglishName(name);
+			if (creatureOptional.isPresent()) {
+				Integer idSpell = creatureOptional.get().getId();
+				jsonStorage.setName(name); // take english parts.
+				jsonStorage.setRefId(idSpell);
+				return jsonStorage;
+			} else {
+				return null;
+			}
+		}).filter(Objects::nonNull).collect(Collectors.toList()));
 	}
 
 	@GetMapping(value = "/api/v1/fspell")

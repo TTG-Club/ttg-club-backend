@@ -10,7 +10,6 @@ import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
-import club.dnd5.portal.dto.fvtt.export.spell.Fspell;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.TimeUnit;
@@ -18,6 +17,7 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.archetype.Archetype;
+import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
@@ -25,7 +25,7 @@ import club.dnd5.portal.model.splells.TimeCast;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import club.dnd5.portal.service.SpellServiceImpl;
+import club.dnd5.portal.service.JsonStorageService;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -61,7 +62,7 @@ public class SpellApiController {
 	private final ClassRepository classRepository;
 	private final ArchetypeSpellRepository archetypeSpellRepository;
 
-	private final SpellServiceImpl spellService;
+	private final JsonStorageService jsonStorageService;
 
 	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -233,19 +234,6 @@ public class SpellApiController {
 		);
 	}
 
-	@Operation(summary = "Загрузка спела в json в формате FVTT по id")
-	@GetMapping(value = "/api/fvtt/v1/bestiary/{id}", produces = "application/json")
-	public ResponseEntity<Fspell> getSpellFvtt(@PathVariable Integer id) {
-		Fspell fspell = spellService.convertFromSpellIntoFspell(id);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		String file = String.format("attachment; filename=\"%s.json\"", fspell.getName());
-		responseHeaders.set("Content-Disposition", file);
-		return ResponseEntity.ok()
-			.headers(responseHeaders)
-			.body(fspell);
-	}
-
-
 	@Operation(summary = "Список SRD заклинаний")
 	@CrossOrigin
 	@GetMapping(value = "/api/fvtt/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -373,14 +361,22 @@ public class SpellApiController {
 		return filters;
 	}
 
-	@GetMapping("/api/fvtt/v1/spell/{id}")
-	public ResponseEntity<SpellFvtt> getSpellFvtt(HttpServletResponse response, @PathVariable Integer id) {
-		Spell spell = spellRepository.findById(id).orElseThrow(PageNotFoundException::new);
-		response.setContentType("application/json");
-		String file = String.format("attachment; filename=\"%s.json\"", spell.getEnglishName());
-		response.setHeader("Content-Disposition", file);
-		return ResponseEntity.ok(new SpellFvtt(spell));
+	@Operation(summary = "Загрузка заклинания в json в формате FVTT по id")
+	@GetMapping(value = "/api/fvtt/v1/fspell/{id}", produces="application/json")
+	public ResponseEntity<byte[]> getSpellsFvtt(@PathVariable Integer id) {
+		JsonStorage jsonStorage = jsonStorageService.editSpellJson(id);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		String file = String.format("attachment; filename=\"%s.json\"", jsonStorage.getName());
+		responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, file);
+		responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+		byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
+
+		return ResponseEntity.ok()
+			.headers(responseHeaders)
+			.body(jsonDataBytes);
 	}
+
 
 	@Operation(summary = "Получение фильтров заклинаний для класса")
 	@PostMapping("/api/v1/filters/spells/{englishClassName}")
