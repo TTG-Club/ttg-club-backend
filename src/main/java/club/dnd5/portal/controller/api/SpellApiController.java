@@ -44,7 +44,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
