@@ -60,9 +60,9 @@ public class RandomEncounterApiController {
 	}
 
 	@PostMapping("/api/v1/tools/encounters/table")
-	public ResponseEntity<RandomEncounterTableApi> getTable(@RequestBody RequestRandomEncounterApi reques) {
-		Optional<RandomEncounterTable> table = repoTable.findByLevelAndType(reques.getLevel(),
-				valueOf(reques.getEnvironment()));
+	public ResponseEntity<RandomEncounterTableApi> getTable(@RequestBody RequestRandomEncounterApi request) {
+		Optional<RandomEncounterTable> table = repoTable.findByLevelAndType(request.getLevel(),
+				valueOf(request.getEnvironment()));
 		if (table.isPresent()) {
 			RandomEncounterTableApi raTable = new RandomEncounterTableApi(table.get());
 			return ResponseEntity.ok(raTable);
