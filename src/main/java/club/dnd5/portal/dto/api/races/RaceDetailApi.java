@@ -31,21 +31,30 @@ public class RaceDetailApi extends RaceApi {
 		url = null;
 		type = race.getType().getCyrillicName();
 		size = race.getSize().getCyrillicName();
-		speed.add(new NameValueApi(null, race.getSpeed()));
+		speed.add(NameValueApi.builder().value(race.getSpeed()).build());
 		if (Objects.nonNull(race.getFly())) {
-			speed.add(new NameValueApi("летая", race.getFly()));
+			speed.add(NameValueApi.builder()
+				.name("летая")
+				.value(race.getFly())
+				.build());
 		}
 		if (Objects.nonNull(race.getClimb())) {
-			speed.add(new NameValueApi("лазая", race.getClimb()));
+			speed.add(NameValueApi.builder()
+				.name("лазая")
+				.value(race.getClimb())
+				.build());
 		}
 		if (Objects.nonNull(race.getSwim())) {
-			speed.add(new NameValueApi("плавая", race.getSwim()));
+			speed.add(NameValueApi.builder()
+				.name("плавая")
+				.value(race.getSwim())
+				.build());
 		}
 		darkvision = race.getDarkvision();
 		if (!race.getSubRaces().isEmpty()) {
 			subraces = race.getSubRaces()
 				.stream()
-				.filter(r -> books.isEmpty()? true : books.contains(r.getBook().getSource()))
+				.filter(r -> books.isEmpty() || books.contains(r.getBook().getSource()))
 				.map(race1 -> new RaceDetailApi(race1, books))
 				.collect(Collectors.toList());
 		}
@@ -84,7 +93,6 @@ public class RaceDetailApi extends RaceApi {
 
 		StringBuilder descriptionBuilder = new StringBuilder();
 
-
 		names.forEach((sex, nameSet) -> {
 			descriptionBuilder.append("<p><strong>")
 				.append(sex.getCyrilicName())
@@ -92,8 +100,6 @@ public class RaceDetailApi extends RaceApi {
 				.append(String.join(", ", nameSet))
 				.append("</p>");
 		});
-
-
 
 		if (nickNames != null && !nickNames.isEmpty()) {
 			for (RaceNickname.NicknameType nicknameType : RaceNickname.NicknameType.values()) {
@@ -118,13 +124,10 @@ public class RaceDetailApi extends RaceApi {
 			}
 		}
 
-
-
-
 		if (!descriptionBuilder.toString().isEmpty()) {
 			if (existingSkill != null) {
 				// "Имена" feature already exists, update its description
-				existingSkill.setDescription(existingSkill.getDescription() + descriptionBuilder.toString());
+				existingSkill.setDescription(existingSkill.getDescription() + descriptionBuilder);
 			} else {
 				// "Имена" feature doesn't exist, create a new one
 				Feature feature = new Feature();
@@ -136,7 +139,4 @@ public class RaceDetailApi extends RaceApi {
 			}
 		}
 	}
-
-
-
 }
