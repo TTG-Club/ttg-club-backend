@@ -34,16 +34,19 @@ public class ParserController {
 
 	private final SpellRepository spellRepository;
 
-
-
-
 	@PostMapping(value = "/api/v1/fspell")
 	public void importSpells(@RequestBody List<JsonNode> request) {
 		jsonStorageRepository.saveAll(request.stream().map(jsonNode -> {
 			JsonStorage jsonStorage = new JsonStorage();
 			jsonStorage.setJsonData(jsonNode.toString());
 			jsonStorage.setTypeJson(JsonType.SPELL);
-			String name = jsonNode.get("name").asText().split("/")[1].trim().replaceAll("-", " ");
+			String name = jsonNode.get("name").asText();
+			if (name.contains("/")) {
+				name = name.split("/")[1].trim().replaceAll("-", " ").trim();
+			}
+			else {
+				return null;
+			}
 			System.out.println("Name - " + name);
 			Optional<Spell> spellOptional = spellRepository.findByEnglishName(name);
 			if (spellOptional.isPresent()) {
@@ -63,7 +66,13 @@ public class ParserController {
 			JsonStorage jsonStorage = new JsonStorage();
 			jsonStorage.setJsonData(jsonNode.toString());
 			jsonStorage.setTypeJson(JsonType.CREATURE);
-			String name = jsonNode.get("name").asText().split("/")[1].trim();
+			String name = jsonNode.get("name").asText();
+			if (name.contains("/")) {
+				name = name.split("/")[1].trim().replaceAll("-", " ").trim();
+			}
+			else {
+				return null;
+			}
 			System.out.println("Name - " + name);
 			Optional<Creature> creatureOptional = bestiaryRepository.findByEnglishName(name);
 			if (creatureOptional.isPresent()) {
