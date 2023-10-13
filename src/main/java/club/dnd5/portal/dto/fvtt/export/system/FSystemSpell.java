@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FSystemSpell {
-	private FComponents components; //++
-	private FMaterials materials; //+
-	private FPreparation preparation; //++
+	private FComponents components;
+	private FMaterials materials;
+	private FPreparation preparation;
 	private FConsume consume;
 	private FCritical critical;
 
@@ -20,7 +20,7 @@ public class FSystemSpell {
 
 	private FSave save;
 
-	private FScaling scaling; //++
+	private FScaling scaling;
 
 	private FUses uses;
 

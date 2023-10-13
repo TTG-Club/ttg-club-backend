@@ -1,9 +1,6 @@
 target/
 /src/main/resources/application-local.properties
 /src/main/resources/robot.txt
-/src/main/resources/application.properties
-/src/main/resources/application-prod.properties
-/src/main/resources/application-dev.properties
 .factorypath
 
 # Frontend Build

@@ -49,13 +49,6 @@ public class Spell implements FoundryCommon {
 
 	private String distance;
 
-//	@OneToOne(fetch = FetchType.LAZY)
-//	@JoinColumns ({
-//		@JoinColumn(name = "refId"),
-//		@JoinColumn(name = "typeJson")
-//	})
-//	private JsonStorage spellJson;
-
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
