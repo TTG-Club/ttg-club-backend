@@ -14,10 +14,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Objects;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class JsonStorageServiceImpl implements JsonStorageService {
 
