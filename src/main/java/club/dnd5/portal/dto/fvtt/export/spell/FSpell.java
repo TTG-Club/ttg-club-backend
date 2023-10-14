@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Fspell {
+public class FSpell {
 	private String name;
 
 	private String type;

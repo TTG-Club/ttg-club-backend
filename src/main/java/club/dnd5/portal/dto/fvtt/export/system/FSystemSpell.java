@@ -7,15 +7,21 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FSystemSpell {
+
 	private FComponents components;
+
 	private FMaterials materials;
+
 	private FPreparation preparation;
+
 	private FConsume consume;
+
 	private FCritical critical;
 
-	private FDamage damage; //++
+	private FDamage damage;
 
 	private FActivation activation;
+
 	private FDuration duration;
 
 	private FSave save;
