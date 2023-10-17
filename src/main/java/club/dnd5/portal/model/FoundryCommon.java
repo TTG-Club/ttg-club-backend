@@ -5,4 +5,8 @@ import lombok.Getter;
 
 public interface FoundryCommon {
 	String getDescription();
+
+	String getName();
+
+	String getEnglishName();
 }

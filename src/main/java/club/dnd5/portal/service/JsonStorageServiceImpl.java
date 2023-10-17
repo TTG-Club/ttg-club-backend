@@ -10,6 +10,7 @@ import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,8 +33,16 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 	private JsonStorage editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity) {
 		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType);
 		JsonStorage jsonStorage = jsonStorageRepository.findById(compositeKey).orElseThrow(PageNotFoundException::new);
-		String jsonText = modifyDescription(entity, jsonStorage.getJsonData());
-		jsonStorage.setJsonData(jsonText);
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			JsonNode rootNode = mapper.readTree(jsonStorage.getJsonData());
+			modifyName(entity, rootNode);
+			modifyBiography(entity, rootNode);
+			jsonStorage.setJsonData(mapper.writeValueAsString(rootNode));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return jsonStorage;
+		}
 		return jsonStorage;
 	}
 
@@ -45,22 +54,26 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		return editJsonEntity(id, JsonType.CREATURE, bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new));
 	}
 
-	private String modifyDescription(FoundryCommon entity, String jsonText) {
+	private void modifyBiography(FoundryCommon entity, JsonNode rootNode) {
 		String description = entity.getDescription();
 		if (Objects.isNull(entity.getDescription()) || entity.getDescription().isEmpty()) {
-			return jsonText;
+			return;
 		}
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode rootNode = mapper.readTree(jsonText);
-			((ObjectNode) rootNode.path("system").path("description"))
-				.put("value", description);
-			String modifiedJson = mapper.writeValueAsString(rootNode);
-			return modifiedJson;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return jsonText;
+		ObjectNode systemNode = (ObjectNode) rootNode.get("system");
+		ObjectNode detailsNode = systemNode.with("details");
+		detailsNode.remove("biography");
+		ObjectNode biographyNode = detailsNode.with("biography");
+		biographyNode.put("value", description);
+		biographyNode.put("public", "");
+	}
+
+	private void modifyName(FoundryCommon entity, JsonNode rootNode) {
+		String name = entity.getName();
+		String englishName = "["+entity.getEnglishName() + "]";
+		if (Objects.isNull(name) || entity.getName().isEmpty()) {
+			return;
 		}
+		((ObjectNode) rootNode).put("name", name + " " + englishName);
 	}
 }
 
