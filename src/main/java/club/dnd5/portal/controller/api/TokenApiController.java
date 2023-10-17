@@ -26,6 +26,8 @@ import java.util.Objects;
 public class TokenApiController {
 	private final TokenRepository tokenRepository;
 	private final BestiaryRepository bestiaryRepository;
+
+	@SecurityRequirement(name = "Bearer Authentication")
 	@Operation(summary = "Получение и поиск токенов")
 	@GetMapping
 	public List<Token> getTokens(
@@ -52,6 +54,7 @@ public class TokenApiController {
 		return tokenRepository.findAll(specification);
 	}
 
+	@SecurityRequirement(name = "Bearer Authentication")
 	@Operation(summary = "Получение токена по id существа")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping("{id}")
