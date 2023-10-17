@@ -64,9 +64,9 @@ public class TokenApiController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@Transactional
 	@PostMapping
-	public void addToken(@RequestParam(required = false) final String name,
+	public String addToken(@RequestParam(required = false) final String name,
 						 @RequestParam(required = false) final String altName,
-						 @RequestParam(required = true) final String englishName,
+						 @RequestParam final String englishName,
 						 @RequestParam(required = false) final String type,
 						 @RequestParam(required = false) final String url) {
 		Creature creature = bestiaryRepository.findByEnglishName(englishName)
@@ -89,12 +89,15 @@ public class TokenApiController {
 			token.setType(type);
 		}
 		if (Objects.isNull(url)) {
-			token.setUrl(String.format("https://img.ttg.club/tokens/round/%s.webp",
-				creature.getUrlName().replace("\'", "_")));
+			token.setUrl("https://img.ttg.club/tokens/round/" + creature.getUrlName()
+				.replace("'", "-")
+				.replaceAll("[(),]+", "_")
+				+ ".webp");
 		} else {
 			token.setUrl(url);
 		}
 		tokenRepository.save(token);
+		return token.getUrl();
 	}
 
 	@Operation(summary = "Удаление токена")
