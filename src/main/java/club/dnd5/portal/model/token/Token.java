@@ -11,14 +11,17 @@ import javax.persistence.*;
 @Table(name = "tokens",
 	indexes = {
 		@Index(name = "token_multi_index", columnList = "name, altName, englishName, type"),
-		@Index(columnList = "url", unique = true)
+		@Index(columnList = "url", unique = true),
+		@Index(columnList = "refId")
 	}
 )
 public class Token {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	/**
 	 * Id существа из бестиария
 	 */
-	@Id
 	@Column(nullable = false)
 	private Integer refId;
 	@Column(nullable = false)
