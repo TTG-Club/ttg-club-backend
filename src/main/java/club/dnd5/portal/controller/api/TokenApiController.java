@@ -7,6 +7,7 @@ import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -60,6 +61,7 @@ public class TokenApiController {
 	}
 
 	@Operation(summary = "Добавление токена")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured("ADMIN")
 	@ResponseStatus(HttpStatus.CREATED)
 	@Transactional
@@ -101,6 +103,7 @@ public class TokenApiController {
 	}
 
 	@Operation(summary = "Удаление токена")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured("ADMIN")
 	@Transactional
 	@ResponseStatus(HttpStatus.OK)
