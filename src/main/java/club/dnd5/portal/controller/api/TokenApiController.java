@@ -65,7 +65,6 @@ public class TokenApiController {
 
 	@Operation(summary = "Добавление токена")
 	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured("ADMIN")
 	@ResponseStatus(HttpStatus.CREATED)
 	@Transactional
 	@PostMapping
@@ -77,6 +76,7 @@ public class TokenApiController {
 		Creature creature = bestiaryRepository.findByEnglishName(englishName)
 				.orElseThrow(PageNotFoundException::new);
 		Token token = new Token();
+		token.setRefId(creature.getId());
 		if (Objects.isNull(name)) {
 			token.setName(creature.getName());
 		} else {
