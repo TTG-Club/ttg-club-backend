@@ -22,6 +22,7 @@ import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
 import club.dnd5.portal.service.JsonStorageService;
@@ -51,6 +52,7 @@ public class BestiaryApiController {
 	private final BestiaryRepository beastRepository;
 	private final TagBestiaryDatatableRepository tagRepository;
 	private final ImageRepository imageRepository;
+	private final TokenRepository tokenRepository;
 
 	private final JsonStorageService jsonStorageService;
 
@@ -206,7 +208,12 @@ public class BestiaryApiController {
 		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
 			.orElseThrow(PageNotFoundException::new);
 		BeastDetailApi beastApi = new BeastDetailApi(beast);
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
+		Collection<String> images = new ArrayList<>();
+		tokenRepository.findByRefIdAndType(beast.getId(), "круглый")
+			.stream()
+			.findFirst()
+			.ifPresent(token -> images.add(token.getUrl()));
+		images.addAll(imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId()));
 		if (!images.isEmpty()) {
 			beastApi.setImages(images);
 		}
