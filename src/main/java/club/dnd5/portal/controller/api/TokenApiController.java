@@ -7,6 +7,7 @@ import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,6 +26,8 @@ import java.util.Objects;
 public class TokenApiController {
 	private final TokenRepository tokenRepository;
 	private final BestiaryRepository bestiaryRepository;
+
+	@SecurityRequirement(name = "Bearer Authentication")
 	@Operation(summary = "Получение и поиск токенов")
 	@GetMapping
 	public List<Token> getTokens(
@@ -51,6 +54,7 @@ public class TokenApiController {
 		return tokenRepository.findAll(specification);
 	}
 
+	@SecurityRequirement(name = "Bearer Authentication")
 	@Operation(summary = "Получение токена по id существа")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping("{id}")
@@ -60,7 +64,7 @@ public class TokenApiController {
 	}
 
 	@Operation(summary = "Добавление токена")
-	@Secured("ADMIN")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.CREATED)
 	@Transactional
 	@PostMapping
@@ -72,6 +76,7 @@ public class TokenApiController {
 		Creature creature = bestiaryRepository.findByEnglishName(englishName)
 				.orElseThrow(PageNotFoundException::new);
 		Token token = new Token();
+		token.setRefId(creature.getId());
 		if (Objects.isNull(name)) {
 			token.setName(creature.getName());
 		} else {
@@ -101,6 +106,7 @@ public class TokenApiController {
 	}
 
 	@Operation(summary = "Удаление токена")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured("ADMIN")
 	@Transactional
 	@ResponseStatus(HttpStatus.OK)
