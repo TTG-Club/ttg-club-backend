@@ -1,16 +1,15 @@
 package club.dnd5.portal.dto.fvtt.export;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import club.dnd5.portal.dto.fvtt.export.system.FSystem;
 import club.dnd5.portal.dto.fvtt.export.token.FToken;
-import org.thymeleaf.util.StringUtils;
-
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Creature;
 import lombok.Getter;
 import lombok.Setter;
+import org.thymeleaf.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,10 +26,8 @@ public class FCreature {
 		name = creature.getName();
 		type = "npc";
 		system = new FSystem(creature);
-		if (creature.getImg() == null) {
-			img = String.format("https://5e.tools/img/%s/%s.png",
+		img = String.format("https://5e.tools/img/%s/%s.png",
 				creature.getBook().getSource(), StringUtils.capitalizeWords(creature.getEnglishName()));
-		}
 		token = new FToken(creature);
 		creature.getFeats().stream()
 			.map(FItem::new)

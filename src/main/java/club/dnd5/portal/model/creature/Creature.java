@@ -109,7 +109,6 @@ public class Creature {
 	private Integer vibration;
 	private Integer blindsight;
 	private Integer blindsightRadius;
-
 	private byte passivePerception;
 	private String passivePerceptionBonus;
 
@@ -171,8 +170,6 @@ public class Creature {
 	@JoinColumn(name = "source")
 	private Book book;
 	private Short page;
-
-	private String img;
 
 	public String getSizeName() {
 		return size.getSizeName(type);
