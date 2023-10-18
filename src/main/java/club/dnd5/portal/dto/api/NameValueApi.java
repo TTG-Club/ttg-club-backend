@@ -1,6 +1,5 @@
 package club.dnd5.portal.dto.api;
 
-import club.dnd5.portal.model.AbilityType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Builder;
@@ -13,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NameValueApi {
-	private AbilityType key;
+	private Object key;
 	private String name;
 	private String shortName;
 	private Object value;
