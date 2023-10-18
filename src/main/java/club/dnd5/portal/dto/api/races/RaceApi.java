@@ -47,6 +47,7 @@ public class RaceApi {
 		abilities = race.getAbilityValueBonuses()
 				.stream()
 				.map(bonus -> NameValueApi.builder()
+					.key(bonus.getAbility())
 					.name(bonus.getAbility().getCyrilicName())
 					.shortName(bonus.getAbility().getShortName())
 					.value(bonus.getAbility())
