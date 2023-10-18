@@ -50,8 +50,7 @@ public class RaceApi {
 					.key(bonus.getAbility())
 					.name(bonus.getAbility().getCyrilicName())
 					.shortName(bonus.getAbility().getShortName())
-					.value(bonus.getAbility())
-					.additional(bonus.getBonus())
+					.value(bonus.getBonus())
 					.build())
 				.collect(Collectors.toList());
 		source = new SourceApi(race.getBook());
