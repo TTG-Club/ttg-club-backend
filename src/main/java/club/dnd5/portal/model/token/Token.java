@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "tokens",
 	indexes = {
-		@Index(name = "token_multi_index", columnList = "name, altName, englishName, type"),
+		@Index(name = "token_multi_index", columnList = "name, altName, englishName"),
 		@Index(columnList = "url", unique = true),
 		@Index(columnList = "refId")
 	}
