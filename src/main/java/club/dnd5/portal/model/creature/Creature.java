@@ -2,6 +2,7 @@ package club.dnd5.portal.model.creature;
 
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.util.ChallengeRating;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,10 +18,9 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-
 @Entity
 @Table(name = "creatures")
-public class Creature {
+public class Creature implements FoundryCommon {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -142,6 +142,7 @@ public class Creature {
 	@JoinColumn(name = "creature_id")
 	private List<CreatureSpell> spells;
 
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
@@ -169,6 +170,7 @@ public class Creature {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
 	private Short page;
 
 	public String getSizeName() {

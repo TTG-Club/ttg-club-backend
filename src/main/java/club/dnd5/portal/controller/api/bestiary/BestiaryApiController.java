@@ -18,12 +18,14 @@ import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.creature.*;
+import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
+import club.dnd5.portal.service.JsonStorageService;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,6 +53,8 @@ public class BestiaryApiController {
 	private final TagBestiaryDatatableRepository tagRepository;
 	private final ImageRepository imageRepository;
 	private final TokenRepository tokenRepository;
+
+	private final JsonStorageService jsonStorageService;
 
 	@Operation(summary = "Получение краткого списка сушеств")
 	@PostMapping(value = "/api/v1/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -215,7 +220,7 @@ public class BestiaryApiController {
 		return beastApi;
 	}
 
-	@Operation(summary = "Загрузка существа в json в формате FVTT по id")
+	@Operation(summary = "Загрузка существа в json в формате FVTT 10 по id")
 	@GetMapping(value = "/api/fvtt/v1/bestiary/{id}", produces="application/json")
 	public ResponseEntity<FCreature> getCreatureFvtt(@PathVariable Integer id) {
 		Creature creature = beastRepository.findById(id).orElseThrow(PageNotFoundException::new);
@@ -226,6 +231,24 @@ public class BestiaryApiController {
 			.headers(responseHeaders)
 			.body(new FCreature(creature));
 	}
+
+	@Operation(summary = "Загрузка существа в json в формате FVTT 11 по id")
+	@GetMapping(value = "/api/fvtt/v1/fbestiary/{id}", produces="application/json")
+	public ResponseEntity<byte[]> getCreatureFvttEleven(@PathVariable Integer id) {
+		JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		String file = String.format("attachment; filename=\"%s.json\"", jsonStorage.getName());
+		responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, file);
+		responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+		byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
+
+		return ResponseEntity.ok()
+			.headers(responseHeaders)
+			.body(jsonDataBytes);
+	}
+
+
 
 	@Operation(summary = "Загрузка всех существ в json в формате FVTT")
 	@CrossOrigin
