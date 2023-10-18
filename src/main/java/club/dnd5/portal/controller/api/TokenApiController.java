@@ -37,19 +37,19 @@ public class TokenApiController {
 		@RequestParam(required = false) final String type) {
 		Specification<Token> specification = null;
 		if (Objects.nonNull(name)) {
-			specification = (root, query, cb) -> cb.like(root.get("name"), "%" + name + "%");
+			specification = (root, query, cb) -> cb.like(root.get("name"), "%" + name.trim() + "%");
 		}
 		if (Objects.nonNull(altName)) {
 			specification = SpecificationUtil.getOrSpecification(
-				specification, (root, query, cb) -> cb.like(root.get("alt_name"), "%" + altName + "%"));
+				specification, (root, query, cb) -> cb.like(root.get("altName"), "%" + altName.trim() + "%"));
 		}
 		if (Objects.nonNull(englishName)) {
 			specification = SpecificationUtil.getOrSpecification(
-				specification, (root, query, cb) -> cb.like(root.get("english_name"), "%" + englishName + "%"));
+				specification, (root, query, cb) -> cb.like(root.get("englishName"), "%" + englishName.trim() + "%"));
 		}
-		if (Objects.nonNull(englishName)) {
+		if (Objects.nonNull(type)) {
 			specification = SpecificationUtil.getAndSpecification(
-				specification, (root, query, cb) -> cb.equal(root.get("type"), type));
+				specification, (root, query, cb) -> cb.equal(root.get("type"), type.trim()));
 		}
 		return tokenRepository.findAll(specification);
 	}
