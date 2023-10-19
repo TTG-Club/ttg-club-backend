@@ -15,13 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,36 +36,58 @@ public class JsonParseController {
 	private final SpellRepository spellRepository;
 
 	@PostMapping(value = "/api/v1/fspell")
-	public void importSpells(@RequestBody List<JsonNode> request) {
-		checkUserPermissions();
+	public void importSpells(@RequestBody List<JsonNode> request, @RequestParam Integer versionFoundry) {
+//		checkUserPermissions();
 		jsonStorageRepository.saveAll(
 			request.stream()
-				.map(jsonNode -> processJsonNode(jsonNode, JsonType.SPELL))
+				.map(jsonNode -> processJsonNode(jsonNode, JsonType.SPELL, versionFoundry))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList())
 		);
 	}
 
 	@PostMapping(value = "/api/v1/fcreature")
-	public void importCreature(@RequestBody List<JsonNode> request) {
-		checkUserPermissions();
-		jsonStorageRepository.saveAll(
-			request.stream()
-				.map(jsonNode -> processJsonNode(jsonNode, JsonType.CREATURE))
+	public void importCreature(@RequestBody List<JsonNode> request, @RequestParam Integer versionFoundry) {
+//		checkUserPermissions();
+		if (versionFoundry == 10) {
+			JsonNode nodeCreature = request.get(0).get("monster");
+			List<JsonStorage> processedDataList = StreamSupport.stream(nodeCreature.spliterator(), false)
+				.map(jsonNode -> processJsonNode(jsonNode, JsonType.CREATURE, versionFoundry))
 				.filter(Objects::nonNull)
-				.collect(Collectors.toList())
-		);
+				.collect(Collectors.toList());
+
+			jsonStorageRepository.saveAll(processedDataList);
+		} else {
+			jsonStorageRepository.saveAll(
+				request.stream()
+					.map(jsonNode -> processJsonNode(jsonNode, JsonType.CREATURE, 11))
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList())
+			);
+		}
 	}
 
-	private JsonStorage processJsonNode(JsonNode jsonNode, JsonType jsonType) {
+	private JsonStorage processJsonNode(JsonNode jsonNode, JsonType jsonType, Integer versionFoundry) {
 		JsonStorage jsonStorage = new JsonStorage();
 		jsonStorage.setJsonData(jsonNode.toString());
 		jsonStorage.setTypeJson(jsonType);
 		String name = jsonNode.get("name").asText();
-		if (name.contains("/")) {
-			name = name.split("/")[1].trim().replaceAll("-", " ").trim();
+		if (versionFoundry == 10) {
+			if (name.contains("(")) {
+				name = name
+					.split("\\(")[1]
+					.replaceAll("\\(", "")
+					.replaceAll("\\)", "")
+					.trim();
+			} else {
+				return null;
+			}
 		} else {
-			return null;
+			if (name.contains("/")) {
+				name = name.split("/")[1].trim().replaceAll("-", " ").trim();
+			} else {
+				return null;
+			}
 		}
 		Optional<?> entityOptional = null;
 		Integer id = null;
@@ -87,6 +107,7 @@ public class JsonParseController {
 		}
 		jsonStorage.setName(name);
 		jsonStorage.setRefId(id);
+		jsonStorage.setVersionFoundry(versionFoundry);
 		return jsonStorage;
 	}
 
