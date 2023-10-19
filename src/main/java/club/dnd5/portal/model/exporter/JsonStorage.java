@@ -25,6 +25,10 @@ public class JsonStorage implements Serializable {
 	@Enumerated(value = EnumType.STRING)
 	private JsonType typeJson;
 
+	@Id
+	@Column(columnDefinition = "INTEGER DEFAULT 11")
+	private Integer versionFoundry;
+
 	@Column(nullable = false, columnDefinition = "MEDIUMTEXT")
 	private String jsonData;
 }
