@@ -8,8 +8,6 @@ import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
-import club.dnd5.portal.dto.api.spells.SpellFvtt;
-import club.dnd5.portal.dto.api.spells.SpellsFvtt;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.TimeUnit;
@@ -17,7 +15,6 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.archetype.Archetype;
-import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
@@ -37,14 +34,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -211,40 +209,6 @@ public class SpellApiController {
 		return ResponseEntity.ok(spellApi);
 	}
 
-	@Operation(summary = "Список заклинаний в json в формате FVTT")
-	@CrossOrigin
-	@GetMapping(value = "/api/fvtt/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
-	public SpellsFvtt getSpells(String search, String exact) {
-		Specification<Spell> specification = null;
-		if (search != null) {
-			if (exact != null) {
-				specification = (root, query, cb) -> cb.equal(root.get("name"), search.trim().toUpperCase());
-			} else {
-				String likeSearch = "%" + search + "%";
-				specification = (root, query, cb) -> cb.or(cb.like(root.get("altName"), likeSearch),
-					cb.like(root.get("englishName"), likeSearch),
-					cb.like(root.get("name"), likeSearch));
-			}
-		}
-		return new SpellsFvtt(spellRepository.findAll(specification)
-			.stream()
-			.map(SpellFvtt::new)
-			.collect(Collectors.toList())
-		);
-	}
-
-	@Operation(summary = "Список SRD заклинаний")
-	@CrossOrigin
-	@GetMapping(value = "/api/fvtt/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
-	public SpellsFvtt getSrdSpells() {
-		Specification<Spell> specification = (root, query, cb) -> cb.isNotNull(root.get("srd"));
-		return new SpellsFvtt(spellRepository.findAll(specification)
-			.stream()
-			.map(SpellFvtt::new)
-			.collect(Collectors.toList())
-		);
-	}
-
 	@Operation(summary = "Фильтры для заклинаний")
 	@PostMapping("/api/v1/filters/spells")
 	public FilterApi getFilter() {
@@ -359,23 +323,6 @@ public class SpellApiController {
 		filters.setOther(otherFilters);
 		return filters;
 	}
-
-	@Operation(summary = "Загрузка заклинания в json в формате FVTT по id")
-	@GetMapping(value = "/api/fvtt/v1/fspell/{id}", produces="application/json")
-	public ResponseEntity<byte[]> getSpellsFvtt(@PathVariable Integer id) {
-		JsonStorage jsonStorage = jsonStorageService.editSpellJson(id);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		String file = String.format("attachment; filename=\"%s.json\"", jsonStorage.getName());
-		responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, file);
-		responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-		byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
-
-		return ResponseEntity.ok()
-			.headers(responseHeaders)
-			.body(jsonDataBytes);
-	}
-
 
 	@Operation(summary = "Получение фильтров заклинаний для класса")
 	@PostMapping("/api/v1/filters/spells/{englishClassName}")
