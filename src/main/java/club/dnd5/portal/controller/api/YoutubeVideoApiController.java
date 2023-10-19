@@ -1,23 +1,20 @@
 package club.dnd5.portal.controller.api;
 
-import club.dnd5.portal.dto.api.ResponseApi;
+import club.dnd5.portal.dto.api.PaginatedResponseApi;
 import club.dnd5.portal.dto.api.YoutubeVideoApi;
-import club.dnd5.portal.dto.api.spells.Order;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.YoutubeVideo;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.YoutubeVideosRepository;
 import club.dnd5.portal.repository.user.UserRepository;
-import club.dnd5.portal.util.SortUtil;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +22,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -44,38 +40,17 @@ public class YoutubeVideoApiController {
 
 	@Operation(summary = "Получение списка видео")
 	@GetMapping
-	public ResponseEntity<ResponseApi<YoutubeVideoApi>> getVideos(
-		@RequestParam(required = false, defaultValue = "0") Integer page,
-		@RequestParam(required = false, defaultValue = "-1") Integer limit,
+	public ResponseEntity<PaginatedResponseApi<YoutubeVideoApi>> getVideos(
 		@RequestParam(required = false) String search,
+		@RequestParam(required = false, defaultValue = "0") final Integer page,
+		@RequestParam(required = false, defaultValue = "-1") final Integer size,
 		@RequestParam(required = false) List<String> order,
 		@RequestParam(required = false) Boolean activeStatus
 	) {
-		Sort sort;
-
-		if (!CollectionUtils.isEmpty(order)) {
-			sort = Sort.by(
-				order
-					.stream()
-					.filter(Objects::nonNull)
-					.map(Order::new)
-					.map(SortUtil::getOrder)
-					.collect(Collectors.toList())
-			);
-		} else {
-			sort = Sort.unsorted();
-		}
-
-		Pageable pageable = null;
-
-		if (page != null && limit != null && limit != -1) {
-			pageable = PageRequest.of(page, limit, sort);
-		}
-
 		Specification<YoutubeVideo> specification = null;
 
-		if (search != null) {
-			specification = (root, query, cb) -> cb.like(root.get("name"), "%" + search + "%");
+		if (Objects.nonNull(search)) {
+			specification = SpecificationUtil.getSearch(search);
 		}
 
 		if (activeStatus != null) {
@@ -85,25 +60,23 @@ public class YoutubeVideoApiController {
 			);
 		}
 
+		Pageable pageable = PageAndSortUtil.getPageable(page, size, order);
+
 		long count = getCount(activeStatus);
 
-		Collection<YoutubeVideo> videos;
-
-		if (pageable == null) {
-			videos = youtubeVideosRepository.findAll(specification, sort);
-		} else {
-			videos = youtubeVideosRepository.findAll(specification, pageable).toList();
-		}
+		Collection<YoutubeVideo> videos = youtubeVideosRepository.findAll(specification, pageable).toList();
 
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(
-				new ResponseApi<>(
-					count,
+				new PaginatedResponseApi<>(
 					videos
 						.stream()
 						.map(YoutubeVideoApi::new)
-						.collect(Collectors.toList())
+						.collect(Collectors.toList()),
+					count,
+					page,
+					size
 				)
 			);
 	}
