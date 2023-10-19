@@ -65,7 +65,8 @@ public class BestiaryApiController {
 			specification = SpecificationUtil.getSearch(request);
 		}
 		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
-		if (!optionalRequest.map(BeastlRequesApi::getFilter).map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
+		if (optionalRequest.map(BeastlRequesApi::getFilter).isPresent()
+			&& optionalRequest.map(BeastlRequesApi::getFilter).map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification,
 				(root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
 		}
