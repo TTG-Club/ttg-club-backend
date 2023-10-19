@@ -3,11 +3,8 @@ package club.dnd5.portal.controller.api;
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
 import club.dnd5.portal.dto.fvtt.export.FBeastiary;
-import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.dto.fvtt.plutonium.FBeast;
-import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.JsonType;
-import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.JsonStorageRepository;
@@ -16,12 +13,12 @@ import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.service.JsonStorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -63,7 +60,7 @@ public class FvttApiController {
 				.body(jsonDataBytes);
 		} else {
 			List<JsonStorage> jsonStorageList = jsonStorageRepository
-				.findJsonStoragesByTypeJsonAndVersionFoundry(JsonType.SPELL, versionFoundry);
+				.findAllByTypeJsonAndVersionFoundry(JsonType.SPELL, versionFoundry);
 			byte[] jsonDataBytes = convertListToJson(jsonStorageList);
 
 			HttpHeaders responseHeaders = new HttpHeaders();
@@ -82,53 +79,23 @@ public class FvttApiController {
 		@RequestParam(required = false) Integer id,
 		@RequestParam(required = false, defaultValue = "11") Integer versionFoundry
 	) {
-		HttpHeaders responseHeaders;
-		byte[] jsonDataBytes;
 		if (id != null) {
-			if (versionFoundry != 10) {
-				JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, versionFoundry);
-				responseHeaders = createResponseHeaders(jsonStorage.getName());
-
-				jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
-
-				return ResponseEntity.ok()
-					.headers(responseHeaders)
-					.body(jsonDataBytes);
-			} else {
-				try {
-					Creature creature = bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new);
-					jsonDataBytes = serializeToJson(new FCreature(creature));
-
-					responseHeaders = createResponseHeaders(creature.getEnglishName());
-
-					return ResponseEntity.ok()
-						.headers(responseHeaders)
-						.contentType(MediaType.APPLICATION_OCTET_STREAM)
-						.body(jsonDataBytes);
-				} catch (PageNotFoundException e) {
-					return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-				}
-			}
+			JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, versionFoundry);
+			HttpHeaders responseHeaders = createResponseHeaders(jsonStorage.getName());
+			byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
+			return ResponseEntity.ok()
+				.headers(responseHeaders)
+				.body(jsonDataBytes);
 		} else {
-			if (versionFoundry != 10) {
-				List<JsonStorage> jsonStorageList = jsonStorageRepository
-					.findJsonStoragesByTypeJsonAndVersionFoundry(JsonType.CREATURE, versionFoundry);
-				jsonDataBytes = convertListToJson(jsonStorageList);
-
-				responseHeaders = createResponseHeaders("creature");
-
-			} else {
-				List<FBeast> list = bestiaryRepository.findAll()
-					.stream()
-					.map(FBeast::new)
-					.collect(Collectors.toList());
-
-				FBeastiary fBeastiary = new FBeastiary(list);
-				jsonDataBytes = serializeToJson(fBeastiary);
-
-				responseHeaders = createResponseHeaders("beastiary");
+			HttpHeaders responseHeaders = createResponseHeaders("creature_list");
+			List<JsonStorage> bestiaryList = jsonStorageService.getAllJson(JsonType.CREATURE, versionFoundry);
+			String jsonData = null;
+			try {
+				jsonData = new ObjectMapper().writeValueAsString(bestiaryList);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
 			}
-
+			byte[] jsonDataBytes = jsonData.getBytes(StandardCharsets.UTF_8);
 			return ResponseEntity.ok()
 				.headers(responseHeaders)
 				.body(jsonDataBytes);

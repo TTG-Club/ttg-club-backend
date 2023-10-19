@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface JsonStorageRepository extends JpaRepository<JsonStorage, JsonStorageCompositeKey>{
 	JsonStorage findByName(String name);
-	List<JsonStorage> findJsonStoragesByTypeJsonAndVersionFoundry(JsonType jsonType, Integer versionFoundry);
+	List<JsonStorage> findAllByTypeJsonAndVersionFoundry(JsonType jsonType, Integer versionFoundry);
 }
