@@ -43,8 +43,8 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private final String srcType = "вид сверху";
 
-	private JsonStorage editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity) {
-		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType);
+	private JsonStorage editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, Integer versionFoundry) {
+		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType, versionFoundry);
 		JsonStorage jsonStorage = jsonStorageRepository.findById(compositeKey).orElseThrow(PageNotFoundException::new);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -64,12 +64,12 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		return jsonStorage;
 	}
 
-	public JsonStorage editSpellJson(Integer id) {
-		return editJsonEntity(id, JsonType.SPELL, spellRepository.findById(id).orElseThrow(PageNotFoundException::new));
+	public JsonStorage editSpellJson(Integer id, Integer versionFoundry) {
+		return editJsonEntity(id, JsonType.SPELL, spellRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 
-	public JsonStorage editCreatureJson(Integer id) {
-		return editJsonEntity(id, JsonType.CREATURE, bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new));
+	public JsonStorage editCreatureJson(Integer id, Integer versionFoundry) {
+		return editJsonEntity(id, JsonType.CREATURE, bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 
 	private void modifyBiography(FoundryCommon entity, JsonNode rootNode) {
