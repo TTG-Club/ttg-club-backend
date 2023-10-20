@@ -16,15 +16,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
 @Service
 @Transactional
@@ -45,15 +49,23 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private final String srcType = "вид сверху";
 
-	public List<JsonStorage> getAllJson(JsonType jsonType, Integer versionFoundry) {
+	//вернуться стринг
+	public List<String> getAllJson(JsonType jsonType, Integer versionFoundry) {
 		List<JsonStorage> jsonStorageList = jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(jsonType, versionFoundry);
+		if (jsonStorageList.isEmpty()) {
+			throw new PageNotFoundException();
+		}
 		switch (jsonType) {
 			case CREATURE:
-				return getAllJsonCreatures(jsonStorageList, versionFoundry);
+				jsonStorageList = getAllJsonCreatures(jsonStorageList, versionFoundry);
 			case SPELL:
-				return getAllJsonSpells(jsonStorageList, versionFoundry);
+				jsonStorageList = getAllJsonSpells(jsonStorageList, versionFoundry);
 		}
-		return jsonStorageList;
+		List<String> listFoundryCommon = new ArrayList<>();
+		 jsonStorageList.stream()
+			.map(element -> listFoundryCommon.add(element.getJsonData()))
+			.collect(Collectors.toList());
+		return listFoundryCommon;
 	}
 
 	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, Integer versionFoundry){
@@ -68,6 +80,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 			.collect(Collectors.toList());
 	}
 
+	@SneakyThrows
 	private JsonStorage editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, Integer versionFoundry) {
 		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType, versionFoundry);
 		JsonStorage jsonStorage = jsonStorageRepository.findById(compositeKey).orElseThrow(PageNotFoundException::new);
@@ -100,12 +113,14 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 	private void modifyBiography(FoundryCommon entity, JsonNode rootNode) {
 		String description = entity.getDescription();
 		ObjectNode systemNode = (ObjectNode) rootNode.get("system");
-		ObjectNode detailsNode = systemNode.with("details");
-		detailsNode.remove("biography");
+		if (systemNode != null) {
+			ObjectNode detailsNode = systemNode.with("details");
+			detailsNode.remove("biography");
 
-		ObjectNode biographyNode = detailsNode.with("biography");
-		biographyNode.put("value", description);
-		biographyNode.put("public", "");
+			ObjectNode biographyNode = detailsNode.with("biography");
+			biographyNode.put("value", description);
+			biographyNode.put("public", "");
+		}
 	}
 
 	private void modifyName(FoundryCommon entity, JsonNode rootNode) {

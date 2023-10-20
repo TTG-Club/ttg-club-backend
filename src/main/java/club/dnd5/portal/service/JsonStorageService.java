@@ -8,6 +8,6 @@ import java.util.List;
 public interface JsonStorageService {
 	JsonStorage editSpellJson (Integer id, Integer versionFoundry);
 	JsonStorage editCreatureJson (Integer id, Integer versionFoundry);
-	List<JsonStorage> getAllJson(JsonType jsonType, Integer versionFoundry);
+	List<String> getAllJson(JsonType jsonType, Integer versionFoundry);
 }
 
