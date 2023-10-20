@@ -8,6 +8,7 @@ import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.dto.api.spells.SpellFilter;
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -35,11 +36,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
@@ -62,6 +70,94 @@ public class SpellApiController {
 	private final ArchetypeSpellRepository archetypeSpellRepository;
 
 	private final JsonStorageService jsonStorageService;
+	@Operation(summary = "Получение краткого списка заклинаний")
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping("/api/v1/spells")
+	private List<SpellApi> getSpells(
+		@PageableDefault(size = 80)
+		@SortDefault.SortDefaults({
+			@SortDefault(
+				sort = "level",
+				direction = Sort.Direction.ASC),
+			@SortDefault(
+				sort = "name",
+				direction = Sort.Direction.ASC)
+		})
+		final @ParameterObject Pageable pageable,
+		final @RequestParam(required = false) String search,
+	    final @ParameterObject SpellFilter filter) {
+		Specification<Spell> specification = null;
+		if (StringUtils.hasText(search)) {
+			specification = SpecificationUtil.getSearch(search);
+		}
+		if (!CollectionUtils.isEmpty(filter.getLevels())) {
+			specification = SpecificationUtil.getAndSpecification(specification,
+				(root, query, cb) -> root.get("level").in(filter.getLevels()));
+		}
+		if (!CollectionUtils.isEmpty(filter.getMyclass())) {
+			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+				Join<HeroClass, Spell> join = root.join("heroClass", JoinType.LEFT);
+				query.distinct(true);
+				return cb.and(join.get("id").in(filter.getMyclass()));
+			});
+		}
+		if (!CollectionUtils.isEmpty(filter.getSchools())) {
+			specification = SpecificationUtil.getAndSpecification(specification,
+				 (root, query, cb) -> root.get("school").in(filter.getSchools()));
+		}
+		if (!CollectionUtils.isEmpty(filter.getTimecast())) {
+			List<Specification<Spell>> timecastSpecifications = new ArrayList<>();
+			for (String timecast : filter.getTimecast()) {
+				String[] parts = timecast.split("\\s");
+				int time = Integer.parseInt(parts[0]);
+				TimeUnit unit = TimeUnit.valueOf(parts[1]);
+				Specification<Spell> timecastSpecification = (root, query, cb) -> {
+					Join<TimeCast, Spell> join = root.join("times", JoinType.INNER);
+					query.distinct(true);
+					return cb.and(
+						cb.equal(join.get("number"), time),
+						cb.equal(join.get("unit"), unit)
+					);
+				};
+				timecastSpecifications.add(timecastSpecification);
+			}
+			Specification<Spell> combinedSpecification = SpecificationUtil.combineWithOr(timecastSpecifications);
+			specification = SpecificationUtil.getAndSpecification(specification, combinedSpecification);
+		}
+		if (!CollectionUtils.isEmpty(filter.getDistance())) {
+			Specification<Spell> addSpec = null;
+			for (String distance : filter.getDuration()) {
+				addSpec = SpecificationUtil.getOrSpecification(addSpec,
+					(root, query, cb) -> cb.like(root.get("duration"), "%" + distance + "%"));
+			}
+			specification = SpecificationUtil.getAndSpecification(specification, addSpec);
+		}
+		if (!CollectionUtils.isEmpty(filter.getDuration())) {
+			Specification<Spell> addSpec = null;
+			for (String distance : filter.getDuration()) {
+				addSpec = SpecificationUtil.getOrSpecification(addSpec,
+					(root, query, cb) -> cb.like(root.get("duration"), "%" + distance + "%"));
+			}
+			specification = SpecificationUtil.getAndSpecification(specification, addSpec);
+		}
+		if (!CollectionUtils.isEmpty(filter.getDamageTypes())) {
+			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+				Join<DamageType, Spell> join = root.join("damageType", JoinType.LEFT);
+				query.distinct(true);
+				return join.in(filter.getDamageTypes());
+			});
+		}
+		if (!CollectionUtils.isEmpty(filter.getBooks())) {
+			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+				Join<Book, Spell> join = root.join("book", JoinType.INNER);
+				return join.get("source").in(filter.getBooks());
+			});
+		}
+		return spellRepository.findAll(specification, pageable).toList()
+			.stream()
+			.map(SpellApi::new)
+			.collect(Collectors.toList());
+	}
 
 	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,16 +180,13 @@ public class SpellApiController {
 			}
 			if (request.getFilter().getSchools() != null && !request.getFilter().getSchools().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
-					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools().stream().map(MagicSchool::valueOf).collect(Collectors.toList())));
+					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools()));
 			}
 			if (request.getFilter().getDamageTypes() != null && !request.getFilter().getDamageTypes().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<DamageType, Spell> join = root.join("damageType", JoinType.LEFT);
 					query.distinct(true);
-					return join.in(request.getFilter().getDamageTypes()
-						.stream()
-						.map(DamageType::valueOf)
-						.collect(Collectors.toList()));
+					return join.in(request.getFilter().getDamageTypes());
 				});
 			}
 			if (request.getFilter().getRitual() != null && !request.getFilter().getRitual().isEmpty()) {
@@ -196,7 +289,7 @@ public class SpellApiController {
 			content = @Content),
 		@ApiResponse(responseCode = "404", description = "Spell not found",
 			content = @Content)})
-	@PostMapping(value = "/api/v1/spells/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<SpellDetailApi> getSpell(@PathVariable String englishName) {
 		Spell spell = spellRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		SpellDetailApi spellApi = new SpellDetailApi(spell);

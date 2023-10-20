@@ -1,15 +1,16 @@
 package club.dnd5.portal.dto.api.spells;
 
-import java.util.List;
-
+import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.splells.MagicSchool;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Set;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -19,26 +20,26 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SpellFilter {
 	@JsonProperty("book")
-	private List<String> books;
-	
+	private Set<String> books;
+
 	@JsonProperty("level")
-	private List<Integer> levels;
+	private Set<Integer> levels;
 
-	@JsonProperty("class") 
-    private List<String> myclass;
+	@JsonProperty("class")
+    private Set<String> myclass;
 
-    @JsonProperty("school") 
-    private List<String> schools;
+    @JsonProperty("school")
+    private Set<MagicSchool> schools;
 
-    private List<String> timecast;
-    private List<String> distance;
-    private List<String> duration;
+    private Set<String> timecast;
+    private Set<String> distance;
+    private Set<String> duration;
 
-    private List<String> components;
-    private List<String> ritual;
-    private List<String> concentration;
+    private Set<String> components;
+    private Set<String> ritual;
+    private Set<String> concentration;
     @JsonProperty("damageType")
-    private List<String> damageTypes;
+    private Set<DamageType> damageTypes;
 
     private Boolean homebrew;
     private Boolean settings;

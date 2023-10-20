@@ -4,7 +4,6 @@ import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.FoundryCommon;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.model.exporter.JsonStorage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,7 +51,7 @@ public class Spell implements FoundryCommon {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	@Column(columnDefinition = "TEXT", nullable = true)
+	@Column(columnDefinition = "TEXT")
 	private String upperLevel;
 
 	private Boolean verbalComponent;
@@ -62,7 +61,7 @@ public class Spell implements FoundryCommon {
 	@Column(columnDefinition = "boolean default false")
 	private Boolean consumable;
 
-	@Column(columnDefinition = "TEXT", nullable = true)
+	@Column(columnDefinition = "TEXT")
 	private String additionalMaterialComponent;
 	private String duration;
 	private Boolean concentration;
