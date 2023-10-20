@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -46,18 +47,25 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	public List<JsonStorage> getAllJson(JsonType jsonType, Integer versionFoundry) {
 		List<JsonStorage> jsonStorageList = jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(jsonType, versionFoundry);
-		boolean isSpell = false;
-		if (JsonType.SPELL == jsonType) isSpell = true;
-		for (int i = 0; i < jsonStorageList.size(); i++) {
-			JsonStorage jsonStorage = jsonStorageList.get(i);
-			if (isSpell) {
-				jsonStorage = editSpellJson(jsonStorage.getRefId(), versionFoundry);
-			} else {
-				jsonStorage = editCreatureJson(jsonStorage.getRefId(), versionFoundry);
-			}
-			jsonStorageList.set(i, jsonStorage);
+		switch (jsonType) {
+			case CREATURE:
+				return getAllJsonCreatures(jsonStorageList, versionFoundry);
+			case SPELL:
+				return getAllJsonSpells(jsonStorageList, versionFoundry);
 		}
 		return jsonStorageList;
+	}
+
+	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, Integer versionFoundry){
+		return jsonStorageList.stream()
+			.map(element -> editSpellJson(element.getRefId(), versionFoundry))
+			.collect(Collectors.toList());
+	}
+
+	private List<JsonStorage>  getAllJsonCreatures(List<JsonStorage> jsonStorageList, Integer versionFoundry) {
+		return jsonStorageList.stream()
+			.map(element -> editCreatureJson(element.getRefId(), versionFoundry))
+			.collect(Collectors.toList());
 	}
 
 	private JsonStorage editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, Integer versionFoundry) {
