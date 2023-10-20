@@ -140,6 +140,28 @@ public class SpellApiController {
 			}
 			specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 		}
+		if (!CollectionUtils.isEmpty(filter.getComponents())) {
+			if (filter.getComponents().contains("1")) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.equal(root.get("verbalComponent"), true));
+			}
+			if (filter.getComponents().contains("2")) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.equal(root.get("somaticComponent"), true));
+			}
+			if (filter.getComponents().contains("3")) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.equal(root.get("materialComponent"), true));
+			}
+			if (filter.getComponents().contains("4")) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.equal(root.get("consumable"), true));
+			}
+			if (filter.getComponents().contains("5")) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.equal(root.get("consumable"), false));
+			}
+		}
 		if (!CollectionUtils.isEmpty(filter.getDamageTypes())) {
 			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 				Join<DamageType, Spell> join = root.join("damageType", JoinType.LEFT);
