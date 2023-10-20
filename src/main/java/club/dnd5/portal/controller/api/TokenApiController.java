@@ -1,15 +1,19 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.dto.api.PaginatedResponseApi;
+import club.dnd5.portal.dto.api.TokenApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.token.Token;
 import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
+import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Tag(name = "Токены", description = "API по токена")
 @RequiredArgsConstructor
@@ -30,28 +35,40 @@ public class TokenApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Operation(summary = "Получение и поиск токенов")
 	@GetMapping
-	public List<Token> getTokens(
-		@RequestParam(required = false) final String name,
-		@RequestParam(required = false) final String altName,
-		@RequestParam(required = false) final String englishName,
-		@RequestParam(required = false) final String type) {
+	public PaginatedResponseApi<TokenApi> getTokens(
+		@RequestParam(required = false) final String search,
+		@RequestParam(required = false, defaultValue = "false") final Boolean exact,
+		@RequestParam(required = false) final String type,
+		@RequestParam(required = false, defaultValue = "0") final Integer page,
+		@RequestParam(required = false, defaultValue = "-1") final Integer size,
+		@RequestParam(required = false) List<String> order
+	) {
 		Specification<Token> specification = null;
-		if (Objects.nonNull(name)) {
-			specification = (root, query, cb) -> cb.like(root.get("name"), "%" + name.trim() + "%");
+
+		if (Objects.nonNull(search)) {
+			specification = SpecificationUtil.getSearch(search, exact);
 		}
-		if (Objects.nonNull(altName)) {
-			specification = SpecificationUtil.getOrSpecification(
-				specification, (root, query, cb) -> cb.like(root.get("altName"), "%" + altName.trim() + "%"));
-		}
-		if (Objects.nonNull(englishName)) {
-			specification = SpecificationUtil.getOrSpecification(
-				specification, (root, query, cb) -> cb.like(root.get("englishName"), "%" + englishName.trim() + "%"));
-		}
+
 		if (Objects.nonNull(type)) {
 			specification = SpecificationUtil.getAndSpecification(
 				specification, (root, query, cb) -> cb.equal(root.get("type"), type.trim()));
 		}
-		return tokenRepository.findAll(specification);
+
+		Pageable pageable = PageAndSortUtil.getPageable(page, size, order);
+
+		List<Token> tokens = tokenRepository.findAll(specification, pageable).toList();
+
+		long total = tokenRepository.count(specification);
+
+        return new PaginatedResponseApi<>(
+			tokens
+				.stream()
+				.map(TokenApi::new)
+				.collect(Collectors.toList()),
+			total,
+			page,
+			size
+		);
 	}
 
 	@SecurityRequirement(name = "Bearer Authentication")
