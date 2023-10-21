@@ -48,6 +48,25 @@ public final class SpecificationUtil {
 		}
 	}
 
+	public static <T> Specification<T> getSearch(String search) {
+		String likeSearch = "%" + search.trim().toUpperCase() + "%";
+
+		return (root, query, cb) ->
+			cb.or(
+				cb.like(cb.upper(root.get("altName")), likeSearch),
+				cb.like(cb.upper(root.get("englishName")), likeSearch),
+				cb.like(cb.upper(root.get("name")), likeSearch)
+			);
+	}
+
+	public static <T> Specification<T> getSearch(String search, Boolean exact) {
+		if (Optional.of(exact).orElse(false)) {
+			return (root, query, cb) -> cb.equal(root.get("name"), search.trim().toUpperCase());
+		}
+
+		return getSearch(search);
+	}
+
 	public static <T> Specification<T> combineWithOr(List<Specification<T>> specifications) {
 		Specification<T> combinedSpecification = null;
 		for (Specification<T> specification : specifications) {

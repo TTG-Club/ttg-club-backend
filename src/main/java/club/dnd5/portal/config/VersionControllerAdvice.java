@@ -30,7 +30,7 @@ public class VersionControllerAdvice {
 
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals("theme_name")) {
+				if (cookie.getName().equals("ttg_theme_name")) {
 					themeName = cookie.getValue();
 				}
 			}
