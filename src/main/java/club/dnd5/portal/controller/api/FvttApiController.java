@@ -2,8 +2,6 @@ package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
-import club.dnd5.portal.dto.fvtt.export.FBeastiary;
-import club.dnd5.portal.dto.fvtt.plutonium.FBeast;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
@@ -13,7 +11,6 @@ import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.service.JsonStorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +35,10 @@ public class FvttApiController {
 	private final JsonStorageService jsonStorageService;
 
 	private final JsonStorageRepository jsonStorageRepository;
+
 	private final BestiaryRepository bestiaryRepository;
 
-	private SpellRepository spellRepository;
+	private final SpellRepository spellRepository;
 
 	@Operation(summary = "Загрузка заклинания в json в формате FVTT")
 	@GetMapping(value = "/api/fvtt/spell", produces = "application/json")
@@ -50,23 +48,21 @@ public class FvttApiController {
 	) {
 		if (id != null) {
 			JsonStorage jsonStorage = jsonStorageService.editSpellJson(id, versionFoundry);
-			HttpHeaders responseHeaders = new HttpHeaders();
-			String file = String.format("attachment; filename=\"%s.json\"", jsonStorage.getName());
-			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, file);
-			responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+			HttpHeaders responseHeaders = createResponseHeaders(jsonStorage.getName());
 			byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
 			return ResponseEntity.ok()
 				.headers(responseHeaders)
 				.body(jsonDataBytes);
 		} else {
-			List<JsonStorage> jsonStorageList = jsonStorageRepository
-				.findAllByTypeJsonAndVersionFoundry(JsonType.SPELL, versionFoundry);
-			byte[] jsonDataBytes = convertListToJson(jsonStorageList);
-
-			HttpHeaders responseHeaders = new HttpHeaders();
-			String file = String.format("attachment; filename=\"%s.json\"", "spells");
-			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, file);
-			responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			HttpHeaders responseHeaders = createResponseHeaders("spells_list");
+			List<String> spellsList = jsonStorageService.getAllJson(JsonType.SPELL, versionFoundry);
+			String jsonData = null;
+			try {
+				jsonData = new ObjectMapper().writeValueAsString(spellsList);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+			byte[] jsonDataBytes = jsonData.getBytes(StandardCharsets.UTF_8);
 			return ResponseEntity.ok()
 				.headers(responseHeaders)
 				.body(jsonDataBytes);
@@ -88,7 +84,7 @@ public class FvttApiController {
 				.body(jsonDataBytes);
 		} else {
 			HttpHeaders responseHeaders = createResponseHeaders("creature_list");
-			List<JsonStorage> bestiaryList = jsonStorageService.getAllJson(JsonType.CREATURE, versionFoundry);
+			List<String> bestiaryList = jsonStorageService.getAllJson(JsonType.CREATURE, versionFoundry);
 			String jsonData = null;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(bestiaryList);
@@ -102,7 +98,7 @@ public class FvttApiController {
 		}
 	}
 
-
+	@Deprecated
 	@Operation(summary = "Список заклинаний в json в формате FVTT")
 	@CrossOrigin
 	@GetMapping(value = "/api/fvtt/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -125,6 +121,7 @@ public class FvttApiController {
 		);
 	}
 
+	@Deprecated
 	@Operation(summary = "Список SRD заклинаний")
 	@CrossOrigin
 	@GetMapping(value = "/api/fvtt/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -137,35 +134,6 @@ public class FvttApiController {
 		);
 	}
 
-	@Operation(summary = "Загрузка всех существ в json в формате FVTT")
-	@CrossOrigin
-	@GetMapping("/api/fvtt/v1/bestiary")
-	public FBeastiary getCreatures() {
-		List<FBeast> list = bestiaryRepository.findAll()
-			.stream()
-			.map(FBeast::new)
-			.collect(Collectors.toList());
-		return new FBeastiary(list);
-	}
-
-	private byte[] convertListToJson(List<JsonStorage> jsonStorageList) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		try {
-			return objectMapper.writeValueAsBytes(jsonStorageList);
-		} catch (JsonProcessingException e) {
-			return new byte[0];
-		}
-	}
-
-	private byte[] serializeToJson(Object object) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		try {
-			return objectMapper.writeValueAsBytes(object);
-		} catch (Exception e) {
-			return new byte[0];
-		}
-	}
-
 	private HttpHeaders createResponseHeaders(String filename) {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		String file = String.format("attachment; filename=\"%s.json\"", filename);
@@ -173,6 +141,4 @@ public class FvttApiController {
 		responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 		return responseHeaders;
 	}
-
-
 }

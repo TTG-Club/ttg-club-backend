@@ -28,8 +28,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -49,7 +47,6 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private final String srcType = "вид сверху";
 
-	//вернуться стринг
 	public List<String> getAllJson(JsonType jsonType, Integer versionFoundry) {
 		List<JsonStorage> jsonStorageList = jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(jsonType, versionFoundry);
 		if (jsonStorageList.isEmpty()) {
@@ -58,11 +55,13 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		switch (jsonType) {
 			case CREATURE:
 				jsonStorageList = getAllJsonCreatures(jsonStorageList, versionFoundry);
+				break;
 			case SPELL:
 				jsonStorageList = getAllJsonSpells(jsonStorageList, versionFoundry);
+				break;
 		}
 		List<String> listFoundryCommon = new ArrayList<>();
-		 jsonStorageList.stream()
+		jsonStorageList.stream()
 			.map(element -> listFoundryCommon.add(element.getJsonData()))
 			.collect(Collectors.toList());
 		return listFoundryCommon;
@@ -88,9 +87,13 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		try {
 			JsonNode rootNode = mapper.readTree(jsonStorage.getJsonData());
 			modifyName(entity, rootNode);
-			modifyBiography(entity, rootNode);
+			if (versionFoundry != 10) {
+				modifyBiography(entity, rootNode);
+			}
 			if (jsonStorage.getTypeJson().equals(JsonType.CREATURE)) {
-				modifyImgCreature(jsonStorage.getRefId(), rootNode);
+				if (versionFoundry != 10) {
+					modifyImgCreature(jsonStorage.getRefId(), rootNode);
+				}
 			} else {
 				modifyImgSpell(jsonStorage.getRefId(), rootNode);
 			}
@@ -153,14 +156,16 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		}
 		Optional<Token> srcToken = tokenRepository.findByRefIdAndType(creatureId, srcType).stream().findFirst();
 		ObjectNode prototypeNode = (ObjectNode) rootNode.get("prototypeToken");
-		ObjectNode textureNode = prototypeNode.with("texture");
-		if (srcToken.isPresent()) {
-			textureNode.put("src", srcToken.get().getUrl());
-		} else {
-			if (imgToken.isPresent()) {
-				textureNode.put("src", imgToken.get().getUrl());
+		if (prototypeNode != null) {
+			ObjectNode textureNode = prototypeNode.with("texture");
+			if (srcToken.isPresent()) {
+				textureNode.put("src", srcToken.get().getUrl());
 			} else {
-				textureNode.put("src", imgFiveETools);
+				if (imgToken.isPresent()) {
+					textureNode.put("src", imgToken.get().getUrl());
+				} else {
+					textureNode.put("src", imgFiveETools);
+				}
 			}
 		}
 	}

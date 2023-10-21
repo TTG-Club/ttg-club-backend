@@ -4,8 +4,8 @@ import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.model.user.Role;
+import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.JsonStorageRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
@@ -37,7 +37,7 @@ public class JsonParseController {
 
 	@PostMapping(value = "/api/v1/fspell")
 	public void importSpells(@RequestBody List<JsonNode> request, @RequestParam Integer versionFoundry) {
-//		checkUserPermissions();
+		checkUserPermissions();
 		jsonStorageRepository.saveAll(
 			request.stream()
 				.map(jsonNode -> processJsonNode(jsonNode, JsonType.SPELL, versionFoundry))
@@ -48,7 +48,7 @@ public class JsonParseController {
 
 	@PostMapping(value = "/api/v1/fcreature")
 	public void importCreature(@RequestBody List<JsonNode> request, @RequestParam Integer versionFoundry) {
-//		checkUserPermissions();
+		checkUserPermissions();
 		if (versionFoundry == 10) {
 			JsonNode nodeCreature = request.get(0).get("monster");
 			List<JsonStorage> processedDataList = StreamSupport.stream(nodeCreature.spliterator(), false)
