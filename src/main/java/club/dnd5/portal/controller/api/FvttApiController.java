@@ -18,10 +18,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -30,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Tag(name = "Foundry", description = "API для экспорта в Foundry")
 @RestController
+@RequestMapping(value = "/api/fvtt")
 public class FvttApiController {
 
 	private final JsonStorageService jsonStorageService;
@@ -41,13 +39,13 @@ public class FvttApiController {
 	private final SpellRepository spellRepository;
 
 	@Operation(summary = "Загрузка заклинания в json в формате FVTT")
-	@GetMapping(value = "/api/fvtt/spell", produces = "application/json")
+	@GetMapping(value = "/spell", produces = "application/json")
 	public ResponseEntity<byte[]> getSpellsFvtt(
 		@RequestParam(required = false) Integer id,
-		@RequestParam(required = false, defaultValue = "11") Integer versionFoundry
+		@RequestParam(required = false, defaultValue = "11") Integer version
 	) {
 		if (id != null) {
-			JsonStorage jsonStorage = jsonStorageService.editSpellJson(id, versionFoundry);
+			JsonStorage jsonStorage = jsonStorageService.editSpellJson(id, version);
 			HttpHeaders responseHeaders = createResponseHeaders(jsonStorage.getName());
 			byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
 			return ResponseEntity.ok()
@@ -55,7 +53,7 @@ public class FvttApiController {
 				.body(jsonDataBytes);
 		} else {
 			HttpHeaders responseHeaders = createResponseHeaders("spells_list");
-			List<String> spellsList = jsonStorageService.getAllJson(JsonType.SPELL, versionFoundry);
+			List<String> spellsList = jsonStorageService.getAllJson(JsonType.SPELL, version);
 			String jsonData = null;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(spellsList);
@@ -70,13 +68,13 @@ public class FvttApiController {
 	}
 
 	@Operation(summary = "Загрузка существа в json в формате FVTT")
-	@GetMapping(value = "/api/fvtt/bestiary", produces = "application/json")
+	@GetMapping(value = "/bestiary", produces = "application/json")
 	public ResponseEntity<byte[]> getCreatureFvtt(
 		@RequestParam(required = false) Integer id,
-		@RequestParam(required = false, defaultValue = "11") Integer versionFoundry
+		@RequestParam(required = false, defaultValue = "11") Integer version
 	) {
 		if (id != null) {
-			JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, versionFoundry);
+			JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, version);
 			HttpHeaders responseHeaders = createResponseHeaders(jsonStorage.getName());
 			byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
 			return ResponseEntity.ok()
@@ -84,7 +82,7 @@ public class FvttApiController {
 				.body(jsonDataBytes);
 		} else {
 			HttpHeaders responseHeaders = createResponseHeaders("creature_list");
-			List<String> bestiaryList = jsonStorageService.getAllJson(JsonType.CREATURE, versionFoundry);
+			List<String> bestiaryList = jsonStorageService.getAllJson(JsonType.CREATURE, version);
 			String jsonData = null;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(bestiaryList);
@@ -101,7 +99,7 @@ public class FvttApiController {
 	@Deprecated
 	@Operation(summary = "Список заклинаний в json в формате FVTT")
 	@CrossOrigin
-	@GetMapping(value = "/api/fvtt/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSpells(String search, String exact) {
 		Specification<Spell> specification = null;
 		if (search != null) {
@@ -124,7 +122,7 @@ public class FvttApiController {
 	@Deprecated
 	@Operation(summary = "Список SRD заклинаний")
 	@CrossOrigin
-	@GetMapping(value = "/api/fvtt/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSrdSpells() {
 		Specification<Spell> specification = (root, query, cb) -> cb.isNotNull(root.get("srd"));
 		return new SpellsFvtt(spellRepository.findAll(specification)
