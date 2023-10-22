@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Tag(name = "Foundry", description = "API для экспорта в Foundry")
 @RestController
-@RequestMapping(value = "/api/fvtt/v1")
+@RequestMapping(value = "/api/v1/fvtt")
 public class FvttApiController {
 
 	private final JsonStorageService jsonStorageService;
