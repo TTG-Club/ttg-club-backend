@@ -20,8 +20,8 @@ import java.util.List;
 public class RequestApi {
 	@Schema(description = "page number", defaultValue = "0")
     public Integer page;
-	@Schema(description = "limit on one page", defaultValue = "10")
-    public Integer limit = -1;
+	@Schema(description = "page size", defaultValue = "10")
+    public Integer size = -1;
 	@Schema(description = "the search object", defaultValue = "null")
     public SearchRequest search;
 

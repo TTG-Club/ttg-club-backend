@@ -2,7 +2,6 @@ package club.dnd5.portal.repository;
 
 import club.dnd5.portal.dto.api.SearchApi;
 import club.dnd5.portal.dto.api.SourceApi;
-import club.dnd5.portal.model.book.Book;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Repository;
@@ -27,7 +26,7 @@ public class SearchRepository {
 		return ((BigInteger) query.getSingleResult()).longValue();
 	}
 
-	public List<SearchApi> search(String searchText, Integer page, Integer limit) {
+	public List<SearchApi> search(String searchText, Integer page, Integer size) {
 		Query query = entityManager.createNativeQuery(
 			"SELECT fts.name, fts.english_name, fts.section, fts.url, fts.description, b.source, b.type, b.name book_name " +
 				    "FROM full_text_search fts " +
@@ -36,13 +35,13 @@ public class SearchRepository {
 				    "ORDER BY LENGTH(fts.name)");
 		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
 
-		if (limit != null) {
-			query.setMaxResults(limit);
+		if (size != null) {
+			query.setMaxResults(size);
 		} else {
-			limit = 10;
+			size = 10;
 		}
 		if (page != null) {
-			query.setFirstResult(page * limit);
+			query.setFirstResult(page * size);
 		}
 		List<Object[]> result = query.getResultList();
 		return result.stream().map(row -> new SearchApi(row[0], row[1], row[2], row[3], shortDescription(row[4]),

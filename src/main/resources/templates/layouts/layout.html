@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ru" th:data-theme="'theme-' + ${themeName}">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru" th:class="${themeName}">
 <head>
   <meta name="build-sha" th:content="${version}">
   <meta th:unless="${profile eq 'prod'}" name="build-type" th:content="${profile}">
