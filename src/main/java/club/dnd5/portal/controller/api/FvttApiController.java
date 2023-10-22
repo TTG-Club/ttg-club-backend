@@ -123,7 +123,7 @@ public class FvttApiController {
 	@Deprecated
 	@Operation(summary = "Список SRD заклинаний")
 	@CrossOrigin
-	@GetMapping(value = "/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSrdSpells() {
 		Specification<Spell> specification = (root, query, cb) -> cb.isNotNull(root.get("srd"));
 		return new SpellsFvtt(spellRepository.findAll(specification)
