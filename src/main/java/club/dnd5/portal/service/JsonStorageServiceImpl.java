@@ -69,18 +69,18 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, Integer versionFoundry){
 		return jsonStorageList.stream()
-			.map(element -> editSpellJson(element.getRefId(), versionFoundry))
+			.map(element -> editSpellJson(element.getRefId(), versionFoundry).get())
 			.collect(Collectors.toList());
 	}
 
 	private List<JsonStorage>  getAllJsonCreatures(List<JsonStorage> jsonStorageList, Integer versionFoundry) {
 		return jsonStorageList.stream()
-			.map(element -> editCreatureJson(element.getRefId(), versionFoundry))
+			.map(element -> editCreatureJson(element.getRefId(), versionFoundry).get())
 			.collect(Collectors.toList());
 	}
 
 	@SneakyThrows
-	private JsonStorage editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, Integer versionFoundry) {
+	private Optional<JsonStorage> editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, Integer versionFoundry) {
 		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType, versionFoundry);
 		JsonStorage jsonStorage = jsonStorageRepository.findById(compositeKey).orElseThrow(PageNotFoundException::new);
 		ObjectMapper mapper = new ObjectMapper();
@@ -100,16 +100,16 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 			jsonStorage.setJsonData(mapper.writeValueAsString(rootNode));
 		} catch (IOException e) {
 			e.printStackTrace();
-			return jsonStorage;
+			return Optional.ofNullable(jsonStorage);
 		}
-		return jsonStorage;
+		return Optional.ofNullable(jsonStorage);
 	}
 
-	public JsonStorage editSpellJson(Integer id, Integer versionFoundry) {
+	public Optional<JsonStorage> editSpellJson(Integer id, Integer versionFoundry) {
 		return editJsonEntity(id, JsonType.SPELL, spellRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 
-	public JsonStorage editCreatureJson(Integer id, Integer versionFoundry) {
+	public Optional<JsonStorage> editCreatureJson(Integer id, Integer versionFoundry) {
 		return editJsonEntity(id, JsonType.CREATURE, bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 

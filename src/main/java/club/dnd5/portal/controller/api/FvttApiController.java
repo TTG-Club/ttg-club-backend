@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -44,8 +45,8 @@ public class FvttApiController {
 		@RequestParam(required = false) Integer id,
 		@RequestParam(required = false, defaultValue = "11") Integer version
 	) {
-		if (id != null) {
-			JsonStorage jsonStorage = jsonStorageService.editSpellJson(id, version);
+		if (Objects.nonNull(id)) {
+			JsonStorage jsonStorage = jsonStorageService.editSpellJson(id, version).get();
 			HttpHeaders responseHeaders = createResponseHeaders(jsonStorage.getName());
 			byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
 			return ResponseEntity.ok()
@@ -73,8 +74,8 @@ public class FvttApiController {
 		@RequestParam(required = false) Integer id,
 		@RequestParam(required = false, defaultValue = "11") Integer version
 	) {
-		if (id != null) {
-			JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, version);
+		if (Objects.nonNull(id)) {
+			JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, version).get();
 			HttpHeaders responseHeaders = createResponseHeaders(jsonStorage.getName());
 			byte[] jsonDataBytes = jsonStorage.getJsonData().getBytes(StandardCharsets.UTF_8);
 			return ResponseEntity.ok()
