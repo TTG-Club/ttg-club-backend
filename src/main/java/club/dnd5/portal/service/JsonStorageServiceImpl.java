@@ -16,13 +16,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -43,44 +47,83 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private final String srcType = "вид сверху";
 
-	private JsonStorage editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity) {
-		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType);
+	public List<String> getAllJson(JsonType jsonType, Integer versionFoundry) {
+		List<JsonStorage> jsonStorageList = jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(jsonType, versionFoundry);
+		if (jsonStorageList.isEmpty()) {
+			throw new PageNotFoundException();
+		}
+		switch (jsonType) {
+			case CREATURE:
+				jsonStorageList = getAllJsonCreatures(jsonStorageList, versionFoundry);
+				break;
+			case SPELL:
+				jsonStorageList = getAllJsonSpells(jsonStorageList, versionFoundry);
+				break;
+		}
+		List<String> listFoundryCommon = new ArrayList<>();
+		jsonStorageList.stream()
+			.map(element -> listFoundryCommon.add(element.getJsonData()))
+			.collect(Collectors.toList());
+		return listFoundryCommon;
+	}
+
+	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, Integer versionFoundry){
+		return jsonStorageList.stream()
+			.map(element -> editSpellJson(element.getRefId(), versionFoundry).get())
+			.collect(Collectors.toList());
+	}
+
+	private List<JsonStorage>  getAllJsonCreatures(List<JsonStorage> jsonStorageList, Integer versionFoundry) {
+		return jsonStorageList.stream()
+			.map(element -> editCreatureJson(element.getRefId(), versionFoundry).get())
+			.collect(Collectors.toList());
+	}
+
+	@SneakyThrows
+	private Optional<JsonStorage> editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, Integer versionFoundry) {
+		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType, versionFoundry);
 		JsonStorage jsonStorage = jsonStorageRepository.findById(compositeKey).orElseThrow(PageNotFoundException::new);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			JsonNode rootNode = mapper.readTree(jsonStorage.getJsonData());
 			modifyName(entity, rootNode);
-			modifyBiography(entity, rootNode);
+			if (versionFoundry != 10) {
+				modifyBiography(entity, rootNode);
+			}
 			if (jsonStorage.getTypeJson().equals(JsonType.CREATURE)) {
-				modifyImgCreature(jsonStorage.getRefId(), rootNode);
+				if (versionFoundry != 10) {
+					modifyImgCreature(jsonStorage.getRefId(), rootNode);
+				}
 			} else {
 				modifyImgSpell(jsonStorage.getRefId(), rootNode);
 			}
 			jsonStorage.setJsonData(mapper.writeValueAsString(rootNode));
 		} catch (IOException e) {
 			e.printStackTrace();
-			return jsonStorage;
+			return Optional.ofNullable(jsonStorage);
 		}
-		return jsonStorage;
+		return Optional.ofNullable(jsonStorage);
 	}
 
-	public JsonStorage editSpellJson(Integer id) {
-		return editJsonEntity(id, JsonType.SPELL, spellRepository.findById(id).orElseThrow(PageNotFoundException::new));
+	public Optional<JsonStorage> editSpellJson(Integer id, Integer versionFoundry) {
+		return editJsonEntity(id, JsonType.SPELL, spellRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 
-	public JsonStorage editCreatureJson(Integer id) {
-		return editJsonEntity(id, JsonType.CREATURE, bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new));
+	public Optional<JsonStorage> editCreatureJson(Integer id, Integer versionFoundry) {
+		return editJsonEntity(id, JsonType.CREATURE, bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 
 	private void modifyBiography(FoundryCommon entity, JsonNode rootNode) {
 		String description = entity.getDescription();
 		ObjectNode systemNode = (ObjectNode) rootNode.get("system");
-		ObjectNode detailsNode = systemNode.with("details");
-		detailsNode.remove("biography");
+		if (systemNode != null) {
+			ObjectNode detailsNode = systemNode.with("details");
+			detailsNode.remove("biography");
 
-		ObjectNode biographyNode = detailsNode.with("biography");
-		biographyNode.put("value", description);
-		biographyNode.put("public", "");
+			ObjectNode biographyNode = detailsNode.with("biography");
+			biographyNode.put("value", description);
+			biographyNode.put("public", "");
+		}
 	}
 
 	private void modifyName(FoundryCommon entity, JsonNode rootNode) {
@@ -113,14 +156,16 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		}
 		Optional<Token> srcToken = tokenRepository.findByRefIdAndType(creatureId, srcType).stream().findFirst();
 		ObjectNode prototypeNode = (ObjectNode) rootNode.get("prototypeToken");
-		ObjectNode textureNode = prototypeNode.with("texture");
-		if (srcToken.isPresent()) {
-			textureNode.put("src", srcToken.get().getUrl());
-		} else {
-			if (imgToken.isPresent()) {
-				textureNode.put("src", imgToken.get().getUrl());
+		if (prototypeNode != null) {
+			ObjectNode textureNode = prototypeNode.with("texture");
+			if (srcToken.isPresent()) {
+				textureNode.put("src", srcToken.get().getUrl());
 			} else {
-				textureNode.put("src", imgFiveETools);
+				if (imgToken.isPresent()) {
+					textureNode.put("src", imgToken.get().getUrl());
+				} else {
+					textureNode.put("src", imgFiveETools);
+				}
 			}
 		}
 	}
