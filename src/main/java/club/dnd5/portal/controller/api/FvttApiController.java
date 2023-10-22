@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Tag(name = "Foundry", description = "API для экспорта в Foundry")
 @RestController
-@RequestMapping(value = "/api/fvtt")
+@RequestMapping(value = "/api/fvtt/v1")
 public class FvttApiController {
 
 	private final JsonStorageService jsonStorageService;
@@ -100,7 +100,7 @@ public class FvttApiController {
 	@Deprecated
 	@Operation(summary = "Список заклинаний в json в формате FVTT")
 	@CrossOrigin
-	@GetMapping(value = "/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSpells(String search, String exact) {
 		Specification<Spell> specification = null;
 		if (search != null) {
