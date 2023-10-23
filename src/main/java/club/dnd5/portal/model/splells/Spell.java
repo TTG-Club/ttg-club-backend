@@ -1,8 +1,10 @@
 package club.dnd5.portal.model.splells;
 
 import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.FoundryCommon;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.model.exporter.JsonStorage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +21,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "spells")
-public class Spell {
+public class Spell implements FoundryCommon {
 	public static final int MAX_LEVEL = 9;
 
 	@Id
@@ -77,19 +79,17 @@ public class Spell {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
 	private Short page;
 	private Boolean srd;
 
-	public String getFullName() {
-		return name.toLowerCase() + " [" + englishName.toLowerCase() +"]";
-	}
+	/**
+	 * Иконка для FVTT (относительный путь)
+	 */
+	private String img;
 
 	public String getComponents() {
 		return (verbalComponent ? "В" : "") + (somaticComponent ? "C" : "") + (materialComponent ? "М" : "");
-	}
-
-	public String getTimesDescription() {
-		return "";
 	}
 
 	public String getUrlName() {

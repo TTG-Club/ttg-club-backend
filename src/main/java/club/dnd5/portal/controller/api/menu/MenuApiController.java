@@ -2,6 +2,7 @@ package club.dnd5.portal.controller.api.menu;
 
 import club.dnd5.portal.dto.api.menu.MenuApi;
 import club.dnd5.portal.repository.MenuRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,12 +15,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Menu", description = "The Menu API")
+@Tag(name = "Меню сайта", description = "The Menu API")
 @RestController
 @RequestMapping("/api/v1/menu")
 public class MenuApiController {
 	private final MenuRepository menuRepository;
 
+	@Operation(summary = "Получение списка элементов меню")
 	@GetMapping
 	@ResponseStatus(code = HttpStatus.OK)
 	public List<MenuApi> getMenu() {

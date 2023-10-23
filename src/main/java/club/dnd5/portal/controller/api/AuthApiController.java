@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Tag(name = "User", description = "The User API")
+@Tag(name = "Авторизация и регистрация", description = "The User API")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthApiController {

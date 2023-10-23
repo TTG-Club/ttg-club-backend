@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 import java.util.Random;
 
+import static club.dnd5.portal.model.creature.HabitatType.*;
+
+@Tag(name = "Утилиты", description = "API по случайным столкновениям")
 @RequiredArgsConstructor
-@Tag(name = "Tools", description = "The Tools API")
 @RestController
 public class RandomEncounterApiController {
 	public static final Random rnd = new Random();
@@ -32,22 +34,22 @@ public class RandomEncounterApiController {
 
 	@GetMapping("/api/v1/tools/encounters")
 	public RandomEncounterInputApi getItems() {
-		return new RandomEncounterInputApi(HabitatType.types());
+		return new RandomEncounterInputApi(types());
 	}
 
 	@PostMapping("/api/v1/tools/encounters")
-	public ResponseEntity<RandomEncounterApi> getItems(@RequestBody RequestRandomEncounterApi reques) {
-		if (reques.getLevel() == null) {
-			reques.setLevel(Dice.d4.roll());
+	public ResponseEntity<RandomEncounterApi> getItems(@RequestBody RequestRandomEncounterApi request) {
+		if (request.getLevel() == null) {
+			request.setLevel(Dice.d4.roll());
 		}
 		HabitatType enviroment;
-		if (reques.getEnvironment() == null) {
-			HabitatType[] enviroments = HabitatType.types().toArray(new HabitatType[HabitatType.types().size()]);
-			enviroment = enviroments[rnd.nextInt(enviroments.length)];
+		if (request.getEnvironment() == null) {
+			HabitatType[] habitatTypes = types().toArray(new HabitatType[types().size()]);
+			enviroment = habitatTypes[rnd.nextInt(habitatTypes.length)];
 		} else {
-			enviroment = HabitatType.valueOf(reques.getEnvironment());
+			enviroment = valueOf(request.getEnvironment());
 		}
-		Optional<RandomEncounterRow> encounter = repository.findOne(Dice.d100.roll(), reques.getLevel(), enviroment);
+		Optional<RandomEncounterRow> encounter = repository.findOne(Dice.d100.roll(), request.getLevel(), enviroment);
 		if (encounter.isPresent()) {
 			return ResponseEntity.ok(new RandomEncounterApi(encounter.get()));
 		} else {
@@ -58,9 +60,9 @@ public class RandomEncounterApiController {
 	}
 
 	@PostMapping("/api/v1/tools/encounters/table")
-	public ResponseEntity<RandomEncounterTableApi> getTable(@RequestBody RequestRandomEncounterApi reques) {
-		Optional<RandomEncounterTable> table = repoTable.findByLevelAndType(reques.getLevel(),
-				HabitatType.valueOf(reques.getEnvironment()));
+	public ResponseEntity<RandomEncounterTableApi> getTable(@RequestBody RequestRandomEncounterApi request) {
+		Optional<RandomEncounterTable> table = repoTable.findByLevelAndType(request.getLevel(),
+				valueOf(request.getEnvironment()));
 		if (table.isPresent()) {
 			RandomEncounterTableApi raTable = new RandomEncounterTableApi(table.get());
 			return ResponseEntity.ok(raTable);

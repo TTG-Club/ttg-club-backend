@@ -12,6 +12,7 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 public class ArmorApiController {
 	private final ArmorRepository armorRepository;
 
+	@Operation(summary = "Получение краткого списка доспехов")
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ArmorApi> getItem(@RequestBody ArmorRequestApi request) {
 		Specification<Armor> specification = null;
@@ -57,6 +59,7 @@ public class ArmorApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Получение доспеха по английскому имени")
 	@PostMapping(value = "/api/v1/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ArmorDetailApi getOption(@PathVariable String englishName) {
 		return new ArmorDetailApi(armorRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new));

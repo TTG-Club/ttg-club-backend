@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Tag(name = "Rule", description = "The Rule API")
+@Tag(name = "Правила", description = "API по терминам и правилам")
 @RequiredArgsConstructor
 @RestController
 public class RuleApiController {

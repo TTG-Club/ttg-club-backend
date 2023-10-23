@@ -8,8 +8,6 @@ import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
-import club.dnd5.portal.dto.api.spells.SpellFvtt;
-import club.dnd5.portal.dto.api.spells.SpellsFvtt;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.TimeUnit;
@@ -24,6 +22,7 @@ import club.dnd5.portal.model.splells.TimeCast;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
+import club.dnd5.portal.service.JsonStorageService;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,12 +31,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -45,25 +47,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Tag(name = "Spell", description = "The Spell API")
+@Tag(name = "Заклинания", description = "API по заклинаниям")
+@RequiredArgsConstructor
 @RestController
 public class SpellApiController {
-	private static final String[][] classesMap = { { "1", "Бард" }, { "2", "Волшебник" }, { "3", "Друид" },
-			{ "4", "Жрец" }, { "5", "Колдун" }, { "6", "Паладин" }, { "7", "Следопыт" }, { "8", "Чародей" },
-			{ "14", "Изобретатель" } };
+	private static final String[][] classesMap = {{"1", "Бард"}, {"2", "Волшебник"}, {"3", "Друид"},
+		{"4", "Жрец"}, {"5", "Колдун"}, {"6", "Паладин"}, {"7", "Следопыт"}, {"8", "Чародей"},
+		{"14", "Изобретатель"}};
 
-	@Autowired
-	private SpellRepository spellRepository;
-	@Autowired
-	private ClassRepository classRepository;
-	@Autowired
-	private ArchetypeSpellRepository archetypeSpellRepository;
+	private final SpellRepository spellRepository;
+	private final ClassRepository classRepository;
+	private final ArchetypeSpellRepository archetypeSpellRepository;
 
-	@Operation(summary = "Список заклинаний")
+	private final JsonStorageService jsonStorageService;
+
+	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<SpellApi> getSpells(@RequestBody SpellRequestApi request) {
 		Specification<Spell> specification = null;
-		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
+		Optional<RequestApi> optionalRequest = Optional.of(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}
@@ -78,7 +80,7 @@ public class SpellApiController {
 					return cb.and(join.get("id").in(request.getFilter().getMyclass()));
 				});
 			}
-			if (request.getFilter().getSchools()!= null && !request.getFilter().getSchools().isEmpty()) {
+			if (request.getFilter().getSchools() != null && !request.getFilter().getSchools().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
 					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools().stream().map(MagicSchool::valueOf).collect(Collectors.toList())));
 			}
@@ -93,64 +95,71 @@ public class SpellApiController {
 				});
 			}
 			if (request.getFilter().getRitual() != null && !request.getFilter().getRitual().isEmpty()) {
-				if(request.getFilter().getRitual().contains("yes")) {
+				if (request.getFilter().getRitual().contains("yes")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("ritual"), true));
+						(root, query, cb) -> cb.equal(root.get("ritual"), true));
 				}
-				if(request.getFilter().getRitual().contains("no")) {
+				if (request.getFilter().getRitual().contains("no")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("ritual"), false));
+						(root, query, cb) -> cb.equal(root.get("ritual"), false));
 				}
 			}
-			if (request.getFilter().getConcentration()!=null && !request.getFilter().getConcentration().isEmpty()) {
-				if(request.getFilter().getConcentration().contains("yes")) {
+			if (request.getFilter().getConcentration() != null && !request.getFilter().getConcentration().isEmpty()) {
+				if (request.getFilter().getConcentration().contains("yes")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("concentration"), true));
+						(root, query, cb) -> cb.equal(root.get("concentration"), true));
 				}
-				if(request.getFilter().getConcentration().contains("no")) {
+				if (request.getFilter().getConcentration().contains("no")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("concentration"), false));
+						(root, query, cb) -> cb.equal(root.get("concentration"), false));
 				}
 			}
 			if (request.getFilter().getComponents() != null && !request.getFilter().getComponents().isEmpty()) {
 				if (request.getFilter().getComponents().contains("1")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("verbalComponent"), true));
+						(root, query, cb) -> cb.equal(root.get("verbalComponent"), true));
 				}
 				if (request.getFilter().getComponents().contains("2")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("somaticComponent"), true));
+						(root, query, cb) -> cb.equal(root.get("somaticComponent"), true));
 				}
 				if (request.getFilter().getComponents().contains("3")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("materialComponent"), true));
+						(root, query, cb) -> cb.equal(root.get("materialComponent"), true));
 				}
 				if (request.getFilter().getComponents().contains("4")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("consumable"), true));
+						(root, query, cb) -> cb.equal(root.get("consumable"), true));
 				}
 				if (request.getFilter().getComponents().contains("5")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-							(root, query, cb) -> cb.equal(root.get("consumable"), false));
+						(root, query, cb) -> cb.equal(root.get("consumable"), false));
 				}
 			}
 			if (request.getFilter().getTimecast() != null && !request.getFilter().getTimecast().isEmpty()) {
+				List<Specification<Spell>> timecastSpecifications = new ArrayList<>();
 				for (String timecast : request.getFilter().getTimecast()) {
 					String[] parts = timecast.split("\\s");
 					int time = Integer.parseInt(parts[0]);
 					TimeUnit unit = TimeUnit.valueOf(parts[1]);
-					specification = SpecificationUtil.getOrSpecification(specification, (root, query, cb) -> {
+					Specification<Spell> timecastSpecification = (root, query, cb) -> {
 						Join<TimeCast, Spell> join = root.join("times", JoinType.INNER);
 						query.distinct(true);
-						return cb.and(cb.equal(join.get("number"), time), cb.equal(join.get("unit"), unit));
-					});
+						return cb.and(
+							cb.equal(join.get("number"), time),
+							cb.equal(join.get("unit"), unit)
+						);
+					};
+					timecastSpecifications.add(timecastSpecification);
 				}
+				Specification<Spell> combinedSpecification = SpecificationUtil.combineWithOr(timecastSpecifications);
+				specification = SpecificationUtil.getAndSpecification(specification, combinedSpecification);
 			}
 			if (request.getFilter().getDistance() != null && !request.getFilter().getDistance().isEmpty()) {
 				Specification<Spell> addSpec = null;
-				for (String distance : request.getFilter().getDistance()) {
+				for (String distance : request.getFilter().getDuration()) {
 					addSpec = SpecificationUtil.getOrSpecification(addSpec,
-							(root, query, cb) -> cb.like(root.get("distance"), "%" + distance + "%"));
+							(root, query, cb) -> cb.like(root.get("duration"), "%" + distance + "%"));
 				}
 				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 			}
@@ -158,7 +167,7 @@ public class SpellApiController {
 				Specification<Spell> addSpec = null;
 				for (String distance : request.getFilter().getDuration()) {
 					addSpec = SpecificationUtil.getOrSpecification(addSpec,
-							(root, query, cb) -> cb.like(root.get("duration"), "%" + distance + "%"));
+						(root, query, cb) -> cb.like(root.get("duration"), "%" + distance + "%"));
 				}
 				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 			}
@@ -178,13 +187,13 @@ public class SpellApiController {
 
 	@Operation(summary = "Получение заклинания по английскому названию")
 	@ApiResponses(value = {
-		  @ApiResponse(responseCode = "200", description = "Found the spell",
-		    content = { @Content(mediaType = "application/json",
-		      schema = @Schema(implementation = SpellDetailApi.class)) }),
-		  @ApiResponse(responseCode = "400", description = "Invalid id supplied",
-		    content = @Content),
-		  @ApiResponse(responseCode = "404", description = "Spell not found",
-		    content = @Content) })
+		@ApiResponse(responseCode = "200", description = "Found the spell",
+			content = {@Content(mediaType = "application/json",
+				schema = @Schema(implementation = SpellDetailApi.class))}),
+		@ApiResponse(responseCode = "400", description = "Invalid id supplied",
+			content = @Content),
+		@ApiResponse(responseCode = "404", description = "Spell not found",
+			content = @Content)})
 	@PostMapping(value = "/api/v1/spells/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<SpellDetailApi> getSpell(@PathVariable String englishName) {
 		Spell spell = spellRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
@@ -200,41 +209,7 @@ public class SpellApiController {
 		return ResponseEntity.ok(spellApi);
 	}
 
-	@Operation(summary = "Список заклинаний")
-	@CrossOrigin
-	@GetMapping(value = "/api/fvtt/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
-	public SpellsFvtt getSpells(String search, String exact){
-		Specification<Spell> specification = null;
-		if (search != null) {
-			if (exact != null) {
-				specification = (root, query, cb) -> cb.equal(root.get("name"), search.trim().toUpperCase());
-			} else {
-				String likeSearch = "%" + search + "%";
-				specification =  (root, query, cb) -> cb.or(cb.like(root.get("altName"), likeSearch),
-					cb.like(root.get("englishName"), likeSearch),
-					cb.like(root.get("name"), likeSearch));
-			}
-		}
-		return new SpellsFvtt(spellRepository.findAll(specification)
-			.stream()
-			.map(SpellFvtt::new)
-			.collect(Collectors.toList())
-		);
-	}
-
-	@Operation(summary = "Список SRD заклинаний")
-	@CrossOrigin
-	@GetMapping(value = "/api/fvtt/v1/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
-	public SpellsFvtt getSrdSpells(){
-		Specification<Spell> specification = (root, query, cb) -> cb.isNotNull(root.get("srd"));
-		return new SpellsFvtt(spellRepository.findAll(specification)
-			.stream()
-			.map(SpellFvtt::new)
-			.collect(Collectors.toList())
-		);
-	}
-
-	@Operation(summary = "Gets spells filter", tags = "spells")
+	@Operation(summary = "Фильтры для заклинаний")
 	@PostMapping("/api/v1/filters/spells")
 	public FilterApi getFilter() {
 		FilterApi filters = new FilterApi();
@@ -244,8 +219,8 @@ public class SpellApiController {
 			if (!books.isEmpty()) {
 				FilterApi filter = new FilterApi(typeBook.getName(), typeBook.name());
 				filter.setValues(books.stream()
-						.map(book -> new FilterValueApi(book.getSource(), book.getSource(),	Boolean.TRUE, book.getName()))
-						.collect(Collectors.toList()));
+					.map(book -> new FilterValueApi(book.getSource(), book.getSource(), Boolean.TRUE, book.getName()))
+					.collect(Collectors.toList()));
 				sources.add(filter);
 			}
 		}
@@ -257,15 +232,15 @@ public class SpellApiController {
 
 		FilterApi spellClassFilter = new FilterApi("Классы", "class");
 		spellClassFilter.setValues(IntStream.range(0, classesMap.length)
-				 .mapToObj(indexSpellClass -> new FilterValueApi(classesMap[indexSpellClass][1], classesMap[indexSpellClass][0]))
-				 .collect(Collectors.toList()));
+			.mapToObj(indexSpellClass -> new FilterValueApi(classesMap[indexSpellClass][1], classesMap[indexSpellClass][0]))
+			.collect(Collectors.toList()));
 		otherFilters.add(spellClassFilter);
 
 		FilterApi schoolSpellFilter = new FilterApi("Школа", "school");
 		schoolSpellFilter.setValues(
-				Arrays.stream(MagicSchool.values())
-				 .map(school -> new FilterValueApi(school.getName(), school.name()))
-				 .collect(Collectors.toList()));
+			Arrays.stream(MagicSchool.values())
+				.map(school -> new FilterValueApi(school.getName(), school.name()))
+				.collect(Collectors.toList()));
 		otherFilters.add(getSchoolsFilter());
 
 		FilterApi ritualFilter = new FilterApi("Ритуал", "ritual");
@@ -284,9 +259,9 @@ public class SpellApiController {
 
 		FilterApi damageTypeFilter = new FilterApi("Тип урона", "damageType");
 		damageTypeFilter.setValues(
-				DamageType.getSpellDamage().stream()
-				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
-				 .collect(Collectors.toList()));
+			DamageType.getSpellDamage().stream()
+				.map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+				.collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
 
 		FilterApi timecastFilter = new FilterApi("Время накладывания", "timecast");
@@ -349,6 +324,7 @@ public class SpellApiController {
 		return filters;
 	}
 
+	@Operation(summary = "Получение фильтров заклинаний для класса")
 	@PostMapping("/api/v1/filters/spells/{englishClassName}")
 	public FilterApi getByClassFilter(@PathVariable String englishClassName) {
 		FilterApi filters = new FilterApi();
@@ -357,10 +333,10 @@ public class SpellApiController {
 		List<FilterApi> otherFilters = new ArrayList<>();
 		if (heroClass.getEnglishName().equals("Warlock")) {
 			otherFilters.add(getLevelsFilter(Spell.MAX_LEVEL));
-		}
-		else {
+		} else {
 			otherFilters.add(getLevelsFilter(heroClass.getSpellcasterType().getMaxSpellLevel()));
-		}		otherFilters.add(getComponentsFilter());
+		}
+		otherFilters.add(getComponentsFilter());
 		otherFilters.add(getSchoolsFilter());
 
 		List<FilterApi> customFilters = new ArrayList<>();
@@ -381,6 +357,7 @@ public class SpellApiController {
 		return filters;
 	}
 
+	@Operation(summary = "Получение фильтров заклинаний для архетипа")
 	@PostMapping("/api/v1/filters/spells/{englishClassName}/{englishArchetypeName}")
 	public FilterApi getByClassFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();
@@ -389,8 +366,7 @@ public class SpellApiController {
 		List<FilterApi> otherFilters = new ArrayList<>();
 		if (heroClass.getEnglishName().equals("Warlock")) {
 			otherFilters.add(getLevelsFilter(Spell.MAX_LEVEL));
-		}
-		else {
+		} else {
 			otherFilters.add(getLevelsFilter(heroClass.getSpellcasterType().getMaxSpellLevel()));
 		}
 		otherFilters.add(getComponentsFilter());
@@ -408,8 +384,7 @@ public class SpellApiController {
 		if ("Eldritch_Knight".equalsIgnoreCase(englishArchetypeName) ||
 			"Arcane_Trickster".equalsIgnoreCase(englishArchetypeName)) {
 			customValue.setKey(String.valueOf(2));
-		}
-		else {
+		} else {
 			customValue.setKey(String.valueOf(heroClass.getId()));
 		}
 		customFilter.setValues(Collections.singletonList(customValue));
@@ -424,17 +399,17 @@ public class SpellApiController {
 	private FilterApi getLevelsFilter(int maxLevel) {
 		FilterApi levelFilter = new FilterApi("Уровень", "level");
 		levelFilter.setValues(IntStream.rangeClosed(0, maxLevel)
-				 .mapToObj(level -> new FilterValueApi(level == 0 ? "заговор" : String.valueOf(level),  String.valueOf(level)))
-				 .collect(Collectors.toList()));
+			.mapToObj(level -> new FilterValueApi(level == 0 ? "заговор" : String.valueOf(level), String.valueOf(level)))
+			.collect(Collectors.toList()));
 		return levelFilter;
 	}
 
 	private FilterApi getSchoolsFilter() {
 		FilterApi schoolSpellFilter = new FilterApi("Школа", "school");
 		schoolSpellFilter.setValues(
-				Arrays.stream(MagicSchool.values())
-				 .map(school -> new FilterValueApi(school.getName(), school.name()))
-				 .collect(Collectors.toList()));
+			Arrays.stream(MagicSchool.values())
+				.map(school -> new FilterValueApi(school.getName(), school.name()))
+				.collect(Collectors.toList()));
 		return schoolSpellFilter;
 	}
 

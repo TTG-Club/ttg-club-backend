@@ -144,7 +144,7 @@
 													type="spell">
 												<a class="tip_spell"
 												   th:href="@{'/spells/' + ${spell.spell.englishName}}"
-												   th:text="${spell.spell.fullName}"></a>
+												   th:text="|${spell.spell.name.toLowerCase()} [${spell.spell.englishName.toLowerCase()}]|"></a>
 											</detail-tooltip>
 											<span th:if="${spell.advenced}"
 												  th:text="| (${spell.advenced})|"></span>

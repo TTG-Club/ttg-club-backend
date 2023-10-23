@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Race", description = "The Race API")
+@Tag(name = "Расы и происхождения", description = "API по рассам и происхождениям")
 @RestController
 public class RacesApiController {
 	private final RaceRepository raceRepository;

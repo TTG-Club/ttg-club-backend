@@ -36,12 +36,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Trait", description = "The Trait API")
+@Tag(name = "Черты", description = "API по чертам")
 @RestController
 public class TraitApiController {
 	private final TraitRepository traitRepository;
 
-	@Operation(summary = "Gets all traits")
+	@Operation(summary = "Получение краткого списка черт")
 	@PostMapping(value = "/api/v1/traits", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<TraitApi> getTraits(@RequestBody FeatRequestApi request) {
 		Specification<Trait> specification = null;
@@ -80,12 +80,12 @@ public class TraitApiController {
 					if (request.getFilter().getRequirements().contains("yes") && !request.getFilter().getRequirements().contains("no")) {
 						specification = SpecificationUtil.getAndSpecification(
 							specification,
-							(root, query, cb) -> cb.and(cb.notEqual(root.get("requirement"), "Нет"), cb.isNotNull(root.get("requirement")))
+							(root, query, cb) -> cb.and(cb.notEqual(root.get("requirement"), "Нет"))
 						);
 					} else if (request.getFilter().getRequirements().contains("no") && !request.getFilter().getRequirements().contains("yes")) {
 						specification = SpecificationUtil.getAndSpecification(
 							specification,
-							(root, query, cb) -> cb.or(cb.equal(root.get("requirement"), "Нет"), cb.isNull(root.get("requirement")))
+							(root, query, cb) -> cb.or(cb.equal(root.get("requirement"), "Нет"))
 						);
 					}
 				}
@@ -96,14 +96,17 @@ public class TraitApiController {
 			.stream()
 			.map(TraitApi::new)
 			.collect(Collectors.toList());
+
 	}
 
+	@Operation(summary = "Получение черты по английскому названию")
 	@PostMapping(value = "/api/v1/traits/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<TraitDetailApi> getTrait(@PathVariable String englishName) {
 		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(new TraitDetailApi(trait));
 	}
 
+	@Operation(summary = "Получение фильтров для черт")
 	@PostMapping("/api/v1/filters/traits")
 	public FilterApi getTraitFilter() {
 		FilterApi filters = new FilterApi();

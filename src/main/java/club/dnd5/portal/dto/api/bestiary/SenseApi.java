@@ -1,16 +1,16 @@
 package club.dnd5.portal.dto.api.bestiary;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.model.creature.Creature;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -23,40 +23,44 @@ public class SenseApi {
 	private List<NameValueApi> senses;
 	public SenseApi(Creature beast) {
 		passivePerception = String.valueOf(beast.getPassivePerception());
-		if (beast.getPassivePerceptionBonus() != null) {
+		if (Objects.nonNull(beast.getPassivePerceptionBonus())) {
 			passivePerception += beast.getPassivePerceptionBonus();
 		}
-		if (beast.getDarkvision() != null) {
+		if (Objects.nonNull(beast.getDarkvision())) {
 			senses = new ArrayList<>(4);
-			senses.add(new NameValueApi("тёмное зрение", beast.getDarkvision()));
+			senses.add(NameValueApi.builder()
+				.name("тёмное зрение")
+				.value(beast.getDarkvision())
+				.build());
 		}
-		if (beast.getTrysight() != null) {
+		if (Objects.nonNull(beast.getTrysight())) {
 			if (senses == null) {
 				senses = new ArrayList<>(3);
 			}
-			senses.add(new NameValueApi("истинное зрение", beast.getTrysight()));
+			senses.add(NameValueApi.builder()
+				.name("истинное зрение")
+				.value(beast.getTrysight())
+				.build());
 		}
-		if (beast.getBlindsight() != null) {
+		if (Objects.nonNull(beast.getBlindsight())) {
 			if (senses == null) {
 				senses = new ArrayList<>(2);
 			}
-			NameValueApi value = new NameValueApi("слепое зрение", beast.getBlindsight());
+			NameValueApi.NameValueApiBuilder builder = NameValueApi.builder().name("слепое зрение").value(beast.getBlindsight());
 			if (beast.getBlindsightRadius() != null) {
-				value.setAdditional("слеп за пределами этого радиуса");
+				builder.additional("слеп за пределами этого радиуса");
 			}
-			senses.add(value);
+			senses.add(builder.build());
 		}
-		if (beast.getVibration() != null) {
+		if (Objects.nonNull(beast.getVibration())) {
 			if (senses == null) {
 				senses = new ArrayList<>(1);
 			}
-			NameValueApi value = new NameValueApi("чувство вибрации", beast.getVibration());
+			NameValueApi.NameValueApiBuilder builder = NameValueApi.builder().name("чувство вибрации").value(beast.getVibration());
 			if (beast.getBlindsightRadius() != null && beast.getBlindsightRadius() == 1) {
-				value.setAdditional("слеп за пределами этого радиуса");
+				builder.additional("слеп за пределами этого радиуса");
 			}
-			senses.add(value);
-		}
-		if (beast.getHover() != null) {
+			senses.add(builder.build());
 		}
 	}
 }

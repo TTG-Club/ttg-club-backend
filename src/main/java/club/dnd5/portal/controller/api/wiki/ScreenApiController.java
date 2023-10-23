@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Tag(name = "Ширма Мастера", description = "API по ширме")
 @RequiredArgsConstructor
-@Tag(name = "Screen", description = "The Screen API")
 @RestController
 public class ScreenApiController {
 	private final ScreenRepository screenRepository;

@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Tag(name = "Класс", description = "API классов")
 @RequiredArgsConstructor
-@Tag(name = "Class", description = "The Class API")
 @RestController
 public class ClassApiController {
 	private final ClassRepository classRepo;

@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Tag(name = "Утилиты", description = "API по генерации товаров у торговца")
 @RequiredArgsConstructor
-@Tag(name = "Tools", description = "The tools API")
 @RestController
 public class TraderApiController {
 	private static final Random rnd = new Random();
@@ -42,9 +42,9 @@ public class TraderApiController {
 	public TraderApi getTrader(){
 		TraderApi traderApi = new TraderApi();
 		List<NameValueApi> magicLevels = new ArrayList<>(3);
-		magicLevels.add(new NameValueApi("Мало", 0));
-		magicLevels.add(new NameValueApi("Норма", 1));
-		magicLevels.add(new NameValueApi("Много", 2));
+		magicLevels.add(NameValueApi.builder().name("Мало").value(0).build());
+		magicLevels.add(NameValueApi.builder().name("Норма").value(1).build());
+		magicLevels.add(NameValueApi.builder().name("Много").value( 2).build());
 		traderApi.setMagicLevels(magicLevels);
 		traderApi.setSources(Arrays.asList(
 			new SourceApi("DMG", "Руководство мастера"),
