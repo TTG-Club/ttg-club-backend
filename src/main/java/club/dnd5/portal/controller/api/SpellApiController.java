@@ -157,9 +157,9 @@ public class SpellApiController {
 			}
 			if (request.getFilter().getDistance() != null && !request.getFilter().getDistance().isEmpty()) {
 				Specification<Spell> addSpec = null;
-				for (String distance : request.getFilter().getDuration()) {
+				for (String distance : request.getFilter().getDistance()) {
 					addSpec = SpecificationUtil.getOrSpecification(addSpec,
-							(root, query, cb) -> cb.like(root.get("duration"), "%" + distance + "%"));
+							(root, query, cb) -> cb.like(root.get("distance"), "%" + distance + "%"));
 				}
 				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 			}
