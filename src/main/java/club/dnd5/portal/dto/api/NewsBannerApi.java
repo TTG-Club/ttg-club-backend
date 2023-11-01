@@ -17,10 +17,13 @@ public class NewsBannerApi {
 
 	private String url;
 
+	private boolean active;
+
 	public NewsBannerApi (NewsBanner newsBanner) {
-		 name = newsBanner.getTitle();
-		 description = newsBanner.getText();
+		 name = newsBanner.getName();
+		 description = newsBanner.getDescription();
 		 image = newsBanner.getImage();
 		 url = newsBanner.getUrl();
+		 active = newsBanner.isActive();
 	}
 }
