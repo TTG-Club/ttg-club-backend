@@ -5,7 +5,6 @@ import club.dnd5.portal.model.NewsBanner;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.NewsBannerRepository;
-import club.dnd5.portal.repository.YoutubeVideosRepository;
 import club.dnd5.portal.repository.user.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,7 +27,6 @@ import java.util.*;
 public class NewsBannerApiController {
 	private static final Set<String> ROLES = new HashSet<>(Arrays.asList("MODERATOR", "ADMIN"));
 
-	private final YoutubeVideosRepository youtubeVideosRepository;
 	private final UserRepository userRepository;
 
 	private final NewsBannerRepository newsBannerRepository;
