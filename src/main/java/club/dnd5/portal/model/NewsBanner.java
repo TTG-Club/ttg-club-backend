@@ -1,18 +1,17 @@
 package club.dnd5.portal.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
+
 @Getter
 @Setter
 @Entity
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class NewsBanner {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
