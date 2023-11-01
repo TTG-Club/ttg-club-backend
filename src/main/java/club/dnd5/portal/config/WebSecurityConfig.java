@@ -1,6 +1,10 @@
 package club.dnd5.portal.config;
 
+import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
+import club.dnd5.portal.security.JwtAuthenticationFilter;
 import club.dnd5.portal.security.JwtTokenProvider;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,11 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
-import club.dnd5.portal.security.JwtAuthenticationFilter;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @RequiredArgsConstructor
 @Configuration
@@ -66,6 +65,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         .and()
         	.authorizeRequests()
         	.antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
+        	.antMatchers(HttpMethod.DELETE, "/api/v1/**").permitAll()
+        	.antMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
         	.antMatchers("/api/v1/auth/**").permitAll()
         	.antMatchers("/swagger-ui/**").permitAll()
         	.antMatchers("/swagger-resources/**").permitAll()

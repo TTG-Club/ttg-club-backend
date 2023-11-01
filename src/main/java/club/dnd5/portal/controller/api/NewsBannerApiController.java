@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -84,6 +85,7 @@ public class NewsBannerApiController {
 			.description(newsBannerApi.getDescription())
 			.name(newsBannerApi.getName())
 			.active(newsBannerApi.isActive())
+			.createdAt(LocalDateTime.now())
 			.build();
 		return ResponseEntity.status(HttpStatus.OK).body(newsBannerRepository.save(newNewsBanner));
 	}
@@ -91,7 +93,7 @@ public class NewsBannerApiController {
 	@Operation(summary = "Remove NewsBanner")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@DeleteMapping
-	public ResponseEntity<?> removeVideo(@RequestParam String name) {
+	public ResponseEntity<?> removeBanners(@RequestParam String name) {
 		checkUserPermissions();
 
 		Optional<NewsBanner> newsBanner = newsBannerRepository.findByName(name);
