@@ -90,20 +90,6 @@ public class NewsBannerApiController {
 		return ResponseEntity.status(HttpStatus.OK).body(newsBannerRepository.save(newNewsBanner));
 	}
 
-	@Operation(summary = "Remove NewsBanner")
-	@SecurityRequirement(name = "Bearer Authentication")
-	@DeleteMapping
-	public ResponseEntity<?> removeBanners(@RequestParam String name) {
-		checkUserPermissions();
-
-		Optional<NewsBanner> newsBanner = newsBannerRepository.findByName(name);
-		if (!newsBanner.isPresent()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("News banner name is incorrect!");
-		}
-		newsBannerRepository.delete(newsBanner.get());
-		return ResponseEntity.status(HttpStatus.OK).build();
-	}
-
 	@Operation(summary = "Change NewsBanner active status")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Transactional

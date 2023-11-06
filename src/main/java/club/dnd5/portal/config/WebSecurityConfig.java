@@ -65,7 +65,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         .and()
         	.authorizeRequests()
         	.antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
-        	.antMatchers(HttpMethod.DELETE, "/api/v1/**").permitAll()
         	.antMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
         	.antMatchers("/api/v1/auth/**").permitAll()
         	.antMatchers("/swagger-ui/**").permitAll()
