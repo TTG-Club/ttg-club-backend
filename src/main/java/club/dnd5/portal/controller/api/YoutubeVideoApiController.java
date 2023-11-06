@@ -50,7 +50,7 @@ public class YoutubeVideoApiController {
 		Specification<YoutubeVideo> specification = null;
 
 		if (Objects.nonNull(search)) {
-			specification = SpecificationUtil.getSearch(search);
+			specification = SpecificationUtil.getSearchByName(search);
 		}
 
 		if (activeStatus != null) {
@@ -168,7 +168,7 @@ public class YoutubeVideoApiController {
 		YoutubeVideo video = youtubeVideosRepository.findById(id)
 			.orElseThrow(PageNotFoundException::new);
 
-		if (video.isActive() == activeStatus) {
+		if (video.isActive() == Boolean.TRUE.equals(activeStatus)) {
 			return ResponseEntity.status(HttpStatus.OK).build();
 		}
 
