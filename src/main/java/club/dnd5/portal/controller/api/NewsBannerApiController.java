@@ -32,7 +32,7 @@ public class NewsBannerApiController {
 
 	private final NewsBannerRepository newsBannerRepository;
 
-	@Operation(summary = "Get all News Banners")
+	@Operation(summary = "Получение всех новостных Баннеров")
 	@GetMapping
 	public ResponseEntity <List<NewsBannerApi>> getNewsBanners(
 	) {
@@ -44,7 +44,7 @@ public class NewsBannerApiController {
 		return ResponseEntity.ok(newsBannerApiList);
 	}
 
-	@Operation(summary = "Adding a new News Banner")
+	@Operation(summary = "Добавление новостного баннера")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Transactional
 	@PostMapping
@@ -66,7 +66,7 @@ public class NewsBannerApiController {
 		return ResponseEntity.status(HttpStatus.OK).body(new NewsBannerApi(newsBanner));
 	}
 
-	@Operation(summary = "Update News Banner")
+	@Operation(summary = "Обновление новостного баннера")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Transactional
 	@PatchMapping
@@ -90,7 +90,7 @@ public class NewsBannerApiController {
 		return ResponseEntity.status(HttpStatus.OK).body(newsBannerRepository.save(newNewsBanner));
 	}
 
-	@Operation(summary = "Change NewsBanner active status")
+	@Operation(summary = "Изменение статуса для новостного баннера")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Transactional
 	@PatchMapping("/active")
