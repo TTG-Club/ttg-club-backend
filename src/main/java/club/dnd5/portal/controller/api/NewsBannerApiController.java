@@ -1,15 +1,21 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.NewsBannerApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.NewsBanner;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.NewsBannerRepository;
 import club.dnd5.portal.repository.user.UserRepository;
+import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
@@ -32,16 +38,41 @@ public class NewsBannerApiController {
 
 	private final NewsBannerRepository newsBannerRepository;
 
-	@Operation(summary = "Получение всех новостных Баннеров")
+	@Operation(summary = "Получение списка баннеров")
 	@GetMapping
-	public ResponseEntity <List<NewsBannerApi>> getNewsBanners(
+	public ResponseEntity<Page<NewsBannerApi>> getNewsBanners(
+		@RequestParam(required = false) String search,
+		@RequestParam(required = false, defaultValue = "0") final Integer page,
+		@RequestParam(required = false, defaultValue = "-1") final Integer size,
+		@RequestParam(required = false) List<String> order,
+		@RequestParam(required = false) Boolean activeStatus
 	) {
-		List<NewsBanner> newsBannerList = this.newsBannerRepository.findAll();
-		List<NewsBannerApi> newsBannerApiList = new ArrayList<>();
-		for (NewsBanner newsBanner : newsBannerList) {
-			newsBannerApiList.add(new NewsBannerApi(newsBanner));
+		Specification<NewsBanner> specification = null;
+
+		if (Objects.nonNull(search)) {
+			specification = SpecificationUtil.getSearchByName(search);
 		}
-		return ResponseEntity.ok(newsBannerApiList);
+
+		if (activeStatus != null) {
+			specification = SpecificationUtil.getAndSpecification(
+				specification,
+				(root, query, cb) -> cb.equal(root.get("active"), activeStatus)
+			);
+		}
+		Pageable pageable = PageAndSortUtil.getPageable(page, size, order);
+
+		Page<NewsBanner> news = newsBannerRepository.findAll(specification, pageable);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(news.map(NewsBannerApi::new));
+	}
+
+	@Operation(summary = "Получение новостного Баннера по статусу")
+	@GetMapping("/active")
+	public ResponseEntity <NewsBannerApi> getNewsBanner(@RequestParam boolean active) {
+		NewsBanner newsBanner = newsBannerRepository.findByActive(active).orElseThrow(PageNotFoundException::new);
+		return ResponseEntity.ok(new NewsBannerApi(newsBanner));
 	}
 
 	@Operation(summary = "Добавление новостного баннера")
@@ -102,7 +133,7 @@ public class NewsBannerApiController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("News banner name is incorrect!");
 		}
 		NewsBanner newNewsBanner = newsBanner.get();
-		if (newNewsBanner.isActive() == activeStatus) {
+		if (newNewsBanner.isActive() == Boolean.TRUE.equals(activeStatus)) {
 			return ResponseEntity.status(HttpStatus.OK).build();
 		}
 		newNewsBanner.setActive(activeStatus);
