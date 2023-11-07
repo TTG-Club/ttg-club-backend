@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,7 +21,7 @@ public class SiteConfigurationApiController {
 
 	@GetMapping
 	public List<SiteConfiguration> getAllConfigurations() {
-		return (new ArrayList<>(siteConfigurationRepository.findAll()));
+		return (siteConfigurationRepository.findAll());
 	}
 
 	@GetMapping(params = "key")
