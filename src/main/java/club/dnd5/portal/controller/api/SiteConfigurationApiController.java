@@ -4,8 +4,6 @@ import club.dnd5.portal.model.SiteConfiguration;
 import club.dnd5.portal.repository.SiteConfigurationRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,15 +21,12 @@ public class SiteConfigurationApiController {
 	private final SiteConfigurationRepository siteConfigurationRepository;
 
 	@GetMapping
-	public ResponseEntity<List<SiteConfiguration>> getAllConfigurations() {
-		List<SiteConfiguration> siteConfigurations = new ArrayList<>();
-		siteConfigurationRepository.findAll().forEach(siteConfigurations::add);
-		return new ResponseEntity<>(siteConfigurations, HttpStatus.OK);
+	public List<SiteConfiguration> getAllConfigurations() {
+		return (new ArrayList<>(siteConfigurationRepository.findAll()));
 	}
 
 	@GetMapping(params = "key")
-	public ResponseEntity<List<SiteConfiguration>> getConfigByKeys(@RequestParam List<String> keys) {
-		List<SiteConfiguration> siteConfigurations = siteConfigurationRepository.findAllById(keys);
-		return new ResponseEntity<>(siteConfigurations, HttpStatus.OK);
+	public List<SiteConfiguration> getConfigByKeys(@RequestParam List<String> keys) {
+		return siteConfigurationRepository.findAllById(keys);
 	}
 }
