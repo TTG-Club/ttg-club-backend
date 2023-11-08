@@ -121,6 +121,4 @@ public class ArmorApiController {
 		filters.setOther(otherFilters);
 		return null;
 	}
-
-
 }
