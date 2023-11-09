@@ -22,7 +22,7 @@ public class ArmorFilter {
 	private Boolean disadvantage;
 
 	@JsonProperty("type")
-	private List<String> typeArmor;
+	private List<Integer> typeArmor;
 
 	@JsonProperty("strengthRequirements")
 	private List<Integer> strengthRequirements;

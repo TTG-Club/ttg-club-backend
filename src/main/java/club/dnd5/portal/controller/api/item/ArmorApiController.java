@@ -5,6 +5,7 @@ import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.item.ArmorApi;
 import club.dnd5.portal.dto.api.item.ArmorDetailApi;
+import club.dnd5.portal.dto.api.item.ArmorFilter;
 import club.dnd5.portal.dto.api.item.ArmorRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -51,11 +52,25 @@ public class ArmorApiController {
 		}
 
 		if (request.getFilter() != null) {
-			if (!request.getFilter().getBooks().isEmpty()) {
+			ArmorFilter armorFilter = request.getFilter();
+			if (!armorFilter.getBooks().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<Book, Spell> join = root.join("book", JoinType.INNER);
 					return join.get("source").in(request.getFilter().getBooks());
 				});
+			}
+			if(armorFilter.getDisadvantage() != null) {
+				int disadvantage = armorFilter.getDisadvantage() ? 1:0;
+				specification = SpecificationUtil.getAndSpecification(specification,
+						(root, query, cb) -> cb.equal(root.get("stels_hindrance"), disadvantage));
+			}
+			if (!armorFilter.getStrengthRequirements().isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> root.get("force_requirements").in(armorFilter.getStrengthRequirements()));
+			}
+			if (!armorFilter.getTypeArmor().isEmpty()) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> root.get("force_requirements").in(armorFilter.getTypeArmor()));
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
