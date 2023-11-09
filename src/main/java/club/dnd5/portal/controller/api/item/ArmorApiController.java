@@ -59,10 +59,10 @@ public class ArmorApiController {
 					return join.get("source").in(request.getFilter().getBooks());
 				});
 			}
-			if(armorFilter.getDisadvantage() != null) {
-				int disadvantage = armorFilter.getDisadvantage() ? 1:0;
+			if (armorFilter.getDisadvantage() != null) {
+				int disadvantage = armorFilter.getDisadvantage() ? 1 : 0;
 				specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("stels_hindrance"), disadvantage));
+					(root, query, cb) -> cb.equal(root.get("stels_hindrance"), disadvantage));
 			}
 			if (!armorFilter.getStrengthRequirements().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
@@ -96,7 +96,7 @@ public class ArmorApiController {
 			if (!books.isEmpty()) {
 				FilterApi filter = new FilterApi(typeBook.getName(), typeBook.name());
 				filter.setValues(books.stream()
-					.map(book -> new FilterValueApi(book.getSource(), book.getSource(),	Boolean.TRUE, book.getName()))
+					.map(book -> new FilterValueApi(book.getSource(), book.getSource(), Boolean.TRUE, book.getName()))
 					.collect(Collectors.toList()));
 				sources.add(filter);
 			}
@@ -113,16 +113,14 @@ public class ArmorApiController {
 		otherFilters.add(typeFilter);
 
 		FilterApi strengthFilter = new FilterApi("Требование к силе", "strength requirements");
-		List<Armor> armorList = armorRepository.findAll();
-		List<FilterValueApi> values = new ArrayList<>();
-		values.add(new FilterValueApi("Нет требований", "no requirements"));
-		for (Armor armor : armorList) {
-			//потому что в бд по стандарту null, а не 0
-			if (armor.getForceRequirements() != null) {
+		List<FilterValueApi> values = armorRepository.findAll().stream()
+			.filter(armor -> armor.getForceRequirements() != null)
+			.map(armor -> {
 				int requirements = armor.getForceRequirements();
-				values.add(new FilterValueApi(requirements + " силы", armor + " strength"));
-			}
-		}
+				return new FilterValueApi(requirements + " силы", requirements + " strength");
+			})
+			.distinct()
+			.collect(Collectors.toList());
 		strengthFilter.setValues(values);
 		otherFilters.add(strengthFilter);
 
@@ -130,10 +128,10 @@ public class ArmorApiController {
 		List<FilterValueApi> disadvantageValues = new ArrayList<>();
 		disadvantageValues.add(new FilterValueApi("Есть", "yes"));
 		disadvantageValues.add(new FilterValueApi("Нету", "no"));
-		strengthFilter.setValues(disadvantageValues);
+		disadvantageFilter.setValues(disadvantageValues);
 		otherFilters.add(disadvantageFilter);
 
 		filters.setOther(otherFilters);
-		return null;
+		return filters;
 	}
 }
