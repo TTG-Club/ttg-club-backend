@@ -62,15 +62,15 @@ public class ArmorApiController {
 			if (armorFilter.getDisadvantage() != null) {
 				int disadvantage = armorFilter.getDisadvantage() ? 1 : 0;
 				specification = SpecificationUtil.getAndSpecification(specification,
-					(root, query, cb) -> cb.equal(root.get("stels_hindrance"), disadvantage));
+					(root, query, cb) -> cb.equal(root.get("stelsHindrance"), disadvantage));
 			}
 			if (!armorFilter.getStrengthRequirements().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
-					(root, query, cb) -> root.get("force_requirements").in(armorFilter.getStrengthRequirements()));
+					(root, query, cb) -> root.get("forceRequirements").in(armorFilter.getStrengthRequirements()));
 			}
 			if (!armorFilter.getTypeArmor().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
-					(root, query, cb) -> root.get("force_requirements").in(armorFilter.getTypeArmor()));
+					(root, query, cb) -> root.get("type").in(armorFilter.getTypeArmor()));
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
