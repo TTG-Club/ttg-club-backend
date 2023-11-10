@@ -9,10 +9,10 @@ import club.dnd5.portal.dto.api.item.ArmorFilter;
 import club.dnd5.portal.dto.api.item.ArmorRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Armor;
+import club.dnd5.portal.model.items.ArmorCategory;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
@@ -107,8 +107,8 @@ public class ArmorApiController {
 
 		FilterApi typeFilter = new FilterApi("Тип брони", "type");
 		typeFilter.setValues(
-			Arrays.stream(ArmorType.values())
-				.map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
+			Arrays.stream(ArmorCategory.values())
+				.map(value -> new FilterValueApi(value.getName(), value.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(typeFilter);
 
