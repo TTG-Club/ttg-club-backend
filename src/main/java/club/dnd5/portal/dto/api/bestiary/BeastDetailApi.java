@@ -51,6 +51,7 @@ public class BeastDetailApi extends BeastApi {
 	private Collection<NameValueApi> feats;
 	private Collection<NameValueApi> actions;
 	private Collection<NameValueApi> reactions;
+	private String reaction;
 	private Collection<NameValueApi> bonusActions;
 	private LegendaryApi legendary;
 	private Collection<NameValueApi> mysticalActions;
@@ -192,6 +193,7 @@ public class BeastDetailApi extends BeastApi {
 		}
 		actionsBeast = beast.getActions(ActionType.REACTION);
 		if (!actionsBeast.isEmpty()) {
+			reaction = beast.getReaction();
 			reactions = actionsBeast
 				.stream()
 				.peek(feat -> MarkdownUtil.convert(feat, beast))
