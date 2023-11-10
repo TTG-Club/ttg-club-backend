@@ -59,6 +59,13 @@ public final class SpecificationUtil {
 			);
 	}
 
+	public static <T> Specification<T> getSearchByName(String search) {
+		String likeSearch = "%" + search.trim().toUpperCase() + "%";
+
+		return (root, query, cb) ->
+				cb.like(cb.upper(root.get("name")), likeSearch);
+	}
+
 	public static <T> Specification<T> getSearch(String search, Boolean exact) {
 		if (Optional.of(exact).orElse(false)) {
 			return (root, query, cb) -> cb.equal(root.get("name"), search.trim().toUpperCase());
