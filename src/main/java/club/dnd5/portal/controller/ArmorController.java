@@ -4,19 +4,19 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.items.Armor;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+@RequiredArgsConstructor
 @Hidden
 @Controller
 public class ArmorController {
 	private static final String BASE_URL = "https://ttg.club/armors";
 
-	@Autowired
-	private ArmorRepository armorRepository;
+	private final ArmorRepository armorRepository;
 
 	@GetMapping("/armors")
 	public String getArmors(Model model) {

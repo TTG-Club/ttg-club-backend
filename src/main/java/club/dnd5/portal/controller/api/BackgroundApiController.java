@@ -19,7 +19,7 @@ import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -35,13 +35,13 @@ import javax.persistence.criteria.Order;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Tag(name = "Background", description = "The BackgroundApi API")
+@RequiredArgsConstructor
+@Tag(name = "Предыстории", description = "API по предысториям")
 @RestController
 public class BackgroundApiController {
-	@Autowired
-	private BackgroundRepository backgroundRepository;
+	private final BackgroundRepository backgroundRepository;
 
-	@Operation(summary = "Gets all backgrounds", tags = "background")
+	@Operation(summary = "Получения краткого списка предисторий")
 	@PostMapping(value = "/api/v1/backgrounds", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BackgroundApi> getBackgrounds(@RequestBody FeatRequestApi request) {
 		Specification<Background> specification = null;

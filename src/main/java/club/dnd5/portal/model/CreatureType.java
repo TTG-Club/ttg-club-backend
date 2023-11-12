@@ -16,7 +16,7 @@ public enum CreatureType {
 	FIEND("исчадие"), // 7
 	GIANT("великан", "гигант"), // 8
 	HUMANOID("гуманоид"), // 9
-	MONSTROSITY("чудовище", "монстр"), // 10
+	MONSTROSITY("монстр", "чудовище"), // 10
 	OOZE("тина"), // 11
 	OUTSIDER("потустаронний"), // 12
 	PLANT("растение"), // 13
@@ -27,20 +27,20 @@ public enum CreatureType {
 	SMALL_BEAST("стая крошечных зверей", "крохотных зверей", "рой крошечных зверей"),
 	SWARM("рой", "стая");
 
-	private final String displayCyrilicName;
-	private Set<String> cyrilicNames;
+	private final String displayCyrillicName;
+	private final Set<String> cyrillicNames;
 
-	private CreatureType(String... cyrilicNames) {
-		this.displayCyrilicName = cyrilicNames[0];
-		this.cyrilicNames = new HashSet<>(Arrays.asList(cyrilicNames));
+	CreatureType(String... cyrillicNames) {
+		this.displayCyrillicName = cyrillicNames[0];
+		this.cyrillicNames = new HashSet<>(Arrays.asList(cyrillicNames));
 	}
 
-	public String getCyrilicName() {
-		return this.displayCyrilicName;
+	public String getCyrillicName() {
+		return this.displayCyrillicName;
 	}
 
-	public static CreatureType parse(String type) {
-		return Arrays.stream(values()).filter(t -> t.cyrilicNames.contains(type)).findFirst()
+	public static CreatureType parse(final String type) {
+		return Arrays.stream(values()).filter(t -> t.cyrillicNames.contains(type)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException(type));
 	}
 

@@ -1,17 +1,5 @@
 package club.dnd5.portal.controller.api.tools;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.item.ItemApi;
 import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.spell.SpellApi;
@@ -21,33 +9,27 @@ import club.dnd5.portal.dto.api.tools.TreasuryApi;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.TypeBook;
-import club.dnd5.portal.model.items.MagicThingTable;
-import club.dnd5.portal.model.items.Rarity;
-import club.dnd5.portal.model.items.Treasure;
-import club.dnd5.portal.model.items.TreasureType;
-import club.dnd5.portal.model.items.Weapon;
+import club.dnd5.portal.model.items.*;
 import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.repository.datatable.ItemMagicTableRepository;
-import club.dnd5.portal.repository.datatable.MagicItemRepository;
-import club.dnd5.portal.repository.datatable.SpellRepository;
-import club.dnd5.portal.repository.datatable.TreasureRepository;
-import club.dnd5.portal.repository.datatable.WeaponRepository;
+import club.dnd5.portal.repository.datatable.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Tools", description = "The tools API")
+import java.util.*;
+
+@Tag(name = "Утилиты", description = "API по генерации сокровищницы")
+@RequiredArgsConstructor
 @RestController
 public class TreasuryApiController {
 	public static final Random rnd = new Random();
-	@Autowired
-	private MagicItemRepository magicItemRepo;
-	@Autowired
-	private SpellRepository spellRepo;
-	@Autowired
-	private WeaponRepository weaponRepo;
-	@Autowired
-	private ItemMagicTableRepository mtRepo;
-	@Autowired
-	private TreasureRepository treasureRepo;
+	private final MagicItemRepository magicItemRepo;
+	private final SpellRepository spellRepo;
+	private final WeaponRepository weaponRepo;
+	private final ItemMagicTableRepository mtRepo;
+	private final TreasureRepository treasureRepo;
 
 	@PostMapping("/api/v1/tools/treasury")
 	public TreasuryApi getItems(@RequestBody RequestTreasuryApi request) {

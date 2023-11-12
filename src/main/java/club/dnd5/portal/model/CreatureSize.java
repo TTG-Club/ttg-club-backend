@@ -1,9 +1,9 @@
 package club.dnd5.portal.model;
 
+import lombok.Getter;
+
 import java.util.EnumSet;
 import java.util.Set;
-
-import lombok.Getter;
 
 @Getter
 public enum CreatureSize {
@@ -14,8 +14,8 @@ public enum CreatureSize {
 	HUGE("Огромный", "Огромная", "Огромное"), // 4
 	GARGANTUAN("Громадный", "Громадная", "Громадное"), //5
 	SMALL_MEDIUM("Средний или Маленький");
-	
-	private String [] names;
+
+	private final String [] names;
 	CreatureSize(String... names){
 		this.names = names;
 	}
@@ -44,7 +44,6 @@ public enum CreatureSize {
 		case SMALL_BEAST:
 			return names[1];
 		case FIEND:
-		case MONSTROSITY:
 		case PLANT:
 			return names[2];
 		default:
@@ -52,14 +51,14 @@ public enum CreatureSize {
 		}
 	}
 
-	public String getCyrilicName() {
+	public String getCyrillicName() {
 		return names[0];
 	}
-	
+
 	public String getCell() {
 		switch (this) {
 		case TINY: return "1/4 клетки";
-		case SMALL: return "1/2 клетки";
+		case SMALL: return "1 клетка";
 		case MEDIUM: return "1 клетка";
 		case LARGE: return "2x2 клетки";
 		case HUGE: return "3x3 клетки";

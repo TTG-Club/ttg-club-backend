@@ -4,6 +4,11 @@ public final class ChallengeRating {
 	private ChallengeRating() {
 	}
 
+	/**
+	 * Получение уровня опасности по опыту
+	 * @param exp опыт
+	 * @return уровень опасности
+	 */
 	public static String getCR(int exp) {
 		String expStr = "0";
 		if ((exp > 10) && (exp <= 25)) {

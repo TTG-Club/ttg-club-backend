@@ -1,16 +1,15 @@
 package club.dnd5.portal.dto.api.tools;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import club.dnd5.portal.model.encounters.RandomEncounterRow;
+import club.dnd5.portal.model.encounters.RandomEncounterTable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import club.dnd5.portal.model.encounters.RandomEncounterRow;
-import club.dnd5.portal.model.encounters.RandomEncounterеTable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -19,13 +18,14 @@ import lombok.Setter;
 @Setter
 public class RandomEncounterTableApi {
 	private String name;
-	private String[] thead = new String[2];
+	private String formula;
+	private String[] thead = new String[1];
 	private Collection<Collection<String>> tbody;
-	
-	public RandomEncounterTableApi(RandomEncounterеTable table) {
+
+	public RandomEncounterTableApi(RandomEncounterTable table) {
 		name = table.getName();
-		thead[0] = String.format("<dice-roller formula=\"%s\">%s</dice-roller>", table.getFormula(), table.getFormula());
-		thead[1] = "Столкновение";
+		formula = table.getFormula();
+		thead[0] = "Столкновение";
 		tbody = new ArrayList<>(table.getEncounters().size());
 		for (RandomEncounterRow reRow : table.getEncounters()) {
 			Collection<String> row = new ArrayList<>(2);

@@ -22,7 +22,7 @@ import club.dnd5.portal.repository.datatable.PantheonGodRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -36,16 +36,13 @@ import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Tag(name = "God", description = "The God API")
+@Tag(name = "Боги", description = "API богов")
+@RequiredArgsConstructor
 @RestController
 public class GodApiController {
-	@Autowired
-	private GodRepository godRepository;
-	@Autowired
-	private PantheonGodRepository pantheonRepository;
-
-	@Autowired
-	private ImageRepository imageRepository;
+	private final GodRepository godRepository;
+	private final PantheonGodRepository pantheonRepository;
+	private final ImageRepository imageRepository;
 
 	@PostMapping(value = "/api/v1/gods", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<GodApi> getGods(@RequestBody GodRequestApi request) {

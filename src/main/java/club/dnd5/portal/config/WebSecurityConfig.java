@@ -1,5 +1,11 @@
 package club.dnd5.portal.config;
 
+import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
+import club.dnd5.portal.security.JwtAuthenticationFilter;
+import club.dnd5.portal.security.JwtTokenProvider;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
-import club.dnd5.portal.security.JwtAuthenticationFilter;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-
+@RequiredArgsConstructor
 @Configuration
 @SecurityScheme(
 	  name = "Bearer Authentication",
@@ -34,15 +36,14 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
-	@Autowired
-	private UserDetailsService userDetailsService;
-
-	@Autowired
-    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+	private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+	private final JwtTokenProvider tokenProvider;
+	private final UserDetailsService customUserDetailsService;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(){
-        return  new JwtAuthenticationFilter();
+        return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
     }
 
 	@Bean
@@ -52,39 +53,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		/*
-		 * http.authorizeRequests().antMatchers("/profile/**").hasRole("USER");
-		 * http.authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN");
-		 * http.authorizeRequests().antMatchers("/webjars/**").permitAll();
-		 *
-		 * http.authorizeRequests().antMatchers("/robots.txt").permitAll();
-		 *
-		 * http.authorizeRequests().and().logout().logoutSuccessUrl("/").permitAll();
-		 *
-		 * http.authorizeRequests().and().exceptionHandling().accessDeniedPage(
-		 * "/error.html");
-		 *
-		 * http.cors().and().csrf().disable();
-		 */
-
 		http.httpBasic();
-        http.cors().and()
-        .csrf().disable()
-        .exceptionHandling()
-        .authenticationEntryPoint(authenticationEntryPoint)
+        http.cors()
+		.and()
+        	.csrf().disable()
+        	.exceptionHandling()
+        	.authenticationEntryPoint(authenticationEntryPoint)
         .and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        	.sessionManagement()
+        	.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
-        .authorizeRequests()
-        .antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
-        .antMatchers("/api/v1/auth/**").permitAll()
-        .antMatchers("/swagger-ui/**").permitAll()
-        .antMatchers("/swagger-resources/**").permitAll()
-        .antMatchers("/swagger-ui.html").permitAll()
-        .antMatchers(HttpMethod.GET, "/**").permitAll()
-        .antMatchers(HttpMethod.HEAD, "/**").permitAll()
-        .antMatchers(HttpMethod.PUT, "/**").permitAll()
+        	.authorizeRequests()
+        	.antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
+        	.antMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
+        	.antMatchers("/api/v1/auth/**").permitAll()
+        	.antMatchers("/swagger-ui/**").permitAll()
+        	.antMatchers("/swagger-resources/**").permitAll()
+        	.antMatchers("/swagger-ui.html").permitAll()
+        	.antMatchers(HttpMethod.GET, "/**").permitAll()
+        	.antMatchers(HttpMethod.HEAD, "/**").permitAll()
+        	.antMatchers(HttpMethod.PUT, "/**").permitAll()
         .anyRequest()
         .authenticated();
 		http.headers().frameOptions().disable();

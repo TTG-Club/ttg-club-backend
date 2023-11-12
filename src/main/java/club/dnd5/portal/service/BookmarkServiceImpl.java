@@ -10,18 +10,17 @@ import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.user.BookmarkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
-	@Autowired
-	private SpellRepository spellRepository;
-	@Autowired
-	private BestiaryRepository bestiaryRepository;
-	@Autowired
-	private BookmarkRepository bookmarkRepository;
+	private final SpellRepository spellRepository;
+	private final BestiaryRepository bestiaryRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	@Override
 	public Collection<BookmarkApi> getBookmarks(User user) {
@@ -40,12 +39,11 @@ public class BookmarkServiceImpl implements BookmarkService {
 		entityBookmark.setName(bookmark.getName());
 		if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("/spells/")) {
 			String englishName = bookmark.getUrl().replace("/spells/", "").replace('_', ' ');
-			Optional<Spell> option = spellRepository.findByEnglishName(englishName);
-			if (option.isPresent()) {
-				entityBookmark.setPrefix(String.valueOf(option.get().getLevel()));
-			}
+			spellRepository.findByEnglishName(englishName)
+				.ifPresent(spell -> entityBookmark.setPrefix(String.valueOf(spell.getLevel())));
 		} else if (Objects.nonNull(bookmark.getUrl()) && bookmark.getUrl().contains("/bestiary/")) {
 			String englishName = bookmark.getUrl().replace("/bestiary/", "").replace('_', ' ');
+
 			List<Creature> beasts = bestiaryRepository.findByEnglishName(englishName);
 			if (!beasts.isEmpty()) {
 				entityBookmark.setPrefix(String.valueOf(beasts.get(0).getChallengeRating()));

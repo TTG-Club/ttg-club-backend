@@ -6,25 +6,24 @@ import club.dnd5.portal.model.background.Personalization;
 import club.dnd5.portal.model.background.PersonalizationType;
 import club.dnd5.portal.repository.datatable.BackgroundRepository;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.naming.directory.InvalidAttributesException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Hidden
 @Controller
 public class BackgroundController {
 	private static final String BASE_URL = "https://ttg.club/backgrounds";
 
-	@Autowired
-	private BackgroundRepository backgroundRepository;
+	private final BackgroundRepository backgroundRepository;
 
 	@GetMapping("/backgrounds")
 	public String getBackgrounds(Model model) {
@@ -46,11 +45,11 @@ public class BackgroundController {
 	}
 
 	@GetMapping("/backgrounds/fragment/{id}")
-	public String getBackgroundFragmentById(Model model, @PathVariable Integer id) throws InvalidAttributesException {
-		Background background = backgroundRepository.findById(id).orElseThrow(InvalidAttributesException::new);
+	public String getBackgroundFragmentById(Model model, @PathVariable Integer id) {
+		Background background = backgroundRepository.findById(id).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("background", background);
 		Map<PersonalizationType, List<Personalization>> tables = background.getPersonalizations().stream()
-				.collect(Collectors.groupingBy(Personalization::getType, () -> new EnumMap<>(PersonalizationType.class), Collectors.toList()));
+			.collect(Collectors.groupingBy(Personalization::getType, () -> new EnumMap<>(PersonalizationType.class), Collectors.toList()));
 		model.addAttribute("tables", tables);
 		return "fragments/background :: view";
 	}

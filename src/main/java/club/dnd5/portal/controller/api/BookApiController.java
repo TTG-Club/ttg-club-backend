@@ -11,7 +11,7 @@ import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Tag(name = "Book", description = "The Book API")
+@RequiredArgsConstructor
+@Tag(name = "Источники", description = "API для источников")
 @RestController
 public class BookApiController {
-	@Autowired
-	private BookRepository bookRepository;
+	private final BookRepository bookRepository;
 
-	@Operation(summary = "Gets all books")
+	@Operation(summary = "Получение краткого списка источников")
 	@PostMapping(value = "/api/v1/books", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BookApi> getBooks(@RequestBody BookRequestApi request) {
 		Specification<Book> specification = null;
@@ -64,7 +64,7 @@ public class BookApiController {
 			.collect(Collectors.toList());
 	}
 
-	@Operation(summary = "Get book by english name")
+	@Operation(summary = "Получение исчтоника по английскому имения")
 	@PostMapping(value = "/api/v1/books/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<BookApi> getBook(@PathVariable String englishName) {
 		Book book = bookRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);

@@ -1,15 +1,13 @@
 package club.dnd5.portal.security;
 
+import club.dnd5.portal.exception.ApiException;
 import io.jsonwebtoken.*;
-
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import club.dnd5.portal.exception.ApiException;
+import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
@@ -19,25 +17,28 @@ public class JwtTokenProvider {
     @Value("${app.jwt-expiration-milliseconds}")
     private int jwtExpirationInMs;
 
-    // generate token
-    public String generateToken(Authentication authentication){
+	/**
+	 * Генерация токена
+	 * @param authentication authentication
+	 * @return JWT токен
+	 */
+	public String generateToken(Authentication authentication){
         String username = authentication.getName();
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationInMs);
 
-        String token = Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
-                .compact();
-        return token;
+        return Jwts.builder()
+			.setSubject(username)
+			.setIssuedAt(new Date())
+			.setExpiration(expireDate)
+			.signWith(SignatureAlgorithm.HS512, jwtSecret)
+			.compact();
     }
 
     /**
      * get username from the token
-     * @param token
-     * @return
+     * @param token токен
+     * @return имя пользователя
      */
     public String getUsernameFromJWT(String token){
         Claims claims = Jwts.parser()
@@ -49,8 +50,8 @@ public class JwtTokenProvider {
 
     /**
      *  validate JWT token
-     * @param token
-     * @return
+     * @param token токен
+     * @return true если токен провалидирован
      */
     public boolean validateToken(String token){
         try{

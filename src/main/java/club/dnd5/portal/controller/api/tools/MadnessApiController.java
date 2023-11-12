@@ -6,8 +6,9 @@ import club.dnd5.portal.dto.api.tools.RequestMadnessApi;
 import club.dnd5.portal.model.Madness;
 import club.dnd5.portal.model.MadnessType;
 import club.dnd5.portal.repository.MadnessRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,34 +17,38 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Tag(name = "Tools", description = "The Madness API")
+@Tag(name = "Утилиты", description = "API для генерации безумия")
+@RequiredArgsConstructor
 @RestController
 public class MadnessApiController {
 	public static final Random rnd = new Random();
 
-	@Autowired
-	private MadnessRepository madnessRepository;
+	private final MadnessRepository madnessRepository;
 
+	@Operation(summary = "Получение списка безумия")
 	@GetMapping("/api/v1/tools/madness")
 	public Collection<NameValueApi> getItems() {
 		return Arrays
 			.stream(MadnessType.values())
-			.map(t -> new NameValueApi(t.getCyrilicName(), t.name()))
+			.map(type -> NameValueApi.builder()
+				.name(type.getCyrilicName())
+				.value(type.name())
+				.build())
 			.collect(Collectors.toList());
 	}
 
 	@PostMapping("/api/v1/tools/madness")
-	public Collection<MadnessApi> getItems(@RequestBody RequestMadnessApi reques) {
+	public Collection<MadnessApi> getItems(@RequestBody RequestMadnessApi request) {
 		MadnessType madnessType;
-		if (reques.getType() == null)
+		if (request.getType() == null)
 		{
 			madnessType = MadnessType.values()[rnd.nextInt(MadnessType.values().length)];
 		} else {
-			madnessType = MadnessType.valueOf(reques.getType());
+			madnessType = MadnessType.valueOf(request.getType());
 		}
-		Collection<MadnessApi> madness = new ArrayList<MadnessApi>(reques.getCount());
+		Collection<MadnessApi> madness = new ArrayList<>(request.getCount());
 		List<Madness> items = madnessRepository.findByMadnessType(madnessType);
-		for (int i = 0; i < reques.getCount(); i++) {
+		for (int i = 0; i < request.getCount(); i++) {
 			madness.add(new MadnessApi(items.get(rnd.nextInt(items.size()))));
 		}
 		return madness;

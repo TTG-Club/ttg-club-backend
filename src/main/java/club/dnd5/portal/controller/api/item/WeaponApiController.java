@@ -19,7 +19,9 @@ import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,7 +36,8 @@ import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Tag(name = "Weapon", description = "The Weapon API")
+@RequiredArgsConstructor
+@Tag(name = "Оружие", description = "API оружия")
 @RestController
 public class WeaponApiController {
 	@Autowired
@@ -42,6 +45,7 @@ public class WeaponApiController {
 	@Autowired
 	private WeaponPropertyDatatableRepository propertyRepository;
 
+	@Operation(summary = "Получение краткого списка оружия")
 	@PostMapping(value = "/api/v1/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<WeaponApi> getWeapon(@RequestBody WeaponRequesApi request) {
 		Specification<Weapon> specification = null;
@@ -98,6 +102,7 @@ public class WeaponApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Получение оружия по английскому имени")
 	@PostMapping(value = "/api/v1/weapons/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public WeaponDetailApi getWeapon(@PathVariable String englishName) {
 		return new WeaponDetailApi(weaponRepository.findByEnglishName(englishName.replace('_', ' '))

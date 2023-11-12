@@ -18,7 +18,7 @@ import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,26 +27,24 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Tag(name = "Tools", description = "The tools API")
+@Tag(name = "Утилиты", description = "API по генерации товаров у торговца")
+@RequiredArgsConstructor
 @RestController
 public class TraderApiController {
 	private static final Random rnd = new Random();
-	@Autowired
-	private MagicItemRepository magicItemRepo;
-	@Autowired
-	private SpellRepository spellRepo;
-	@Autowired
-	private WeaponRepository weaponRepo;
-	@Autowired
-	private ItemMagicTableRepository mtRepo;
+
+	private final MagicItemRepository magicItemRepo;
+	private final SpellRepository spellRepo;
+	private final WeaponRepository weaponRepo;
+	private final ItemMagicTableRepository mtRepo;
 
 	@GetMapping("/api/v1/tools/trader")
 	public TraderApi getTrader(){
 		TraderApi traderApi = new TraderApi();
 		List<NameValueApi> magicLevels = new ArrayList<>(3);
-		magicLevels.add(new NameValueApi("Мало", 0));
-		magicLevels.add(new NameValueApi("Норма", 1));
-		magicLevels.add(new NameValueApi("Много", 2));
+		magicLevels.add(NameValueApi.builder().name("Мало").value(0).build());
+		magicLevels.add(NameValueApi.builder().name("Норма").value(1).build());
+		magicLevels.add(NameValueApi.builder().name("Много").value( 2).build());
 		traderApi.setMagicLevels(magicLevels);
 		traderApi.setSources(Arrays.asList(
 			new SourceApi("DMG", "Руководство мастера"),

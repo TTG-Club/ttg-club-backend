@@ -46,14 +46,19 @@ public class RaceApi {
 		}
 		abilities = race.getAbilityValueBonuses()
 				.stream()
-				.map(bonus -> new NameValueApi(bonus.getAbility().getCyrilicName(), bonus.getAbility().getShortName(), bonus.getAbility(), bonus.getBonus()))
+				.map(bonus -> NameValueApi.builder()
+					.key(bonus.getAbility())
+					.name(bonus.getAbility().getCyrilicName())
+					.shortName(bonus.getAbility().getShortName())
+					.value(bonus.getBonus())
+					.build())
 				.collect(Collectors.toList());
 		source = new SourceApi(race.getBook());
 		if (!race.getSubRaces().isEmpty()) {
 			subraces = race.getSubRaces()
 				.stream()
 				.filter(r -> !r.isView())
-				.filter(r -> books.isEmpty() ? true : books.contains(r.getBook().getSource()))
+				.filter(r -> books.isEmpty() || books.contains(r.getBook().getSource()))
 				.map(race1 -> new RaceApi(race1, books))
 				.collect(Collectors.toList());
 		}
@@ -66,8 +71,5 @@ public class RaceApi {
 		} else if (race.getBook().getType() == TypeBook.CUSTOM) {
 			group = new GroupApi("Расы Homebrew", (byte) 3);
 		}
-	}
-	public RaceApi(Race race) {
-		this(race, Collections.emptySet());
 	}
 }

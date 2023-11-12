@@ -2,6 +2,7 @@ package club.dnd5.portal.model.creature;
 
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.util.ChallengeRating;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,10 +18,9 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-
 @Entity
 @Table(name = "creatures")
-public class Creature {
+public class Creature implements FoundryCommon {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -109,7 +109,6 @@ public class Creature {
 	private Integer vibration;
 	private Integer blindsight;
 	private Integer blindsightRadius;
-
 	private byte passivePerception;
 	private String passivePerceptionBonus;
 
@@ -143,6 +142,7 @@ public class Creature {
 	@JoinColumn(name = "creature_id")
 	private List<CreatureSpell> spells;
 
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
@@ -170,13 +170,8 @@ public class Creature {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
 	private Short page;
-
-	private String img;
-
-	public void addFeat(CreatureFeat feat) {
-		feats.add(feat);
-	}
 
 	public String getSizeName() {
 		return size.getSizeName(type);
@@ -190,51 +185,6 @@ public class Creature {
 		return alignment;
 	}
 
-	public String strengthText() {
-		return getFormatAbility(strength);
-	}
-
-	public String dexterityText() {
-		return getFormatAbility(dexterity);
-	}
-
-	public String constitutionText() {
-		return getFormatAbility(constitution);
-	}
-
-	public String intellectText() {
-		return getFormatAbility(intellect);
-	}
-
-	public String wizdomText() {
-		return getFormatAbility(wizdom);
-	}
-
-	public String charismaText() {
-		return getFormatAbility(charisma);
-	}
-
-	private String getFormatAbility(byte ability) {
-		return String.format("%d (%+d)", ability, (ability - 10) < 0 ? (ability - 11) / 2 : (ability - 10) / 2);
-	}
-
-	public String getArmorTypeString() {
-		return armorTypes.stream().map(ArmorType::getCyrillicName).collect(Collectors.joining(", "));
-	}
-
-	public String getHp() {
-		if (bonusHP == null && diceHp == null && suffixHP == null) {
-			return String.format("%d", averageHp);
-		}
-		if (bonusHP == null && diceHp == null && suffixHP != null) {
-			return String.format("%d %s", averageHp, suffixHP);
-		}
-		if (bonusHP == null) {
-			return String.format("%d (%d%s)", averageHp, countDiceHp, diceHp.getName());
-		}
-		return String.format("%d (%d%s %s %d)", averageHp, countDiceHp, diceHp.getName(), bonusHP >=0 ? "+" : "-", Math.abs(bonusHP));
-	}
-
 	public String getHpFormula() {
 		if (bonusHP == null && diceHp == null && suffixHP == null) {
 			return String.format("%d", averageHp);
@@ -245,7 +195,7 @@ public class Creature {
 		if (bonusHP == null) {
 			return String.format("%d%s", countDiceHp, diceHp.name());
 		}
-		return String.format("%d%s%s%d", countDiceHp, diceHp.name(),  bonusHP>=0 ? "+" : "-", Math.abs(bonusHP));
+		return String.format("%d%s%s%d", countDiceHp, diceHp.name(), bonusHP >= 0 ? "+" : "-", Math.abs(bonusHP));
 	}
 
 	public String getSense() {
@@ -273,21 +223,6 @@ public class Creature {
 		return String.join(", ", sense);
 	}
 
-	public String getAllSpeed() {
-		return String.format("%d фт.", speed) + (flySpeed == null ? "" : String.format(", летая %d фт.", flySpeed))
-				+ (hover != null && hover == 1 ? " (парит)" : "")
-				+ (swimmingSpped == null ? "" : String.format(", плавая %d фт.", swimmingSpped))
-				+ (diggingSpeed == null ? "" : String.format(", копая %d фт.", diggingSpeed))
-				+ (climbingSpeed == null ? "" : String.format(", лазая %d фт.", climbingSpeed));
-	}
-
-	public String getAllSpeedEnglish() {
-		return String.format("%d ft.", speed) + (flySpeed == null ? "" : String.format(", fly %d ft.", flySpeed))
-				+ (swimmingSpped == null ? "" : String.format(", swim %d ft.", swimmingSpped))
-				+ (diggingSpeed == null ? "" : String.format(", burrow %d ft.", diggingSpeed))
-				+ (climbingSpeed == null ? "" : String.format(", climb %d ft.", climbingSpeed));
-	}
-
 	public List<Action> getActions(ActionType type){
 		return actions.stream()
 			.filter(a -> a.getActionType() == type)
@@ -298,28 +233,19 @@ public class Creature {
  		return actions;
 	}
 
-	public List<Action> getReactions(){
-		return actions.stream().filter(a -> a.getActionType() == ActionType.REACTION).collect(Collectors.toList());
-	}
-
-	public List<Action> getBonusActions(){
-		return actions.stream().filter(a -> a.getActionType() == ActionType.BONUS).collect(Collectors.toList());
-	}
-
-	public List<Action> getLegendaries(){
-		return actions.stream().filter(a -> a.getActionType() == ActionType.LEGENDARY).collect(Collectors.toList());
-	}
-
 	public Byte getSavingThrow(AbilityType abilityType) {
-		return savingThrows.stream().filter(st-> st.getAbility() == abilityType).map(SavingThrow::getBonus).findFirst().orElse(null);
+		return savingThrows.stream()
+			.filter(st-> st.getAbility() == abilityType)
+			.map(SavingThrow::getBonus)
+			.findFirst().orElse(null);
 	}
 
 	public Byte getSkillBonus(SkillType skillType) {
-		return skills.stream().filter(st-> st.getType() == skillType).map(Skill::getBonus).findFirst().orElse(null);
-	}
-
-	public int getBonusHpAbs() {
-		return bonusHP == null ? 0 : Math.abs(bonusHP);
+		return skills.stream()
+			.filter(st-> st.getType() == skillType)
+			.map(Skill::getBonus)
+			.findFirst()
+			.orElse(null);
 	}
 
 	public String getUrlName() {

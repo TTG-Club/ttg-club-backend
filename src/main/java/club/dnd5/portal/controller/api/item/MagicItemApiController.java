@@ -20,8 +20,9 @@ import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -34,14 +35,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Tag(name = "Magic Item", description = "The Magic Item API")
+@RequiredArgsConstructor
+@Tag(name = "Магические предметы", description = "The Magic Item API")
 @RestController
 public class MagicItemApiController {
-	@Autowired
-	private MagicItemRepository magicItemRepository;
-	@Autowired
-	private ImageRepository imageRepository;
+	private final MagicItemRepository magicItemRepository;
+	private final ImageRepository imageRepository;
 
+	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<MagicItemApi> getItems(@RequestBody MagicItemRequesApi request) {
 		Specification<MagicItem> specification = null;
@@ -100,6 +101,7 @@ public class MagicItemApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Получение магического предмета по английскому имени")
 	@PostMapping(value = "/api/v1/items/magic/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MagicItemDetailApi getItem(@PathVariable String englishName) {
 		MagicItem item = magicItemRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
@@ -110,7 +112,7 @@ public class MagicItemApiController {
 		}
 		return itemApi;
 	}
-
+	@Operation(summary = "Получение фильтра для магических предметов")
 	@PostMapping("/api/v1/filters/items/magic")
 	public FilterApi getMagicItemsFilter() {
 		FilterApi filters = new FilterApi();
@@ -168,9 +170,10 @@ public class MagicItemApiController {
 		return filters;
 	}
 
+	@Operation(summary = "Получение json магического предмета в формате FVTT по id")
 	@GetMapping("/api/fvtt/v1/magic-item/{id}")
 	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
-		MagicItem item = magicItemRepository.findById(id).get();
+		MagicItem item = magicItemRepository.findById(id).orElseThrow(PageNotFoundException::new);
 		response.setContentType("application/json");
 		String file = String.format("attachment; filename=\"%s.json\"", item.getEnglishName());
 		response.setHeader("Content-Disposition", file);

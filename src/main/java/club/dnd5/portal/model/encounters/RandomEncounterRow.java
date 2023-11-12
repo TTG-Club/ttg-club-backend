@@ -21,14 +21,14 @@ import lombok.Setter;
 @Setter
 
 @Entity()
-@Table(name = "random_encounters", 
+@Table(name = "random_encounters",
 	indexes = {@Index(name = "fn_index", columnList = "start, end, level, type")}
 )
 public class RandomEncounterRow {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	
+
 	private int start;
 	private int end;
 
@@ -36,18 +36,18 @@ public class RandomEncounterRow {
 
 	@Enumerated (EnumType.STRING)
 	private HabitatType type;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "encounter_id")
-	private RandomEncounterеTable encounter;
+	private RandomEncounterTable encounter;
 
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
-	
+
 	public String getK100() {
 		if (start == end) {
 			return String.format("%02d", start);

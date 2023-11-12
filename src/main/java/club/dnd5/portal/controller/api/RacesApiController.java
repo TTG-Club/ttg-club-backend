@@ -19,7 +19,7 @@ import club.dnd5.portal.repository.datatable.RaceRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -34,14 +34,12 @@ import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Tag(name = "Race", description = "The Race API")
+@RequiredArgsConstructor
+@Tag(name = "Расы и происхождения", description = "API по рассам и происхождениям")
 @RestController
 public class RacesApiController {
-	@Autowired
-	private RaceRepository raceRepository;
-
-	@Autowired
-	private ImageRepository imageRepository;
+	private final RaceRepository raceRepository;
+	private final ImageRepository imageRepository;
 
 	@PostMapping(value = "/api/v1/races", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RaceApi> getRaces(@RequestBody RaceRequestApi request) {

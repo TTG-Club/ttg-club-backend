@@ -20,7 +20,7 @@ public class TypeDetailApi {
 	private String name;
 	private List<String> tags;
 	public TypeDetailApi(Creature beast) {
-		name = beast.getType().getCyrilicName();
+		name = beast.getType().getCyrillicName();
 		if (beast.getRaceName() != null) {
 			tags = Arrays.asList(beast.getRaceName().split(","));
 		}

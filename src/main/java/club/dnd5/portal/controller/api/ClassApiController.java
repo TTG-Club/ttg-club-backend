@@ -1,28 +1,11 @@
 package club.dnd5.portal.controller.api;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import club.dnd5.portal.exception.PageNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.ClassApi;
 import club.dnd5.portal.dto.api.classes.ClassDetailApi;
 import club.dnd5.portal.dto.api.classes.ClassRequestApi;
+import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -34,17 +17,30 @@ import club.dnd5.portal.repository.classes.ArchetypeRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Class", description = "The Class API")
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Tag(name = "Класс", description = "API классов")
+@RequiredArgsConstructor
 @RestController
 public class ClassApiController {
-	@Autowired
-	private ClassRepository classRepo;
-	@Autowired
-	private ArchetypeRepository archetypeRepository;
-
-	@Autowired
-	private ImageRepository imageRepository;
+	private final ClassRepository classRepo;
+	private final ArchetypeRepository archetypeRepository;
+	private final ImageRepository imageRepository;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {

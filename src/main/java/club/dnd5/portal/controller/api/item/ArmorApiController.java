@@ -12,8 +12,9 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -28,12 +29,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Tag(name = "Armor", description = "The Armor API")
+@RequiredArgsConstructor
+@Tag(name = "Доспехи (броня)", description = "The Armor API")
 @RestController
 public class ArmorApiController {
-	@Autowired
-	private ArmorRepository armorRepository;
+	private final ArmorRepository armorRepository;
 
+	@Operation(summary = "Получение краткого списка доспехов")
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ArmorApi> getItem(@RequestBody ArmorRequestApi request) {
 		Specification<Armor> specification = null;
@@ -57,6 +59,7 @@ public class ArmorApiController {
 			.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "Получение доспеха по английскому имени")
 	@PostMapping(value = "/api/v1/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ArmorDetailApi getOption(@PathVariable String englishName) {
 		return new ArmorDetailApi(armorRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new));

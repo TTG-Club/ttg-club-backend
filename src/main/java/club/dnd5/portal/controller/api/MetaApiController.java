@@ -26,7 +26,7 @@ import club.dnd5.portal.repository.InfoPagesRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -39,58 +39,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Tag(name = "Meta", description = "The meta API")
+@Tag(name = "Метаданные", description = "API для получения метаданных по странице")
+@RequiredArgsConstructor
 @RestController
 public class MetaApiController {
-	@Autowired
-	private ImageRepository imageRepository;
-
-	@Autowired
-	private ClassRepository classRepository;
-
-	@Autowired
-	private RaceRepository raceRepository;
-
-	@Autowired
-	private TraitRepository traitRepository;
-
-	@Autowired
-	private BackgroundRepository backgroundRepository;
-
-	@Autowired
-	private SpellRepository spellRepository;
-
-	@Autowired
-	private OptionRepository optionRepository;
-
-	@Autowired
-	private WeaponRepository weaponRepository;
-
-	@Autowired
-	private ArmorRepository armorRepository;
-
-	@Autowired
-	private ItemRepository itemRepository;
-
-	@Autowired
-	private MagicItemRepository magicItemRepository;
-
-	@Autowired
-	private BestiaryRepository bestiaryItemRepository;
-
-	@Autowired
-	private ScreenRepository screenRepository;
-
-	@Autowired
-	private GodRepository godRepository;
-
-	@Autowired
-	private RuleRepository ruleRepository;
-
-	@Autowired
-	private BookRepository bookRepository;
-	@Autowired
-	private InfoPagesRepository infoPagesRepository;
+	private final ImageRepository imageRepository;
+	private final ClassRepository classRepository;
+	private final RaceRepository raceRepository;
+	private final TraitRepository traitRepository;
+	private final BackgroundRepository backgroundRepository;
+	private final SpellRepository spellRepository;
+	private final OptionRepository optionRepository;
+	private final WeaponRepository weaponRepository;
+	private final ArmorRepository armorRepository;
+	private final ItemRepository itemRepository;
+	private final MagicItemRepository magicItemRepository;
+	private final BestiaryRepository bestiaryItemRepository;
+	private final ScreenRepository screenRepository;
+	private final GodRepository godRepository;
+	private final RuleRepository ruleRepository;
+	private final BookRepository bookRepository;
+	private final InfoPagesRepository infoPagesRepository;
 
 	@GetMapping(value = "/api/v1/meta/*", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getNotMapping() {
@@ -124,15 +93,16 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/classes/{classEnglishName}/{archetypeEnglishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getArchetypeMeta(@PathVariable String classEnglishName, @PathVariable String archetypeEnglishName) {
-		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		HeroClass heroClass = classRepository.findByEnglishName(classEnglishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
-		Optional<Archetype> archetype = heroClass.getArchetypes().stream()
+		Archetype archetype = heroClass.getArchetypes().stream()
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeEnglishName.replace('_', ' ')))
-				.findFirst();
+				.findFirst().orElseThrow(PageNotFoundException::new);
 		meta.setTitle(String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",
-				StringUtils.capitalize(archetype.get().getName().toLowerCase()), heroClass.getName(), heroClass.getEnglishName()));
+				StringUtils.capitalize(archetype.getName().toLowerCase()), heroClass.getName(), heroClass.getEnglishName()));
 		meta.setDescription(String.format("%s - описание %s класса %s из D&D 5 редакции",
-				archetype.get().getName(), heroClass.getArchetypeName(), heroClass.getName()));
+				archetype.getName(), heroClass.getArchetypeName(), heroClass.getName()));
 		meta.setMenu("Классы");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
 		if (!images.isEmpty()) {
@@ -151,12 +121,13 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getRaceMeta(@PathVariable String englishName) {
-		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
+		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
-		meta.setTitle(race.get().getName() + " | Расы и происхождения D&D 5e");
-		meta.setDescription(String.format("%s - раса персонажа по D&D 5 редакции", race.get().getName()));
+		meta.setTitle(race.getName() + " | Расы и происхождения D&D 5e");
+		meta.setDescription(String.format("%s - раса персонажа по D&D 5 редакции", race.getName()));
 		meta.setMenu("Расы и происхождения");
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			meta.setImage(images.iterator().next());
 		}
@@ -165,23 +136,22 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/races/{englishName}/{subrace}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<MetaApi> getSubraceMeta(@PathVariable String englishName, @PathVariable String subrace) {
-		Optional<Race> race = raceRepository.findByEnglishName(englishName.replace('_', ' '));
-		if (race.isPresent()) {
-			Optional<Race> subRace = race.get().getSubRaces()
-				.stream()
-				.filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' ')))
-				.findFirst();
-			MetaApi meta = new MetaApi();
-			meta.setTitle(String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.get().getName()));
-			meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.get().getName()));
-			meta.setMenu("Расы и происхождения");
-			Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.get().getId());
-			if (!images.isEmpty()) {
-				meta.setImage(images.iterator().next());
-			}
-			return ResponseEntity.ok(meta);
+		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
+		Race subRace = race.getSubRaces()
+			.stream()
+			.filter(r -> r.getEnglishName().equalsIgnoreCase(subrace.replace('_', ' ')))
+			.findFirst()
+			.orElseThrow(PageNotFoundException::new);
+		MetaApi meta = new MetaApi();
+		meta.setTitle(String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.getName()));
+		meta.setDescription(String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.getName()));
+		meta.setMenu("Расы и происхождения");
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.getId());
+		if (!images.isEmpty()) {
+			meta.setImage(images.iterator().next());
 		}
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(meta);
 	}
 
 	@GetMapping(value = "/api/v1/meta/traits", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -397,12 +367,14 @@ public class MetaApiController {
 
 	@GetMapping(value = "/api/v1/meta/screens/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getScreenMeta(@PathVariable String englishName) {
-		Optional<Screen> screen = screenRepository.findByEnglishName(englishName.replace('_', ' '));
+		Screen screen = screenRepository.findByEnglishName(englishName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
-		meta.setTitle(String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.get().getName(), screen.get().getEnglishName()));
-		meta.setDescription(String.format("%s (%s) Ширма Мастера Подземелий и Драконов по D&D 5 редакции", screen.get().getName(), screen.get().getEnglishName()));
+		meta.setTitle(String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.getName(), screen.getEnglishName()));
+		meta.setDescription(String.format("%s (%s) Ширма Мастера Подземелий и Драконов по D&D 5 редакции",
+			screen.getName(), screen.getEnglishName()));
 		meta.setMenu("Ширма");
-		meta.setKeywords(screen.get().getAltName() + " " + screen.get().getEnglishName());
+		meta.setKeywords(screen.getAltName() + " " + screen.getEnglishName());
 		return meta;
 	}
 

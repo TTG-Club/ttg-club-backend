@@ -1,6 +1,6 @@
 package club.dnd5.portal.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,14 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    // inject dependencies
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-
-    @Autowired
-    private UserDetailsService customUserDetailsService;
+    private final JwtTokenProvider tokenProvider;
+    private final UserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

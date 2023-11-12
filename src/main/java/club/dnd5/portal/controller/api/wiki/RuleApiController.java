@@ -13,7 +13,7 @@ import club.dnd5.portal.repository.datatable.RuleRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -28,11 +28,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Tag(name = "Rule", description = "The Rule API")
+@Tag(name = "Правила", description = "API по терминам и правилам")
+@RequiredArgsConstructor
 @RestController
 public class RuleApiController {
-	@Autowired
-	private RuleRepository ruleRepository;
+	private final RuleRepository ruleRepository;
 
 	@PostMapping(value = "/api/v1/rules", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RuleApi> getRules(@RequestBody RuleRequestApi request) {
