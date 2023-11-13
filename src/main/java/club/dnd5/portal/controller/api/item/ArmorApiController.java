@@ -125,7 +125,7 @@ public class ArmorApiController {
 		otherFilters.add(strengthFilter);
 
 		FilterApi disadvantageFilter = new FilterApi("Помеха при ношение", "disadvantage");
-		List<FilterValueApi> disadvantageValues = new ArrayList<>();
+		List<FilterValueApi> disadvantageValues = new ArrayList<>(2);
 		disadvantageValues.add(new FilterValueApi("Есть", "yes"));
 		disadvantageValues.add(new FilterValueApi("Нету", "no"));
 		disadvantageFilter.setValues(disadvantageValues);
