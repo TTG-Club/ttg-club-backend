@@ -1,12 +1,12 @@
 package club.dnd5.portal.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
@@ -35,7 +35,10 @@ public enum DamageType {
 	DARK("дробящий, колющий и рубящий, пока находится в области тусклого света или тьмы"), //19
 	FORCE("силовое поле"), //20
 	METAL_WEAPON("дробящий, колющий и рубящий урон от оружия из металла"), //21
-	VORPAL_SWORD("рубящий удар мечом головорубом"); //22
+	VORPAL_SWORD("рубящий удар мечом головорубом"), //22
+
+	NECROTIC("некротическая энергия"),
+	THUNDER("звук");
 
 	private String cyrilicName;
 
