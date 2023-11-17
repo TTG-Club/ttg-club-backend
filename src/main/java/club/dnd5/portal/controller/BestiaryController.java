@@ -45,13 +45,18 @@ public class BestiaryController {
 				beast.getAligment(),
 				beast.getChallengeRating()));
 		Collection<Token> images = tokenRepository.findByRefIdAndType(beast.getId(), "круглый");
+		String imageUrl;
 		if (!images.isEmpty()) {
-			model.addAttribute("metaImage", images
+			imageUrl = images
 					.stream()
 					.map(Token::getUrl)
 					.findFirst()
-					.orElse(""));
+					.orElse("");
+
+		} else {
+			imageUrl = "https://img.ttg.club/tokens/no-img.webp";
 		}
+		model.addAttribute("metaImage", imageUrl);
 		model.addAttribute("menuTitle", "Бестиарий");
 		return "spa";
 	}
