@@ -422,6 +422,16 @@ public class MetaApiController {
 		return meta;
 	}
 
+	@GetMapping(value = "/api/v1/meta/tools/tokenator", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MetaApi getTokenatorMeta() {
+		MetaApi meta = new MetaApi();
+		meta.setTitle("Токенатор (Tokenator) | TTG Club");
+		meta.setDescription("Создание собственных токенов для настольных игр | TTG Club");
+		meta.setMenu("Токенатор");
+		meta.setKeywords("tokenator, tokenstamp, token stamp, token creator, token creating, токенатор, токенштамп, токен штамп, создание токена, создать токен, создание жетона, создать жетон");
+		return meta;
+	}
+
 	@GetMapping(value = "/api/v1/meta/books/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getBooksMeta(@PathVariable String englishName) {
 		Book book = bookRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
