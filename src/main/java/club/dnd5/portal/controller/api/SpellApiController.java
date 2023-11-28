@@ -159,15 +159,15 @@ public class SpellApiController {
 				Specification<Spell> addSpec = null;
 				for (String distance : request.getFilter().getDistance()) {
 					addSpec = SpecificationUtil.getOrSpecification(addSpec,
-							(root, query, cb) -> cb.like(root.get("distance"), "%" + distance + "%"));
+						(root, query, cb) -> cb.equal(root.get("distance"), distance));
 				}
 				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 			}
 			if (request.getFilter().getDuration() != null && !request.getFilter().getDuration().isEmpty()) {
 				Specification<Spell> addSpec = null;
-				for (String distance : request.getFilter().getDuration()) {
+				for (String duration : request.getFilter().getDuration()) {
 					addSpec = SpecificationUtil.getOrSpecification(addSpec,
-						(root, query, cb) -> cb.like(root.get("duration"), "%" + distance + "%"));
+						(root, query, cb) -> cb.like(root.get("duration"), "%" + duration + "%"));
 				}
 				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 			}
@@ -285,6 +285,7 @@ public class SpellApiController {
 		values.add(new FilterValueApi("касание", "Касание"));
 		values.add(new FilterValueApi("5 футов", "5 футов"));
 		values.add(new FilterValueApi("10 футов", "10 футов"));
+		values.add(new FilterValueApi("20 футов", "20 футов"));
 		values.add(new FilterValueApi("25 футов", "25 футов"));
 		values.add(new FilterValueApi("30 футов", "30 футов"));
 		values.add(new FilterValueApi("40 футов", "40 футов"));
@@ -292,6 +293,7 @@ public class SpellApiController {
 		values.add(new FilterValueApi("60 футов", "60 футов"));
 		values.add(new FilterValueApi("90 футов", "90 футов"));
 		values.add(new FilterValueApi("100 футов", "100 футов"));
+		values.add(new FilterValueApi("120 футов", "120 футов"));
 		values.add(new FilterValueApi("150 футов", "150 футов"));
 		values.add(new FilterValueApi("300 футов", "300 футов"));
 		values.add(new FilterValueApi("400 футов", "400 футов"));
