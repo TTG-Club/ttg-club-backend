@@ -13,7 +13,7 @@ public enum CreatureSize {
 	LARGE("Большой", "Большая", "Большое"), // 3
 	HUGE("Огромный", "Огромная", "Огромное"), // 4
 	GARGANTUAN("Громадный", "Громадная", "Громадное"), //5
-	SMALL_MEDIUM("Средний или Маленький");
+	SMALL_MEDIUM("Средний или Маленький", "Средняя или Маленькая", "Среднее или Маленькое");
 
 	private final String [] names;
 	CreatureSize(String... names){
