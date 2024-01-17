@@ -28,7 +28,7 @@ public class GodApi {
 		if (god.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
-		alignment = god.getAligment().getCyrilicName();
+		alignment = god.getAligment().getCyrillicName();
 		shortAlignment = god.getAligment().getShortName();
 	}
 }

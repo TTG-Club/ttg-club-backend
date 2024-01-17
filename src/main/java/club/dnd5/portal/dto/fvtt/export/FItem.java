@@ -1,16 +1,12 @@
 package club.dnd5.portal.dto.fvtt.export;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.CreatureFeat;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.*;
 
 @Getter
 @Setter
@@ -37,7 +33,6 @@ public class FItem {
 		name = feat.getName();
 		type = "feat";
 		system = new FItemSystem(feat);
-		img = feat.getImg();
 	}
 
 	public FItem(Action action) {
@@ -48,9 +43,6 @@ public class FItem {
 			type = "feat";
 		}
 		system = new FItemSystem(action);
-		if (action.getImg() != null) {
-			img = action.getImg();
-		}
 	}
 
 	public FItem(ArmorType armor) {

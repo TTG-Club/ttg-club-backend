@@ -1,17 +1,16 @@
 package club.dnd5.portal.dto.api.classes;
 
-import javax.validation.constraints.NotNull;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+@JsonInclude(JsonInclude.Include.NON_NULL)
 
 @Getter
 @Setter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NameApi {
-	@NotNull
+	@NonNull
 	private String rus;
-	@NotNull
+	@NonNull
 	private String eng;
+	private String alt;
 }

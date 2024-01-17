@@ -40,11 +40,11 @@ public enum DamageType {
 	NECROTIC("некротическая энергия"),
 	THUNDER("звук");
 
-	private String cyrilicName;
+	private final String cyrillicName;
 
 	public static DamageType parse(String damageTypeString) {
 		for (DamageType damageType : values()) {
-			if (damageType.cyrilicName.equals(damageTypeString)) {
+			if (damageType.cyrillicName.equals(damageTypeString)) {
 				return damageType;
 			}
 		}

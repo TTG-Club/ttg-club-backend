@@ -11,6 +11,7 @@ import club.dnd5.portal.util.MarkdownUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,40 +28,66 @@ import java.util.stream.Collectors;
 @Setter
 public class BeastDetailApi extends BeastApi {
 	private int id;
+	@Schema(description = "опыт")
 	private Integer experience;
+	@Schema(description = "бонус мастерства")
 	private String proficiencyBonus;
+	@Schema(description = "размер")
 	private SizeApi size;
+	@Schema(description = "мировоозрение")
 	private String alignment;
+	@Schema(description = "значение класса доспеха")
 	private Byte armorClass;
+	@Schema(description = "список доспехов")
 	private Collection<UrlApi> armors;
+	@Schema(description = "свободный текст для доспехов")
 	private String armorText;
+	@Schema(description = "хиты")
 	private HitPointsApi hits;
+	@Schema(description = "скорости")
 	private Collection<NameValueApi> speed;
+	@Schema(description = "характеристики")
 	private AbilityApi ability;
-
+	@Schema(description = "бонусы к спасброскам")
 	private Collection<NameValueApi> savingThrows;
+	@Schema(description = "бонусы к умениям")
 	private Collection<NameValueApi> skills;
-
+	@Schema(description = "сопротивление к урону")
 	private Collection<String> damageResistances;
+	@Schema(description = "иммунитеты к урону")
 	private Collection<String> damageImmunities;
+	@Schema(description = "уязвимости к урону")
 	private Collection<String> damageVulnerabilities;
+	@Schema(description = "иммунитеты к состояниям")
 	private Collection<String> conditionImmunities;
+	@Schema(description = "чувства")
 	private SenseApi senses;
+	@Schema(description = "языки")
 	private Collection<String> languages;
 
+	@Schema(description = "умения")
 	private Collection<NameValueApi> feats;
+	@Schema(description = "действия")
 	private Collection<NameValueApi> actions;
+	@Schema(description = "реакции")
 	private Collection<NameValueApi> reactions;
+	@Schema(description = "свободный текст к реакциям")
 	private String reaction;
+	@Schema(description = "бонусный действия")
 	private Collection<NameValueApi> bonusActions;
+	@Schema(description = "легендарный действия")
 	private LegendaryApi legendary;
+	@Schema(description = "мистические действия")
 	private Collection<NameValueApi> mysticalActions;
-
+	@Schema(description = "текстовое описание")
 	private String description;
+	@Schema(description = "тэги")
 	private Collection<TagApi> tags;
-
+	@Schema(description = "места обитания")
 	private Collection<String> environment;
+	@Schema(description = "ссылки на токены и изображения")
 	private Collection<String> images;
+	@Schema(description = "логово")
 	private LairApi lair;
 
 	public BeastDetailApi(Creature beast) {
@@ -148,24 +175,24 @@ public class BeastDetailApi extends BeastApi {
 		}
 		if (!beast.getResistanceDamages().isEmpty()) {
 			damageResistances = beast.getResistanceDamages().stream()
-				.map(DamageType::getCyrilicName)
+				.map(DamageType::getCyrillicName)
 				.collect(Collectors.toList());
 		}
 		if (!beast.getImmunityDamages().isEmpty()) {
 			damageImmunities = beast.getImmunityDamages()
 				.stream()
-				.map(DamageType::getCyrilicName)
+				.map(DamageType::getCyrillicName)
 				.collect(Collectors.toList());
 		}
 		if (!beast.getVulnerabilityDamages().isEmpty()) {
 			damageVulnerabilities = beast.getVulnerabilityDamages()
 				.stream()
-				.map(DamageType::getCyrilicName)
+				.map(DamageType::getCyrillicName)
 				.collect(Collectors.toList());
 		}
 		if (!beast.getImmunityStates().isEmpty()) {
 			conditionImmunities = beast.getImmunityStates().stream()
-				.map(Condition::getCyrilicName)
+				.map(Condition::getCyrillicName)
 				.collect(Collectors.toList());
 		}
 		senses = new SenseApi(beast);
