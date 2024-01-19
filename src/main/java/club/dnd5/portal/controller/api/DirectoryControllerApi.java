@@ -2,10 +2,7 @@ package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.DirectoryApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
-import club.dnd5.portal.model.Alignment;
-import club.dnd5.portal.model.CreatureSize;
-import club.dnd5.portal.model.CreatureType;
-import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.creature.Condition;
 import club.dnd5.portal.model.creature.HabitatType;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +23,16 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v2/")
 @RestController
 public class DirectoryControllerApi {
+    @Operation(summary = "Дайсы")
+    @GetMapping("/dices")
+    public DirectoryApi getDices() {
+        return new DirectoryApi(
+                Arrays.stream(Dice.values())
+                        .map(type -> new NameApi(type.getName(), type.name()))
+                        .collect(Collectors.toList())
+        );
+    }
+
     @Operation(summary = "Типы существ")
     @GetMapping("/beast/types")
     public DirectoryApi getCreatureType() {
@@ -35,6 +42,7 @@ public class DirectoryControllerApi {
                         .collect(Collectors.toList())
         );
     }
+
     @Operation(summary = "Размеры существ")
     @GetMapping("/size")
     public DirectoryApi getCreatureSize() {
@@ -64,6 +72,7 @@ public class DirectoryControllerApi {
                         .collect(Collectors.toList())
         );
     }
+
     @Operation(summary = "Мировоззрение")
     @GetMapping("/alignments")
     public DirectoryApi getAlignments() {
@@ -73,6 +82,7 @@ public class DirectoryControllerApi {
                         .collect(Collectors.toList())
         );
     }
+
     @Operation(summary = "Места обитания")
     @GetMapping("/environments")
     public DirectoryApi getEnvironments() {

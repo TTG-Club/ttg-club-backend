@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityExistsException;
@@ -36,7 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Tag(name = "Бестиарий версии 2", description = "API для сущест из бестиария")
+@Tag(name = "Бестиарий v2", description = "API для сущест из бестиария")
 @RequestMapping("/api/v2/")
 @RestController
 public class Bestiary2ApiController {
@@ -44,8 +43,8 @@ public class Bestiary2ApiController {
     private final ImageRepository imageRepository;
     private final TokenRepository tokenRepository;
     @Operation(summary = "Получение краткого списка сушеств")
-    @GetMapping(value = "/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<BeastApi> getBestiary(BeastRequesApi request) {
+    @GetMapping(value = "/bestiary")
+    public List<BeastApi> getBestiary(@RequestParam BeastRequesApi request) {
         Specification<Creature> specification = null;
         Optional<BeastRequesApi> optionalRequest = Optional.ofNullable(request);
         if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
@@ -191,7 +190,7 @@ public class Bestiary2ApiController {
     }
 
     @Operation(summary = "Получение сушества по английскому имени")
-    @GetMapping(value = "/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/bestiary/{englishName}")
     public BeastDetailApi getBeast(@PathVariable String englishName) {
         Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
                 .orElseThrow(PageNotFoundException::new);
@@ -211,7 +210,7 @@ public class Bestiary2ApiController {
     @Operation(summary = "Добавление существа в бестиарий")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/api/v2/bestiary")
-    public void createBeast(BeastDetailRequest request) {
+    public void createBeast(@RequestBody BeastDetailRequest request) {
         Creature beast = new Creature();
         Optional<Creature> exist = beastRepository.findByEnglishName(request.getName().getEng());
         if (exist.isPresent()) {
@@ -226,7 +225,7 @@ public class Bestiary2ApiController {
     @Operation(summary = "Обнавление существа из бестиарии")
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/api/v2/bestiary")
-    public void updateBeast(BeastDetailRequest request) {
+    public void updateBeast(@RequestBody BeastDetailRequest request) {
         Creature beast = beastRepository.findById(request.getId())
                 .orElseThrow(PageNotFoundException::new);
         beastRepository.save(beast);
