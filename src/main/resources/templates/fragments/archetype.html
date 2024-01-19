@@ -65,7 +65,7 @@
               >
                 <a
                   class="tip_scroll"
-                  th:utext="${iterStat.last} ? ${trait.name.toLowerCase()} : ${trait.name.toLowerCase()} + ', '"
+                  th:utext="${iterStat.last} ? ${trait.name.toLowerCase() + trait.suffix} : ${trait.name.toLowerCase() + trait.suffix} + ', '"
                   th:href="|#c${trait.child eq null ? trait.id : trait.child}|"
                 ></a>
               </detail-tooltip>
