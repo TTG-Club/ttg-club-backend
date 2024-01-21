@@ -47,10 +47,9 @@ public class TokenBorderApiController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@PostMapping("/upload")
+	@PostMapping(value = "/upload",consumes = {"multipart/form-data"} )
 	public ResponseEntity<String> uploadTokenBorder(@RequestParam("file") MultipartFile multipartFile) {
 		String imageUrl = tokenBorderService.uploadTokenBorder(multipartFile);
 		return ResponseEntity.ok(imageUrl);
 	}
-
 }

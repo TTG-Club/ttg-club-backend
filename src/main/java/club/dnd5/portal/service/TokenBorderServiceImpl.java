@@ -26,7 +26,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 
 	private final TokenBorderRepository tokenBorderRepository;
 
-	private final static String TOKEN_BORDERS_PATH = "/resources/token-borders/";
+	private final static String TOKEN_BORDERS_PATH = "src/main/resources/tokens/borders/";
 
 	private TokenBorderApi mapToApi(TokenBorder tokenBorder) {
 		return TokenBorderApi.builder()
@@ -117,9 +117,6 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 		String timestamp = now.format(formatter);
 
-		int dotIndex = fileName.lastIndexOf('.');
-		String fileExtension = (dotIndex == -1) ? "" : fileName.substring(dotIndex);
-
-		return fileName + "_" + timestamp + fileExtension;
+		return timestamp + "_" + fileName;
 	}
 }
