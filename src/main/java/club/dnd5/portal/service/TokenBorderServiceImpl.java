@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,24 +90,36 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 
 	@Override
 	public String uploadTokenBorder(MultipartFile multipartFile) {
-		String fileName = multipartFile.getName();
-		String filePath = TOKEN_BORDERS_PATH + fileName + ".webp";
+		String fileName = multipartFile.getOriginalFilename();
+		String uniqueFileName = generateUniqueFileName(fileName);
+		String filePath = TOKEN_BORDERS_PATH + uniqueFileName;
+
 		try {
 			saveFile(multipartFile, filePath);
-			return constructImageUrl(fileName);
+			return constructImageUrl(uniqueFileName);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new PageNotFoundException();
 		}
-		return null;
 	}
 
 	private String constructImageUrl(String fileName) {
-		return "https://img.ttg.club/tokens/borders/" + fileName + ".webp";
+		return "https://img.ttg.club/tokens/borders/" + fileName;
 	}
 
 	private void saveFile(MultipartFile multipartFile, String filePath) throws IOException {
 		byte[] bytes = multipartFile.getBytes();
 		Path path = Paths.get(filePath);
 		Files.write(path, bytes);
+	}
+
+	private String generateUniqueFileName(String fileName) {
+		LocalDateTime now = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+		String timestamp = now.format(formatter);
+
+		int dotIndex = fileName.lastIndexOf('.');
+		String fileExtension = (dotIndex == -1) ? "" : fileName.substring(dotIndex);
+
+		return fileName + "_" + timestamp + fileExtension;
 	}
 }
