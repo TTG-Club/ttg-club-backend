@@ -84,8 +84,8 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	}
 
 	@Override
-	public void deleteTokenBorder(TokenBorder tokenBorder) {
-		tokenBorderRepository.delete(tokenBorder);
+	public void deleteTokenBorderById(Long id) {
+		tokenBorderRepository.deleteById(id);
 	}
 
 	@Override
