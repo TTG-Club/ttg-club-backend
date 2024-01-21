@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface TokenBorderRepository extends JpaRepository<TokenBorder, Long> {
-	@Query(value = "SELECT * FROM token_border WHERE type = :type", nativeQuery = true)
+	@Query(value = "SELECT * FROM token_borders WHERE type = :type", nativeQuery = true)
 	List<TokenBorder> getTokenBordersByType(String type);
 }
