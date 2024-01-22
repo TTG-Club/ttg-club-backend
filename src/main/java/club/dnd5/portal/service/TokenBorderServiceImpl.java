@@ -99,7 +99,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 				throw new StorageException("Failed to store empty file.");
 			}
 
-			String fileName = sanitizeFileName(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+			String fileName = Objects.requireNonNull(multipartFile.getOriginalFilename());
 			String uniqueFileName = generateUniqueFileName(fileName);
 
 			Path path = Paths.get(rootLocation);
@@ -121,15 +121,23 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	}
 
 	private String generateUniqueFileName(String fileName) {
+		String sanitizedFileName = sanitizeFileName(fileName);
 		LocalDateTime now = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 		String timestamp = now.format(formatter);
 
-		return timestamp + "_" + fileName;
+		return timestamp + "_" + sanitizedFileName;
 	}
 
 	private String sanitizeFileName(String fileName) {
-		// Remove any path components and ".." sequences from the file name
-		return fileName.replaceAll("[/\\\\]+|\\.\\.", "");
+		// Remove any path components ("/" or "\") and ".." sequences from the file name
+		String sanitizedFileName = fileName.replaceAll("[/\\\\]+|\\.\\.", "");
+
+		// Ensure that the file has a valid and expected extension
+		if (!sanitizedFileName.matches("^[a-zA-Z0-9_-]+\\.(jpg|png|gif|webp)$")) {
+			throw new SecurityException("Invalid file extension.");
+		}
+
+		return sanitizedFileName;
 	}
 }
