@@ -17,5 +17,5 @@ public interface TokenBorderService {
 
 	void deleteTokenBorderById(Long id);
 
-	String uploadTokenBorder(MultipartFile multipartFile);
+	String storeTokenBorder(MultipartFile multipartFile);
 }

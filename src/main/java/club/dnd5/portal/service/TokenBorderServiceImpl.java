@@ -2,6 +2,7 @@ package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.TokenBorderApi;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.exception.StorageException;
 import club.dnd5.portal.model.token.TokenBorder;
 import club.dnd5.portal.repository.TokenBorderRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +11,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -26,7 +29,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 
 	private final TokenBorderRepository tokenBorderRepository;
 
-	private final static String TOKEN_BORDERS_PATH = "src/main/resources/tokens/borders/";
+	private static final String rootLocation = "src/main/resources/tokens/borders/";
 
 	private TokenBorderApi mapToApi(TokenBorder tokenBorder) {
 		return TokenBorderApi.builder()
@@ -89,13 +92,28 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	}
 
 	@Override
-	public String uploadTokenBorder(MultipartFile multipartFile) {
-		String fileName = multipartFile.getOriginalFilename();
-		String uniqueFileName = generateUniqueFileName(fileName);
-		String filePath = TOKEN_BORDERS_PATH + uniqueFileName;
-
+	public String storeTokenBorder(MultipartFile multipartFile) {
 		try {
-			saveFile(multipartFile, filePath);
+			if (multipartFile.isEmpty()) {
+				throw new StorageException("Failed to store empty file.");
+			}
+
+			String fileName = multipartFile.getOriginalFilename();
+			String uniqueFileName = generateUniqueFileName(fileName);
+
+			Path path = Paths.get(rootLocation);
+			Path destinationFile = path.resolve(Paths.get(uniqueFileName))
+				.normalize().toAbsolutePath();
+
+			if (!destinationFile.getParent().equals(path.toAbsolutePath())) {
+				throw new StorageException("Cannot store file outside current directory.");
+			}
+
+			try (InputStream inputStream = multipartFile.getInputStream()) {
+				Files.copy(inputStream, destinationFile,
+					StandardCopyOption.REPLACE_EXISTING);
+			}
+
 			return constructImageUrl(uniqueFileName);
 		} catch (IOException e) {
 			throw new PageNotFoundException();
@@ -104,12 +122,6 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 
 	private String constructImageUrl(String fileName) {
 		return "https://img.ttg.club/tokens/borders/" + fileName;
-	}
-
-	private void saveFile(MultipartFile multipartFile, String filePath) throws IOException {
-		byte[] bytes = multipartFile.getBytes();
-		Path path = Paths.get(filePath);
-		Files.write(path, bytes);
 	}
 
 	private String generateUniqueFileName(String fileName) {
