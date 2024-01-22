@@ -19,6 +19,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -98,20 +99,15 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 				throw new StorageException("Failed to store empty file.");
 			}
 
-			String fileName = multipartFile.getOriginalFilename();
+			String fileName = sanitizeFileName(Objects.requireNonNull(multipartFile.getOriginalFilename()));
 			String uniqueFileName = generateUniqueFileName(fileName);
 
 			Path path = Paths.get(rootLocation);
 			Path destinationFile = path.resolve(Paths.get(uniqueFileName))
 				.normalize().toAbsolutePath();
 
-			if (!destinationFile.getParent().equals(path.toAbsolutePath())) {
-				throw new StorageException("Cannot store file outside current directory.");
-			}
-
 			try (InputStream inputStream = multipartFile.getInputStream()) {
-				Files.copy(inputStream, destinationFile,
-					StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 			}
 
 			return constructImageUrl(uniqueFileName);
@@ -130,5 +126,10 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 		String timestamp = now.format(formatter);
 
 		return timestamp + "_" + fileName;
+	}
+
+	private String sanitizeFileName(String fileName) {
+		// Remove any path components and ".." sequences from the file name
+		return fileName.replaceAll("[/\\\\]+|\\.\\.", "");
 	}
 }
