@@ -1,10 +1,12 @@
 package club.dnd5.portal.controller.api;
 
-import club.dnd5.portal.dto.api.TokenBorderApi;
+import club.dnd5.portal.model.token.TokenBorder;
 import club.dnd5.portal.service.TokenBorderServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -19,49 +21,52 @@ import java.util.List;
 public class TokenBorderApiController {
 	private final TokenBorderServiceImpl tokenBorderService;
 
-	@SecurityRequirement(name = "Bearer Authentication")
+	@Operation(summary = "Получение всех границ токенов")
 	@GetMapping
-	public ResponseEntity<List<TokenBorderApi>> getAllTokenBorders() {
-		List<TokenBorderApi> tokenBorders = tokenBorderService.getAllTokenBorders();
+	public ResponseEntity<List<TokenBorder>> getAllTokenBorders() {
+		List<TokenBorder> tokenBorders = tokenBorderService.getAllTokenBorders();
 		return ResponseEntity.ok(tokenBorders);
 	}
 
-	@SecurityRequirement(name = "Bearer Authentication")
+	@Operation(summary = "Получение всех границ токенов по типу")
 	@GetMapping("/by-type/{type}")
-	public ResponseEntity<List<TokenBorderApi>> getTokenBordersByType(@PathVariable String type) {
-		List<TokenBorderApi> tokenBorders = tokenBorderService.getTokenBordersByType(type);
-		return ResponseEntity.ok(tokenBorders);
+	public List<TokenBorder> getTokenBordersByType(@PathVariable String type) {
+		return tokenBorderService.getTokenBordersByType(type);
 	}
 
+	@Operation(summary = "Создание границы токена")
+	@ResponseStatus(HttpStatus.CREATED)
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured("ADMIN")
 	@PostMapping
-	public ResponseEntity<TokenBorderApi> createTokenBorder(@RequestBody TokenBorderApi tokenBorderApi) {
-		TokenBorderApi createdTokenBorder = tokenBorderService.createTokenBorder(tokenBorderApi);
-		return ResponseEntity.ok(createdTokenBorder);
+	public TokenBorder createTokenBorder(@RequestBody TokenBorder tokenBorder) {
+		return tokenBorderService.createTokenBorder(tokenBorder);
 	}
 
+	@Operation(summary = "Обновление границы токена")
+	@ResponseStatus(HttpStatus.OK)
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured("ADMIN")
 	@PutMapping
-	public ResponseEntity<TokenBorderApi> updateTokenBorder(@RequestBody TokenBorderApi tokenBorderApi) {
-		TokenBorderApi updatedTokenBorder = tokenBorderService.updateTokenBorder(tokenBorderApi);
-		return ResponseEntity.ok(updatedTokenBorder);
+	public TokenBorder updateTokenBorder(@RequestBody TokenBorder tokenBorder) {
+		return tokenBorderService.updateTokenBorder(tokenBorder);
 	}
 
+	@Operation(summary = "Удаление границы токена по id")
+	@ResponseStatus(HttpStatus.OK)
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured("ADMIN")
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteTokenBorder(@PathVariable Long id) {
+	public void deleteTokenBorder(@PathVariable Long id) {
 		tokenBorderService.deleteTokenBorderById(id);
-		return ResponseEntity.noContent().build();
 	}
 
+	@Operation(summary = "Сохранения файла и получения url")
+	@ResponseStatus(HttpStatus.CREATED)
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured("ADMIN")
 	@PostMapping(value = "/upload",consumes = {"multipart/form-data"} )
-	public ResponseEntity<String> uploadTokenBorder(@RequestParam("file") MultipartFile multipartFile) {
-		String imageUrl = tokenBorderService.storeTokenBorder(multipartFile);
-		return ResponseEntity.ok(imageUrl);
+	public String uploadTokenBorder(@RequestParam("file") MultipartFile multipartFile) {
+		return tokenBorderService.storeTokenBorder(multipartFile);
 	}
 }

@@ -1,15 +1,14 @@
 package club.dnd5.portal.service;
 
-import club.dnd5.portal.dto.api.TokenBorderApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.exception.StorageException;
 import club.dnd5.portal.model.token.TokenBorder;
 import club.dnd5.portal.repository.TokenBorderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -21,75 +20,88 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class TokenBorderServiceImpl implements TokenBorderService {
-
 	private final TokenBorderRepository tokenBorderRepository;
 
-	private static final String rootLocation = "src/main/resources/tokens/borders/";
+	@Value("${token.borders.rootLocation}")
+	private String rootLocation;
 
-	private TokenBorderApi mapToApi(TokenBorder tokenBorder) {
-		return TokenBorderApi.builder()
-			.id(tokenBorder.getId())
-			.name(tokenBorder.getName())
-			.type(tokenBorder.getType())
-			.url(tokenBorder.getUrl())
-			.build();
+	public static final String TOKEN_BORDERS_URL = "https://img.ttg.club/tokens/borders/";
+
+	@Override
+	public List<TokenBorder> getAllTokenBorders() {
+		return tokenBorderRepository.findAll();
 	}
 
 	@Override
-	public List<TokenBorderApi> getAllTokenBorders() {
-		List<TokenBorder> tokenBorders = tokenBorderRepository.findAll();
-		return tokenBorders.stream()
-			.map(this::mapToApi)
-			.collect(Collectors.toList());
+	public List<TokenBorder> getTokenBordersByType(String type) {
+		return tokenBorderRepository.findAllByType(type);
 	}
 
 	@Override
-	public List<TokenBorderApi> getTokenBordersByType(String type) {
-		List<TokenBorder> tokenBorders = tokenBorderRepository.getTokenBordersByType(type);
-		return tokenBorders.stream()
-			.map(this::mapToApi)
-			.collect(Collectors.toList());
+	public TokenBorder createTokenBorder(TokenBorder tokenBorder) {
+		TokenBorder newTokenBorder = new TokenBorder();
+		newTokenBorder.setName(tokenBorder.getName());
+		newTokenBorder.setType(tokenBorder.getType());
+		newTokenBorder.setUrl(tokenBorder.getUrl());
+		newTokenBorder.setUserId(tokenBorder.getUserId());
+		return tokenBorderRepository.save(newTokenBorder);
 	}
 
 	@Override
-	public TokenBorderApi createTokenBorder(TokenBorderApi tokenBorderApi) {
-		TokenBorder tokenBorder = new TokenBorder();
-		tokenBorder.setName(tokenBorderApi.getName());
-		tokenBorder.setType(tokenBorderApi.getType());
-		tokenBorder.setUrl(tokenBorderApi.getUrl());
+	public TokenBorder updateTokenBorder(TokenBorder newTokenBorder) {
+		Optional<TokenBorder> optionalTokenBorder = tokenBorderRepository.findById(newTokenBorder.getId());
 
-		TokenBorder savedTokenBorder = tokenBorderRepository.save(tokenBorder);
-
-		return mapToApi(savedTokenBorder);
-	}
-
-	@Override
-	public TokenBorderApi updateTokenBorder(TokenBorderApi tokenBorderApi) {
-		Optional<TokenBorder> optionalTokenBorder = tokenBorderRepository.findById(tokenBorderApi.getId());
-
-		if (optionalTokenBorder.isPresent()) {
-			TokenBorder tokenBorder = optionalTokenBorder.get();
-			tokenBorder.setName(tokenBorderApi.getName());
-			tokenBorder.setType(tokenBorderApi.getType());
-			tokenBorder.setUrl(tokenBorderApi.getUrl());
-
-			TokenBorder updatedTokenBorder = tokenBorderRepository.save(tokenBorder);
-
-			return mapToApi(updatedTokenBorder);
-		} else {
-			throw new PageNotFoundException();
-		}
+		return optionalTokenBorder
+			.map(existingTokenBorder -> {
+				existingTokenBorder.setName(newTokenBorder.getName());
+				existingTokenBorder.setType(newTokenBorder.getType());
+				existingTokenBorder.setUrl(newTokenBorder.getUrl());
+				existingTokenBorder.setUserId(newTokenBorder.getUserId());
+				return tokenBorderRepository.save(existingTokenBorder);
+			})
+			.orElseThrow(PageNotFoundException::new);
 	}
 
 	@Override
 	public void deleteTokenBorderById(Long id) {
-		tokenBorderRepository.deleteById(id);
+		Optional<TokenBorder> optionalTokenBorder = tokenBorderRepository.findById(id);
+
+		optionalTokenBorder.ifPresent(tokenBorder -> {
+			// Delete the associated file
+			deleteFile(tokenBorder);
+
+			// Delete the TokenBorder entity from the repository
+			tokenBorderRepository.deleteById(id);
+		});
+	}
+
+	private void deleteFile(TokenBorder tokenBorder) {
+		// Extract the file name from the URL
+		String url = tokenBorder.getUrl();
+		String fileName = extractFileNameFromUrl(url);
+
+		Path filePath = Paths.get(rootLocation, fileName).normalize().toAbsolutePath();
+
+		try {
+			Files.deleteIfExists(filePath);
+		} catch (IOException e) {
+			throw new StorageException("Failed to delete file", e);
+		}
+	}
+
+	private String extractFileNameFromUrl(String url) {
+		// Extract the file name from the URL
+		int lastSlashIndex = url.lastIndexOf('/');
+		if (lastSlashIndex != -1 && lastSlashIndex < url.length() - 1) {
+			return url.substring(lastSlashIndex + 1);
+		} else {
+			// Handle the case where the URL format is unexpected
+			throw new StorageException("Invalid URL format: " + url);
+		}
 	}
 
 	@Override
@@ -117,7 +129,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	}
 
 	private String constructImageUrl(String fileName) {
-		return "https://img.ttg.club/tokens/borders/" + fileName;
+		return TOKEN_BORDERS_URL + fileName;
 	}
 
 	private String generateUniqueFileName(String fileName) {
