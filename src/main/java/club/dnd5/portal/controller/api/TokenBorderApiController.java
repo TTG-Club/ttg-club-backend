@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,9 +22,8 @@ public class TokenBorderApiController {
 
 	@Operation(summary = "Получение всех границ токенов")
 	@GetMapping
-	public ResponseEntity<List<TokenBorder>> getAllTokenBorders() {
-		List<TokenBorder> tokenBorders = tokenBorderService.getAllTokenBorders();
-		return ResponseEntity.ok(tokenBorders);
+	public List<TokenBorder> getAllTokenBorders() {
+		return tokenBorderService.getAllTokenBorders();
 	}
 
 	@Operation(summary = "Получение всех границ токенов по типу")

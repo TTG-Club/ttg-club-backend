@@ -29,7 +29,8 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	@Value("${token.borders.rootLocation}")
 	private String rootLocation;
 
-	public static final String TOKEN_BORDERS_URL = "https://img.ttg.club/tokens/borders/";
+	@Value("${token.borders.url}")
+	public String tokenBordersURL;
 
 	@Override
 	public List<TokenBorder> getAllTokenBorders() {
@@ -129,7 +130,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	}
 
 	private String constructImageUrl(String fileName) {
-		return TOKEN_BORDERS_URL + fileName;
+		return tokenBordersURL + fileName;
 	}
 
 	private String generateUniqueFileName(String fileName) {
