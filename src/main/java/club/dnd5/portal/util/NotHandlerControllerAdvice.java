@@ -1,6 +1,7 @@
 package club.dnd5.portal.util;
 
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.exception.StorageException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
@@ -23,6 +24,13 @@ public class NotHandlerControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(PageNotFoundException.class)
 	public String handlePageNotFound(Exception exception, Model model, HttpServletRequest request) {
+		addAttributes(request, model);
+		return "spa";
+	}
+
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ExceptionHandler(StorageException.class)
+	public String handleStorageException(Exception exception, Model model, HttpServletRequest request) {
 		addAttributes(request, model);
 		return "spa";
 	}
