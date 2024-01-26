@@ -21,11 +21,13 @@ import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityExistsException;
@@ -208,6 +210,8 @@ public class Bestiary2ApiController {
     }
 
     @Operation(summary = "Добавление существа в бестиарий")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Secured({"ADMIN"})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/api/v2/bestiary")
     public void createBeast(@RequestBody BeastDetailRequest request) {
@@ -223,6 +227,8 @@ public class Bestiary2ApiController {
     }
 
     @Operation(summary = "Обнавление существа из бестиарии")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Secured({"ADMIN"})
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/api/v2/bestiary")
     public void updateBeast(@RequestBody BeastDetailRequest request) {
