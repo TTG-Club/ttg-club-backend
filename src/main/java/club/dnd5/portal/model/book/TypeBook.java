@@ -13,7 +13,8 @@ public enum TypeBook {
 	MODULE("Приключения"),
 	SETTING("Сеттинги"),
 	TEST("Unearthed Arcana"),
+	THIRD_PARTY("3rd party"),
 	CUSTOM("Homebrew");
 
-	private String name;
+	private final String name;
 }
