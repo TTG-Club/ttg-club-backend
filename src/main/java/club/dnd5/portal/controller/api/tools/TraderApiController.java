@@ -246,7 +246,7 @@ public class TraderApiController {
 							break;
 						case 89:
 							String alignment = Alignment.values()[rnd.nextInt(Alignment.values().length)]
-									.getCyrilicName();
+									.getCyrillicName();
 							itemApi.updateName("(Мировоззрение: " + alignment + ")");
 							break;
 						case 91:

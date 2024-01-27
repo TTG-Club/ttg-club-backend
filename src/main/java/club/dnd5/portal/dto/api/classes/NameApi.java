@@ -1,17 +1,20 @@
 package club.dnd5.portal.dto.api.classes;
 
-import javax.validation.constraints.NotNull;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+@JsonInclude(JsonInclude.Include.NON_NULL)
 
 @Getter
 @Setter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NameApi {
-	@NotNull
+	@Schema(description = "имя по русски", required = true)
+	@NonNull
 	private String rus;
-	@NotNull
+	@NonNull
+	@Schema(description = "имя по английски", required = true)
 	private String eng;
+	@Schema(description = "альтернативное имя")
+	private String alt;
 }

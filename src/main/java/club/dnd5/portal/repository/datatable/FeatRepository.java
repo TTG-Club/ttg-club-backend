@@ -13,11 +13,8 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Repository
-public interface TraitRepository extends JpaRepository<Trait, Integer>, JpaSpecificationExecutor<Trait> {
+public interface FeatRepository extends JpaRepository<Trait, Integer>, JpaSpecificationExecutor<Trait> {
 	Optional<Trait> findByEnglishName(String name);
-
-	@Query("SELECT t.requirement FROM Trait t GROUP BY t.requirement")
-	Collection<String> findAllPrerequisite();
 
 	@Query("SELECT c.book FROM Trait c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	Collection<Book> findBook(@Param("type") TypeBook type);

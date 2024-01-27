@@ -16,8 +16,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchRequest {
-	@Schema(description = "the search value", defaultValue = "")
+	@Schema(description = "строка поиска", example = "search")
 	private String value;
-	@Schema(description = "the exact comparison")
+	@Schema(description = "true если нужно точное совпадение", example = "false")
 	private Boolean exact;
 }

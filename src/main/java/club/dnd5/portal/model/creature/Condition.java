@@ -1,13 +1,12 @@
 package club.dnd5.portal.model.creature;
 
+import lombok.Getter;
+import org.thymeleaf.util.StringUtils;
+
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.thymeleaf.util.StringUtils;
-
-import lombok.Getter;
 
 /**
  * Состояния существ
@@ -33,13 +32,13 @@ public enum Condition {
 	STUNNED(12, "ошеломление"), //15
 	UNCONSCIOUS(1, "бессознательность"); //16
 
-	private String cyrilicName;
-	private Set<String> names;
-	private Integer id;
+	private final String cyrillicName;
+	private final Set<String> names;
+	private final Integer id;
 
 	Condition(int id, String ...  names){
 		this.id = id;
-		cyrilicName = names[0];
+		cyrillicName = names[0];
 		this.names = Arrays.stream(names).collect(Collectors.toSet());
 	}
 
@@ -48,7 +47,7 @@ public enum Condition {
 	}
 
 	public String getName() {
-		return StringUtils.capitalizeWords(cyrilicName.toLowerCase());
+		return StringUtils.capitalizeWords(cyrillicName.toLowerCase());
 	}
 
 	public static Condition parse(String stateString) {
