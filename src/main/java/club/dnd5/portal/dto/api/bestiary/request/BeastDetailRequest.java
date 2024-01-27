@@ -7,6 +7,7 @@ import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.creature.HabitatType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -62,24 +63,24 @@ public class BeastDetailRequest {
 	@Schema(description = "Уровень опасности", required = true)
 	private String challengeRating;
 	@Schema(description = "Особенности")
-	private Collection<NameValueApi> feats;
+	private Collection<DescriptionRequest> feats;
 	@Schema(description = "Действия")
-	private Collection<NameValueApi> actions;
+	private Collection<DescriptionRequest> actions;
 	@Schema(description = "Реакции")
-	private Collection<NameValueApi> reactions;
+	private Collection<DescriptionRequest> reactions;
 	private String reaction;
 	@Schema(description = "Бонусные действия")
-	private Collection<NameValueApi> bonusActions;
+	private Collection<DescriptionRequest> bonusActions;
 	@Schema(description = "Легенданые действия")
 	private LegendaryApi legendary;
 	@Schema(description = "Мистически действия")
-	private Collection<NameValueApi> mysticalActions;
+	private Collection<DescriptionRequest> mysticalActions;
 	@Schema(description = "Текстовое описание")
 	private String description;
 	@Schema(description = "Тэги", example = "Дроу")
 	private Collection<String> tags;
 	@Schema(description = "Среда обитания")
-	private Collection<String> environment;
+	private Collection<HabitatType> environment;
 	@Schema(description = "URLs изображений")
 	private Collection<String> images;
 	@Schema(description = "Логово")

@@ -1,6 +1,5 @@
 package club.dnd5.portal.controller.api;
 
-import club.dnd5.portal.dto.api.DirectoryApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.creature.Condition;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
@@ -25,81 +25,73 @@ import java.util.stream.Collectors;
 public class DirectoryControllerApi {
     @Operation(summary = "Дайсы")
     @GetMapping("/dices")
-    public DirectoryApi getDices() {
-        return new DirectoryApi(
-                Arrays.stream(Dice.values())
+    public Collection<NameApi> getDices() {
+        return Arrays.stream(Dice.values())
                         .map(type -> new NameApi(type.getName(), type.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()
         );
     }
 
     @Operation(summary = "Типы существ")
     @GetMapping("/beast/types")
-    public DirectoryApi getCreatureType() {
-        return new DirectoryApi(
-                Arrays.stream(CreatureType.values())
+    public Collection<NameApi> getCreatureType() {
+        return Arrays.stream(CreatureType.values())
                         .map(type -> new NameApi(type.getCyrillicName(), type.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()
         );
     }
 
     @Operation(summary = "Размеры существ")
     @GetMapping("/size")
-    public DirectoryApi getCreatureSize() {
-        return new DirectoryApi(
-                Arrays.stream(CreatureSize.values())
+    public Collection<NameApi> getCreatureSize() {
+        return Arrays.stream(CreatureSize.values())
                 .map(size -> new NameApi(size.getCyrillicName(), size.name()))
-                .collect(Collectors.toList())
+                .collect(Collectors.toList()
         );
     }
 
     @Operation(summary = "Типы урона")
     @GetMapping("/damage/types")
-    public DirectoryApi getDamageType() {
-        return new DirectoryApi(
-                Arrays.stream(DamageType.values())
+    public Collection<NameApi> getDamageType() {
+        return Arrays.stream(DamageType.values())
                         .map(type -> new NameApi(type.getCyrillicName(), type.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()
         );
     }
 
     @Operation(summary = "Состояния")
     @GetMapping("/conditions")
-    public DirectoryApi getConditions() {
-        return new DirectoryApi(
-                Arrays.stream(Condition.values())
+    public Collection<NameApi> getConditions() {
+        return Arrays.stream(Condition.values())
                         .map(type -> new NameApi(type.getCyrillicName(), type.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()
         );
     }
 
     @Operation(summary = "Мировоззрение")
     @GetMapping("/alignments")
-    public DirectoryApi getAlignments() {
-        return new DirectoryApi(
-                Arrays.stream(Alignment.values())
+    public Collection<NameApi> getAlignments() {
+        return Arrays.stream(Alignment.values())
                         .map(type -> new NameApi(type.getCyrillicName(), type.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()
         );
     }
 
     @Operation(summary = "Места обитания")
     @GetMapping("/environments")
-    public DirectoryApi getEnvironments() {
-        return new DirectoryApi(
-                Arrays.stream(HabitatType.values())
+    public Collection<NameApi> getEnvironments() {
+        return Arrays.stream(HabitatType.values())
                         .map(type -> new NameApi(type.getName(), type.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()
         );
     }
 
     @Operation(summary = "Типы доспехов для существ")
-    @GetMapping("/armor-types")
-    public DirectoryApi getArmorTypes() {
-        return new DirectoryApi(
-                Arrays.stream(ArmorType.values())
+    @GetMapping("/armor/types")
+    public Collection<NameApi> getArmorTypes() {
+        return Arrays.stream(ArmorType.values())
                         .map(type -> new NameApi(type.getCyrillicName(), type.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()
         );
     }
 }
