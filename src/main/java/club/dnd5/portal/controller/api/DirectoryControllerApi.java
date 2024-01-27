@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 @Tag(name = "Справочники", description = "API для различных справочников")
-@RequestMapping("/api/v2/")
+@RequestMapping("/api/v2/reference/")
 @RestController
 public class DirectoryControllerApi {
     @Operation(summary = "Дайсы")
@@ -89,6 +89,16 @@ public class DirectoryControllerApi {
         return new DirectoryApi(
                 Arrays.stream(HabitatType.values())
                         .map(type -> new NameApi(type.getName(), type.name()))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    @Operation(summary = "Типы доспехов для существ")
+    @GetMapping("/armor-types")
+    public DirectoryApi getArmorTypes() {
+        return new DirectoryApi(
+                Arrays.stream(ArmorType.values())
+                        .map(type -> new NameApi(type.getCyrillicName(), type.name()))
                         .collect(Collectors.toList())
         );
     }
