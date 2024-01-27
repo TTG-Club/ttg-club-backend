@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.criteria.Join;
@@ -203,6 +204,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         return beastApi;
     }
 
+    @Transactional
     @Override
     public void create(BeastDetailRequest request) {
         Creature beast = new Creature();
@@ -214,6 +216,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         beastRepository.save(beast);
     }
 
+    @Transactional
     @Override
     public void update(BeastDetailRequest request) {
         Creature beast = beastRepository.findById(request.getId())
@@ -229,8 +232,11 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setType(request.getType());
         beast.setAlignment(request.getAlignment());
         beast.setAC(request.getArmorClass());
+
         beast.setAverageHp(request.getHits().getAverage());
         beast.setCountDiceHp(request.getHits().getDiceCount());
         beast.setDiceHp(request.getHits().getHitDice());
+        beast.setBonusHP(request.getHits().getBonus());
+
     }
 }
