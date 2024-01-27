@@ -16,6 +16,8 @@ public class ArchetypeTrait {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	private String name;
+	@Column(columnDefinition = "varchar(25) default ''")
+	private String suffix;
 	private byte level;
 	@Column(columnDefinition = "TEXT")
 	private String description;
