@@ -85,6 +85,8 @@ public class BeastDetailRequest {
 	private Collection<String> images;
 	@Schema(description = "Логово")
 	private LairApi lair;
+	@Schema(description = "true если НПС", example = "false")
+	private boolean npc;
 	@Schema(description = "источник", example = "MM")
 	protected String source;
 }

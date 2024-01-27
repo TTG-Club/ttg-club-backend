@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.dto.api.ValueApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.creature.Condition;
@@ -25,9 +26,13 @@ import java.util.stream.Collectors;
 public class DirectoryControllerApi {
     @Operation(summary = "Дайсы")
     @GetMapping("/dices")
-    public Collection<NameApi> getDices() {
+    public Collection<ValueApi> getDices() {
         return Arrays.stream(Dice.values())
-                        .map(type -> new NameApi(type.getName(), type.name()))
+                        .map(type -> ValueApi.builder()
+                                .rus(type.getName())
+                                .eng(type.name())
+                                .value(type.getMaxValue())
+                                .build())
                         .collect(Collectors.toList()
         );
     }
@@ -42,7 +47,7 @@ public class DirectoryControllerApi {
     }
 
     @Operation(summary = "Размеры существ")
-    @GetMapping("/size")
+    @GetMapping("/sizes")
     public Collection<NameApi> getCreatureSize() {
         return Arrays.stream(CreatureSize.values())
                 .map(size -> new NameApi(size.getCyrillicName(), size.name()))
