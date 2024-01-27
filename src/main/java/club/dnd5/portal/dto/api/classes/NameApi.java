@@ -9,10 +9,12 @@ import lombok.*;
 @Setter
 @RequiredArgsConstructor
 public class NameApi {
-	@Schema(description = "имя по русски")
+	@Schema(description = "имя по русски", required = true)
 	@NonNull
 	private String rus;
 	@NonNull
+	@Schema(description = "имя по английски", required = true)
 	private String eng;
+	@Schema(description = "альтернативное имя")
 	private String alt;
 }

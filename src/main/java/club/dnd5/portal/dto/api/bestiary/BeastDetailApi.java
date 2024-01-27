@@ -120,8 +120,9 @@ public class BeastDetailApi extends BeastApi {
 			.value(beast.getSpeed())
 			.build());
 		if (beast.getFlySpeed() != null) {
-			NameValueApi.NameValueApiBuilder builder = NameValueApi.builder().name("летая")
-				.value(beast.getFlySpeed());
+			NameValueApi.NameValueApiBuilder builder = NameValueApi.builder()
+					.name("летая")
+					.value(beast.getFlySpeed());
 			if (beast.getHover() != null) {
 				builder.additional("парит");
 			}

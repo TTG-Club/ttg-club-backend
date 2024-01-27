@@ -16,10 +16,10 @@ public class HitRequest {
     private Short average;
     @Schema(description = "количество дайсов", example = "10")
     private Short diceCount;
-    @Schema(description = "Хит дайс", example = "10")
+    @Schema(description = "Хит дайс", example = "d8")
     private Dice hitDice;
     @Schema(description = "бонус", example = "10")
     private Short bonus;
-    @Schema(description = "текстовое описание")
+    @Schema(description = "текстовое описание, например 'доспехи мага'")
     private String text;
 }

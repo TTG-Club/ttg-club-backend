@@ -45,7 +45,9 @@ public class Bestiary2ApiController {
     private final BestiaryRepository beastRepository;
     private final ImageRepository imageRepository;
     private final TokenRepository tokenRepository;
+
     @Operation(summary = "Получение краткого списка сушеств")
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/bestiary")
     public List<BeastApi> getBestiary(@ParameterObject BeastRequesApi request) {
         Specification<Creature> specification = null;
@@ -55,7 +57,9 @@ public class Bestiary2ApiController {
         }
         Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
         if (optionalRequest.map(BeastRequesApi::getFilter).isPresent()
-                && optionalRequest.map(BeastRequesApi::getFilter).map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
+                && optionalRequest.map(BeastRequesApi::getFilter)
+                .map(BeastFilter::getNpc)
+                .orElseGet(Collections::emptyList).isEmpty()) {
             specification = SpecificationUtil.getAndSpecification(specification,
                     (root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
         }

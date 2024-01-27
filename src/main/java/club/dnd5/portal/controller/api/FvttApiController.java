@@ -5,8 +5,6 @@ import club.dnd5.portal.dto.api.spells.SpellsFvtt;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.repository.JsonStorageRepository;
-import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.service.JsonStorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,10 +30,6 @@ import java.util.stream.Collectors;
 public class FvttApiController {
 
 	private final JsonStorageService jsonStorageService;
-
-	private final JsonStorageRepository jsonStorageRepository;
-
-	private final BestiaryRepository bestiaryRepository;
 
 	private final SpellRepository spellRepository;
 

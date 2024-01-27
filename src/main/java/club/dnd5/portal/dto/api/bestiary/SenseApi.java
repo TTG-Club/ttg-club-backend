@@ -20,7 +20,7 @@ import java.util.Objects;
 @Getter
 @Setter
 public class SenseApi {
-	@Schema(description = "пассивная Внимательность")
+	@Schema(description = "пассивная Внимательность", example = "10")
 	private String passivePerception;
 	@Schema(description = "список чувств")
 	private List<NameValueApi> senses;

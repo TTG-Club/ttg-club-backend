@@ -2,8 +2,10 @@ package club.dnd5.portal.dto.api.bestiary.request;
 
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.*;
+import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.CreatureSize;
+import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.DamageType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -21,21 +23,25 @@ import java.util.Collection;
 @NoArgsConstructor
 @Getter
 @Setter
-public class BeastDetailRequest extends BeastApi {
-	@Schema(description = "ID из базы")
+public class BeastDetailRequest {
+	@Schema(description = "ID из базы, если обновление, для создания оставляем NULL")
 	private Integer id;
-	@Schema(description = "Размер существа")
+	@Schema(description = "имя существа", required = true)
+	private NameApi name;
+	@Schema(description = "Размер существа", example = "MEDIUM", required = true)
 	private CreatureSize size;
-	@Schema(description = "мировоззрение", example = "11-3031.01")
+	@Schema(description = "Тип существа", example = "ABERRATION", required = true)
+	private CreatureType type;
+	@Schema(description = "мировоззрение", example = "LAWFUL_GOOD", required = true)
 	private Alignment alignment;
-	@Schema(description = "КД", example = "10")
+	@Schema(description = "КД", example = "10", required = true)
 	private Byte armorClass;
 	@Schema(description = "список доспехов")
 	private Collection<String> armors;
-	@Schema(description = "хиты")
+	@Schema(description = "хиты", required = true)
 	private HitRequest hits;
 	private Collection<NameValueApi> speed;
-	@Schema(description = "Характеристики")
+	@Schema(description = "Характеристики", required = true)
 	private AbilityApi ability;
 	@Schema(description = "Бонусы к спасброскам")
 	private Collection<NameValueApi> savingThrows;
@@ -53,6 +59,8 @@ public class BeastDetailRequest extends BeastApi {
 	private SenseApi senses;
 	@Schema(description = "Языки")
 	private Collection<String> languages;
+	@Schema(description = "Уровень опасности", required = true)
+	private String challengeRating;
 	@Schema(description = "Особенности")
 	private Collection<NameValueApi> feats;
 	@Schema(description = "Действия")
@@ -68,12 +76,14 @@ public class BeastDetailRequest extends BeastApi {
 	private Collection<NameValueApi> mysticalActions;
 	@Schema(description = "Текстовое описание")
 	private String description;
-	@Schema(description = "Тэги")
-	private Collection<TagApi> tags;
+	@Schema(description = "Тэги", example = "Дроу")
+	private Collection<String> tags;
 	@Schema(description = "Среда обитания")
 	private Collection<String> environment;
 	@Schema(description = "URLs изображений")
 	private Collection<String> images;
 	@Schema(description = "Логово")
 	private LairApi lair;
+	@Schema(description = "источник", example = "MM")
+	protected String source;
 }
