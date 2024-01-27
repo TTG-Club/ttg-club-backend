@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -46,7 +47,7 @@ public class Bestiary2ApiController {
     private final TokenRepository tokenRepository;
     @Operation(summary = "Получение краткого списка сушеств")
     @GetMapping(value = "/bestiary")
-    public List<BeastApi> getBestiary(@RequestParam BeastRequesApi request) {
+    public List<BeastApi> getBestiary(@ParameterObject BeastRequesApi request) {
         Specification<Creature> specification = null;
         Optional<BeastRequesApi> optionalRequest = Optional.ofNullable(request);
         if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
