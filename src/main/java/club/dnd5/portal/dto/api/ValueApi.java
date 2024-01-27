@@ -1,6 +1,5 @@
 package club.dnd5.portal.dto.api;
 
-import club.dnd5.portal.dto.api.classes.NameApi;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,10 +10,11 @@ import lombok.Setter;
 
 @JsonInclude(Include.NON_NULL)
 
+@Schema(description = "Имя и значение")
 @Builder
 @Getter
 @Setter
-public class ValueApi extends NameApi {
+public class ValueApi {
 	@Schema(description = "имя по русски")
 	@NonNull
 	private String rus;
