@@ -28,7 +28,7 @@ public class ReferenceClassApi {
 	public ReferenceClassApi(HeroClass heroClass){
 		name = heroClass.getCapitalazeName();
 		url = String.format("/classes/%s", heroClass.getUrlName());
-		icon = String.format("class-%s", heroClass.getEnglishName().replace(' ', '-').toLowerCase());
+		icon = String.format("class/%s", heroClass.getEnglishName().replace(' ', '-').toLowerCase());
 	}
 
 	public ReferenceClassApi(Archetype archetype) {
@@ -49,6 +49,6 @@ public class ReferenceClassApi {
 		} else {
 			url = String.format("/classes/%s", optionType.getClassName().replace(' ', '_'));
 		}
-		icon = String.format("class-%s", optionType.getClassName().replace(' ', '-').toLowerCase());
+		icon = String.format("class/%s", optionType.getClassName().replace(' ', '-').toLowerCase());
 	}
 }
