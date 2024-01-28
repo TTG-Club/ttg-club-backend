@@ -126,15 +126,6 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 				throw new StorageException("Cannot store file outside current directory.");
 			}
 
-			// Check if the destination directory exists, create if not
-			if (!Files.exists(destinationDirectory)) {
-				try {
-					Files.createDirectories(destinationDirectory);
-				} catch (IOException ex) {
-					throw new StorageException("Failed to create destination directory.", ex);
-				}
-			}
-
 			try (InputStream inputStream = multipartFile.getInputStream()) {
 				Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 			}
