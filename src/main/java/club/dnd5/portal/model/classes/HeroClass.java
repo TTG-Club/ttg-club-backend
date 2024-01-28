@@ -1,28 +1,5 @@
 package club.dnd5.portal.model.classes;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-
-import org.thymeleaf.util.StringUtils;
-
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
@@ -33,6 +10,12 @@ import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.splells.Spell;
 import lombok.Getter;
 import lombok.Setter;
+import org.thymeleaf.util.StringUtils;
+
+import javax.persistence.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -176,10 +159,10 @@ public class HeroClass {
 		return levelArhitypeFeats;
 	}
 	
-	public List<ArchetypeTrait> getArhitypeTraitNames(int arhitypeId, int level){
+	public List<ArchetypeTrait> getArhitypeTraitNames(int archetypeId, int level){
 		List<ArchetypeTrait> levelArhitypeFeats = archetypes
 				.stream()
-				.filter(a -> a.getId() == arhitypeId)
+				.filter(a -> a.getId() == archetypeId)
 				.flatMap(a -> a.getFeats().stream())
 				.filter(t-> t.getLevel() == level)
 				.collect(Collectors.toList());

@@ -4,12 +4,10 @@ import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.FoundryCommon;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.model.exporter.JsonStorage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.List;
@@ -52,17 +50,16 @@ public class Spell implements FoundryCommon {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	@Column(columnDefinition = "TEXT", nullable = true)
+	@Column(columnDefinition = "TEXT")
 	private String upperLevel;
 
-	private Boolean verbalComponent;
-	private Boolean somaticComponent;
-	private Boolean materialComponent;
+	private boolean verbalComponent;
+	private boolean somaticComponent;
 
 	@Column(columnDefinition = "boolean default false")
 	private Boolean consumable;
 
-	@Column(columnDefinition = "TEXT", nullable = true)
+	@Column(columnDefinition = "TEXT")
 	private String additionalMaterialComponent;
 	private String duration;
 	private Boolean concentration;
@@ -83,20 +80,11 @@ public class Spell implements FoundryCommon {
 	private Short page;
 	private Boolean srd;
 
-	/**
-	 * Иконка для FVTT (относительный путь)
-	 */
-	private String img;
-
 	public String getComponents() {
-		return (verbalComponent ? "В" : "") + (somaticComponent ? "C" : "") + (materialComponent ? "М" : "");
+		return (verbalComponent ? "В" : "") + (somaticComponent ? "C" : "") + (additionalMaterialComponent != null ? "М" : "");
 	}
 
 	public String getUrlName() {
 		return englishName.toLowerCase().replace(' ', '_');
-	}
-
-	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
 	}
 }

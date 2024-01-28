@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  prod-ssh:
+  dev-ssh:
     name: Update Dev SSH Server
     if: ${{ github.ref_name == 'dev' }}
     runs-on: ubuntu-latest
@@ -32,6 +32,7 @@ jobs:
             docker run \
               --network ttg-network-dev \
               --name ttg-app-dev \
+              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }} \
               -p 9090:8080 \
               -d \
               -e spring.profiles.active=dev \
@@ -44,7 +45,7 @@ jobs:
               -e dbname=dnd5 magistrus/dnd5club
             docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
 
-  dev-ssh:
+  prod-ssh:
     name: Update Prod SSH Server
     if: ${{ github.ref_name == 'main' }}
     runs-on: ubuntu-latest
@@ -61,6 +62,7 @@ jobs:
             docker run \
               --network ttg-network-prod \
               --name ttg-app-prod \
+              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }} \
               -p 9393:8080 \
               -d \
               -e spring.profiles.active=prod \

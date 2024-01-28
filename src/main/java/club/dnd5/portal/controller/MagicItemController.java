@@ -23,7 +23,7 @@ public class MagicItemController {
 	private final MagicItemRepository repository;
 	private final ImageRepository imageRepo;
 
-	@GetMapping("/items/magic")
+	@GetMapping({"/items/magic", "/magic-items"})
 	public String getMagicItems(Model model) {
 		model.addAttribute("metaTitle", "Магические предметы (Magic items) D&D 5e");
 		model.addAttribute("metaUrl", BASE_URL);
@@ -32,7 +32,7 @@ public class MagicItemController {
 		return "spa";
 	}
 
-	@GetMapping("/items/magic/{name}")
+	@GetMapping({"/items/magic/{name}", "/magic-items/{name}"})
 	public String getMagicItem(Model model, @PathVariable String name) {
 		MagicItem item = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Магические предметы D&D 5e", item.getName(), item.getEnglishName()));

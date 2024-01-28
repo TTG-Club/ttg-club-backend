@@ -65,10 +65,10 @@ public class SpellFvtt implements Serializable {
 					.collect(Collectors.toList());
 		}
 		components = new Components();
-		if (spell.getVerbalComponent()) {
+		if (spell.isVerbalComponent()) {
 			components.setV(true);
 		}
-		if (spell.getSomaticComponent()) {
+		if (spell.isSomaticComponent()) {
 			components.setS(true);
 		}
 		if (Objects.nonNull(spell.getAdditionalMaterialComponent())) {
@@ -96,7 +96,7 @@ public class SpellFvtt implements Serializable {
 		if (spell.getUpperLevel() != null) {
 			this.entriesHigherLevel = new EntriesHigherLevel(spell.getUpperLevel());
 		}
-	    Matcher matcher = Pattern.compile("(<span class=\"saving_throw\">\\W+<\\/span>)+").matcher(spell.getDescription());
+	    Matcher matcher = Pattern.compile("(<span class=\"saving_throw\">\\W+</span>)+").matcher(spell.getDescription());
 	    if(matcher.matches()) {
 	    	this.savingThrow = new ArrayList<>(matcher.groupCount());
 	    	while (matcher.find()) {

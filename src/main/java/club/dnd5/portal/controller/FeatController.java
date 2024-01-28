@@ -2,7 +2,7 @@ package club.dnd5.portal.controller;
 
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.trait.Trait;
-import club.dnd5.portal.repository.datatable.TraitRepository;
+import club.dnd5.portal.repository.datatable.FeatRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequiredArgsConstructor
 @Hidden
 @Controller
-public class TraitController {
-	private static final String BASE_URL = "https://ttg.club/traits";
+public class FeatController {
+	private static final String BASE_URL = "https://ttg.club/feats";
 
-	private final TraitRepository repository;
+	private final FeatRepository repository;
 
 	@GetMapping({"/traits", "/feats"})
 	public String getTraits(Model model) {

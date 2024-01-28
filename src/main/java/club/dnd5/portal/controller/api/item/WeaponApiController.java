@@ -131,7 +131,7 @@ public class WeaponApiController {
 		FilterApi damageTypeFilter = new FilterApi("По типу урона", "damageType");
 		damageTypeFilter.setValues(
 				DamageType.getWeaponDamage().stream()
-				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+				 .map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
 

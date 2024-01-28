@@ -28,6 +28,4 @@ public class Action {
 	 */
 	@Column(columnDefinition = "boolean default false")
 	private boolean markdown;
-
-	private String img;
 }
