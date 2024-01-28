@@ -32,7 +32,7 @@ jobs:
             docker run \
               --network ttg-network-dev \
               --name ttg-app-dev \
-              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }}
+              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }} \
               -p 9090:8080 \
               -d \
               -e spring.profiles.active=dev \
@@ -62,7 +62,7 @@ jobs:
             docker run \
               --network ttg-network-prod \
               --name ttg-app-prod \
-              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }}
+              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }} \
               -p 9393:8080 \
               -d \
               -e spring.profiles.active=prod \
