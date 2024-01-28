@@ -119,7 +119,7 @@ public class GodApiController {
 		FilterApi alignmentFilter = new FilterApi("Мировоззрение", "alignment");
 		alignmentFilter.setValues(
 				Alignment.getGods().stream()
-				 .map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+				 .map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(alignmentFilter);
 

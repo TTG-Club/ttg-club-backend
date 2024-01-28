@@ -6,7 +6,7 @@ import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
 import club.dnd5.portal.dto.api.bestiary.BeastFilter;
-import club.dnd5.portal.dto.api.bestiary.BeastlRequesApi;
+import club.dnd5.portal.dto.api.bestiary.BeastRequesApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.CreatureSize;
@@ -21,7 +21,6 @@ import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
-import club.dnd5.portal.service.JsonStorageService;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,19 +49,17 @@ public class BestiaryApiController {
 	private final ImageRepository imageRepository;
 	private final TokenRepository tokenRepository;
 
-	private final JsonStorageService jsonStorageService;
-
 	@Operation(summary = "Получение краткого списка сушеств")
 	@PostMapping(value = "/api/v1/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<BeastApi> getBestiary(@RequestBody BeastlRequesApi request) {
+	public List<BeastApi> getBestiary(@RequestBody BeastRequesApi request) {
 		Specification<Creature> specification = null;
-		Optional<BeastlRequesApi> optionalRequest = Optional.ofNullable(request);
+		Optional<BeastRequesApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}
 		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
-		if (optionalRequest.map(BeastlRequesApi::getFilter).isPresent()
-			&& optionalRequest.map(BeastlRequesApi::getFilter).map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
+		if (optionalRequest.map(BeastRequesApi::getFilter).isPresent()
+			&& optionalRequest.map(BeastRequesApi::getFilter).map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification,
 				(root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
 		}
@@ -300,7 +297,7 @@ public class BestiaryApiController {
 		FilterApi vulnerabilityDamageFilter = new FilterApi("Уязвимость к урону", "vulnerabilityDamage");
 		values = DamageType.getVulnerability()
 			.stream()
-			.map(damage -> new FilterValueApi(damage.getCyrilicName(), damage.name()))
+			.map(damage -> new FilterValueApi(damage.getCyrillicName(), damage.name()))
 			.collect(Collectors.toList());
 		vulnerabilityDamageFilter.setValues(values);
 		otherFilters.add(vulnerabilityDamageFilter);
@@ -308,7 +305,7 @@ public class BestiaryApiController {
 		FilterApi resistDamageFilter = new FilterApi("Сопротивление к урону", "resistanceDamage");
 		values = DamageType.getResistance()
 			.stream()
-			.map(damage -> new FilterValueApi(damage.getCyrilicName(), damage.name()))
+			.map(damage -> new FilterValueApi(damage.getCyrillicName(), damage.name()))
 			.collect(Collectors.toList());
 		resistDamageFilter.setValues(values);
 		otherFilters.add(resistDamageFilter);
@@ -316,7 +313,7 @@ public class BestiaryApiController {
 		FilterApi immunityDamageFilter = new FilterApi("Иммунитет к урону", "immunityDamage");
 		values = DamageType.getImmunity()
 			.stream()
-			.map(damage -> new FilterValueApi(damage.getCyrilicName(), damage.name()))
+			.map(damage -> new FilterValueApi(damage.getCyrillicName(), damage.name()))
 			.collect(Collectors.toList());
 		immunityDamageFilter.setValues(values);
 		otherFilters.add(immunityDamageFilter);
@@ -324,7 +321,7 @@ public class BestiaryApiController {
 		FilterApi immunityConditionFilter = new FilterApi("Иммунитет к состояниям", "immunityCondition");
 		values = Condition.getImmunity()
 			.stream()
-			.map(condition -> new FilterValueApi(condition.getCyrilicName(), condition.name()))
+			.map(condition -> new FilterValueApi(condition.getCyrillicName(), condition.name()))
 			.collect(Collectors.toList());
 		immunityConditionFilter.setValues(values);
 		otherFilters.add(immunityConditionFilter);

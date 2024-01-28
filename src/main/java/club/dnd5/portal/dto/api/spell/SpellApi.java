@@ -1,17 +1,16 @@
 package club.dnd5.portal.dto.api.spell;
 
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.splells.Spell;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -38,13 +37,13 @@ public class SpellApi {
 		name = new NameApi(spell.getName(), spell.getEnglishName());
 		level = spell.getLevel();
 		school = spell.getSchool().getName();
-		if (spell.getVerbalComponent()) {
+		if (spell.isVerbalComponent()) {
 			components.setV(Boolean.TRUE);	
 		}
-		if (spell.getSomaticComponent()) {
+		if (spell.isSomaticComponent()) {
 			components.setS(Boolean.TRUE);	
 		}
-		if (spell.getMaterialComponent()) {
+		if (spell.getAdditionalMaterialComponent() != null) {
 			components.setM(Boolean.TRUE);
 		}
 		if (spell.getRitual()) {

@@ -21,6 +21,4 @@ public class CreatureFeat {
 	 */
 	@Column(columnDefinition = "boolean default false")
 	private boolean markdown;
-
-	private String img;
 }

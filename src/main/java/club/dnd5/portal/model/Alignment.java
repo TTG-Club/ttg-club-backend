@@ -1,9 +1,9 @@
 package club.dnd5.portal.model;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.List;
-
-import lombok.Getter;
 
 @Getter
 public enum Alignment {
@@ -22,15 +22,15 @@ public enum Alignment {
 	ALL("", "любое мировоззрение", "любое мировоззрение", "любое мировоззрение"), // 12
 	NO_GOOD("", "любое не доброе мировоззрение", "любое не доброе мировоззрение", "любое не доброе мировоззрение") // 13
 	;
-	private String shortName;
-	private String[] names;
+	private final String shortName;
+	private final String[] names;
 	
 	Alignment(String shortName, String... names){
 		this.shortName = shortName;
 		this.names = names;
 	}
 
-	public String getCyrilicName() {
+	public String getCyrillicName() {
 		return names[0];
 	}
 

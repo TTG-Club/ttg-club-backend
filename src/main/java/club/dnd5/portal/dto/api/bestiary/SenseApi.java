@@ -4,6 +4,7 @@ import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.model.creature.Creature;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,8 +20,11 @@ import java.util.Objects;
 @Getter
 @Setter
 public class SenseApi {
+	@Schema(description = "пассивная Внимательность", example = "10")
 	private String passivePerception;
+	@Schema(description = "список чувств")
 	private List<NameValueApi> senses;
+
 	public SenseApi(Creature beast) {
 		passivePerception = String.valueOf(beast.getPassivePerception());
 		if (Objects.nonNull(beast.getPassivePerceptionBonus())) {

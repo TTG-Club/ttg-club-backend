@@ -1,13 +1,13 @@
 package club.dnd5.portal.dto.fvtt.export.system.details;
 
-import java.util.stream.Collectors;
-
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.creature.Spellcater;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -24,7 +24,7 @@ public class FDetails {
 
 	public FDetails(Creature creature) {
 		biography = new FBiography(creature.getDescription(), "");
-		alignment = creature.getAlignment().getCyrilicName();
+		alignment = creature.getAlignment().getCyrillicName();
 		race = creature.getRaceName();
 		type = new FType(creature.getType().name().toLowerCase(), "", "", "");
 		environment = creature.getHabitates().stream().map(HabitatType::getName).collect(Collectors.joining(", "));
@@ -42,7 +42,7 @@ public class FDetails {
 			cr = 0;
 			break;
 		default:
-			cr = Integer.valueOf(creature.getChallengeRating());
+			cr = Integer.parseInt(creature.getChallengeRating());
 		}
 		if (!creature.getSpellcasters().isEmpty()) {
 			for (Spellcater spellcaster : creature.getSpellcasters()) {
