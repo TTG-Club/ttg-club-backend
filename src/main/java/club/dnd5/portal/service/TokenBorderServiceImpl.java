@@ -146,7 +146,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	}
 
 	private String constructImageUrl(String fileName) {
-		return tokenBordersURL +"/"+ fileName;
+		return tokenBordersURL + "/" + fileName;
 	}
 
 	private String generateUniqueFileName(String fileName) {
