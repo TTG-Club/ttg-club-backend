@@ -26,7 +26,7 @@ public enum ArmorType {
 	PLATE("латный доспех", "plate_armor"), // 11
 
 	PLATE_HALF("пластинчатый доспех", "splint_armor"), // 12 неверное
-	CUIRASS("кираса", "breastplate"), //13
+	CUIRASS("кираса", "breastplate"), //13 неверное
 
 	BONECRAFT("костяной доспех", null), //14
 	MAGE_ARMOR("с доспехами мага", null), //15
@@ -36,6 +36,7 @@ public enum ArmorType {
 	SPLINT("наборный доспех", "splint_armor"),
 
 	// правильные именования
+	PADDED_ARMOR("стёганный доспех", "padded_armor"),
 	CHAIN_SHIRT("кольчужная рубаха", "chain_shirt"),
 	SCALE_MAIL("чешуйчатый доспех", "scale_mail_armor"),
 	STUDDED_LEATHER("проклёпаная кожа", "studded_leather_armor");
@@ -46,17 +47,18 @@ public enum ArmorType {
 	public static Set<ArmorType> getCreatures() {
 		return EnumSet.of(NATURAL,
 			LEATHER,
-			RIVETED_LEATHER,
+			PADDED_ARMOR,
+			STUDDED_LEATHER,
 			HIDE,
-			CHAINMAIL,
+			CHAIN_SHIRT,
 			SCALED,
-			CUIRASS,
 			BREASTPLATE,
 			HALF_PLATE,
 			RING_MAIL,
 			CHAIN_MAIL,
 			PLATE_HALF,
-			PLATE);
+			PLATE,
+			SHIELD);
 	}
 
 	public String getPlutoniumTypeName() {
