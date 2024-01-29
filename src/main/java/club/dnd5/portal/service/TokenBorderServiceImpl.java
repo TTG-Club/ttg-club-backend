@@ -119,6 +119,13 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 			Path destinationFile = path.resolve(Paths.get(uniqueFileName))
 				.normalize().toAbsolutePath();
 
+			Path destinationDirectory = destinationFile.getParent();
+
+			if (!destinationFile.getParent().equals(path.toAbsolutePath())) {
+				// This is a security check
+				throw new StorageException("Cannot store file outside current directory.");
+			}
+
 			try (InputStream inputStream = multipartFile.getInputStream()) {
 				Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 			}
