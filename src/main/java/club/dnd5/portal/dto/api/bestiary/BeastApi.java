@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.creature.Creature;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,10 +17,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BeastApi {
+	@Schema(description = "Имя")
 	private NameApi name;
+	@Schema(description = "тип существа")
 	protected Object type;
+	@Schema(description = "Уровень опасности")
 	private String challengeRating;
+	@Schema(description = "URL")
 	protected String url;
+	@Schema(description = "источник")
 	protected SourceApi source;
 
 	public BeastApi(Creature beast) {

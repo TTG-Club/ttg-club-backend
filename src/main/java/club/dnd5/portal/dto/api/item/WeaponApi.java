@@ -30,7 +30,7 @@ public class WeaponApi {
 			homebrew = Boolean.TRUE;	
 		}
 		type = new TypeApi(weapon.getType().getName(), weapon.getType().ordinal());
-		damage = new DamageApi(weapon.getDamage(), weapon.getDamageType().getCyrilicName());
+		damage = new DamageApi(weapon.getDamage(), weapon.getDamageType().getCyrillicName());
 		if (weapon.getCost() != null) {
 			price = String.format("%d %s.", weapon.getCost(), weapon.getCurrency().getName());
 		}

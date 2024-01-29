@@ -32,7 +32,6 @@ public class TokenApiController {
 	private final TokenRepository tokenRepository;
 	private final BestiaryRepository bestiaryRepository;
 
-	@SecurityRequirement(name = "Bearer Authentication")
 	@Operation(summary = "Получение и поиск токенов")
 	@GetMapping
 	public PaginatedResponseApi<TokenApi> getTokens(
@@ -71,7 +70,6 @@ public class TokenApiController {
 		);
 	}
 
-	@SecurityRequirement(name = "Bearer Authentication")
 	@Operation(summary = "Получение токена по id существа")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping("{id}")
@@ -81,6 +79,7 @@ public class TokenApiController {
 	}
 
 	@Operation(summary = "Добавление токена")
+	@Secured({"ADMIN"})
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.CREATED)
 	@Transactional

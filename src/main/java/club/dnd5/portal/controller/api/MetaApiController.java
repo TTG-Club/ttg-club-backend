@@ -44,7 +44,7 @@ public class MetaApiController {
 	private final ImageRepository imageRepository;
 	private final ClassRepository classRepository;
 	private final RaceRepository raceRepository;
-	private final TraitRepository traitRepository;
+	private final FeatRepository traitRepository;
 	private final BackgroundRepository backgroundRepository;
 	private final SpellRepository spellRepository;
 	private final OptionRepository optionRepository;
@@ -383,7 +383,7 @@ public class MetaApiController {
 		God god = godRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Боги D&D 5e", god.getName(), god.getEnglishName()));
-		meta.setDescription(String.format("%s (%s) - %s %s, %s", god.getName(), god.getEnglishName(), god.getAligment().getCyrilicName(), god.getSex().getCyrilicName(), god.getCommitment()));
+		meta.setDescription(String.format("%s (%s) - %s %s, %s", god.getName(), god.getEnglishName(), god.getAligment().getCyrillicName(), god.getSex().getCyrilicName(), god.getCommitment()));
 		meta.setMenu("Боги");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.GOD, god.getId());
 		if (!images.isEmpty()) {
@@ -419,6 +419,16 @@ public class MetaApiController {
 		meta.setTitle("Источники (Sources) D&D 5e");
 		meta.setDescription("Источники [Sources] D&D 5e");
 		meta.setMenu("Источники");
+		return meta;
+	}
+
+	@GetMapping(value = "/api/v1/meta/tools/tokenator", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MetaApi getTokenatorMeta() {
+		MetaApi meta = new MetaApi();
+		meta.setTitle("Токенатор (Tokenator) | TTG Club");
+		meta.setDescription("Создание собственных токенов для настольных игр | TTG Club");
+		meta.setMenu("Токенатор");
+		meta.setKeywords("tokenator, tokenstamp, token stamp, token creator, token creating, токенатор, токенштамп, токен штамп, создание токена, создать токен, создание жетона, создать жетон");
 		return meta;
 	}
 

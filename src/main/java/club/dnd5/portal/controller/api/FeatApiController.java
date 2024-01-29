@@ -12,7 +12,7 @@ import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.trait.Trait;
-import club.dnd5.portal.repository.datatable.TraitRepository;
+import club.dnd5.portal.repository.datatable.FeatRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,18 +38,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Tag(name = "Черты", description = "API по чертам")
 @RestController
-public class TraitApiController {
-	private final TraitRepository traitRepository;
+public class FeatApiController {
+	private final FeatRepository featRepository;
 
 	@Operation(summary = "Получение краткого списка черт")
-	@PostMapping(value = "/api/v1/traits", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = {"/api/v1/traits","/api/v1/feats"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<TraitApi> getTraits(@RequestBody FeatRequestApi request) {
 		Specification<Trait> specification = null;
 		Optional<FeatRequestApi> spellRequest = Optional.ofNullable(request);
 		if (!spellRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}
-		if (request.getFilter() != null) {
+		if (spellRequest.map(FeatRequestApi::getFilter).isPresent()) {
 			if (!request.getFilter().getBooks().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<Book, Trait> join = root.join("book", JoinType.INNER);
@@ -92,7 +92,7 @@ public class TraitApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return traitRepository.findAll(specification, pageable).toList()
+		return featRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(TraitApi::new)
 			.collect(Collectors.toList());
@@ -100,19 +100,19 @@ public class TraitApiController {
 	}
 
 	@Operation(summary = "Получение черты по английскому названию")
-	@PostMapping(value = "/api/v1/traits/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = {"/api/v1/traits/{englishName}", "/api/v1/feats/{englishName}"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<TraitDetailApi> getTrait(@PathVariable String englishName) {
-		Trait trait = traitRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		Trait trait = featRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		return ResponseEntity.ok(new TraitDetailApi(trait));
 	}
 
 	@Operation(summary = "Получение фильтров для черт")
-	@PostMapping("/api/v1/filters/traits")
+	@PostMapping({"/api/v1/filters/traits", "/api/v1/filters/feats"})
 	public FilterApi getTraitFilter() {
 		FilterApi filters = new FilterApi();
 		List<FilterApi> sources = new ArrayList<>();
 		for (TypeBook typeBook : TypeBook.values()) {
-			Collection<Book> books = traitRepository.findBook(typeBook);
+			Collection<Book> books = featRepository.findBook(typeBook);
 			if (!books.isEmpty()) {
 				FilterApi filter = new FilterApi(typeBook.getName(), typeBook.name());
 				filter.setValues(books.stream()

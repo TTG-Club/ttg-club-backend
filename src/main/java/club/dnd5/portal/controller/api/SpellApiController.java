@@ -22,7 +22,6 @@ import club.dnd5.portal.model.splells.TimeCast;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import club.dnd5.portal.service.JsonStorageService;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,8 +57,6 @@ public class SpellApiController {
 	private final SpellRepository spellRepository;
 	private final ClassRepository classRepository;
 	private final ArchetypeSpellRepository archetypeSpellRepository;
-
-	private final JsonStorageService jsonStorageService;
 
 	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -260,7 +257,7 @@ public class SpellApiController {
 		FilterApi damageTypeFilter = new FilterApi("Тип урона", "damageType");
 		damageTypeFilter.setValues(
 			DamageType.getSpellDamage().stream()
-				.map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
+				.map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
 

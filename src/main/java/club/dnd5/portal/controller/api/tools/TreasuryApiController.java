@@ -508,7 +508,7 @@ public class TreasuryApiController {
 							break;
 						case 89:
 							String aligment = Alignment.values()[rnd.nextInt(Alignment.values().length)]
-									.getCyrilicName();
+									.getCyrillicName();
 							itemApi.updateName("(Мировоззрение: " + aligment + ")");
 							break;
 						case 91:
