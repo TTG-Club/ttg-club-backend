@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @JsonInclude(Include.NON_NULL)
 
 @NoArgsConstructor
@@ -43,7 +45,11 @@ public class ItemApi {
 	}
 
 	public ItemApi(Treasure item) {
-		name = new NameApi(item.getName(), item.getEnglishName());
+		if (Objects.nonNull(item.getEnglishName())) {
+			name = new NameApi(item.getName(), item.getEnglishName());
+		} else {
+			name = new NameApi(item.getName(), "");
+		}
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
