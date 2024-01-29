@@ -13,45 +13,52 @@ import java.util.Set;
 @AllArgsConstructor
 public enum ArmorType {
 	NATURAL("природный доспех", null), // 0
-	LEATHER("кожанный доспех", "leather_armor"), // 1
+	LEATHER("кожаный доспех", "leather_armor"), // 1
 	HIDE("шкурный доспех", "hide_armor"), // 2
-	CHAINMAIL("кольчужная рубаха", "chain_shirt"), //3
+	CHAINMAIL("кольчужная рубаха", "chain_shirt"), //3 неверное
 	RING_MAIL("кольчатый доспех", "ring_mail_armor"),
 	SCRAPPY("лоскутный доспех", null), // 4
-	SCALED("чешуйчатый доспех", "scale_mail_armor"), //5
-	RIVETED_LEATHER("проклёпаная кожа", "studded_leather_armor"), //7
+	SCALED("чешуйчатый доспех", "scale_mail_armor"), //5 неверное
+	RIVETED_LEATHER("проклёпаная кожа", "studded_leather_armor"), //7 неверное
 	CHAIN_MAIL("кольчуга", "chain_mail"), // 8
 	BREASTPLATE("нагрудник", "breastplate"), // 9
 	HALF_PLATE("полулаты", "half_plate_armor"), // 10
 	PLATE("латный доспех", "plate_armor"), // 11
 
-	PLATE_HALF("пластинчатый доспех", "splint_armor"), // 12
-	CUIRASS("кираса", "breastplate"), //13
+	PLATE_HALF("пластинчатый доспех", "splint_armor"), // 12 неверное
+	CUIRASS("кираса", "breastplate"), //13 неверное
 
 	BONECRAFT("костяной доспех", null), //14
 	MAGE_ARMOR("с доспехами мага", null), //15
 
 	SHIELD("щит", "shield"), // 16
 	SCRAPS("обломки доспеха", null),
-	SPLINT("наборный доспех", "splint_armor"); // 17;
+	SPLINT("наборный доспех", "splint_armor"),
 
-	private String cyrillicName;
-	private String englishName;
+	// правильные именования
+	PADDED_ARMOR("стёганный доспех", "padded_armor"),
+	CHAIN_SHIRT("кольчужная рубаха", "chain_shirt"),
+	SCALE_MAIL("чешуйчатый доспех", "scale_mail_armor"),
+	STUDDED_LEATHER("проклёпаная кожа", "studded_leather_armor");
+
+	private final String cyrillicName;
+	private final String englishName;
 
 	public static Set<ArmorType> getCreatures() {
 		return EnumSet.of(NATURAL,
 			LEATHER,
-			RIVETED_LEATHER,
+			PADDED_ARMOR,
+			STUDDED_LEATHER,
 			HIDE,
-			CHAINMAIL,
+			CHAIN_SHIRT,
 			SCALED,
-			CUIRASS,
 			BREASTPLATE,
 			HALF_PLATE,
 			RING_MAIL,
 			CHAIN_MAIL,
 			PLATE_HALF,
-			PLATE);
+			PLATE,
+			SHIELD);
 	}
 
 	public String getPlutoniumTypeName() {
