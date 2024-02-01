@@ -26,11 +26,14 @@ import java.util.Optional;
 public class TokenBorderServiceImpl implements TokenBorderService {
 	private final TokenBorderRepository tokenBorderRepository;
 
-	@Value("${token.borders.rootLocation}")
+	@Value("${images.root}")
 	private String rootLocation;
 
-	@Value("${token.borders.url}")
-	public String tokenBordersURL;
+	@Value("${images.token.borders}")
+	private String tokenBorders;
+
+	@Value("${ttg.url}")
+	private String ttgWebsiteUrl;
 
 	@Override
 	public List<TokenBorder> getAllTokenBorders() {
@@ -85,7 +88,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 		String url = tokenBorder.getUrl();
 		String fileName = extractFileNameFromUrl(url);
 
-		Path filePath = Paths.get(rootLocation, fileName).normalize().toAbsolutePath();
+		Path filePath = Paths.get(rootLocation + tokenBorders, fileName).normalize().toAbsolutePath();
 
 		try {
 			Files.deleteIfExists(filePath);
@@ -115,7 +118,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 			String fileName = Objects.requireNonNull(multipartFile.getOriginalFilename());
 			String uniqueFileName = generateUniqueFileName(fileName);
 
-			Path path = Paths.get(rootLocation);
+			Path path = Paths.get(rootLocation + tokenBorders);
 			Path destinationFile = path.resolve(Paths.get(uniqueFileName))
 				.normalize().toAbsolutePath();
 
@@ -137,7 +140,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	}
 
 	private String constructImageUrl(String fileName) {
-		return tokenBordersURL + "/" + fileName;
+		return ttgWebsiteUrl + tokenBorders + "/" + fileName;
 	}
 
 	private String generateUniqueFileName(String fileName) {

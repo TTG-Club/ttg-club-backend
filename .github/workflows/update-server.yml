@@ -37,7 +37,7 @@ jobs:
               -d \
               -e spring.profiles.active=dev \
               -e frontend.application.sha=$(echo -n $(uuidgen) | shasum -a 256 | tr -d "\n *-") \
-              -e token.borders.rootLocation=${{ secrets.DOCKER_MOUNT_DESTINATION }} \
+              -e images.root=${{ secrets.DOCKER_MOUNT_DESTINATION }} \
               -e dbhost=ttg-db-dev \
               -e dbport=3306 \
               -e dbuser=${{ secrets.DB_USER }} \
@@ -68,7 +68,7 @@ jobs:
               -d \
               -e spring.profiles.active=prod \
               -e frontend.application.sha=$(echo -n $(uuidgen) | shasum -a 256 | tr -d "\n *-") \
-              -e token.borders.rootLocation=${{ secrets.DOCKER_MOUNT_DESTINATION }} \
+              -e images.root=${{ secrets.DOCKER_MOUNT_DESTINATION }} \
               -e dbhost=ttg-db-prod \
               -e dbport=3306 \
               -e dbuser=${{ secrets.DB_USER }} \
