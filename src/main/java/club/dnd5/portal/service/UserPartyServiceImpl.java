@@ -56,28 +56,25 @@ public class UserPartyServiceImpl implements UserPartyService {
 	}
 
 	@Override
-	public void updateUserPartyName(Long partyId, String newName, String newDescription) {
+	public void updateUserParty(Long partyId, UserPartyApi userPartyDTO) {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(partyId);
 		optionalUserParty.ifPresent(userParty -> {
-			userParty.setGroupName(newName);
-			userParty.setDescription(newDescription);
+			userParty.setGroupName(userPartyDTO.getGroupName());
+			userParty.setDescription(userPartyDTO.getDescription());
 			userParty.setLastUpdateDate(new Date());
 			userPartyRepository.save(userParty);
 		});
 	}
 
 	@Override
-	public void deleteUserParty(UserPartyApi userPartyDTO) {
-		UserParty userParty = convertToUserPartyEntity(userPartyDTO);
-		userPartyRepository.delete(userParty);
-	}
-
-	private List<UserPartyApi> convertToUserPartyApiList(List<UserParty> userParties) {
-		List<UserPartyApi> userPartyApis = new ArrayList<>();
-		for (UserParty userParty : userParties) {
-			userPartyApis.add(convertToUserPartyApi(userParty));
+	public String deleteUserPartyById(Long id) {
+		Optional<UserParty> optionalUserParty = userPartyRepository.findById(id);
+		if (optionalUserParty.isPresent()) {
+			userPartyRepository.deleteById(id);
+			return "Delete was successful";
+		} else {
+			return "User party with id " + id + " not found";
 		}
-		return userPartyApis;
 	}
 
 	// Utility methods for conversion between API DTO and JPA Entity
@@ -109,5 +106,13 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.creationDate(userPartyDTO.getCreationDate())
 			.lastUpdateDate(userPartyDTO.getLastUpdateDate())
 			.build();
+	}
+
+	private List<UserPartyApi> convertToUserPartyApiList(List<UserParty> userParties) {
+		List<UserPartyApi> userPartyApis = new ArrayList<>();
+		for (UserParty userParty : userParties) {
+			userPartyApis.add(convertToUserPartyApi(userParty));
+		}
+		return userPartyApis;
 	}
 }
