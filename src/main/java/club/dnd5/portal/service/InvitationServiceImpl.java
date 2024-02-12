@@ -1,10 +1,13 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.Invitation;
 import club.dnd5.portal.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -68,12 +71,24 @@ public class InvitationServiceImpl implements InvitationService {
 
 	@Override
 	public String getInviteByLink(Long groupId) {
-		return null;
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		if (invitationOptional.isPresent()) {
+			Invitation invitation = invitationOptional.get();
+			return invitation.getLink();
+		} else {
+			throw new PageNotFoundException();
+		}
 	}
 
 	@Override
 	public String getInviteByCode(Long groupId) {
-		return null;
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		if (invitationOptional.isPresent()) {
+			Invitation invitation = invitationOptional.get();
+			return invitation.getCode();
+		} else {
+			throw new PageNotFoundException();
+		}
 	}
 
 	private String generateUniqueCode() {
