@@ -4,6 +4,7 @@ public interface InviterService {
 	// Методы для создания приглашений
 	String generateLinkInvitation(String groupId);
 	String generateEmailInvitation(String groupId, String userEmail);
+	String generateCodeInvitation(String groupId);
 
 	// Методы для отправки приглашений
 	void sendInvitationEmail(String invitationId);

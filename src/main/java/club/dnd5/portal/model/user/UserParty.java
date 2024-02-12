@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.user;
 
+import club.dnd5.portal.model.Invitation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,6 +32,9 @@ public class UserParty {
 
 	@OneToMany(mappedBy = "userParty")
 	private List<User> userList;
+
+	@OneToOne(mappedBy = "userParty")
+	private Invitation invitation;
 
 	@Column(name = "creation_date")
 	private Date creationDate;
