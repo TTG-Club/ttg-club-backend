@@ -1,6 +1,6 @@
 package club.dnd5.portal.service;
 
-public interface InviterService {
+public interface InvitationService {
 	// Методы для создания приглашений
 	String generateLinkInvitation(String groupId);
 	String generateEmailInvitation(String groupId, String userEmail);
@@ -19,6 +19,6 @@ public interface InviterService {
 	void setInvitationExpiration(String invitationId, Long expirationTime);
 
 	// Методы для получения приглашений
-	String getInviteByLink();
-	String getInviteByCode();
+	String getInviteByLink(Long groupId);
+	String getInviteByCode(Long groupId);
 }
