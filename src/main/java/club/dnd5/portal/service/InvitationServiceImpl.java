@@ -18,13 +18,13 @@ public class InvitationServiceImpl implements InvitationService {
 
 	@Override
 	public String generateLinkInvitation(String groupId) {
-		String uniqueIdentifier = UUID.randomUUID().toString();
-		return ttgUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
-	}
-
-	@Override
-	public String generateEmailInvitation(String groupId, String userEmail) {
-		return null;
+		String uniqueIdentifier;
+		String invitationLink;
+		do {
+			uniqueIdentifier = UUID.randomUUID().toString();
+			invitationLink = ttgUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
+		} while (invitationRepository.existsByLink(invitationLink)); // Check if the generated link already exists in the database
+		return invitationLink;
 	}
 
 	@Override

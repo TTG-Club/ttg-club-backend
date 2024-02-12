@@ -3,7 +3,6 @@ package club.dnd5.portal.service;
 public interface InvitationService {
 	// Методы для создания приглашений
 	String generateLinkInvitation(String groupId);
-	String generateEmailInvitation(String groupId, String userEmail);
 	String generateCodeInvitation(String groupId);
 
 	// Методы для отправки приглашений
