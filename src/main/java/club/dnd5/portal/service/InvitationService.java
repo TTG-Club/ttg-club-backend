@@ -1,5 +1,7 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.model.Invitation;
+
 public interface InvitationService {
 	// Методы для создания приглашений
 	String generateLinkInvitation(String groupId);
@@ -9,8 +11,7 @@ public interface InvitationService {
 	void sendInvitationEmail(String invitationId);
 
 	// Методы для получения информации о приглашениях
-	String getInvitationById(String invitationId);
-	String getInvitationStatus(String invitationId);
+	Invitation getInvitationById(Long invitationId);
 
 	// Методы для управления приглашениями
 	void cancelInvitation(String invitationId);

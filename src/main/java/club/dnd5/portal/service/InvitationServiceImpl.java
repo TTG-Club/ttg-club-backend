@@ -45,18 +45,20 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public String getInvitationById(String invitationId) {
-		return null;
-	}
-
-	@Override
-	public String getInvitationStatus(String invitationId) {
-		return null;
+	public Invitation getInvitationById(Long invitationId) {
+		return invitationRepository.findById(invitationId).orElseThrow(PageNotFoundException::new);
 	}
 
 	@Override
 	public void cancelInvitation(String invitationId) {
+		Optional<Invitation> invitationOptional = invitationRepository.findById(Long.parseLong(invitationId));
 
+		if (invitationOptional.isPresent()) {
+			Invitation invitation = invitationOptional.get();
+			invitationRepository.delete(invitation);
+		} else {
+			throw new PageNotFoundException();
+		}
 	}
 
 	@Override
