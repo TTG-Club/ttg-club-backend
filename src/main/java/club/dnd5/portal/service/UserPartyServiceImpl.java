@@ -7,6 +7,9 @@ import club.dnd5.portal.model.user.UserParty;
 import club.dnd5.portal.repository.UserPartyRepository;
 import club.dnd5.portal.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,11 +22,26 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 	private final UserRepository userRepository;
 
+	private final EmailService emailService;
+
+	private final InvitationServiceImpl invitationService;
+
 	@Override
 	public UserPartyApi createUserParty(UserPartyApi userPartyDTO) {
+		//TODO TEST
 		UserParty userParty = convertToUserPartyEntity(userPartyDTO);
 		userParty.setCreationDate(new Date());
-		return convertToUserPartyApi(userPartyRepository.save(userParty));
+
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+
+		List<User> invitationList = Collections.singletonList(user);
+
+		userParty = userPartyRepository.save(userParty);
+
+		emailService.sendInvitationLink(invitationList, invitationService.getInviteByLink(userParty.getId()));
+
+		return convertToUserPartyApi(userParty);
 	}
 
 	@Override
@@ -114,5 +132,13 @@ public class UserPartyServiceImpl implements UserPartyService {
 			userPartyApis.add(convertToUserPartyApi(userParty));
 		}
 		return userPartyApis;
+	}
+
+	private String getAuthenticatedUserEmail() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			return authentication.getName();
+		}
+		throw new IllegalStateException("User is not authenticated");
 	}
 }
