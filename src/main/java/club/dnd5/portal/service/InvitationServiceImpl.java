@@ -2,7 +2,9 @@ package club.dnd5.portal.service;
 
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.Invitation;
+import club.dnd5.portal.model.user.UserParty;
 import club.dnd5.portal.repository.InvitationRepository;
+import club.dnd5.portal.repository.UserPartyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ public class InvitationServiceImpl implements InvitationService {
 	private String ttgUrl;
 
 	private final InvitationRepository invitationRepository;
+
+	private final UserPartyRepository userPartyRepository;
 
 	@Override
 	public String generateLinkInvitation(String groupId) {
@@ -40,13 +44,10 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public void sendInvitationEmail(String invitationId) {
-
-	}
-
-	@Override
-	public Invitation getInvitationById(Long invitationId) {
-		return invitationRepository.findById(invitationId).orElseThrow(PageNotFoundException::new);
+	public Invitation getInvitationByGroupId(Long groupId) {
+		return userPartyRepository.findById(groupId)
+			.map(UserParty::getInvitation)
+			.orElseThrow(PageNotFoundException::new);
 	}
 
 	@Override
@@ -62,13 +63,17 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public void resendInvitation(String invitationId) {
-
-	}
-
-	@Override
 	public void setInvitationExpiration(String invitationId, Long expirationTime) {
+		Optional<Invitation> invitationOptional = invitationRepository.findById(Long.parseLong(invitationId));
 
+		if (invitationOptional.isPresent()) {
+			Invitation invitation = invitationOptional.get();
+			invitation.setExpirationTime(expirationTime);
+
+			invitationRepository.save(invitation);
+		} else {
+			throw new PageNotFoundException();
+		}
 	}
 
 	@Override

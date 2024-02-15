@@ -27,5 +27,5 @@ public class Invitation {
 	@JoinColumn(name = "user_party_id")
 	private UserParty userParty;
 
-	private int lifetimeInSeconds;
+	private Long expirationTime;
 }
