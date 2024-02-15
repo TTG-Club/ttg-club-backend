@@ -2,7 +2,6 @@ package club.dnd5.portal.service;
 
 import club.dnd5.portal.model.user.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
@@ -19,8 +18,7 @@ public class EmailService {
 	@Qualifier("userServiceImpl")
 	private final UserService service;
 
-	@Autowired
-	private JavaMailSender mailSender;
+	private final JavaMailSender mailSender;
 
 	@Async
 	public void confirmRegistration(User user) {
@@ -28,10 +26,10 @@ public class EmailService {
 		service.createVerificationToken(user, token);
 
 		String recipientAddress = user.getEmail();
-		String subject = "Потверждение регистрации";
+		String subject = "Подтверждение регистрации";
 
 		String confirmationUrl = "https://dev.ttg.club/confirm/email?token=" + token;
-		String message = "Потвердите ваш email адресс перейдя по ссылке:";
+		String message = "Подтвердите ваш email адрес, перейдя по ссылке::";
 
 		SimpleMailMessage email = new SimpleMailMessage();
 		email.setTo(recipientAddress);
