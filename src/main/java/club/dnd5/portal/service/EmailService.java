@@ -27,16 +27,10 @@ public class EmailService {
 
 		String recipientAddress = user.getEmail();
 		String subject = "Подтверждение регистрации";
+		String confirmationUrl = createConfirmationUrl(token);
+		String message = "Подтвердите ваш email адрес, перейдя по ссылке:";
 
-		String confirmationUrl = "https://dev.ttg.club/confirm/email?token=" + token;
-		String message = "Подтвердите ваш email адрес, перейдя по ссылке::";
-
-		SimpleMailMessage email = new SimpleMailMessage();
-		email.setTo(recipientAddress);
-		email.setFrom("support@ttg.club");
-		email.setSubject(subject);
-		email.setText(String.format("%s %s", message,  confirmationUrl));
-		mailSender.send(email);
+		sendEmail(recipientAddress, subject, message, confirmationUrl);
 	}
 
 	@Async
@@ -46,21 +40,36 @@ public class EmailService {
 
 		String recipientAddress = user.getEmail();
 		String subject = "Сброс пароля на ttg.club";
-		String[] profiles = this.environment.getActiveProfiles();
-		String confirmationUrl;
-		if("dev".equals(profiles[0])) {
-			confirmationUrl = "https://dev.ttg.club/reset/password?token=" + token;
-		} else {
-			confirmationUrl = "https://ttg.club/reset/password?token=" + token;
-		}
-
+		String confirmationUrl = createPasswordResetUrl(token);
 		String message = "Для сброса пароля перейдите по ссылке и введите новый пароль:";
 
+		sendEmail(recipientAddress, subject, message, confirmationUrl);
+	}
+
+	private String createConfirmationUrl(String token) {
+		String[] profiles = environment.getActiveProfiles();
+		if (profiles[0].equals("dev")) {
+			return "https://dev.ttg.club/confirm/email?token=" + token;
+		} else {
+			return "https://ttg.club/confirm/email?token=" + token;
+		}
+	}
+
+	private String createPasswordResetUrl(String token) {
+		String[] profiles = environment.getActiveProfiles();
+		if (profiles[0].equals("dev")) {
+			return "https://dev.ttg.club/reset/password?token=" + token;
+		} else {
+			return "https://ttg.club/reset/password?token=" + token;
+		}
+	}
+
+	private void sendEmail(String recipientAddress, String subject, String message, String confirmationUrl) {
 		SimpleMailMessage email = new SimpleMailMessage();
 		email.setTo(recipientAddress);
 		email.setFrom("support@ttg.club");
 		email.setSubject(subject);
-		email.setText(String.format("%s %s", message,  confirmationUrl));
+		email.setText(String.format("%s %s", message, confirmationUrl));
 		mailSender.send(email);
 	}
 }
