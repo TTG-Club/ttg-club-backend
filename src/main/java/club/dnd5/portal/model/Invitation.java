@@ -28,4 +28,13 @@ public class Invitation {
 	private UserParty userParty;
 
 	private Long expirationTime;
+
+	public boolean isExpired() {
+		// Calculate expiration date by adding expirationTime milliseconds to generationDate
+		Date expirationDate = new Date(generationDate.getTime() + expirationTime);
+
+		// Check if current date is after the expiration date
+		return new Date().after(expirationDate);
+	}
+
 }

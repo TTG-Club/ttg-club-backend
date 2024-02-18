@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
 	boolean existsByCode(String code);
 	boolean existsByLink(String link);
+	Optional<Invitation> findByLink(String link);
 	Optional<Invitation> findByUserPartyId(Long groupId);
 }
