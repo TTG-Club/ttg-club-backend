@@ -28,18 +28,15 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 	@Override
 	public UserPartyApi createUserParty(UserPartyApi userPartyDTO) {
-		//TODO TEST
-		UserParty userParty = convertToUserPartyEntity(userPartyDTO);
-		userParty.setCreationDate(new Date());
-
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 
-		List<User> invitationList = Collections.singletonList(user);
-
+		UserParty userParty = convertToUserPartyEntity(userPartyDTO);
+		userParty.getUserList().add(user);
 		userParty = userPartyRepository.save(userParty);
 
-		emailService.sendInvitationLink(invitationList, invitationService.getInviteByLink(userParty.getId()));
+		emailService.sendInvitationLink(userParty.getUserList(),
+			invitationService.getInviteByLink(userParty.getId()));
 
 		return convertToUserPartyApi(userParty);
 	}
@@ -121,7 +118,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.groupName(userPartyDTO.getGroupName())
 			.description(userPartyDTO.getDescription())
 			.userList(userList)
-			.creationDate(userPartyDTO.getCreationDate())
+			.creationDate((new Date()))
 			.lastUpdateDate(userPartyDTO.getLastUpdateDate())
 			.build();
 	}

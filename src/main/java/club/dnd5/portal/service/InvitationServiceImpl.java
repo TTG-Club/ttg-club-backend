@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -18,28 +19,49 @@ import java.util.UUID;
 public class InvitationServiceImpl implements InvitationService {
 	@Value("${ttg.url}")
 	private String ttgUrl;
-
 	private final InvitationRepository invitationRepository;
-
 	private final UserPartyRepository userPartyRepository;
 
 	@Override
-	public String generateLinkInvitation(String groupId) {
-		String uniqueIdentifier;
+	public String generateLinkInvitation(Long groupId) {
+		UserParty userParty = userPartyRepository.findById(groupId)
+			.orElseThrow(PageNotFoundException::new);
+
+		Invitation invitation = new Invitation();
+		invitation.setGenerationDate(new Date());
+		invitation.setUserParty(userParty);
+		invitation.setCode(generateCodeInvitation(groupId));
+
+		// Generate unique invitation link
 		String invitationLink;
 		do {
-			uniqueIdentifier = UUID.randomUUID().toString();
+			String uniqueIdentifier = UUID.randomUUID().toString();
 			invitationLink = ttgUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
 		} while (invitationRepository.existsByLink(invitationLink)); // Check if the generated link already exists in the database
+
+		invitation.setLink(invitationLink);
+		invitation.setExpirationTime(calculateExpirationTimeInMillis(1));
+		invitationRepository.save(invitation);
+
 		return invitationLink;
 	}
 
 	@Override
-	public String generateCodeInvitation(String groupId) {
+	public String generateCodeInvitation(Long groupId) {
 		String code;
 		do {
 			code = generateUniqueCode();
 		} while (invitationRepository.existsByCode(code));
+
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		if (invitationOptional.isPresent()) {
+			Invitation invitation = invitationOptional.get();
+			invitation.setCode(code);
+			invitationRepository.save(invitation);
+		} else {
+			throw new PageNotFoundException();
+		}
+
 		return code;
 	}
 
@@ -51,8 +73,8 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public void cancelInvitation(String invitationId) {
-		Optional<Invitation> invitationOptional = invitationRepository.findById(Long.parseLong(invitationId));
+	public void cancelInvitation(Long groupId) {
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
 
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
@@ -63,8 +85,8 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public void setInvitationExpiration(String invitationId, Long expirationTime) {
-		Optional<Invitation> invitationOptional = invitationRepository.findById(Long.parseLong(invitationId));
+	public void setInvitationExpiration(Long groupId, Long expirationTime) {
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
 
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
@@ -106,5 +128,10 @@ public class InvitationServiceImpl implements InvitationService {
 			codeBuilder.append(digit);
 		}
 		return codeBuilder.toString();
+	}
+
+	private long calculateExpirationTimeInMillis(int days) {
+		final long MILLISECONDS_IN_DAY = 24L * 60 * 60 * 1000;
+		return days * MILLISECONDS_IN_DAY;
 	}
 }
