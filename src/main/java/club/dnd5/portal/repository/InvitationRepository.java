@@ -12,4 +12,5 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
 	boolean existsByLink(String link);
 	Optional<Invitation> findByLink(String link);
 	Optional<Invitation> findByUserPartyId(Long groupId);
+	Optional<Invitation> findByCode(String code);
 }

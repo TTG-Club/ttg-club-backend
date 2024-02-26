@@ -120,6 +120,32 @@ public class InvitationServiceImpl implements InvitationService {
 		}
 	}
 
+	@Override
+	public boolean checkTheInvitationCode(String code) {
+		Optional<Invitation> invitationOptional = invitationRepository.findByCode(code);
+
+		if (invitationOptional.isPresent()) {
+			Invitation invitation = invitationOptional.get();
+			if (!invitation.isExpired()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean checkTheInvitationLink(String uniqueIdentifier, Long groupId) {
+		String invitationLink = ttgUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
+		Optional<Invitation> invitationOptional = invitationRepository.findByLink(invitationLink);
+
+		if (invitationOptional.isPresent()) {
+			Invitation invitation = invitationOptional.get();
+			return !invitation.isExpired();
+		} else {
+			return false;
+		}
+	}
+
 	private String generateUniqueCode() {
 		Random random = new Random();
 		StringBuilder codeBuilder = new StringBuilder();

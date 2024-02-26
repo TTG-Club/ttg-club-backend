@@ -10,4 +10,6 @@ public interface InvitationService {
 	void setInvitationExpiration(Long groupId, Long expirationTime);
 	String getInviteByLink(Long groupId);
 	String getInviteByCode(Long groupId);
+	boolean checkTheInvitationLink(String uniqueIdentifier, Long groupId);
+	boolean checkTheInvitationCode(String code);
 }
