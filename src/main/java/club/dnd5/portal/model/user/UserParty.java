@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,8 +31,8 @@ public class UserParty {
 	@Column(name = "description")
 	private String description;
 
-	@OneToMany(mappedBy = "userParty")
-	private List<User> userList;
+	@ManyToMany(mappedBy = "userParties")
+	private List<User> userList = new ArrayList<>();
 
 	@OneToOne(mappedBy = "userParty")
 	private Invitation invitation;

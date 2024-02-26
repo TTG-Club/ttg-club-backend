@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -30,9 +31,9 @@ public class User {
     @Column(name = "enabled")
     private boolean enabled;
 
-	@ManyToOne
+	@ManyToMany
 	@JoinColumn(name = "user_party_id")
-	private UserParty userParty;
+	private List<UserParty> userParties = new ArrayList<>();
 
     public User() {
     	this.createDate = LocalDateTime.now();
