@@ -1,16 +1,19 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.UserPartyApi;
+import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.model.user.UserParty;
 import club.dnd5.portal.repository.UserPartyRepository;
 import club.dnd5.portal.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,11 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserPartyServiceImpl implements UserPartyService {
 	private final UserPartyRepository userPartyRepository;
-
 	private final UserRepository userRepository;
-
 	private final EmailService emailService;
-
 	private final InvitationServiceImpl invitationService;
 
 	@Override
@@ -31,16 +31,60 @@ public class UserPartyServiceImpl implements UserPartyService {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 
+		//Проблема в том что я сразу добавляю игроков, даже несмотря на то приняли ли они или нет инвайт
 		UserParty userParty = convertToUserPartyEntity(userPartyDTO);
 		userParty.getUserList().add(user);
+		user.getUserParties().add(userParty);
+		userRepository.save(user);
+
 		userParty = userPartyRepository.save(userParty);
 
-		emailService.sendInvitationLink(userParty.getUserList(),
-			invitationService.getInviteByLink(userParty.getId()));
+		List<User> usersToSendEmail = retrieveUsersFromUserPartyApi(userPartyDTO);
+		usersToSendEmail.add(user);
+
+		emailService.sendInvitationLink(usersToSendEmail,
+			invitationService.generateLinkInvitation(userParty.getId()));
 
 		return convertToUserPartyApi(userParty);
 	}
 
+	@Override
+	@Transactional
+	public void addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId) {
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+		Optional<UserParty> optionalUserParty = userPartyRepository.findById(groupId);
+
+		if (!optionalUserParty.isPresent()) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Party not found");
+		}
+
+		UserParty userParty = optionalUserParty.get();
+		if (invitationService.checkTheInvitationLink(uniqueIdentifier, groupId)) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid URL");
+		}
+
+		addUserToParty(user, userParty);
+	}
+
+	@Override
+	@Transactional
+	public void addingUserToPartyBasedOnInvitationCode(String code, Long groupId) {
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+		Optional<UserParty> optionalUserParty = userPartyRepository.findById(groupId);
+
+		if (!optionalUserParty.isPresent()) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Party not found");
+		}
+
+		UserParty userParty = optionalUserParty.get();
+		if (!invitationService.checkTheInvitationCode(code)) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
+		}
+
+		addUserToParty(user, userParty);
+	}
 	@Override
 	public List<UserPartyApi> getAllUserParties() {
 		List<UserParty> userParties = userPartyRepository.findAll();
@@ -108,19 +152,21 @@ public class UserPartyServiceImpl implements UserPartyService {
 	}
 
 	private UserParty convertToUserPartyEntity(UserPartyApi userPartyDTO) {
-		List<User> userList = userPartyDTO.getUserListIds().stream()
-			.map(userId -> userRepository.findById(userId).orElse(null))
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
-
 		return UserParty.builder()
 			.ownerId(userPartyDTO.getOwnerId())
 			.groupName(userPartyDTO.getGroupName())
 			.description(userPartyDTO.getDescription())
-			.userList(userList)
+			.userList(new ArrayList<>())
 			.creationDate((new Date()))
 			.lastUpdateDate(userPartyDTO.getLastUpdateDate())
 			.build();
+	}
+
+	private List<User> retrieveUsersFromUserPartyApi(UserPartyApi userPartyDTO) {
+		return userPartyDTO.getUserListIds().stream()
+			.map(userId -> userRepository.findById(userId).orElse(null))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 	}
 
 	private List<UserPartyApi> convertToUserPartyApiList(List<UserParty> userParties) {
@@ -137,5 +183,12 @@ public class UserPartyServiceImpl implements UserPartyService {
 			return authentication.getName();
 		}
 		throw new IllegalStateException("User is not authenticated");
+	}
+
+	private void addUserToParty(User user, UserParty userParty) {
+		if (!user.getUserParties().contains(userParty)) {
+			user.getUserParties().add(userParty);
+			userRepository.save(user);
+		}
 	}
 }
