@@ -179,7 +179,7 @@ public class Creature implements FoundryCommon {
 
 	public String getAligment() {
 		if (alignmentSuffix != null) {
-			return String.format("%S %s", alignmentSuffix, alignment.getName(type));
+			return String.format("%s %s", alignmentSuffix, alignment.getName(type));
 		}
 		return alignment.getName(type);
 	}
