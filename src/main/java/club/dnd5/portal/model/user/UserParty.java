@@ -31,7 +31,12 @@ public class UserParty {
 	@Column(name = "description")
 	private String description;
 
-	@ManyToMany(mappedBy = "userParties")
+	@ManyToMany
+	@JoinTable(
+		name = "user_membership",
+		joinColumns = @JoinColumn(name = "user_id"),
+		inverseJoinColumns = @JoinColumn(name = "user_party_id")
+	)
 	private List<User> userList = new ArrayList<>();
 
 	@OneToOne(mappedBy = "userParty")

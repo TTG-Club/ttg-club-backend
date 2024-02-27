@@ -31,7 +31,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 
-		//Проблема в том что я сразу добавляю игроков, даже несмотря на то приняли ли они или нет инвайт
 		UserParty userParty = convertToUserPartyEntity(userPartyDTO);
 		userParty.getUserList().add(user);
 		user.getUserParties().add(userParty);
@@ -51,25 +50,16 @@ public class UserPartyServiceImpl implements UserPartyService {
 	@Override
 	@Transactional
 	public void addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId) {
-		String userEmail = getAuthenticatedUserEmail();
-		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
-		Optional<UserParty> optionalUserParty = userPartyRepository.findById(groupId);
-
-		if (!optionalUserParty.isPresent()) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Party not found");
-		}
-
-		UserParty userParty = optionalUserParty.get();
-		if (invitationService.checkTheInvitationLink(uniqueIdentifier, groupId)) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid URL");
-		}
-
-		addUserToParty(user, userParty);
+		addUserToPartyBasedOnInvitation(uniqueIdentifier, groupId, true);
 	}
 
 	@Override
 	@Transactional
 	public void addingUserToPartyBasedOnInvitationCode(String code, Long groupId) {
+		addUserToPartyBasedOnInvitation(code, groupId, false);
+	}
+
+	private void addUserToPartyBasedOnInvitation(String identifier, Long groupId, boolean isLink) {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(groupId);
@@ -79,12 +69,15 @@ public class UserPartyServiceImpl implements UserPartyService {
 		}
 
 		UserParty userParty = optionalUserParty.get();
-		if (!invitationService.checkTheInvitationCode(code)) {
+		if (isLink && invitationService.checkTheInvitationLink(identifier, groupId)) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid URL");
+		} else if (!isLink && invitationService.checkTheInvitationCode(identifier)) {
 			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
 		}
 
 		addUserToParty(user, userParty);
 	}
+
 	@Override
 	public List<UserPartyApi> getAllUserParties() {
 		List<UserParty> userParties = userPartyRepository.findAll();

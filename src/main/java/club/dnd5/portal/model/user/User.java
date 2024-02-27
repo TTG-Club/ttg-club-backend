@@ -31,8 +31,7 @@ public class User {
     @Column(name = "enabled")
     private boolean enabled;
 
-	@ManyToMany
-	@JoinColumn(name = "user_party_id")
+	@ManyToMany(mappedBy = "userList")
 	private List<UserParty> userParties = new ArrayList<>();
 
     public User() {
