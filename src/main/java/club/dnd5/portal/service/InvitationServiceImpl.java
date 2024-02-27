@@ -25,6 +25,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class InvitationServiceImpl implements InvitationService {
+	private static final String unauthorizedErrorMessage = "User is not authorized to access the invitation";
+	private static final String invitationNotFoundErrorMessage = "Invitation not found for the provided groupId";
 	@Value("${ttg.url}")
 	private String ttgUrl;
 	private final InvitationRepository invitationRepository;
@@ -77,7 +79,7 @@ public class InvitationServiceImpl implements InvitationService {
 	@Override
 	public InvitationApi getInvitationByGroupId(Long groupId) {
 		if (!isUserAuthorizedToAccessInvitation(groupId)) {
-			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
 		UserParty userParty = userPartyRepository.findById(groupId)
@@ -92,34 +94,34 @@ public class InvitationServiceImpl implements InvitationService {
 	@Override
 	public void cancelInvitation(Long groupId) {
 		if (!isUserAuthorizedToAccessInvitation(groupId)) {
-			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
 		Invitation invitation = invitationOptional
-			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId"));
+			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
 
 		invitationRepository.delete(invitation);
 	}
 
 	@Override
-	public void setInvitationExpiration(Long groupId, Long expirationTime) {
+	public void setInvitationExpiration(Long groupId, int days) {
 		if (!isUserAuthorizedToAccessInvitation(groupId)) {
-			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
 		Invitation invitation = invitationOptional
-			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId"));
+			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
 
-		invitation.setExpirationTime(expirationTime);
+		invitation.setExpirationTime(calculateExpirationTimeInMillis(days));
 		invitationRepository.save(invitation);
 	}
 
 	@Override
-	public String getInviteByLink(Long groupId) {
+	public String getInvitationLinkByGroupId(Long groupId) {
 		if (!isUserAuthorizedToAccessInvitation(groupId)) {
-			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
@@ -127,14 +129,14 @@ public class InvitationServiceImpl implements InvitationService {
 			Invitation invitation = invitationOptional.get();
 			return invitation.getLink();
 		} else {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId");
+			throw new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage);
 		}
 	}
 
 	@Override
-	public String getInviteByCode(Long groupId) {
+	public String getInvitationCodeByGroupId(Long groupId) {
 		if (!isUserAuthorizedToAccessInvitation(groupId)) {
-			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
@@ -142,7 +144,7 @@ public class InvitationServiceImpl implements InvitationService {
 			Invitation invitation = invitationOptional.get();
 			return invitation.getCode();
 		} else {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId");
+			throw new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage);
 		}
 	}
 
@@ -152,9 +154,7 @@ public class InvitationServiceImpl implements InvitationService {
 
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
-			if (!invitation.isExpired()) {
-				return true;
-			}
+			return !invitation.isExpired();
 		}
 		return false;
 	}
