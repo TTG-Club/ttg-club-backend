@@ -1,12 +1,20 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.dto.api.InvitationApi;
+import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.Invitation;
+import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.model.user.UserParty;
 import club.dnd5.portal.repository.InvitationRepository;
 import club.dnd5.portal.repository.UserPartyRepository;
+import club.dnd5.portal.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -21,6 +29,7 @@ public class InvitationServiceImpl implements InvitationService {
 	private String ttgUrl;
 	private final InvitationRepository invitationRepository;
 	private final UserPartyRepository userPartyRepository;
+	private final UserRepository userRepository;
 
 	@Override
 	public String generateLinkInvitation(Long groupId) {
@@ -66,57 +75,74 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public Invitation getInvitationByGroupId(Long groupId) {
-		return userPartyRepository.findById(groupId)
-			.map(UserParty::getInvitation)
-			.orElseThrow(PageNotFoundException::new);
+	public InvitationApi getInvitationByGroupId(Long groupId) {
+		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+		}
+
+		UserParty userParty = userPartyRepository.findById(groupId)
+			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User party not found for the provided groupId"));
+
+		Invitation invitation = userParty.getInvitation();
+
+		// Convert Invitation entity to InvitationApi DTO
+		return InvitationApi.fromEntity(invitation);
 	}
 
 	@Override
 	public void cancelInvitation(Long groupId) {
-		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
-
-		if (invitationOptional.isPresent()) {
-			Invitation invitation = invitationOptional.get();
-			invitationRepository.delete(invitation);
-		} else {
-			throw new PageNotFoundException();
+		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
 		}
+
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		Invitation invitation = invitationOptional
+			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId"));
+
+		invitationRepository.delete(invitation);
 	}
 
 	@Override
 	public void setInvitationExpiration(Long groupId, Long expirationTime) {
-		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
-
-		if (invitationOptional.isPresent()) {
-			Invitation invitation = invitationOptional.get();
-			invitation.setExpirationTime(expirationTime);
-
-			invitationRepository.save(invitation);
-		} else {
-			throw new PageNotFoundException();
+		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
 		}
+
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		Invitation invitation = invitationOptional
+			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId"));
+
+		invitation.setExpirationTime(expirationTime);
+		invitationRepository.save(invitation);
 	}
 
 	@Override
 	public String getInviteByLink(Long groupId) {
+		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+		}
+
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
 			return invitation.getLink();
 		} else {
-			throw new PageNotFoundException();
+			throw new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId");
 		}
 	}
 
 	@Override
 	public String getInviteByCode(Long groupId) {
+		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "User is not authorized to access the invitation");
+		}
+
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
 			return invitation.getCode();
 		} else {
-			throw new PageNotFoundException();
+			throw new ApiException(HttpStatus.NOT_FOUND, "Invitation not found for the provided groupId");
 		}
 	}
 
@@ -144,6 +170,21 @@ public class InvitationServiceImpl implements InvitationService {
 		} else {
 			return false;
 		}
+	}
+
+	private boolean isUserAuthorizedToAccessInvitation(Long groupId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			String userEmail = authentication.getName();
+			Optional<User> optionalUser = userRepository.findByEmail(userEmail);
+			if (optionalUser.isPresent()) {
+				User user = optionalUser.get();
+				UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+				return userParty.getOwnerId().equals(user.getId());
+			}
+			return false;
+		}
+		throw new IllegalStateException("User is not authenticated");
 	}
 
 	private String generateUniqueCode() {
