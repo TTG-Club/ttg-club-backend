@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.dto.api.UserApi;
 import club.dnd5.portal.dto.api.UserPartyApi;
 import club.dnd5.portal.dto.api.UserPartyCreateApi;
 import club.dnd5.portal.service.UserPartyService;
@@ -56,7 +57,7 @@ public class UserPartyApiController {
 	@Operation(summary = "Получение айди юзеров, которые находятся в группе")
 	@GetMapping("/members/{partyId}")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Long> getUserPartyMembers(@PathVariable Long partyId) {
+	public List<UserApi> getUserPartyMembers(@PathVariable Long partyId) {
 		return userPartyService.getUserPartyMembers(partyId);
 	}
 

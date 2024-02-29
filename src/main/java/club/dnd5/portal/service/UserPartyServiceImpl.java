@@ -1,8 +1,10 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.dto.api.UserApi;
 import club.dnd5.portal.dto.api.UserPartyApi;
 import club.dnd5.portal.dto.api.UserPartyCreateApi;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.model.user.UserParty;
 import club.dnd5.portal.repository.UserPartyRepository;
@@ -70,12 +72,21 @@ public class UserPartyServiceImpl implements UserPartyService {
 	}
 
 	@Override
-	public List<Long> getUserPartyMembers(Long partyId) {
+	public List<UserApi> getUserPartyMembers(Long partyId) {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(partyId);
-		return optionalUserParty.map(userParty -> userParty.getUserList().stream()
-				.map(User::getId)
-				.collect(Collectors.toList()))
-			.orElseThrow(PageNotFoundException::new);
+		List<UserApi> userApis = new ArrayList<>();
+		if (optionalUserParty.isPresent()) {
+			for (User user : optionalUserParty.get().getUserList()) {
+				UserApi userApi = UserApi.builder()
+					.email(user.getEmail())
+					.name(user.getName())
+					.roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+					.username(user.getUsername())
+					.build();
+				userApis.add(userApi);
+			}
+		}
+		return userApis;
 	}
 
 	@Override
@@ -134,11 +145,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 		UserParty userParty = new UserParty();
 		userParty.setGroupName(userPartyCreateApi.getGroupName());
 		userParty.setDescription(userPartyCreateApi.getDescription());
-//		userParty.setUserList(userPartyCreateApi.getUserListIds().stream()
-//			.filter(id -> userRepository.findById(id).isPresent())
-//			.map(id -> userRepository.findById(id).get())
-//			.collect(Collectors.toList())
-//		);
 		userParty.setCreationDate(new Date());
 		userParty.setLastUpdateDate(new Date());
 		return userParty;
