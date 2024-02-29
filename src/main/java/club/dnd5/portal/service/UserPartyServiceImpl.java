@@ -1,24 +1,23 @@
 package club.dnd5.portal.service;
 
-import club.dnd5.portal.dto.api.UserApi;
-import club.dnd5.portal.dto.api.UserPartyApi;
-import club.dnd5.portal.dto.api.UserPartyCreateApi;
+import club.dnd5.portal.dto.api.*;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.model.user.UserParty;
 import club.dnd5.portal.repository.UserPartyRepository;
 import club.dnd5.portal.repository.user.UserRepository;
+import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.util.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,21 +56,54 @@ public class UserPartyServiceImpl implements UserPartyService {
 	}
 
 	@Override
-	public List<UserPartyApi> getAllUserParties() {
-		List<UserParty> userParties = userPartyRepository.findAll();
-		return convertToUserPartyApiList(userParties);
+	public List<UserPartyApi> getAllUserParties(UserPartyRequestApi request) {
+		if (request == null) {
+			return Collections.emptyList();
+		}
+		Specification<UserParty> specification = null;
+
+		if (!request.getSearch().getValue().isEmpty()) {
+			specification = SpecificationUtil.getSearch(request);
+		}
+
+		UserPartyFilter userPartyFilter = request.getFilter();
+		if (userPartyFilter != null) {
+			if (userPartyFilter.getUserId() != null) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> root.join("userList").get("id").in(userPartyFilter.getUserId()));
+			}
+			if (userPartyFilter.isOnlyOwner()) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.equal(root.get("ownerId"), userPartyFilter.getUserId()));
+			}
+			if (userPartyFilter.getPartyName() != null) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.equal(root.get("groupName"), userPartyFilter.getPartyName()));
+			}
+			if (userPartyFilter.getStartDate() != null && userPartyFilter.getEndDate() != null) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.between(root.get("creationDate"), userPartyFilter.getStartDate(), userPartyFilter.getEndDate()));
+			}
+			if (userPartyFilter.getMinMembers() != null) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.greaterThanOrEqualTo(cb.size(root.get("userList")), userPartyFilter.getMinMembers()));
+			}
+			if (userPartyFilter.getMaxMembers() != null) {
+				specification = SpecificationUtil.getAndSpecification(specification,
+					(root, query, cb) -> cb.lessThanOrEqualTo(cb.size(root.get("userList")), userPartyFilter.getMaxMembers()));
+			}
+		}
+
+		Pageable pageable = PageAndSortUtil.getPageable(request);
+		return convertToUserPartyApiList(
+			new ArrayList<>(userPartyRepository.findAll(specification, pageable).toList())
+		);
 	}
+
 
 	@Override
 	public UserPartyApi getUserPartyById(Long id) {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(id);
-		return optionalUserParty.map(this::convertToUserPartyApi)
-			.orElseThrow(PageNotFoundException::new);
-	}
-
-	@Override
-	public UserPartyApi getUserPartyByName(String name) {
-		Optional<UserParty> optionalUserParty = userPartyRepository.findByGroupName(name);
 		return optionalUserParty.map(this::convertToUserPartyApi)
 			.orElseThrow(PageNotFoundException::new);
 	}
@@ -126,23 +158,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 		return userPartyApi;
 	}
 
-	private UserParty convertToUserPartyEntity(UserPartyApi userPartyDTO) {
-		return UserParty.builder()
-			.ownerId(userPartyDTO.getOwnerId())
-			.groupName(userPartyDTO.getGroupName())
-			.description(userPartyDTO.getDescription())
-			.userList(userPartyDTO.getUserApiList().stream()
-				.map(userApi -> userApi.getEmail())
-				.map(userRepository::findByEmail)
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.collect(Collectors.toList())
-			)
-			.creationDate((new Date()))
-			.lastUpdateDate(userPartyDTO.getLastUpdateDate())
-			.build();
-	}
-
 	private UserParty convertFromUserPartyCreateToEntity(UserPartyCreateApi userPartyCreateApi) {
 		UserParty userParty = new UserParty();
 		userParty.setGroupName(userPartyCreateApi.getGroupName());
@@ -151,6 +166,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 		userParty.setLastUpdateDate(new Date());
 		return userParty;
 	}
+
 	private List<UserPartyApi> convertToUserPartyApiList(List<UserParty> userParties) {
 		List<UserPartyApi> userPartyApis = new ArrayList<>();
 		for (UserParty userParty : userParties) {
@@ -167,7 +183,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 		throw new IllegalStateException("User is not authenticated");
 	}
 
-	private UserApi convertFromUserToUserApi (User user) {
+	private UserApi convertFromUserToUserApi(User user) {
 		return UserApi.builder()
 			.email(user.getEmail())
 			.name(user.getName())
