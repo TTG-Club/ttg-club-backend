@@ -12,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserPartyApi {
-	//сделать опциональным
 	private Long id;
 	private Long ownerId;
 	private String groupName;

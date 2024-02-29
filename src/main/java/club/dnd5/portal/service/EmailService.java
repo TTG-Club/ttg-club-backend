@@ -1,5 +1,6 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.config.ValueProvider;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.model.user.User;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import java.util.UUID;
 @Component
 public class EmailService {
 	private final Environment environment;
+	private static final String resetText = "/reset/password?token=";
+	private final ValueProvider valueProvider;
 	@Qualifier("userServiceImpl")
 	private final UserService userService;
 	private final JavaMailSender mailSender;
@@ -52,9 +55,9 @@ public class EmailService {
 		String[] profiles = this.environment.getActiveProfiles();
 		String confirmationUrl;
 		if ("dev".equals(profiles[0])) {
-			confirmationUrl = "https://dev.ttg.club/reset/password?token=" + token;
+			confirmationUrl = valueProvider.getDevUrl() + resetText + token;
 		} else {
-			confirmationUrl = "https://ttg.club/reset/password?token=" + token;
+			confirmationUrl = valueProvider.getTtgUrl() + resetText + token;
 		}
 
 		String message = "Для сброса пароля перейдите по ссылке и введите новый пароль:";

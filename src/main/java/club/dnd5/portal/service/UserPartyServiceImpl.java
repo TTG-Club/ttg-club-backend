@@ -33,6 +33,8 @@ public class UserPartyServiceImpl implements UserPartyService {
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 
 		UserParty userParty = convertFromUserPartyCreateToEntity(userPartyDTO);
+		userParty.setOwnerId(user.getId());
+
 		userParty.getUserList().add(user);
 		user.getUserParties().add(userParty);
 		userRepository.save(user);
@@ -40,7 +42,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 		userParty = userPartyRepository.save(userParty);
 
 		List<User> usersToSendEmail = userParty.getUserList();
-		usersToSendEmail.add(user);
 
 		emailService.sendInvitationLink(usersToSendEmail,
 			invitationService.generateLinkInvitation(userParty.getId()));
