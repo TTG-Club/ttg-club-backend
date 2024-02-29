@@ -1,10 +1,11 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.InvitationApi;
+import club.dnd5.portal.model.Invitation;
 
 public interface InvitationService {
 	String generateLinkInvitation(Long groupId);
-	String generateCodeInvitation(Long groupId);
+	public String generateCodeInvitation(Invitation invitation);
 	InvitationApi getInvitationByGroupId(Long groupId);
 	void cancelInvitation(Long groupId);
 	void setInvitationExpiration(Long groupId, int days);

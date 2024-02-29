@@ -1,5 +1,6 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.config.ValueProvider;
 import club.dnd5.portal.dto.api.InvitationApi;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -10,7 +11,7 @@ import club.dnd5.portal.repository.InvitationRepository;
 import club.dnd5.portal.repository.UserPartyRepository;
 import club.dnd5.portal.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,8 +28,9 @@ import java.util.UUID;
 public class InvitationServiceImpl implements InvitationService {
 	private static final String unauthorizedErrorMessage = "User is not authorized to access the invitation";
 	private static final String invitationNotFoundErrorMessage = "Invitation not found for the provided groupId";
-	@Value("${ttg.url}")
-	private String ttgUrl;
+	private static final Random random = new Random();
+	private final Environment environment;
+	private final ValueProvider valueProvider;
 	private final InvitationRepository invitationRepository;
 	private final UserPartyRepository userPartyRepository;
 	private final UserRepository userRepository;
@@ -41,37 +43,31 @@ public class InvitationServiceImpl implements InvitationService {
 		Invitation invitation = new Invitation();
 		invitation.setGenerationDate(new Date());
 		invitation.setUserParty(userParty);
-		invitation.setCode(generateCodeInvitation(groupId));
 
-		// Generate unique invitation link
+
+		String[] profiles = this.environment.getActiveProfiles();
 		String invitationLink;
 		do {
 			String uniqueIdentifier = UUID.randomUUID().toString();
-			invitationLink = ttgUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
-		} while (invitationRepository.existsByLink(invitationLink)); // Check if the generated link already exists in the database
+			invitationLink = generateInvitationLink(profiles[0], valueProvider.getDevUrl(), valueProvider.getTtgUrl(), uniqueIdentifier, groupId);
+		} while (invitationRepository.existsByLink(invitationLink));
 
 		invitation.setLink(invitationLink);
 		invitation.setExpirationTime(calculateExpirationTimeInMillis(1));
+		invitation.setCode(generateCodeInvitation(invitation));
 		invitationRepository.save(invitation);
 
 		return invitationLink;
 	}
 
 	@Override
-	public String generateCodeInvitation(Long groupId) {
+	public String generateCodeInvitation(Invitation invitation) {
 		String code;
 		do {
 			code = generateUniqueCode();
 		} while (invitationRepository.existsByCode(code));
-
-		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
-		if (invitationOptional.isPresent()) {
-			Invitation invitation = invitationOptional.get();
-			invitation.setCode(code);
-			invitationRepository.save(invitation);
-		} else {
-			throw new PageNotFoundException();
-		}
+		invitation.setCode(code);
+		invitationRepository.save(invitation);
 
 		return code;
 	}
@@ -161,7 +157,7 @@ public class InvitationServiceImpl implements InvitationService {
 
 	@Override
 	public boolean checkTheInvitationLink(String uniqueIdentifier, Long groupId) {
-		String invitationLink = ttgUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
+		String invitationLink = valueProvider.getTtgUrl() + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
 		Optional<Invitation> invitationOptional = invitationRepository.findByLink(invitationLink);
 
 		if (invitationOptional.isPresent()) {
@@ -188,7 +184,6 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	private String generateUniqueCode() {
-		Random random = new Random();
 		StringBuilder codeBuilder = new StringBuilder();
 		for (int i = 0; i < 6; i++) {
 			int digit = random.nextInt(10);
@@ -200,5 +195,15 @@ public class InvitationServiceImpl implements InvitationService {
 	private long calculateExpirationTimeInMillis(int days) {
 		final long MILLISECONDS_IN_DAY = 24L * 60 * 60 * 1000;
 		return days * MILLISECONDS_IN_DAY;
+	}
+
+	private String generateInvitationLink(String activeProfile, String devUrl, String ttgUrl, String uniqueIdentifier, Long groupId) {
+		String baseUrl;
+		if ("local".equals(activeProfile)) {
+			baseUrl = "http://localhost:8080/api/v1";
+		} else {
+			baseUrl = "dev".equals(activeProfile) ? devUrl : ttgUrl;
+		}
+		return baseUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
 	}
 }
