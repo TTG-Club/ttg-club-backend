@@ -25,13 +25,6 @@ public class UserPartyApiController {
 		return userPartyService.getUserPartyById(id);
 	}
 
-	@Operation(summary = "Получение группы по имени")
-	@GetMapping("/by-name/{name}")
-	@ResponseStatus(HttpStatus.OK)
-	public UserPartyApi getUserPartyByName(@PathVariable String name) {
-		return userPartyService.getUserPartyByName(name);
-	}
-
 	@Operation(summary = "Создание группы")
 	@PostMapping
 	@SecurityRequirement(name = "Bearer Authentication")

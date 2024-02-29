@@ -15,7 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,10 +43,12 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 		userParty = userPartyRepository.save(userParty);
 
-		List<User> usersToSendEmail =userPartyDTO.getUserListIds().stream()
-			.filter(id -> userRepository.findById(id).isPresent())
-			.map(id -> userRepository.findById(id).get())
+		List<User> usersToSendEmail = userPartyDTO.getUserListIds().stream()
+			.map(userRepository::findById)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
 			.collect(Collectors.toList());
+
 
 		emailService.sendInvitationLink(usersToSendEmail,
 			invitationService.generateLinkInvitation(userParty.getId()));
@@ -77,12 +82,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 		List<UserApi> userApis = new ArrayList<>();
 		if (optionalUserParty.isPresent()) {
 			for (User user : optionalUserParty.get().getUserList()) {
-				UserApi userApi = UserApi.builder()
-					.email(user.getEmail())
-					.name(user.getName())
-					.roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
-					.username(user.getUsername())
-					.build();
+				UserApi userApi = convertFromUserToUserApi(user);
 				userApis.add(userApi);
 			}
 		}
@@ -118,8 +118,8 @@ public class UserPartyServiceImpl implements UserPartyService {
 		userPartyApi.setOwnerId(userParty.getOwnerId());
 		userPartyApi.setGroupName(userParty.getGroupName());
 		userPartyApi.setDescription(userParty.getDescription());
-		userPartyApi.setUserListIds(userParty.getUserList().stream()
-			.map(User::getId)
+		userPartyApi.setUserApiList(userParty.getUserList().stream()
+			.map(this::convertFromUserToUserApi)
 			.collect(Collectors.toList()));
 		userPartyApi.setCreationDate(userParty.getCreationDate());
 		userPartyApi.setLastUpdateDate(userParty.getLastUpdateDate());
@@ -131,9 +131,11 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.ownerId(userPartyDTO.getOwnerId())
 			.groupName(userPartyDTO.getGroupName())
 			.description(userPartyDTO.getDescription())
-			.userList(userPartyDTO.getUserListIds().stream()
-				.filter(id -> userRepository.findById(id).isPresent())
-				.map(id -> userRepository.findById(id).get())
+			.userList(userPartyDTO.getUserApiList().stream()
+				.map(userApi -> userApi.getEmail())
+				.map(userRepository::findByEmail)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
 				.collect(Collectors.toList())
 			)
 			.creationDate((new Date()))
@@ -149,14 +151,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 		userParty.setLastUpdateDate(new Date());
 		return userParty;
 	}
-
-	private List<User> retrieveUsersFromUserPartyApi(UserPartyApi userPartyDTO) {
-		return userPartyDTO.getUserListIds().stream()
-			.map(userId -> userRepository.findById(userId).orElse(null))
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
-	}
-
 	private List<UserPartyApi> convertToUserPartyApiList(List<UserParty> userParties) {
 		List<UserPartyApi> userPartyApis = new ArrayList<>();
 		for (UserParty userParty : userParties) {
@@ -171,5 +165,14 @@ public class UserPartyServiceImpl implements UserPartyService {
 			return authentication.getName();
 		}
 		throw new IllegalStateException("User is not authenticated");
+	}
+
+	private UserApi convertFromUserToUserApi (User user) {
+		return UserApi.builder()
+			.email(user.getEmail())
+			.name(user.getName())
+			.roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+			.username(user.getUsername())
+			.build();
 	}
 }

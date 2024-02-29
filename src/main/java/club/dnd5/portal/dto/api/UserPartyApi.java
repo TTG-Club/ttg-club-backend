@@ -16,7 +16,7 @@ public class UserPartyApi {
 	private Long ownerId;
 	private String groupName;
 	private String description;
-	private List<Long> userListIds = new ArrayList<>();
+	private List<UserApi> userApiList = new ArrayList<>();
 	private Date creationDate;
 	private Date lastUpdateDate;
 }
