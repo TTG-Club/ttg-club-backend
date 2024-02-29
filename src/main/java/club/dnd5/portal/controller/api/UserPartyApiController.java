@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/api/v1/user-parties")
 @RequiredArgsConstructor
 public class UserPartyApiController {
-
 	private final UserPartyService userPartyService;
 
 	@Operation(summary = "Получение группы по айди")

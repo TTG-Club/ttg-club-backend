@@ -13,6 +13,4 @@ public interface UserPartyService {
 	List<Long> getUserPartyMembers(Long partyId);
 	String deleteUserPartyById(Long id);
 	void updateUserParty(Long partyId, UserPartyApi userPartyDTO);
-	void addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId);
-	void addingUserToPartyBasedOnInvitationCode(String code, Long groupId);
 }

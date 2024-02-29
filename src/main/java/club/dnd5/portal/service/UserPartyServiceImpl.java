@@ -2,19 +2,16 @@ package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.UserPartyApi;
 import club.dnd5.portal.dto.api.UserPartyCreateApi;
-import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.model.user.UserParty;
 import club.dnd5.portal.repository.UserPartyRepository;
 import club.dnd5.portal.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,43 +38,15 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 		userParty = userPartyRepository.save(userParty);
 
-		List<User> usersToSendEmail = userParty.getUserList();
+		List<User> usersToSendEmail =userPartyDTO.getUserListIds().stream()
+			.filter(id -> userRepository.findById(id).isPresent())
+			.map(id -> userRepository.findById(id).get())
+			.collect(Collectors.toList());
 
 		emailService.sendInvitationLink(usersToSendEmail,
 			invitationService.generateLinkInvitation(userParty.getId()));
 
 		return convertToUserPartyApi(userParty);
-	}
-
-	@Override
-	@Transactional
-	public void addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId) {
-		addUserToPartyBasedOnInvitation(uniqueIdentifier, groupId, true);
-	}
-
-	@Override
-	@Transactional
-	public void addingUserToPartyBasedOnInvitationCode(String code, Long groupId) {
-		addUserToPartyBasedOnInvitation(code, groupId, false);
-	}
-
-	private void addUserToPartyBasedOnInvitation(String identifier, Long groupId, boolean isLink) {
-		String userEmail = getAuthenticatedUserEmail();
-		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
-		Optional<UserParty> optionalUserParty = userPartyRepository.findById(groupId);
-
-		if (!optionalUserParty.isPresent()) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Party not found");
-		}
-
-		UserParty userParty = optionalUserParty.get();
-		if (isLink && invitationService.checkTheInvitationLink(identifier, groupId)) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid URL");
-		} else if (!isLink && invitationService.checkTheInvitationCode(identifier)) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
-		}
-
-		addUserToParty(user, userParty);
 	}
 
 	@Override
@@ -165,11 +134,11 @@ public class UserPartyServiceImpl implements UserPartyService {
 		UserParty userParty = new UserParty();
 		userParty.setGroupName(userPartyCreateApi.getGroupName());
 		userParty.setDescription(userPartyCreateApi.getDescription());
-		userParty.setUserList(userPartyCreateApi.getUserListIds().stream()
-			.filter(id -> userRepository.findById(id).isPresent())
-			.map(id -> userRepository.findById(id).get())
-			.collect(Collectors.toList())
-		);
+//		userParty.setUserList(userPartyCreateApi.getUserListIds().stream()
+//			.filter(id -> userRepository.findById(id).isPresent())
+//			.map(id -> userRepository.findById(id).get())
+//			.collect(Collectors.toList())
+//		);
 		userParty.setCreationDate(new Date());
 		userParty.setLastUpdateDate(new Date());
 		return userParty;
@@ -196,12 +165,5 @@ public class UserPartyServiceImpl implements UserPartyService {
 			return authentication.getName();
 		}
 		throw new IllegalStateException("User is not authenticated");
-	}
-
-	private void addUserToParty(User user, UserParty userParty) {
-		if (!user.getUserParties().contains(userParty)) {
-			user.getUserParties().add(userParty);
-			userRepository.save(user);
-		}
 	}
 }

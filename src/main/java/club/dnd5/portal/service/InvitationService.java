@@ -13,4 +13,6 @@ public interface InvitationService {
 	String getInvitationCodeByGroupId(Long groupId);
 	boolean checkTheInvitationLink(String uniqueIdentifier, Long groupId);
 	boolean checkTheInvitationCode(String code);
+	String addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId);
+	String addingUserToPartyBasedOnInvitationCode(String code, Long groupId);
 }

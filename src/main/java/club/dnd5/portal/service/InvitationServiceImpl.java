@@ -17,6 +17,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
@@ -168,6 +169,42 @@ public class InvitationServiceImpl implements InvitationService {
 		}
 	}
 
+	@Override
+	@Transactional
+	public String addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId) {
+		return addUserToPartyBasedOnInvitation(uniqueIdentifier, groupId, true);
+	}
+
+	@Override
+	@Transactional
+	public String addingUserToPartyBasedOnInvitationCode(String code, Long groupId) {
+		return addUserToPartyBasedOnInvitation(code, groupId, false);
+	}
+
+	//TODO обработку ошибки, чтобы на фронт выскакивала инфа
+	private String addUserToPartyBasedOnInvitation(String identifier, Long groupId, boolean isLink) {
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+		Optional<UserParty> optionalUserParty = userPartyRepository.findById(groupId);
+
+		if (!optionalUserParty.isPresent()) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Party not found");
+		}
+
+		UserParty userParty = optionalUserParty.get();
+		if (userParty.getUserList().contains(user)) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "You are already a member of the group");
+		}
+		if (isLink && checkTheInvitationLink(identifier, groupId)) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid URL");
+		} else if (!isLink && checkTheInvitationCode(identifier)) {
+			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
+		}
+
+		addUserToParty(user, userParty);
+		return "Вы были добавлены в группу";
+	}
+
 	private boolean isUserAuthorizedToAccessInvitation(Long groupId) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
@@ -181,6 +218,13 @@ public class InvitationServiceImpl implements InvitationService {
 			return false;
 		}
 		throw new IllegalStateException("User is not authenticated");
+	}
+
+	private void addUserToParty(User user, UserParty userParty) {
+		if (!user.getUserParties().contains(userParty)) {
+			user.getUserParties().add(userParty);
+			userRepository.save(user);
+		}
 	}
 
 	private String generateUniqueCode() {
@@ -205,5 +249,13 @@ public class InvitationServiceImpl implements InvitationService {
 			baseUrl = "dev".equals(activeProfile) ? devUrl : ttgUrl;
 		}
 		return baseUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
+	}
+
+	private String getAuthenticatedUserEmail() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			return authentication.getName();
+		}
+		throw new IllegalStateException("User is not authenticated");
 	}
 }
