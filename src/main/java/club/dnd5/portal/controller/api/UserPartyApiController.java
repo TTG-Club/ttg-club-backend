@@ -1,8 +1,10 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.UserPartyApi;
+import club.dnd5.portal.dto.api.UserPartyCreateApi;
 import club.dnd5.portal.service.UserPartyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +34,9 @@ public class UserPartyApiController {
 
 	@Operation(summary = "Создание группы")
 	@PostMapping
+	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.CREATED)
-	public UserPartyApi createUserParty(@RequestBody UserPartyApi userPartyDTO) {
+	public UserPartyApi createUserParty(@RequestBody UserPartyCreateApi userPartyDTO) {
 		return userPartyService.createUserParty(userPartyDTO);
 	}
 

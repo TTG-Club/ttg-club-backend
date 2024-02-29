@@ -1,11 +1,12 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.UserPartyApi;
+import club.dnd5.portal.dto.api.UserPartyCreateApi;
 
 import java.util.List;
 
 public interface UserPartyService {
-	UserPartyApi createUserParty(UserPartyApi userPartyDTO);
+	UserPartyApi createUserParty(UserPartyCreateApi userPartyDTO);
 	List<UserPartyApi> getAllUserParties();
 	UserPartyApi getUserPartyById(Long id);
 	UserPartyApi getUserPartyByName(String name);

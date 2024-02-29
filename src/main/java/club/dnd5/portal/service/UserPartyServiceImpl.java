@@ -1,6 +1,7 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.UserPartyApi;
+import club.dnd5.portal.dto.api.UserPartyCreateApi;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.user.User;
@@ -27,18 +28,18 @@ public class UserPartyServiceImpl implements UserPartyService {
 	private final InvitationServiceImpl invitationService;
 
 	@Override
-	public UserPartyApi createUserParty(UserPartyApi userPartyDTO) {
+	public UserPartyApi createUserParty(UserPartyCreateApi userPartyDTO) {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 
-		UserParty userParty = convertToUserPartyEntity(userPartyDTO);
+		UserParty userParty = convertFromUserPartyCreateToEntity(userPartyDTO);
 		userParty.getUserList().add(user);
 		user.getUserParties().add(userParty);
 		userRepository.save(user);
 
 		userParty = userPartyRepository.save(userParty);
 
-		List<User> usersToSendEmail = retrieveUsersFromUserPartyApi(userPartyDTO);
+		List<User> usersToSendEmail = userParty.getUserList();
 		usersToSendEmail.add(user);
 
 		emailService.sendInvitationLink(usersToSendEmail,
@@ -149,10 +150,28 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.ownerId(userPartyDTO.getOwnerId())
 			.groupName(userPartyDTO.getGroupName())
 			.description(userPartyDTO.getDescription())
-			.userList(new ArrayList<>())
+			.userList(userPartyDTO.getUserListIds().stream()
+				.filter(id -> userRepository.findById(id).isPresent())
+				.map(id -> userRepository.findById(id).get())
+				.collect(Collectors.toList())
+			)
 			.creationDate((new Date()))
 			.lastUpdateDate(userPartyDTO.getLastUpdateDate())
 			.build();
+	}
+
+	private UserParty convertFromUserPartyCreateToEntity(UserPartyCreateApi userPartyCreateApi) {
+		UserParty userParty = new UserParty();
+		userParty.setGroupName(userPartyCreateApi.getGroupName());
+		userParty.setDescription(userPartyCreateApi.getDescription());
+		userParty.setUserList(userPartyCreateApi.getUserListIds().stream()
+			.filter(id -> userRepository.findById(id).isPresent())
+			.map(id -> userRepository.findById(id).get())
+			.collect(Collectors.toList())
+		);
+		userParty.setCreationDate(new Date());
+		userParty.setLastUpdateDate(new Date());
+		return userParty;
 	}
 
 	private List<User> retrieveUsersFromUserPartyApi(UserPartyApi userPartyDTO) {
