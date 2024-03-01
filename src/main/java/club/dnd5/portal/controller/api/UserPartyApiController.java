@@ -62,4 +62,12 @@ public class UserPartyApiController {
 	public List<UserPartyApi> getAllUserParties(@RequestBody UserPartyRequestApi request) {
 		return userPartyService.getAllUserParties(request);
 	}
+
+	@Operation(summary = "Покидание группы")
+	@DeleteMapping("/leaving/{groupId}")
+	@SecurityRequirement(name = "Bearer Authentication")
+	@ResponseStatus(HttpStatus.OK)
+	public String leavingFromGroup(@PathVariable("groupId") Long groupId) {
+		return "";
+	}
 }

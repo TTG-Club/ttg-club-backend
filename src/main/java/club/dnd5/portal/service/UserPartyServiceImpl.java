@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -100,7 +101,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 		);
 	}
 
-
 	@Override
 	public UserPartyApi getUserPartyById(Long id) {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(id);
@@ -140,6 +140,25 @@ public class UserPartyServiceImpl implements UserPartyService {
 			return "Delete was successful";
 		} else {
 			return "User party with id " + id + " not found";
+		}
+	}
+
+	@Override
+	@Transactional
+	public String leavingFromGroup(Long groupId) {
+		UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+
+		if (userParty.getUserList().contains(user)) {
+			userParty.getUserList().remove(user);
+			user.getUserParties().remove(userParty);
+			userRepository.save(user);
+			userPartyRepository.save(userParty);
+			return "Вы покинули группу";
+		} else {
+			throw new PageNotFoundException();
 		}
 	}
 

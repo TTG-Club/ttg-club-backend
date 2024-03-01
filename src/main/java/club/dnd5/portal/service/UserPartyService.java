@@ -14,4 +14,5 @@ public interface UserPartyService {
 	List<UserApi> getUserPartyMembers(Long partyId);
 	String deleteUserPartyById(Long id);
 	void updateUserParty(Long partyId, UserPartyApi userPartyDTO);
+	String leavingFromGroup(Long groupId);
 }
