@@ -199,7 +199,7 @@ public class InvitationServiceImpl implements InvitationService {
 			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
 		}
 
-		userParty.getPendingInvitedUserIds().remove(user.getId());
+		userParty.getUserWaitList().remove(user);
 		addUserToParty(user, userParty);
 		return "Вы были добавлены в группу";
 	}

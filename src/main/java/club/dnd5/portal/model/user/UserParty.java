@@ -39,9 +39,13 @@ public class UserParty {
 	)
 	private List<User> userList = new ArrayList<>();
 
-	@Column(name = "pending_invited_user_ids")
-	@ElementCollection
-	private List<Long> pendingInvitedUserIds = new ArrayList<>();
+	@ManyToMany
+	@JoinTable(
+		name = "user_wait_list",
+		joinColumns = @JoinColumn(name = "user_party_id"),
+		inverseJoinColumns = @JoinColumn(name = "user_id")
+	)
+	private List<User> userWaitList = new ArrayList<>();
 
 	@OneToOne(mappedBy = "userParty")
 	private Invitation invitation;

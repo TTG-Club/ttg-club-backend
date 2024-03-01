@@ -44,7 +44,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 		UserParty userParty = convertFromUserPartyCreateToEntity(userPartyDTO);
 		userParty.setOwnerId(user.getId());
-		userParty.setPendingInvitedUserIds(userPartyDTO.getUserListIds());
 		userParty.getUserList().add(user);
 		user.getUserParties().add(userParty);
 		userRepository.save(user);
@@ -56,6 +55,8 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
+
+		userParty.setUserWaitList(usersToSendEmail);
 
 
 		emailService.sendInvitationLink(usersToSendEmail,
@@ -116,6 +117,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.orElseThrow(PageNotFoundException::new);
 	}
 
+	//TODO, если роль админ или владелец, обращается сюда, то показывать ещё и тех кто находится в waitList-е
 	@Override
 	public List<UserApi> getUserPartyMembers(Long partyId) {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(partyId);
