@@ -49,7 +49,7 @@ public class UserPartyApiController {
 		return userPartyService.deleteUserPartyById(id);
 	}
 
-	@Operation(summary = "Получение айди юзеров, которые находятся в группе")
+	@Operation(summary = "Получение юзеров, которые находятся в группе")
 	@GetMapping("/members/{partyId}")
 	@ResponseStatus(HttpStatus.OK)
 	public List<UserApi> getUserPartyMembers(@PathVariable Long partyId) {
@@ -63,11 +63,19 @@ public class UserPartyApiController {
 		return userPartyService.getAllUserParties(request);
 	}
 
+	@Operation(summary = "Удаление участника группы, создателем группы")
+	@DeleteMapping("/members/{groupId}/kick/{userId}")
+	@SecurityRequirement(name = "Bearer Authentication")
+	@ResponseStatus(HttpStatus.OK)
+	public String kickFromGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") Long userId) {
+		return userPartyService.kickFromGroup(groupId, userId);
+	}
+
 	@Operation(summary = "Покидание группы")
 	@DeleteMapping("/leaving/{groupId}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
 	public String leavingFromGroup(@PathVariable("groupId") Long groupId) {
-		return "";
+		return userPartyService.leavingFromGroup(groupId);
 	}
 }

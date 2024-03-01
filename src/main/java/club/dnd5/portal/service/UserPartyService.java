@@ -15,4 +15,5 @@ public interface UserPartyService {
 	String deleteUserPartyById(Long id);
 	void updateUserParty(Long partyId, UserPartyApi userPartyDTO);
 	String leavingFromGroup(Long groupId);
+	String kickFromGroup(Long groupId, Long userId);
 }

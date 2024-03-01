@@ -1,6 +1,7 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.*;
+import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
@@ -12,6 +13,7 @@ import club.dnd5.portal.util.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -162,6 +164,24 @@ public class UserPartyServiceImpl implements UserPartyService {
 		}
 	}
 
+	@Override
+	public String kickFromGroup(Long groupId, Long userId) {
+		UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+		if (checkPermission(user, userParty)) {
+			User userToBeKicked = userRepository.findById(userId).orElseThrow(PageNotFoundException::new);
+			userParty.getUserList().remove(userToBeKicked);
+			userToBeKicked.getUserParties().remove(userParty);
+
+			userRepository.save(user);
+			userPartyRepository.save(userParty);
+			return "User with name " + userToBeKicked.getName() + " has been successfully kicked from the group.";
+		}
+		throw new ApiException(HttpStatus.FORBIDDEN, "You do not have permission to kick users from this group.");
+	}
+
 	// Utility methods for conversion between API DTO and JPA Entity
 	private UserPartyApi convertToUserPartyApi(UserParty userParty) {
 		UserPartyApi userPartyApi = new UserPartyApi();
@@ -209,5 +229,12 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
 			.username(user.getUsername())
 			.build();
+	}
+
+	private boolean checkPermission(User user, UserParty userParty) {
+		if (user.getRoles().contains("ADMIN") || userParty.getOwnerId().equals(user.getId())) {
+			return true;
+		}
+		return false;
 	}
 }
