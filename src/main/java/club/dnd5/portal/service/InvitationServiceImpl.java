@@ -54,7 +54,7 @@ public class InvitationServiceImpl implements InvitationService {
 		} while (invitationRepository.existsByLink(invitationLink));
 
 		invitation.setLink(invitationLink);
-		invitation.setExpirationTime(calculateExpirationTimeInMillis(1));
+		invitation.setExpirationTime(calculateExpirationTimeInMillis(7));
 		invitation.setCode(generateCodeInvitation(invitation));
 		invitationRepository.save(invitation);
 

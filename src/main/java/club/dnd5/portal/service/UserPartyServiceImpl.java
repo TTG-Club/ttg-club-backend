@@ -131,8 +131,15 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 	@Override
 	public void updateUserParty(Long partyId, UserPartyApi userPartyDTO) {
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(partyId);
 		optionalUserParty.ifPresent(userParty -> {
+			if (!checkPermission(user, userParty)) {
+				throw new ApiException(HttpStatus.FORBIDDEN, "You do not have permission to update UserParty.");
+			}
+
 			userParty.setGroupName(userPartyDTO.getGroupName());
 			userParty.setDescription(userPartyDTO.getDescription());
 			userParty.setLastUpdateDate(new Date());
@@ -144,6 +151,11 @@ public class UserPartyServiceImpl implements UserPartyService {
 	public String deleteUserPartyById(Long id) {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(id);
 		if (optionalUserParty.isPresent()) {
+			String userEmail = getAuthenticatedUserEmail();
+			User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+			if (!checkPermission(user, optionalUserParty.get())){
+				throw new ApiException(HttpStatus.FORBIDDEN, "You do not have permission to delete UserParty.");
+			}
 			userPartyRepository.deleteById(id);
 			return "Delete was successful";
 		} else {

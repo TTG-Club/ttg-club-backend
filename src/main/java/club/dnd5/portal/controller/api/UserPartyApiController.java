@@ -37,6 +37,7 @@ public class UserPartyApiController {
 
 	@Operation(summary = "Обновление группы")
 	@PutMapping("/{partyId}")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserParty(@PathVariable Long partyId, @RequestBody UserPartyApi userPartyDTO) {
 		userPartyService.updateUserParty(partyId, userPartyDTO);
@@ -44,6 +45,7 @@ public class UserPartyApiController {
 
 	@Operation(summary = "Удаление группы")
 	@DeleteMapping("/{id}")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
 	public String deleteUserParty(@PathVariable Long id) {
 		return userPartyService.deleteUserPartyById(id);
