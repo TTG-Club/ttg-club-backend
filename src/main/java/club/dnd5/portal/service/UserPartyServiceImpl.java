@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class UserPartyServiceImpl implements UserPartyService {
 	private final UserPartyRepository userPartyRepository;
 	private final UserRepository userRepository;
+	private static final int MAX_GROUP_LIMIT_PER_USER = 5;
 	private final EmailService emailService;
 	private final InvitationServiceImpl invitationService;
 
@@ -35,6 +36,11 @@ public class UserPartyServiceImpl implements UserPartyService {
 	public UserPartyApi createUserParty(UserPartyCreateApi userPartyDTO) {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+
+		if (!checkGroupLimitForUser(user)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "You have exceeded the limit of groups you can own. " +
+				"Consider upgrading your subscription to enjoy unlimited group ownership privileges.");
+		}
 
 		UserParty userParty = convertFromUserPartyCreateToEntity(userPartyDTO);
 		userParty.setOwnerId(user.getId());
@@ -232,9 +238,16 @@ public class UserPartyServiceImpl implements UserPartyService {
 	}
 
 	private boolean checkPermission(User user, UserParty userParty) {
-		if (user.getRoles().contains("ADMIN") || userParty.getOwnerId().equals(user.getId())) {
-			return true;
-		}
-		return false;
+		return user.getRoles().stream()
+			.anyMatch(role -> role.getName().equals("ADMIN"))
+			|| userParty.getOwnerId().equals(user.getId());
+	}
+
+	private boolean checkGroupLimitForUser(User user) {
+		return user.getRoles().stream()
+			.anyMatch(role -> role.getName().equals("ADMIN") || role.getName().equals("SUBSCRIBER"))
+			|| user.getUserParties().stream()
+			.filter(userParty -> userParty.getOwnerId().equals(user.getId()))
+			.count() < MAX_GROUP_LIMIT_PER_USER;
 	}
 }
