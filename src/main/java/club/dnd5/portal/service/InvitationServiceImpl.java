@@ -45,7 +45,6 @@ public class InvitationServiceImpl implements InvitationService {
 		invitation.setGenerationDate(new Date());
 		invitation.setUserParty(userParty);
 
-
 		String[] profiles = this.environment.getActiveProfiles();
 		String invitationLink;
 		do {
@@ -181,7 +180,6 @@ public class InvitationServiceImpl implements InvitationService {
 		return addUserToPartyBasedOnInvitation(code, groupId, false);
 	}
 
-	//TODO обработку ошибки, чтобы на фронт выскакивала инфа
 	private String addUserToPartyBasedOnInvitation(String identifier, Long groupId, boolean isLink) {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
@@ -201,6 +199,7 @@ public class InvitationServiceImpl implements InvitationService {
 			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
 		}
 
+		userParty.getPendingInvitedUserIds().remove(user.getId());
 		addUserToParty(user, userParty);
 		return "Вы были добавлены в группу";
 	}

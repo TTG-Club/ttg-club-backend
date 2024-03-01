@@ -36,5 +36,4 @@ public class Invitation {
 		// Check if current date is after the expiration date
 		return new Date().after(expirationDate);
 	}
-
 }

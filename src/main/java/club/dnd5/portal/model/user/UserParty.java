@@ -39,6 +39,10 @@ public class UserParty {
 	)
 	private List<User> userList = new ArrayList<>();
 
+	@Column(name = "pending_invited_user_ids")
+	@ElementCollection
+	private List<Long> pendingInvitedUserIds = new ArrayList<>();
+
 	@OneToOne(mappedBy = "userParty")
 	private Invitation invitation;
 
