@@ -15,35 +15,35 @@ public class InvitationApiController {
 	private final InvitationServiceImpl invitationService;
 
 	@Operation(summary = "Получение информации о приглашение")
-	@GetMapping("/group/{groupId}")
-	public InvitationApi getInvitationByGroupId(@PathVariable Long groupId) {
-		return invitationService.getInvitationByGroupId(groupId);
+	@GetMapping("/party/{partyId}")
+	public InvitationApi getInvitationByGroupId(@PathVariable Long partyId) {
+		return invitationService.getInvitationByGroupId(partyId);
 	}
 
 	@Operation(summary = "Отмена приглашения")
-	@PostMapping("/{groupId}/cancel")
+	@PostMapping("/{partyId}/cancel")
 	@ResponseStatus(HttpStatus.OK)
-	public void cancelInvitation(@PathVariable Long groupId) {
-		invitationService.cancelInvitation(groupId);
+	public void cancelInvitation(@PathVariable Long partyId) {
+		invitationService.cancelInvitation(partyId);
 	}
 
 	@Operation(summary = "Получение ссылки")
-	@GetMapping("/link/{groupId}")
-	public String getInvitationLinkByGroupId(@PathVariable Long groupId) {
-		return invitationService.getInvitationLinkByGroupId(groupId);
+	@GetMapping("/link/{partyId}")
+	public String getInvitationLinkByGroupId(@PathVariable Long partyId) {
+		return invitationService.getInvitationLinkByGroupId(partyId);
 	}
 
 	@Operation(summary = "Получение кода")
-	@GetMapping("/code/{groupId}")
-	public String getInvitationCodeByGroupId(@PathVariable Long groupId) {
-		return invitationService.getInvitationCodeByGroupId(groupId);
+	@GetMapping("/code/{partyId}")
+	public String getInvitationCodeByGroupId(@PathVariable Long partyId) {
+		return invitationService.getInvitationCodeByGroupId(partyId);
 	}
 
 	@Operation(summary = "Установка значение сколько будет валидна ссылка / code")
-	@PutMapping("/{groupId}/expiration/{days}")
+	@PutMapping("/{partyId}/expiration/{days}")
 	@ResponseStatus(HttpStatus.OK)
-	public void setInvitationExpiration(@PathVariable Long groupId, @PathVariable int days) {
-		invitationService.setInvitationExpiration(groupId, days);
+	public void setInvitationExpiration(@PathVariable Long partyId, @PathVariable int days) {
+		invitationService.setInvitationExpiration(partyId, days);
 	}
 
 	@Operation(summary = "Добавление участника по ссылке")
@@ -52,9 +52,9 @@ public class InvitationApiController {
 	@ResponseStatus(HttpStatus.OK)
 	public String handleInvitationLink(
 		@PathVariable String uniqueIdentifier,
-		@RequestParam Long groupId
+		@RequestParam Long partyId
 	) {
-		return invitationService.addingUserToPartyBasedOnInvitationLink(uniqueIdentifier, groupId);
+		return invitationService.addingUserToPartyBasedOnInvitationLink(uniqueIdentifier, partyId);
 	}
 
 	@Operation(summary = "Добавление участнике по коду")
@@ -63,8 +63,8 @@ public class InvitationApiController {
 	@ResponseStatus(HttpStatus.OK)
 	public String handleInvitationCode(
 		@PathVariable String code,
-		@RequestParam Long groupId
+		@RequestParam Long partyId
 	) {
-		return invitationService.addingUserToPartyBasedOnInvitationCode(code, groupId);
+		return invitationService.addingUserToPartyBasedOnInvitationCode(code, partyId);
 	}
 }

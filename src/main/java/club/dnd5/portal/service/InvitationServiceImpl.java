@@ -199,9 +199,8 @@ public class InvitationServiceImpl implements InvitationService {
 			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
 		}
 
-		userParty.getUserWaitList().remove(user);
-		addUserToParty(user, userParty);
-		return "Вы были добавлены в группу";
+		addUserToAwaitList(user, userParty);
+		return "Вы были добавлены в лист ожидание";
 	}
 
 	private boolean isUserAuthorizedToAccessInvitation(Long groupId) {
@@ -219,10 +218,10 @@ public class InvitationServiceImpl implements InvitationService {
 		throw new IllegalStateException("User is not authenticated");
 	}
 
-	private void addUserToParty(User user, UserParty userParty) {
+	private void addUserToAwaitList(User user, UserParty userParty) {
 		if (!user.getUserParties().contains(userParty)) {
-			user.getUserParties().add(userParty);
-			userRepository.save(user);
+			userParty.getUserWaitList().add(user);
+			userPartyRepository.save(userParty);
 		}
 	}
 

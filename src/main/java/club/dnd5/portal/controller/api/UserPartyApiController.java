@@ -1,6 +1,6 @@
 package club.dnd5.portal.controller.api;
 
-import club.dnd5.portal.dto.api.UserApi;
+import club.dnd5.portal.dto.api.PartyMember;
 import club.dnd5.portal.dto.api.UserPartyApi;
 import club.dnd5.portal.dto.api.UserPartyCreateApi;
 import club.dnd5.portal.dto.api.UserPartyRequestApi;
@@ -21,10 +21,10 @@ public class UserPartyApiController {
 	private final UserPartyService userPartyService;
 
 	@Operation(summary = "Получение группы по айди")
-	@GetMapping("/{id}")
+	@GetMapping("/{partyId}")
 	@ResponseStatus(HttpStatus.OK)
-	public UserPartyApi getUserPartyById(@PathVariable Long id) {
-		return userPartyService.getUserPartyById(id);
+	public UserPartyApi getUserPartyById(@PathVariable Long partyId) {
+		return userPartyService.getUserPartyById(partyId);
 	}
 
 	@Operation(summary = "Создание группы")
@@ -44,17 +44,17 @@ public class UserPartyApiController {
 	}
 
 	@Operation(summary = "Удаление группы")
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/{partyId}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
-	public String deleteUserParty(@PathVariable Long id) {
-		return userPartyService.deleteUserPartyById(id);
+	public String deleteUserParty(@PathVariable Long partyId) {
+		return userPartyService.deleteUserPartyById(partyId);
 	}
 
 	@Operation(summary = "Получение юзеров, которые находятся в группе")
 	@GetMapping("/members/{partyId}")
 	@ResponseStatus(HttpStatus.OK)
-	public List<UserApi> getUserPartyMembers(@PathVariable Long partyId) {
+	public List<PartyMember> getUserPartyMembers(@PathVariable Long partyId) {
 		return userPartyService.getUserPartyMembers(partyId);
 	}
 
@@ -66,18 +66,27 @@ public class UserPartyApiController {
 	}
 
 	@Operation(summary = "Удаление участника группы, создателем группы")
-	@DeleteMapping("/members/{groupId}/kick/{userId}")
+	@DeleteMapping("/members/{partyId}/kick/{userId}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
-	public String kickFromGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") Long userId) {
+	public String kickFromGroup(@PathVariable("partyId") Long groupId, @PathVariable("userId") Long userId) {
 		return userPartyService.kickFromGroup(groupId, userId);
 	}
 
 	@Operation(summary = "Покидание группы")
-	@DeleteMapping("/leaving/{groupId}")
+	@DeleteMapping("/leaving/{partyId}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
-	public String leavingFromGroup(@PathVariable("groupId") Long groupId) {
+	public String leavingFromGroup(@PathVariable("partyId") Long groupId) {
 		return userPartyService.leavingFromGroup(groupId);
 	}
+
+	@Operation(summary = "Подтверждение участника")
+	@PutMapping("/{groupId}/confirm/{userId}")
+	@SecurityRequirement(name = "Bearer Authentication")
+	@ResponseStatus(HttpStatus.OK)
+	public String confirmUser(@PathVariable Long groupId, @PathVariable Long userId) {
+		return null;
+	}
+
 }

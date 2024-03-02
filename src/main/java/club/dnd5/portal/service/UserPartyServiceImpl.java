@@ -56,9 +56,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		userParty.setUserWaitList(usersToSendEmail);
-
-
 		emailService.sendInvitationLink(usersToSendEmail,
 			invitationService.generateLinkInvitation(userParty.getId()));
 
@@ -117,18 +114,25 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.orElseThrow(PageNotFoundException::new);
 	}
 
-	//TODO, если роль админ или владелец, обращается сюда, то показывать ещё и тех кто находится в waitList-е
 	@Override
-	public List<UserApi> getUserPartyMembers(Long partyId) {
+	public List<PartyMember> getUserPartyMembers(Long partyId) {
+		String userEmail = getAuthenticatedUserEmail();
+		User currentUser = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(partyId);
-		List<UserApi> userApis = new ArrayList<>();
+		List<PartyMember> partyMembers = new ArrayList<>();
 		if (optionalUserParty.isPresent()) {
+			UserParty userParty= optionalUserParty.get();
+			if (checkPermission(currentUser, userParty)) {
+				for (User user : userParty.getUserWaitList()) {
+					partyMembers.add(convertFromUserToPartyMember(user, false));
+				}
+			}
 			for (User user : optionalUserParty.get().getUserList()) {
-				UserApi userApi = convertFromUserToUserApi(user);
-				userApis.add(userApi);
+				partyMembers.add(convertFromUserToPartyMember(user, true));
 			}
 		}
-		return userApis;
+		return partyMembers;
 	}
 
 	@Override
@@ -202,6 +206,28 @@ public class UserPartyServiceImpl implements UserPartyService {
 		throw new ApiException(HttpStatus.FORBIDDEN, "You do not have permission to kick users from this group.");
 	}
 
+	@Override
+	public String confirmUser(Long groupId, Long userId) {
+		UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+		String userEmail = getAuthenticatedUserEmail();
+		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+
+		if (checkPermission(user, userParty)) {
+			Optional<User> awaitingUserOptional = userParty.getUserWaitList().stream()
+				.filter(u -> u.getId().equals(userId))
+				.findFirst();
+
+			awaitingUserOptional.ifPresent(awaitingUser -> {
+				userParty.getUserWaitList().remove(awaitingUser);
+				userParty.getUserList().add(awaitingUser);
+				userPartyRepository.save(userParty);
+			});
+
+			return "User confirmed successfully, please refresh the page.";
+		}
+		return "Insufficient permissions to confirm user.";
+	}
+
 	// Utility methods for conversion between API DTO and JPA Entity
 	private UserPartyApi convertToUserPartyApi(UserParty userParty) {
 		UserPartyApi userPartyApi = new UserPartyApi();
@@ -248,6 +274,15 @@ public class UserPartyServiceImpl implements UserPartyService {
 			.name(user.getName())
 			.roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
 			.username(user.getUsername())
+			.build();
+	}
+
+	private PartyMember convertFromUserToPartyMember(User user, boolean ownerApprove) {
+		return PartyMember.builder()
+			.userName(user.getName())
+			.ownerApprove(ownerApprove)
+			.roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+			.name(user.getName())
 			.build();
 	}
 

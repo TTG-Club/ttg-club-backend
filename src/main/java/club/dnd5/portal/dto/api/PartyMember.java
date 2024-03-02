@@ -15,5 +15,4 @@ public class PartyMember {
 	private String name;
 	private List<String> roles;
 	private boolean ownerApprove;
-	private boolean invitationAccepted;
 }
