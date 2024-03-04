@@ -28,7 +28,7 @@ public class UserPartyApiController {
 	}
 
 	@Operation(summary = "Создание группы")
-	@PostMapping
+	@PostMapping("/create")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.CREATED)
 	public UserPartyApi createUserParty(@RequestBody UserPartyCreateApi userPartyDTO) {
@@ -51,8 +51,9 @@ public class UserPartyApiController {
 		return userPartyService.deleteUserPartyById(partyId);
 	}
 
-	@Operation(summary = "Получение юзеров, которые находятся в группе")
+	@Operation(summary = "Получение юзеров, которые находятся в группе, в том числе юзеров которые ожидают подтверждение")
 	@GetMapping("/members/{partyId}")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
 	public List<PartyMember> getUserPartyMembers(@PathVariable Long partyId) {
 		return userPartyService.getUserPartyMembers(partyId);
@@ -69,24 +70,24 @@ public class UserPartyApiController {
 	@DeleteMapping("/members/{partyId}/kick/{userId}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
-	public String kickFromGroup(@PathVariable("partyId") Long groupId, @PathVariable("userId") Long userId) {
-		return userPartyService.kickFromGroup(groupId, userId);
+	public String kickFromGroup(@PathVariable("partyId") Long partyId, @PathVariable("userId") Long userId) {
+		return userPartyService.kickFromGroup(partyId, userId);
 	}
 
 	@Operation(summary = "Покидание группы")
 	@DeleteMapping("/leaving/{partyId}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
-	public String leavingFromGroup(@PathVariable("partyId") Long groupId) {
-		return userPartyService.leavingFromGroup(groupId);
+	public String leavingFromGroup(@PathVariable("partyId") Long partyId) {
+		return userPartyService.leavingFromGroup(partyId);
 	}
 
 	@Operation(summary = "Подтверждение участника")
-	@PutMapping("/{groupId}/confirm/{userId}")
+	@PutMapping("/{partyId}/confirm/{userId}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
-	public String confirmUser(@PathVariable Long groupId, @PathVariable Long userId) {
-		return null;
+	public String confirmUser(@PathVariable Long partyId, @PathVariable Long userId) {
+		return userPartyService.confirmUser(partyId, userId);
 	}
 
 }

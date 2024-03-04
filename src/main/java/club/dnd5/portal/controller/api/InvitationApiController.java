@@ -1,7 +1,7 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.InvitationApi;
-import club.dnd5.portal.service.InvitationServiceImpl;
+import club.dnd5.portal.service.InvitationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -12,35 +12,39 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/invitation")
 @RequiredArgsConstructor
 public class InvitationApiController {
-	private final InvitationServiceImpl invitationService;
+	private final InvitationService invitationService;
 
 	@Operation(summary = "Получение информации о приглашение")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping("/party/{partyId}")
-	public InvitationApi getInvitationByGroupId(@PathVariable Long partyId) {
-		return invitationService.getInvitationByGroupId(partyId);
+	public InvitationApi getInvitationByPartyId(@PathVariable Long partyId) {
+		return invitationService.getInvitationByPartyId(partyId);
 	}
 
 	@Operation(summary = "Отмена приглашения")
 	@PostMapping("/{partyId}/cancel")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
 	public void cancelInvitation(@PathVariable Long partyId) {
 		invitationService.cancelInvitation(partyId);
 	}
 
 	@Operation(summary = "Получение ссылки")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping("/link/{partyId}")
-	public String getInvitationLinkByGroupId(@PathVariable Long partyId) {
-		return invitationService.getInvitationLinkByGroupId(partyId);
+	public String getInvitationLinkByPartyId(@PathVariable Long partyId) {
+		return invitationService.getInvitationLinkByPartyId(partyId);
 	}
 
 	@Operation(summary = "Получение кода")
 	@GetMapping("/code/{partyId}")
-	public String getInvitationCodeByGroupId(@PathVariable Long partyId) {
-		return invitationService.getInvitationCodeByGroupId(partyId);
+	public String getInvitationCodeByPartyId(@PathVariable Long partyId) {
+		return invitationService.getInvitationCodeByPartyId(partyId);
 	}
 
 	@Operation(summary = "Установка значение сколько будет валидна ссылка / code")
 	@PutMapping("/{partyId}/expiration/{days}")
+	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
 	public void setInvitationExpiration(@PathVariable Long partyId, @PathVariable int days) {
 		invitationService.setInvitationExpiration(partyId, days);
@@ -51,10 +55,9 @@ public class InvitationApiController {
 	@GetMapping("/{uniqueIdentifier}")
 	@ResponseStatus(HttpStatus.OK)
 	public String handleInvitationLink(
-		@PathVariable String uniqueIdentifier,
-		@RequestParam Long partyId
+		@PathVariable String uniqueIdentifier
 	) {
-		return invitationService.addingUserToPartyBasedOnInvitationLink(uniqueIdentifier, partyId);
+		return invitationService.addingUserToPartyBasedOnInvitationLink(uniqueIdentifier);
 	}
 
 	@Operation(summary = "Добавление участнике по коду")
@@ -62,9 +65,8 @@ public class InvitationApiController {
 	@GetMapping("/code/{code}")
 	@ResponseStatus(HttpStatus.OK)
 	public String handleInvitationCode(
-		@PathVariable String code,
-		@RequestParam Long partyId
+		@PathVariable String code
 	) {
-		return invitationService.addingUserToPartyBasedOnInvitationCode(code, partyId);
+		return invitationService.addingUserToPartyBasedOnInvitationCode(code);
 	}
 }

@@ -28,7 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InvitationServiceImpl implements InvitationService {
 	private static final String unauthorizedErrorMessage = "User is not authorized to access the invitation";
-	private static final String invitationNotFoundErrorMessage = "Invitation not found for the provided groupId";
+	private static final String invitationNotFoundErrorMessage = "Invitation not found for the provided partyId";
 	private static final Random random = new Random();
 	private final Environment environment;
 	private final ValueProvider valueProvider;
@@ -37,8 +37,8 @@ public class InvitationServiceImpl implements InvitationService {
 	private final UserRepository userRepository;
 
 	@Override
-	public String generateLinkInvitation(Long groupId) {
-		UserParty userParty = userPartyRepository.findById(groupId)
+	public String generateLinkInvitation(Long partyId) {
+		UserParty userParty = userPartyRepository.findById(partyId)
 			.orElseThrow(PageNotFoundException::new);
 
 		Invitation invitation = new Invitation();
@@ -47,11 +47,13 @@ public class InvitationServiceImpl implements InvitationService {
 
 		String[] profiles = this.environment.getActiveProfiles();
 		String invitationLink;
+		String uniqueIdentifier;
 		do {
-			String uniqueIdentifier = UUID.randomUUID().toString();
-			invitationLink = generateInvitationLink(profiles[0], valueProvider.getDevUrl(), valueProvider.getTtgUrl(), uniqueIdentifier, groupId);
+			uniqueIdentifier = UUID.randomUUID().toString();
+			invitationLink = generateInvitationLink(profiles[0], valueProvider.getDevUrl(), valueProvider.getTtgUrl(), uniqueIdentifier);
 		} while (invitationRepository.existsByLink(invitationLink));
 
+		invitation.setUniqueIdentifier(uniqueIdentifier);
 		invitation.setLink(invitationLink);
 		invitation.setExpirationTime(calculateExpirationTimeInMillis(7));
 		invitation.setCode(generateCodeInvitation(invitation));
@@ -73,13 +75,13 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public InvitationApi getInvitationByGroupId(Long groupId) {
-		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+	public InvitationApi getInvitationByPartyId(Long partyId) {
+		if (!isUserAuthorizedToAccessInvitation(partyId)) {
 			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
-		UserParty userParty = userPartyRepository.findById(groupId)
-			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User party not found for the provided groupId"));
+		UserParty userParty = userPartyRepository.findById(partyId)
+			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User party not found for the provided partyId"));
 
 		Invitation invitation = userParty.getInvitation();
 
@@ -88,25 +90,25 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public void cancelInvitation(Long groupId) {
-		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+	public void cancelInvitation(Long partyId) {
+		if (!isUserAuthorizedToAccessInvitation(partyId)) {
 			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
-		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(partyId);
 		Invitation invitation = invitationOptional
 			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
 
-		invitationRepository.delete(invitation);
+		invitation.setExpirationTime(-1L);
 	}
 
 	@Override
-	public void setInvitationExpiration(Long groupId, int days) {
-		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+	public void setInvitationExpiration(Long partyId, int days) {
+		if (!isUserAuthorizedToAccessInvitation(partyId)) {
 			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
-		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(partyId);
 		Invitation invitation = invitationOptional
 			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
 
@@ -115,12 +117,12 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public String getInvitationLinkByGroupId(Long groupId) {
-		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+	public String getInvitationLinkByPartyId(Long partyId) {
+		if (!isUserAuthorizedToAccessInvitation(partyId)) {
 			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
-		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(partyId);
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
 			return invitation.getLink();
@@ -130,12 +132,12 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public String getInvitationCodeByGroupId(Long groupId) {
-		if (!isUserAuthorizedToAccessInvitation(groupId)) {
+	public String getInvitationCodeByPartyId(Long partyId) {
+		if (!isUserAuthorizedToAccessInvitation(partyId)) {
 			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
-		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(groupId);
+		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(partyId);
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
 			return invitation.getCode();
@@ -145,7 +147,7 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public boolean checkTheInvitationCode(String code) {
+	public boolean isValidInvitationCode(String code) {
 		Optional<Invitation> invitationOptional = invitationRepository.findByCode(code);
 
 		if (invitationOptional.isPresent()) {
@@ -156,10 +158,8 @@ public class InvitationServiceImpl implements InvitationService {
 	}
 
 	@Override
-	public boolean checkTheInvitationLink(String uniqueIdentifier, Long groupId) {
-		String invitationLink = valueProvider.getTtgUrl() + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
-		Optional<Invitation> invitationOptional = invitationRepository.findByLink(invitationLink);
-
+	public boolean isValidUniqueIdentifier(String uniqueIdentifier) {
+		Optional<Invitation> invitationOptional = invitationRepository.findByUniqueIdentifier(uniqueIdentifier);
 		if (invitationOptional.isPresent()) {
 			Invitation invitation = invitationOptional.get();
 			return !invitation.isExpired();
@@ -170,47 +170,51 @@ public class InvitationServiceImpl implements InvitationService {
 
 	@Override
 	@Transactional
-	public String addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId) {
-		return addUserToPartyBasedOnInvitation(uniqueIdentifier, groupId, true);
+	public String addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier) {
+		return addUserToPartyBasedOnInvitation(uniqueIdentifier, true);
 	}
 
 	@Override
 	@Transactional
-	public String addingUserToPartyBasedOnInvitationCode(String code, Long groupId) {
-		return addUserToPartyBasedOnInvitation(code, groupId, false);
+	public String addingUserToPartyBasedOnInvitationCode(String code) {
+		return addUserToPartyBasedOnInvitation(code,  false);
 	}
 
-	private String addUserToPartyBasedOnInvitation(String identifier, Long groupId, boolean isLink) {
+	//test
+	private String addUserToPartyBasedOnInvitation(String identifier, boolean isLink) {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
-		Optional<UserParty> optionalUserParty = userPartyRepository.findById(groupId);
+		Optional<Invitation> invitationOptional;
+		if (isLink) {
+			if (!isValidUniqueIdentifier(identifier)) {
+				throw new ApiException(HttpStatus.NOT_FOUND, "Invalid URL");
+			}
+			invitationOptional = invitationRepository.findByUniqueIdentifier(identifier);
 
-		if (!optionalUserParty.isPresent()) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Party not found");
+		} else {
+			if (!isValidInvitationCode(identifier)) {
+				throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
+			}
+			invitationOptional = invitationRepository.findByCode(identifier);
 		}
-
-		UserParty userParty = optionalUserParty.get();
+		Invitation invitation = invitationOptional.get();
+		UserParty userParty = invitation.getUserParty();
 		if (userParty.getUserList().contains(user)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "You are already a member of the group");
-		}
-		if (isLink && checkTheInvitationLink(identifier, groupId)) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid URL");
-		} else if (!isLink && checkTheInvitationCode(identifier)) {
-			throw new ApiException(HttpStatus.NOT_FOUND, "Invalid invitation code");
 		}
 
 		addUserToAwaitList(user, userParty);
 		return "Вы были добавлены в лист ожидание";
 	}
 
-	private boolean isUserAuthorizedToAccessInvitation(Long groupId) {
+	private boolean isUserAuthorizedToAccessInvitation(Long partyId) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			String userEmail = authentication.getName();
 			Optional<User> optionalUser = userRepository.findByEmail(userEmail);
 			if (optionalUser.isPresent()) {
 				User user = optionalUser.get();
-				UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+				UserParty userParty = userPartyRepository.findById(partyId).orElseThrow(PageNotFoundException::new);
 				return userParty.getOwnerId().equals(user.getId());
 			}
 			return false;
@@ -239,14 +243,14 @@ public class InvitationServiceImpl implements InvitationService {
 		return days * MILLISECONDS_IN_DAY;
 	}
 
-	private String generateInvitationLink(String activeProfile, String devUrl, String ttgUrl, String uniqueIdentifier, Long groupId) {
+	private String generateInvitationLink(String activeProfile, String devUrl, String ttgUrl, String uniqueIdentifier) {
 		String baseUrl;
 		if ("local".equals(activeProfile)) {
 			baseUrl = "http://localhost:8080/api/v1";
 		} else {
 			baseUrl = "dev".equals(activeProfile) ? devUrl : ttgUrl;
 		}
-		return baseUrl + "/invitation/" + uniqueIdentifier + "?groupId=" + groupId;
+		return baseUrl + "/invitation/" + uniqueIdentifier;
 	}
 
 	private String getAuthenticatedUserEmail() {

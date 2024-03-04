@@ -4,15 +4,15 @@ import club.dnd5.portal.dto.api.InvitationApi;
 import club.dnd5.portal.model.Invitation;
 
 public interface InvitationService {
-	String generateLinkInvitation(Long groupId);
+	String generateLinkInvitation(Long partyId);
 	String generateCodeInvitation(Invitation invitation);
-	InvitationApi getInvitationByGroupId(Long groupId);
-	void cancelInvitation(Long groupId);
-	void setInvitationExpiration(Long groupId, int days);
-	String getInvitationLinkByGroupId(Long groupId);
-	String getInvitationCodeByGroupId(Long groupId);
-	boolean checkTheInvitationLink(String uniqueIdentifier, Long groupId);
-	boolean checkTheInvitationCode(String code);
-	String addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier, Long groupId);
-	String addingUserToPartyBasedOnInvitationCode(String code, Long groupId);
+	InvitationApi getInvitationByPartyId(Long partyId);
+	void cancelInvitation(Long partyId);
+	void setInvitationExpiration(Long partyId, int days);
+	String getInvitationLinkByPartyId(Long partyId);
+	String getInvitationCodeByPartyId(Long partyId);
+	boolean isValidUniqueIdentifier(String uniqueIdentifier);
+	boolean isValidInvitationCode(String code);
+	String addingUserToPartyBasedOnInvitationLink(String uniqueIdentifier);
+	String addingUserToPartyBasedOnInvitationCode(String code);
 }

@@ -21,6 +21,10 @@ public class Invitation {
 
 	@Column(unique = true)
 	private String code;
+
+	@Column(unique = true)
+	private String uniqueIdentifier;
+
 	private Date generationDate;
 
 	@OneToOne

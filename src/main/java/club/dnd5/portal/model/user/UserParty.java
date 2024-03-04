@@ -47,7 +47,7 @@ public class UserParty {
 	)
 	private List<User> userWaitList = new ArrayList<>();
 
-	@OneToOne(mappedBy = "userParty")
+	@OneToOne(mappedBy = "userParty", cascade = CascadeType.REMOVE)
 	private Invitation invitation;
 
 	@Column(name = "creation_date")

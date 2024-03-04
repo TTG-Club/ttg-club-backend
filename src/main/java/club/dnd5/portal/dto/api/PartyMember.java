@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 @Builder
 public class PartyMember {
+	private Long id;
 	private String userName;
 	private String name;
 	private List<String> roles;

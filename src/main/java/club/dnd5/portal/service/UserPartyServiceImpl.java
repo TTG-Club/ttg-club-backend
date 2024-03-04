@@ -129,7 +129,9 @@ public class UserPartyServiceImpl implements UserPartyService {
 				}
 			}
 			for (User user : optionalUserParty.get().getUserList()) {
-				partyMembers.add(convertFromUserToPartyMember(user, true));
+				if(!Objects.equals(user.getId(), userParty.getOwnerId())) {
+					partyMembers.add(convertFromUserToPartyMember(user, true));
+				}
 			}
 		}
 		return partyMembers;
@@ -153,6 +155,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 		});
 	}
 
+	@Transactional
 	@Override
 	public String deleteUserPartyById(Long id) {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(id);
@@ -171,8 +174,8 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 	@Override
 	@Transactional
-	public String leavingFromGroup(Long groupId) {
-		UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+	public String leavingFromGroup(Long partyId) {
+		UserParty userParty = userPartyRepository.findById(partyId).orElseThrow(PageNotFoundException::new);
 
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
@@ -189,8 +192,8 @@ public class UserPartyServiceImpl implements UserPartyService {
 	}
 
 	@Override
-	public String kickFromGroup(Long groupId, Long userId) {
-		UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+	public String kickFromGroup(Long partyId, Long userId) {
+		UserParty userParty = userPartyRepository.findById(partyId).orElseThrow(PageNotFoundException::new);
 
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
@@ -207,8 +210,8 @@ public class UserPartyServiceImpl implements UserPartyService {
 	}
 
 	@Override
-	public String confirmUser(Long groupId, Long userId) {
-		UserParty userParty = userPartyRepository.findById(groupId).orElseThrow(PageNotFoundException::new);
+	public String confirmUser(Long partyId, Long userId) {
+		UserParty userParty = userPartyRepository.findById(partyId).orElseThrow(PageNotFoundException::new);
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 
@@ -279,6 +282,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 	private PartyMember convertFromUserToPartyMember(User user, boolean ownerApprove) {
 		return PartyMember.builder()
+			.id(user.getId())
 			.userName(user.getName())
 			.ownerApprove(ownerApprove)
 			.roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
