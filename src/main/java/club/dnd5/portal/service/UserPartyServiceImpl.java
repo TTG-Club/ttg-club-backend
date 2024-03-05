@@ -178,18 +178,35 @@ public class UserPartyServiceImpl implements UserPartyService {
 		UserParty userParty = userPartyRepository.findById(partyId).orElseThrow(PageNotFoundException::new);
 
 		String userEmail = getAuthenticatedUserEmail();
-		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+		User currentUser = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 
-		if (userParty.getUserList().contains(user)) {
-			userParty.getUserList().remove(user);
-			user.getUserParties().remove(userParty);
-			userRepository.save(user);
-			userPartyRepository.save(userParty);
-			return "Вы покинули группу";
-		} else {
+		if (!userParty.getUserList().contains(currentUser)) {
 			throw new PageNotFoundException();
 		}
+
+		boolean ownerParty = userParty.getOwnerId().equals(currentUser.getId());
+
+		// Удаляем текущего пользователя из списка пользователей группы
+		userParty.getUserList().remove(currentUser);
+		currentUser.getUserParties().remove(userParty);
+
+		// Сохраняем обновленные данные пользователя и группы
+		userRepository.save(currentUser);
+		userPartyRepository.save(userParty);
+
+		// Если покидающий пользователь - владелец группы, удаляем группу и всех её пользователей
+		if (ownerParty) {
+			for (User user : userParty.getUserList()) {
+				user.getUserParties().remove(userParty);
+			}
+			userParty.getUserList().clear();
+			userPartyRepository.delete(userParty);
+			return "Вы покинули группу, группа была удалена";
+		} else {
+			return "Вы покинули группу";
+		}
 	}
+
 
 	@Override
 	public String kickFromGroup(Long partyId, Long userId) {
