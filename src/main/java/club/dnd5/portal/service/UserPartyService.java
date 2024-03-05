@@ -17,4 +17,5 @@ public interface UserPartyService {
 	String leavingFromGroup(Long groupId);
 	String kickFromGroup(Long groupId, Long userId);
 	String confirmUser(Long groupId, Long userId);
+	String sendInvitationEmails(Long userPartyId, List<Long> userIds);
 }

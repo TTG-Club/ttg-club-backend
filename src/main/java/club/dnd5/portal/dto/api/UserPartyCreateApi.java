@@ -16,4 +16,5 @@ public class UserPartyCreateApi {
 	private String groupName;
 	private String description;
 	private List<Long> userListIds = new ArrayList<>();
+	private boolean sendEmail;
 }

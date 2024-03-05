@@ -90,4 +90,12 @@ public class UserPartyApiController {
 		return userPartyService.confirmUser(partyId, userId);
 	}
 
+	@Operation(summary = "Отправка приглашений по электронной почте")
+	@PostMapping("/{partyId}/send-invitations")
+	@SecurityRequirement(name = "Bearer Authentication")
+	@ResponseStatus(HttpStatus.OK)
+	public String sendInvitationsByEmail(@PathVariable Long partyId, @RequestBody List<Long> userIds) {
+		return userPartyService.sendInvitationEmails(partyId, userIds);
+	}
+
 }

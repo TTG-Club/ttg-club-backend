@@ -50,16 +50,35 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 		userParty = userPartyRepository.save(userParty);
 
-		List<User> usersToSendEmail = userPartyDTO.getUserListIds().stream()
-			.map(userRepository::findById)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
-
-		emailService.sendInvitationLink(usersToSendEmail,
-			invitationService.generateLinkInvitation(userParty.getId()));
+		if (userPartyDTO.isSendEmail()) {
+			sendInvitationEmails(userParty.getId(), userPartyDTO.getUserListIds());
+		}
 
 		return convertToUserPartyApi(userParty);
+	}
+
+	public String sendInvitationEmails(Long userPartyId, List<Long> userIds) {
+		String userEmail = getAuthenticatedUserEmail();
+		User currentUser = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
+		UserParty userParty = userPartyRepository.findById(userPartyId)
+			.orElseThrow(PageNotFoundException::new);
+
+		if (checkPermission(currentUser, userParty)) {
+			List<User> usersToSendEmail = userIds.stream()
+				.map(userRepository::findById)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
+			if (userParty.getInvitation() != null && !userParty.getInvitation().isExpired()) {
+				emailService.sendInvitationLink(usersToSendEmail, userParty.getInvitation().getLink());
+			} else {
+				emailService.sendInvitationLink(usersToSendEmail,
+					invitationService.generateLinkInvitation(userParty.getId()));
+			}
+			return "Приглашение было отправлено на почту";
+		} else {
+			throw new ApiException(HttpStatus.FORBIDDEN, "У вас нет разрешения на отправку приглашения");
+		}
 	}
 
 	@Override
@@ -122,14 +141,14 @@ public class UserPartyServiceImpl implements UserPartyService {
 		Optional<UserParty> optionalUserParty = userPartyRepository.findById(partyId);
 		List<PartyMember> partyMembers = new ArrayList<>();
 		if (optionalUserParty.isPresent()) {
-			UserParty userParty= optionalUserParty.get();
+			UserParty userParty = optionalUserParty.get();
 			if (checkPermission(currentUser, userParty)) {
 				for (User user : userParty.getUserWaitList()) {
 					partyMembers.add(convertFromUserToPartyMember(user, false));
 				}
 			}
 			for (User user : optionalUserParty.get().getUserList()) {
-				if(!Objects.equals(user.getId(), userParty.getOwnerId())) {
+				if (!Objects.equals(user.getId(), userParty.getOwnerId())) {
 					partyMembers.add(convertFromUserToPartyMember(user, true));
 				}
 			}
@@ -162,7 +181,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 		if (optionalUserParty.isPresent()) {
 			String userEmail = getAuthenticatedUserEmail();
 			User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
-			if (!checkPermission(user, optionalUserParty.get())){
+			if (!checkPermission(user, optionalUserParty.get())) {
 				throw new ApiException(HttpStatus.FORBIDDEN, "You do not have permission to delete UserParty.");
 			}
 			userPartyRepository.deleteById(id);
@@ -206,7 +225,6 @@ public class UserPartyServiceImpl implements UserPartyService {
 			return "Вы покинули группу";
 		}
 	}
-
 
 	@Override
 	public String kickFromGroup(Long partyId, Long userId) {
