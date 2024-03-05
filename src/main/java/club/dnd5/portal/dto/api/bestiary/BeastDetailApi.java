@@ -101,7 +101,6 @@ public class BeastDetailApi extends BeastApi {
 			experience = beast.getExp();
 		}
 		proficiencyBonus = beast.getProficiencyBonus();
-
 		alignment = beast.getAligment();
 		armorClass = beast.getAC();
 		setType(new TypeDetailApi(beast));

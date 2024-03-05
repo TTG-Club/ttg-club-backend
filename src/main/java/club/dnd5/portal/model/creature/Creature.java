@@ -2,7 +2,6 @@ package club.dnd5.portal.model.creature;
 
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.util.ChallengeRating;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,6 +39,7 @@ public class Creature implements FoundryCommon {
 
 	@Enumerated(EnumType.ORDINAL)
 	private Alignment alignment;
+	private String alignmentSuffix;
 
 	@Column(nullable = false)
 	private byte AC;
@@ -178,6 +178,9 @@ public class Creature implements FoundryCommon {
 	}
 
 	public String getAligment() {
+		if (alignmentSuffix != null) {
+			return String.format("%s %s", alignmentSuffix, alignment.getName(type));
+		}
 		return alignment.getName(type);
 	}
 
