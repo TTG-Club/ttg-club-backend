@@ -4,7 +4,7 @@ import club.dnd5.portal.dto.api.InvitationApi;
 import club.dnd5.portal.model.Invitation;
 
 public interface InvitationService {
-	String generateLinkInvitation(Long partyId);
+	String generateLinkInvitation(Long partyId, int expirationDay);
 	String generateCodeInvitation(Invitation invitation);
 	InvitationApi getInvitationByPartyId(Long partyId);
 	void cancelInvitation(Long partyId);

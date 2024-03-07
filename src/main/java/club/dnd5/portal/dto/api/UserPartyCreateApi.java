@@ -17,4 +17,5 @@ public class UserPartyCreateApi {
 	private String description;
 	private List<Long> userListIds = new ArrayList<>();
 	private boolean sendEmail;
+	private int expirationDay;
 }

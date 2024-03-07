@@ -54,13 +54,13 @@ public class UserPartyServiceImpl implements UserPartyService {
 		userParty = userPartyRepository.save(userParty);
 
 		if (userPartyDTO.isSendEmail()) {
-			sendInvitationEmails(userParty.getId(), userPartyDTO.getUserListIds());
+			sendInvitationEmails(userParty.getId(), userPartyDTO.getUserListIds(), userPartyDTO.getExpirationDay());
 		}
 
 		return convertToUserPartyApi(userParty);
 	}
 
-	public String sendInvitationEmails(Long userPartyId, List<Long> userIds) {
+	public String sendInvitationEmails(Long userPartyId, List<Long> userIds, int expirationDay) {
 		String userEmail = getAuthenticatedUserEmail();
 		User currentUser = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);
 		UserParty userParty = userPartyRepository.findById(userPartyId)
@@ -76,7 +76,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 				emailService.sendInvitationLink(usersToSendEmail, userParty.getInvitation().getLink());
 			} else {
 				emailService.sendInvitationLink(usersToSendEmail,
-					invitationService.generateLinkInvitation(userParty.getId()));
+					invitationService.generateLinkInvitation(userParty.getId(), expirationDay));
 			}
 			return "Приглашение было отправлено на почту";
 		} else {

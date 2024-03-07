@@ -97,6 +97,6 @@ public class UserPartyApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
 	public String sendInvitationsByEmail(@PathVariable Long partyId, @RequestBody List<Long> userIds) {
-		return userPartyService.sendInvitationEmails(partyId, userIds);
+		return userPartyService.sendInvitationEmails(partyId, userIds, 0);
 	}
 }

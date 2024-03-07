@@ -29,6 +29,7 @@ import java.util.UUID;
 public class InvitationServiceImpl implements InvitationService {
 	private static final String unauthorizedErrorMessage = "User is not authorized to access the invitation";
 	private static final String invitationNotFoundErrorMessage = "Invitation not found for the provided partyId";
+	private static final int EXPIRATION_DAY = 7;
 	private static final Random random = new Random();
 	private final Environment environment;
 	private final ValueProvider valueProvider;
@@ -37,7 +38,7 @@ public class InvitationServiceImpl implements InvitationService {
 	private final UserRepository userRepository;
 
 	@Override
-	public String generateLinkInvitation(Long partyId) {
+	public String generateLinkInvitation(Long partyId, int expirationDay) {
 		UserParty userParty = userPartyRepository.findById(partyId)
 			.orElseThrow(PageNotFoundException::new);
 
@@ -55,7 +56,11 @@ public class InvitationServiceImpl implements InvitationService {
 
 		invitation.setUniqueIdentifier(uniqueIdentifier);
 		invitation.setLink(invitationLink);
-		invitation.setExpirationTime(calculateExpirationTimeInMillis(7));
+		if (expirationDay <= 0) {
+			invitation.setExpirationTime(calculateExpirationTimeInMillis(EXPIRATION_DAY));
+		} else {
+			invitation.setExpirationTime(calculateExpirationTimeInMillis(expirationDay));
+		}
 		invitation.setCode(generateCodeInvitation(invitation));
 		invitationRepository.save(invitation);
 
