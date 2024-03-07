@@ -7,6 +7,7 @@ import club.dnd5.portal.dto.api.UserPartyRequestApi;
 import club.dnd5.portal.service.UserPartyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Пати", description = "API для пати")
 @RestController
 @RequestMapping("/api/v1/user-parties")
 @RequiredArgsConstructor
@@ -25,6 +27,13 @@ public class UserPartyApiController {
 	@ResponseStatus(HttpStatus.OK)
 	public UserPartyApi getUserPartyById(@PathVariable Long partyId) {
 		return userPartyService.getUserPartyById(partyId);
+	}
+
+	@Operation(summary = "Получение краткого списка всех групп")
+	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(HttpStatus.OK)
+	public List<UserPartyApi> getAllUserParties(@RequestBody UserPartyRequestApi request) {
+		return userPartyService.getAllUserParties(request);
 	}
 
 	@Operation(summary = "Создание группы")
@@ -59,13 +68,6 @@ public class UserPartyApiController {
 		return userPartyService.getUserPartyMembers(partyId);
 	}
 
-	@Operation(summary = "Получение краткого списка всех групп")
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseStatus(HttpStatus.OK)
-	public List<UserPartyApi> getAllUserParties(@RequestBody UserPartyRequestApi request) {
-		return userPartyService.getAllUserParties(request);
-	}
-
 	@Operation(summary = "Удаление участника группы, создателем группы")
 	@DeleteMapping("/members/{partyId}/kick/{userId}")
 	@SecurityRequirement(name = "Bearer Authentication")
@@ -97,5 +99,4 @@ public class UserPartyApiController {
 	public String sendInvitationsByEmail(@PathVariable Long partyId, @RequestBody List<Long> userIds) {
 		return userPartyService.sendInvitationEmails(partyId, userIds);
 	}
-
 }

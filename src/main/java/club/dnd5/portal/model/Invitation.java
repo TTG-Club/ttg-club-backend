@@ -8,9 +8,12 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(uniqueConstraints={
-	@UniqueConstraint(columnNames = {"link", "code"})
-})
+@Table(
+	name = "invitation",
+	uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"link", "code"})
+	}
+)
 public class Invitation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

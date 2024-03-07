@@ -7,8 +7,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -51,8 +51,8 @@ public class UserParty {
 	private Invitation invitation;
 
 	@Column(name = "creation_date")
-	private Date creationDate;
+	private LocalDateTime creationDate;
 
 	@Column(name = "last_update_date")
-	private Date lastUpdateDate;
+	private LocalDateTime lastUpdateDate;
 }

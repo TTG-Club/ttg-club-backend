@@ -65,10 +65,9 @@ public class EmailService {
 	}
 
 	private void sendEmailToUsers(List<User> users, String subject, String message, String url) {
-		for (User user : users) {
-			String recipientAddress = user.getEmail();
-			sendEmail(recipientAddress, subject, message, url);
-		}
+		users.stream()
+			.map(User::getEmail)
+			.forEach(recipientAddress -> sendEmail(recipientAddress, subject, message, url));
 	}
 
 	private void sendEmail(String recipientAddress, String subject, String message, String url) {

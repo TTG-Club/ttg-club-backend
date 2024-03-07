@@ -7,12 +7,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @OpenAPIDefinition(
 	    servers = {
 	       @Server(url = "/", description = "Default Server URL")
 	    }
 )
+@EnableAsync
 @SpringBootApplication
 public class PortalApplication {
 	public static void main(String[] args) {

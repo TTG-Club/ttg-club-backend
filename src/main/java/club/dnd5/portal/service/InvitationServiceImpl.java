@@ -180,7 +180,6 @@ public class InvitationServiceImpl implements InvitationService {
 		return addUserToPartyBasedOnInvitation(code,  false);
 	}
 
-	//test
 	private String addUserToPartyBasedOnInvitation(String identifier, boolean isLink) {
 		String userEmail = getAuthenticatedUserEmail();
 		User user = userRepository.findByEmail(userEmail).orElseThrow(PageNotFoundException::new);

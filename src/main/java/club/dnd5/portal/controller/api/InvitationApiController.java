@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class InvitationApiController {
 	private final InvitationService invitationService;
 
-	@Operation(summary = "Получение информации о приглашение")
+	@Operation(summary = "Получение информации о приглашении")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping("/party/{partyId}")
 	public InvitationApi getInvitationByPartyId(@PathVariable Long partyId) {
@@ -42,7 +42,7 @@ public class InvitationApiController {
 		return invitationService.getInvitationCodeByPartyId(partyId);
 	}
 
-	@Operation(summary = "Установка значение сколько будет валидна ссылка / code")
+	@Operation(summary = "Установка значения срока действия ссылки / кода")
 	@PutMapping("/{partyId}/expiration/{days}")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.OK)
@@ -54,19 +54,15 @@ public class InvitationApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping("/{uniqueIdentifier}")
 	@ResponseStatus(HttpStatus.OK)
-	public String handleInvitationLink(
-		@PathVariable String uniqueIdentifier
-	) {
+	public String handleInvitationLink(@PathVariable String uniqueIdentifier) {
 		return invitationService.addingUserToPartyBasedOnInvitationLink(uniqueIdentifier);
 	}
 
-	@Operation(summary = "Добавление участнике по коду")
+	@Operation(summary = "Добавление участника по коду")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping("/code/{code}")
 	@ResponseStatus(HttpStatus.OK)
-	public String handleInvitationCode(
-		@PathVariable String code
-	) {
+	public String handleInvitationCode(@PathVariable String code) {
 		return invitationService.addingUserToPartyBasedOnInvitationCode(code);
 	}
 }

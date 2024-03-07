@@ -10,6 +10,7 @@ import club.dnd5.portal.repository.UserPartyRepository;
 import club.dnd5.portal.repository.user.UserRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,9 +21,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Tag(name = "Приглашения", description = "API для приглашений")
 @Service
 @RequiredArgsConstructor
 public class UserPartyServiceImpl implements UserPartyService {
@@ -169,7 +172,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 			userParty.setGroupName(userPartyDTO.getGroupName());
 			userParty.setDescription(userPartyDTO.getDescription());
-			userParty.setLastUpdateDate(new Date());
+			userParty.setLastUpdateDate(LocalDateTime.now());
 			userPartyRepository.save(userParty);
 		});
 	}
@@ -285,8 +288,8 @@ public class UserPartyServiceImpl implements UserPartyService {
 		UserParty userParty = new UserParty();
 		userParty.setGroupName(userPartyCreateApi.getGroupName());
 		userParty.setDescription(userPartyCreateApi.getDescription());
-		userParty.setCreationDate(new Date());
-		userParty.setLastUpdateDate(new Date());
+		userParty.setCreationDate(LocalDateTime.now());
+		userParty.setLastUpdateDate(LocalDateTime.now());
 		return userParty;
 	}
 
