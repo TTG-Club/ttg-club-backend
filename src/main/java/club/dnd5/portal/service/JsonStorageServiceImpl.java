@@ -67,13 +67,13 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		return listFoundryCommon;
 	}
 
-	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, Integer versionFoundry){
+	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, Integer versionFoundry) {
 		return jsonStorageList.stream()
 			.map(element -> editSpellJson(element.getRefId(), versionFoundry).get())
 			.collect(Collectors.toList());
 	}
 
-	private List<JsonStorage>  getAllJsonCreatures(List<JsonStorage> jsonStorageList, Integer versionFoundry) {
+	private List<JsonStorage> getAllJsonCreatures(List<JsonStorage> jsonStorageList, Integer versionFoundry) {
 		return jsonStorageList.stream()
 			.map(element -> editCreatureJson(element.getRefId(), versionFoundry).get())
 			.collect(Collectors.toList());
@@ -138,7 +138,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 	private void modifyImgSpell(Integer spellId, JsonNode rootNode) {
 		if (((ObjectNode) rootNode).get("img").asText().contains("laaru")) {
 			Spell spell = spellRepository.findById(spellId).get();
-			String link = magicSchool + spell.getSchool().getMagicSchool(spell.getSchool().getName())+ ".webp";
+			String link = magicSchool + spell.getSchool().getMagicSchool(spell.getSchool().getName()) + ".webp";
 			((ObjectNode) rootNode).put("img", link);
 		}
 	}
