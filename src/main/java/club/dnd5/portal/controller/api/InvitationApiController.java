@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/invitation")
 @RequiredArgsConstructor
+@Tag(name = "API для работы с приглашениям группы")
 public class InvitationApiController {
 	private final InvitationService invitationService;
 
