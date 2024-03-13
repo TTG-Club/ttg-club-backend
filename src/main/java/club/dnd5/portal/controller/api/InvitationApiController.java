@@ -4,6 +4,7 @@ import club.dnd5.portal.dto.api.InvitationApi;
 import club.dnd5.portal.service.InvitationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/invitation")
 @RequiredArgsConstructor
+@Tag(name = "API для работы с приглашениям группы")
 public class InvitationApiController {
 	private final InvitationService invitationService;
 
