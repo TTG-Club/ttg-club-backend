@@ -1,21 +1,25 @@
 package club.dnd5.portal.dto.api;
 
+import club.dnd5.portal.model.user.Role;
+import club.dnd5.portal.model.user.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-import club.dnd5.portal.model.user.Role;
-import club.dnd5.portal.model.user.User;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserApi {
 	private String username;
 	private String name;
 	private String email;
 	private List<String> roles;
-	
+
 	public UserApi(User user) {
 		username = user.getUsername();
 		name = user.getName();
