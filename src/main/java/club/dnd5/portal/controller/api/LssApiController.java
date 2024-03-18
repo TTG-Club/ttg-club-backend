@@ -14,9 +14,9 @@ import java.util.List;
 public class LssApiController {
 	private final LssService lssService;
 
-	@GetMapping("spell/{name}")
-	public SpellLSS findByName(@PathVariable String name) {
-		return lssService.findByName(name);
+	@GetMapping("spell/{englishName}")
+	public SpellLSS findByName(@PathVariable String englishName) {
+		return lssService.findByName(englishName);
 	}
 
 	@GetMapping("spell/all")
