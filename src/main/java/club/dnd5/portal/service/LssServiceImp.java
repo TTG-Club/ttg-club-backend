@@ -1,8 +1,8 @@
 package club.dnd5.portal.service;
 
-import club.dnd5.portal.dto.api.spells.SpellLSS;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
@@ -18,13 +18,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LssServiceImp implements LssService {
 	private final SpellRepository spellRepository;
 	private final JsonStorageRepository jsonStorageRepository;
-
 	private final List<String> fieldsToRemove = Arrays.asList("_id", "img", "effects", "folder", "sort", "flags", "ownership", "_stats");
 
 	@Override
@@ -35,13 +35,12 @@ public class LssServiceImp implements LssService {
 	}
 
 	@Override
-	public List<SpellLSS> getAllSpellForLSS() {
-//		return jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(JsonType.SPELL, 11)
-//			.stream()
-//			.map(this::convertFromJsonStorageToSpellLSS)
-//			.filter(Objects::nonNull)
-//			.collect(Collectors.toList());
-		return null;
+	public List<String> getAllSpellForLSS() {
+		return jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(JsonType.SPELL, 11)
+			.stream()
+			.map(this::convertFromJsonStorageToSpellLSS)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 	}
 
 	private String convertFromJsonStorageToSpellLSS(JsonStorage jsonStorage) {
@@ -57,11 +56,12 @@ public class LssServiceImp implements LssService {
 	}
 
 	private String generateClassValueInJsonSpell(Optional<Spell> optionalSpell, String jsonData) throws JsonProcessingException {
+		List<String> classList = new ArrayList<>();
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode jsonNode = objectMapper.readTree(jsonData);
-		List<String> classList = new ArrayList<>();
 		removeChildrenNodeWhichDontUsedForLssFormat(objectMapper, jsonNode);
 		Map<String, Object> nodeMap = objectMapper.convertValue(jsonNode, new TypeReference<Map<String, Object>>(){});
+
 		if (optionalSpell.isPresent()) {
 			Spell spell = optionalSpell.get();
 			if (spell.getHeroClass().size() > 1) {
@@ -77,11 +77,11 @@ public class LssServiceImp implements LssService {
 		return objectMapper.writeValueAsString(jsonNode);
 	}
 
-	private String removeChildrenNodeWhichDontUsedForLssFormat(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
+	private void removeChildrenNodeWhichDontUsedForLssFormat(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
 		ObjectNode object = (ObjectNode) jsonNode;
 		for (String field : fieldsToRemove) {
 			object.remove(field);
 		}
-		return objectMapper.writeValueAsString(object);
+		objectMapper.writeValueAsString(object);
 	}
 }
