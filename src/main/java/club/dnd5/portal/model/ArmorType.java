@@ -21,7 +21,7 @@ public enum ArmorType {
 	SCALED("чешуйчатый доспех", "scale_mail_armor"), //5 неверное
 	RIVETED_LEATHER("проклёпаная кожа", "studded_leather_armor"), //7 неверное
 	CHAIN_MAIL("кольчуга", "chain_mail"), // 8
-	BREASTPLATE("нагрудник", "breastplate"), // 9
+	BREASTPLATE("кираса", "breastplate"), // 9
 	HALF_PLATE("полулаты", "half_plate_armor"), // 10
 	PLATE("латный доспех", "plate_armor"), // 11
 
