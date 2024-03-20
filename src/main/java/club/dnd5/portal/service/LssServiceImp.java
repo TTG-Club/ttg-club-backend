@@ -2,6 +2,7 @@ package club.dnd5.portal.service;
 
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.FoundryVersion;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.exporter.JsonStorage;
@@ -28,15 +29,15 @@ public class LssServiceImp implements LssService {
 	private final List<String> fieldsToRemove = Arrays.asList("_id", "img", "effects", "folder", "sort", "flags", "ownership", "_stats");
 
 	@Override
-	public String findByName(String name) {
+	public String findByIdAndFoundryVersion(Integer spellId, FoundryVersion foundryVersion) {
 		JsonStorage jsonStorage = jsonStorageRepository
-			.findByName(name).orElseThrow(PageNotFoundException::new);
+			.findByRefIdAndTypeJsonAndVersionFoundry(spellId, JsonType.SPELL, foundryVersion).orElseThrow(PageNotFoundException::new);
 		return convertFromJsonStorageToSpellLSS(jsonStorage);
 	}
 
 	@Override
 	public List<String> getAllSpellForLSS() {
-		return jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(JsonType.SPELL, 11)
+		return jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(JsonType.SPELL, FoundryVersion.V11)
 			.stream()
 			.map(this::convertFromJsonStorageToSpellLSS)
 			.filter(Objects::nonNull)
@@ -79,9 +80,7 @@ public class LssServiceImp implements LssService {
 
 	private void removeChildrenNodeWhichDontUsedForLssFormat(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
 		ObjectNode object = (ObjectNode) jsonNode;
-		for (String field : fieldsToRemove) {
-			object.remove(field);
-		}
+		fieldsToRemove.stream().forEach(object::remove);
 		objectMapper.writeValueAsString(object);
 	}
 }
