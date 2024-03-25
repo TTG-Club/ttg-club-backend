@@ -14,12 +14,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TraitApi {
+public class FeatApi {
 	protected NameApi name;
 	protected String url;
 	private String requirements ;
 	private Boolean homebrew;
-	public TraitApi(Trait trait) {
+	public FeatApi(Trait trait) {
 		name = new NameApi(trait.getName(), trait.getEnglishName());
 		url = String.format("/feats/%s", trait.getUrlName());
 		if (trait.getRequirement() != null) {
