@@ -21,7 +21,7 @@ public class TraitApi {
 	private Boolean homebrew;
 	public TraitApi(Trait trait) {
 		name = new NameApi(trait.getName(), trait.getEnglishName());
-		url = String.format("/traits/%s", trait.getUrlName());
+		url = String.format("/feats/%s", trait.getUrlName());
 		if (trait.getRequirement() != null) {
 			requirements = trait.getRequirement();
 		} else {
