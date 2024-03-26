@@ -93,6 +93,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 			}
 			if (jsonStorage.getTypeJson().equals(JsonType.CREATURE)) {
 				if (versionFoundry.equals(FoundryVersion.V11)) {
+					removingId(rootNode);
 					modifyImgCreature(jsonStorage.getRefId(), rootNode);
 				}
 			} else {
@@ -141,6 +142,13 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 			Spell spell = spellRepository.findById(spellId).get();
 			String link = magicSchool + spell.getSchool().getMagicSchool(spell.getSchool().getName()) + ".webp";
 			((ObjectNode) rootNode).put("img", link);
+		}
+	}
+
+	private void removingId(JsonNode rootNode) {
+		if (rootNode instanceof ObjectNode) {
+			ObjectNode objectNode = (ObjectNode) rootNode;
+			objectNode.remove("_id");
 		}
 	}
 
