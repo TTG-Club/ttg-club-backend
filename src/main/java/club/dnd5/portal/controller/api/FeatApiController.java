@@ -4,8 +4,8 @@ import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.classes.FeatRequestApi;
-import club.dnd5.portal.dto.api.classes.TraitApi;
-import club.dnd5.portal.dto.api.classes.TraitDetailApi;
+import club.dnd5.portal.dto.api.classes.FeatApi;
+import club.dnd5.portal.dto.api.classes.FeatDetailApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
@@ -43,7 +43,7 @@ public class FeatApiController {
 
 	@Operation(summary = "Получение краткого списка черт")
 	@PostMapping(value = {"/api/v1/traits","/api/v1/feats"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<TraitApi> getTraits(@RequestBody FeatRequestApi request) {
+	public List<FeatApi> getTraits(@RequestBody FeatRequestApi request) {
 		Specification<Trait> specification = null;
 		Optional<FeatRequestApi> spellRequest = Optional.ofNullable(request);
 		if (!spellRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
@@ -94,16 +94,16 @@ public class FeatApiController {
 		Pageable pageable = PageAndSortUtil.getPageable(request);
 		return featRepository.findAll(specification, pageable).toList()
 			.stream()
-			.map(TraitApi::new)
+			.map(FeatApi::new)
 			.collect(Collectors.toList());
 
 	}
 
 	@Operation(summary = "Получение черты по английскому названию")
 	@PostMapping(value = {"/api/v1/traits/{englishName}", "/api/v1/feats/{englishName}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<TraitDetailApi> getTrait(@PathVariable String englishName) {
+	public ResponseEntity<FeatDetailApi> getTrait(@PathVariable String englishName) {
 		Trait trait = featRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
-		return ResponseEntity.ok(new TraitDetailApi(trait));
+		return ResponseEntity.ok(new FeatDetailApi(trait));
 	}
 
 	@Operation(summary = "Получение фильтров для черт")
