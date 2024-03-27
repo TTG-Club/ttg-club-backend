@@ -3,6 +3,7 @@ package club.dnd5.portal.controller.api.bestiary;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
 import club.dnd5.portal.dto.api.bestiary.BeastFilter;
@@ -199,8 +200,29 @@ public class BestiaryApiController {
 	@Operation(summary = "Получение сушества по английскому имени")
 	@PostMapping(value = "/api/v1/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BeastDetailApi getBeast(@PathVariable String englishName) {
-		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
-			.orElseThrow(PageNotFoundException::new);
+		List<Creature> beasts = beastRepository.findByEnglishName(englishName.replace('_', ' '));
+		if (beasts.isEmpty()) {
+			throw new PageNotFoundException();
+		}
+		Creature beast = beasts.get(0);
+		BeastDetailApi beastApi = new BeastDetailApi(beast);
+		if (beasts.size() > 1) {
+			beastApi.setSources(
+				beasts
+				.stream()
+				.map(Creature::getBook)
+				.map(SourceApi::new)
+				.collect(Collectors.toList()));
+		}
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId());
+		if (!images.isEmpty()) {
+			beastApi.setImages(images);
+		}
+		return beastApi;
+	}
+	@PostMapping(value = "/api/v1/bestiary/{englishName}/{source}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public BeastDetailApi getBeast(@PathVariable String englishName, @PathVariable String source) {
+		Creature beast = beastRepository.findByEnglishNameAndSource(englishName.replace('_', ' '), source).orElseThrow(PageNotFoundException::new);
 		BeastDetailApi beastApi = new BeastDetailApi(beast);
 		Collection<String> images = new ArrayList<>();
 		tokenRepository.findByRefIdAndType(beast.getId(), "круглый")
@@ -212,6 +234,25 @@ public class BestiaryApiController {
 			beastApi.setImages(images);
 		}
 		return beastApi;
+	}
+
+	@GetMapping("/api/fvtt/v1/bestiary/{id}")
+	public ResponseEntity<FCreature> getCreature(HttpServletResponse response, @PathVariable Integer id){
+		Creature creature = beastRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		response.setContentType("application/json");
+		String file = String.format("attachment; filename=\"%s.json\"", creature.getEnglishName());
+		response.setHeader("Content-Disposition", file);
+		return ResponseEntity.ok(new FCreature(creature));
+	}
+
+	@CrossOrigin
+	@GetMapping("/api/fvtt/v1/bestiary")
+	public FBeastiary getCreatures(){
+		List<FBeast> list = beastRepository.findAll()
+				.stream()
+				.map(FBeast::new)
+				.collect(Collectors.toList());
+		return new FBeastiary(list);
 	}
 
 	@Operation(summary = "Фильтры для бестиария")
