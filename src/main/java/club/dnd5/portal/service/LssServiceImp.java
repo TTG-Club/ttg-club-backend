@@ -1,7 +1,6 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.exception.ApiException;
-import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.FoundryVersion;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.classes.HeroClass;
@@ -19,36 +18,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LssServiceImp implements LssService {
+	private static final FoundryVersion STANDARD_FOUNDRY_VERSION = FoundryVersion.V11;
 	private final SpellRepository spellRepository;
 	private final JsonStorageRepository jsonStorageRepository;
 	private final List<String> fieldsToRemove = Arrays.asList("_id", "img", "effects", "folder", "sort", "flags", "ownership", "_stats");
 
 	@Override
-	public String findByIdAndFoundryVersion(Integer spellId, FoundryVersion foundryVersion) {
+	public String findById(Integer spellId) {
 		JsonStorage jsonStorage = jsonStorageRepository
-			.findByRefIdAndTypeJsonAndVersionFoundry(spellId, JsonType.SPELL, foundryVersion).orElseThrow(PageNotFoundException::new);
+			.findByRefIdAndTypeJsonAndVersionFoundry(spellId, JsonType.SPELL, STANDARD_FOUNDRY_VERSION).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Storage was not Found"));
 		return convertFromJsonStorageToSpellLSS(jsonStorage);
-	}
-
-	@Override
-	public List<String> getAllSpellForLSS() {
-		return jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(JsonType.SPELL, FoundryVersion.V11)
-			.stream()
-			.map(this::convertFromJsonStorageToSpellLSS)
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
 	}
 
 	private String convertFromJsonStorageToSpellLSS(JsonStorage jsonStorage) {
 		int spellId = jsonStorage.getRefId();
 		Optional<Spell> optionalSpell = spellRepository.findById(spellId);
 		String jsonData;
-		try{
+		try {
 			jsonData = generateClassValueInJsonSpell(optionalSpell, jsonStorage.getJsonData());
 		} catch (JsonProcessingException exception) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Problem with the Json Processing");
@@ -61,7 +51,8 @@ public class LssServiceImp implements LssService {
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode jsonNode = objectMapper.readTree(jsonData);
 		removeChildrenNodeWhichDontUsedForLssFormat(objectMapper, jsonNode);
-		Map<String, Object> nodeMap = objectMapper.convertValue(jsonNode, new TypeReference<Map<String, Object>>(){});
+		Map<String, Object> nodeMap = objectMapper.convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
+		});
 
 		if (optionalSpell.isPresent()) {
 			Spell spell = optionalSpell.get();
