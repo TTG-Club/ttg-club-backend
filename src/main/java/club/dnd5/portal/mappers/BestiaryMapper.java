@@ -5,6 +5,7 @@ import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.model.ArmorType;
+import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.creature.Creature;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +23,10 @@ public interface BestiaryMapper {
 	final int STANDARD_MOVEMENT = 30;
 	BestiaryMapper INSTANCE = Mappers.getMapper(BestiaryMapper.class);
 
+	//TODO подумать над тем, не будет он дублировать просто напросто значения языка в бдшке
+	//То есть главная проблема на данный момент, это как находить в репе значения или
+	//как создавать свое но при этом не создавать новые значение в бдшке
+
 	@Mapping(target = "armorTypes", source = "armors", qualifiedByName = "mapArmors")
 	@Mapping(target = "immunityDamages", source = "damageImmunities")
 	@Mapping(target = "resistanceDamages", source = "damageResistances")
@@ -37,6 +42,14 @@ public interface BestiaryMapper {
 	@Mapping(target = "climbingSpeed", ignore = true)
 	@Mapping(target = "diggingSpeed", ignore = true)
 	Creature toEntity(BeastDetailRequest dto);
+
+
+	@Named("mapLanguages")
+	default List<Language> mapLanguages(Collection<String> languages) {
+		return languages.stream()
+			.map(this::createLanguageFromName)
+			.collect(Collectors.toList());
+	}
 
 	@Named("mapSpeed")
 	default void speed(Collection<NameValueApi> speeds, @MappingTarget Creature entity) {
@@ -88,6 +101,13 @@ public interface BestiaryMapper {
 		return nameApi.getAlt();
 	}
 
+	default Language createLanguageFromName(String languageName) {
+		Language language = new Language();
+		language.setName(languageName);
+		return language;
+	}
+
+	@Named("objectToShort")
 	static short convertObjectToShort(Object value) {
 		if (value instanceof Number) {
 			return ((Number) value).shortValue();
@@ -102,7 +122,8 @@ public interface BestiaryMapper {
 		}
 	}
 
-	public static byte convertObjectToByte(Object value) {
+	@Named("objectToByte")
+	static byte convertObjectToByte(Object value) {
 		if (value instanceof Number) {
 			return ((Number) value).byteValue();
 		} else if (value instanceof String) {
