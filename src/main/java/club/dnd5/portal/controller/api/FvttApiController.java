@@ -38,7 +38,7 @@ public class FvttApiController {
 	@GetMapping(value = "/spell", produces = "application/json")
 	public ResponseEntity<byte[]> getSpellsFvtt(
 		@RequestParam(required = false) Integer id,
-		@RequestParam(required = false, defaultValue = "V11;") FoundryVersion version
+		@RequestParam(required = false, defaultValue = "V11") FoundryVersion version
 	) {
 		if (Objects.nonNull(id)) {
 			JsonStorage jsonStorage = jsonStorageService.editSpellJson(id, version).get();
@@ -67,7 +67,7 @@ public class FvttApiController {
 	@GetMapping(value = "/bestiary", produces = "application/json")
 	public ResponseEntity<byte[]> getCreatureFvtt(
 		@RequestParam(required = false) Integer id,
-		@RequestParam(required = false, defaultValue = "11") FoundryVersion version
+		@RequestParam(required = false, defaultValue = "V11") FoundryVersion version
 	) {
 		if (Objects.nonNull(id)) {
 			JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, version).get();
