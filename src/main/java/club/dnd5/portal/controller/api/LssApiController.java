@@ -25,7 +25,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LssApiController {
 	private final LssService lssService;
-
 	private final SpellRepository spellRepository;
 
 	@Operation(summary = "Получение заклинание в LSS формате по айди")
