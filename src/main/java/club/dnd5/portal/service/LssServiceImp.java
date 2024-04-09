@@ -56,13 +56,11 @@ public class LssServiceImp implements LssService {
 
 		if (optionalSpell.isPresent()) {
 			Spell spell = optionalSpell.get();
-			if (spell.getHeroClass().size() > 1) {
+			if (spell.getHeroClass().size() >= 1) {
 				for (HeroClass heroClass : spell.getHeroClass()) {
 					classList.add(heroClass.getEnglishName().toLowerCase());
 				}
 				nodeMap.put("classes", classList);
-			} else {
-				nodeMap.put("classes", spell.getHeroClass().get(0).getEnglishName());
 			}
 		}
 		jsonNode = objectMapper.convertValue(nodeMap, JsonNode.class);
