@@ -2,6 +2,7 @@ package club.dnd5.portal.service;
 
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.FoundryCommon;
+import club.dnd5.portal.model.FoundryVersion;
 import club.dnd5.portal.model.JsonStorageCompositeKey;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.creature.Creature;
@@ -47,7 +48,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private final String srcType = "вид сверху";
 
-	public List<String> getAllJson(JsonType jsonType, Integer versionFoundry) {
+	public List<String> getAllJson(JsonType jsonType, FoundryVersion versionFoundry) {
 		List<JsonStorage> jsonStorageList = jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(jsonType, versionFoundry);
 		if (jsonStorageList.isEmpty()) {
 			throw new PageNotFoundException();
@@ -67,31 +68,32 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		return listFoundryCommon;
 	}
 
-	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, Integer versionFoundry){
+	private List<JsonStorage> getAllJsonSpells(List<JsonStorage> jsonStorageList, FoundryVersion versionFoundry) {
 		return jsonStorageList.stream()
 			.map(element -> editSpellJson(element.getRefId(), versionFoundry).get())
 			.collect(Collectors.toList());
 	}
 
-	private List<JsonStorage>  getAllJsonCreatures(List<JsonStorage> jsonStorageList, Integer versionFoundry) {
+	private List<JsonStorage> getAllJsonCreatures(List<JsonStorage> jsonStorageList, FoundryVersion versionFoundry) {
 		return jsonStorageList.stream()
 			.map(element -> editCreatureJson(element.getRefId(), versionFoundry).get())
 			.collect(Collectors.toList());
 	}
 
 	@SneakyThrows
-	private Optional<JsonStorage> editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, Integer versionFoundry) {
+	private Optional<JsonStorage> editJsonEntity(Integer id, JsonType jsonType, FoundryCommon entity, FoundryVersion versionFoundry) {
 		JsonStorageCompositeKey compositeKey = new JsonStorageCompositeKey(id, jsonType, versionFoundry);
 		JsonStorage jsonStorage = jsonStorageRepository.findById(compositeKey).orElseThrow(PageNotFoundException::new);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			JsonNode rootNode = mapper.readTree(jsonStorage.getJsonData());
 			modifyName(entity, rootNode);
-			if (versionFoundry != 10) {
+			if (versionFoundry.equals(FoundryVersion.V10)) {
 				modifyBiography(entity, rootNode);
 			}
 			if (jsonStorage.getTypeJson().equals(JsonType.CREATURE)) {
-				if (versionFoundry != 10) {
+				if (versionFoundry.equals(FoundryVersion.V11)) {
+					removingId(rootNode);
 					modifyImgCreature(jsonStorage.getRefId(), rootNode);
 				}
 			} else {
@@ -105,11 +107,11 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		return Optional.ofNullable(jsonStorage);
 	}
 
-	public Optional<JsonStorage> editSpellJson(Integer id, Integer versionFoundry) {
+	public Optional<JsonStorage> editSpellJson(Integer id, FoundryVersion versionFoundry) {
 		return editJsonEntity(id, JsonType.SPELL, spellRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 
-	public Optional<JsonStorage> editCreatureJson(Integer id, Integer versionFoundry) {
+	public Optional<JsonStorage> editCreatureJson(Integer id, FoundryVersion versionFoundry) {
 		return editJsonEntity(id, JsonType.CREATURE, bestiaryRepository.findById(id).orElseThrow(PageNotFoundException::new), versionFoundry);
 	}
 
@@ -138,8 +140,15 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 	private void modifyImgSpell(Integer spellId, JsonNode rootNode) {
 		if (((ObjectNode) rootNode).get("img").asText().contains("laaru")) {
 			Spell spell = spellRepository.findById(spellId).get();
-			String link = magicSchool + spell.getSchool().getMagicSchool(spell.getSchool().getName())+ ".webp";
+			String link = magicSchool + spell.getSchool().getMagicSchool(spell.getSchool().getName()) + ".webp";
 			((ObjectNode) rootNode).put("img", link);
+		}
+	}
+
+	private void removingId(JsonNode rootNode) {
+		if (rootNode instanceof ObjectNode) {
+			ObjectNode objectNode = (ObjectNode) rootNode;
+			objectNode.remove("_id");
 		}
 	}
 

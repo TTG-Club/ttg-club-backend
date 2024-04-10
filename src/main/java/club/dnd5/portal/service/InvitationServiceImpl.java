@@ -39,8 +39,7 @@ public class InvitationServiceImpl implements InvitationService {
 
 	@Override
 	public String generateLinkInvitation(Long partyId, int expirationDay) {
-		UserParty userParty = userPartyRepository.findById(partyId)
-			.orElseThrow(PageNotFoundException::new);
+		UserParty userParty = userPartyRepository.findById(partyId).orElseThrow(PageNotFoundException::new);
 
 		Invitation invitation = new Invitation();
 		invitation.setGenerationDate(new Date());
@@ -85,8 +84,7 @@ public class InvitationServiceImpl implements InvitationService {
 			throw new ApiException(HttpStatus.FORBIDDEN, unauthorizedErrorMessage);
 		}
 
-		UserParty userParty = userPartyRepository.findById(partyId)
-			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User party not found for the provided partyId"));
+		UserParty userParty = userPartyRepository.findById(partyId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User party not found for the provided partyId"));
 
 		Invitation invitation = userParty.getInvitation();
 
@@ -101,8 +99,7 @@ public class InvitationServiceImpl implements InvitationService {
 		}
 
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(partyId);
-		Invitation invitation = invitationOptional
-			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
+		Invitation invitation = invitationOptional.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
 
 		invitation.setExpirationTime(-1L);
 	}
@@ -114,8 +111,7 @@ public class InvitationServiceImpl implements InvitationService {
 		}
 
 		Optional<Invitation> invitationOptional = invitationRepository.findByUserPartyId(partyId);
-		Invitation invitation = invitationOptional
-			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
+		Invitation invitation = invitationOptional.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, invitationNotFoundErrorMessage));
 
 		invitation.setExpirationTime(calculateExpirationTimeInMillis(days));
 		invitationRepository.save(invitation);
@@ -182,7 +178,7 @@ public class InvitationServiceImpl implements InvitationService {
 	@Override
 	@Transactional
 	public String addingUserToPartyBasedOnInvitationCode(String code) {
-		return addUserToPartyBasedOnInvitation(code,  false);
+		return addUserToPartyBasedOnInvitation(code, false);
 	}
 
 	private String addUserToPartyBasedOnInvitation(String identifier, boolean isLink) {

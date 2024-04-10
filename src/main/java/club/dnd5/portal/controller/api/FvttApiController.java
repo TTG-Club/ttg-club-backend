@@ -2,6 +2,7 @@ package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
+import club.dnd5.portal.model.FoundryVersion;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
@@ -37,7 +38,7 @@ public class FvttApiController {
 	@GetMapping(value = "/spell", produces = "application/json")
 	public ResponseEntity<byte[]> getSpellsFvtt(
 		@RequestParam(required = false) Integer id,
-		@RequestParam(required = false, defaultValue = "11") Integer version
+		@RequestParam(required = false, defaultValue = "V11") FoundryVersion version
 	) {
 		if (Objects.nonNull(id)) {
 			JsonStorage jsonStorage = jsonStorageService.editSpellJson(id, version).get();
@@ -66,7 +67,7 @@ public class FvttApiController {
 	@GetMapping(value = "/bestiary", produces = "application/json")
 	public ResponseEntity<byte[]> getCreatureFvtt(
 		@RequestParam(required = false) Integer id,
-		@RequestParam(required = false, defaultValue = "11") Integer version
+		@RequestParam(required = false, defaultValue = "V11") FoundryVersion version
 	) {
 		if (Objects.nonNull(id)) {
 			JsonStorage jsonStorage = jsonStorageService.editCreatureJson(id, version).get();
