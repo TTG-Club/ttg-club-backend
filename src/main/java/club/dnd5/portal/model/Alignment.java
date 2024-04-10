@@ -77,9 +77,9 @@ public enum Alignment {
 		case UNDEAD:
 		case SLIME:
 		case SMALL_BEAST:
+		case MONSTROSITY:
 			return names[1];
 		case FIEND:
-		case MONSTROSITY:
 		case PLANT:
 			return names[2];
 		default:

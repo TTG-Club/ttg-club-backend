@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.exporter;
 
+import club.dnd5.portal.model.FoundryVersion;
 import club.dnd5.portal.model.JsonStorageCompositeKey;
 import club.dnd5.portal.model.JsonType;
 import lombok.Getter;
@@ -14,7 +15,6 @@ import java.io.Serializable;
 @Setter
 @IdClass(JsonStorageCompositeKey.class)
 public class JsonStorage implements Serializable {
-
 	@Id
 	private Integer refId;
 
@@ -26,8 +26,8 @@ public class JsonStorage implements Serializable {
 	private JsonType typeJson;
 
 	@Id
-	@Column(columnDefinition = "INTEGER DEFAULT 11")
-	private Integer versionFoundry;
+	@Enumerated(EnumType.STRING)
+	private FoundryVersion versionFoundry;
 
 	@Column(nullable = false, columnDefinition = "MEDIUMTEXT")
 	private String jsonData;

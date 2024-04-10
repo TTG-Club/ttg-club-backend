@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.model.FoundryVersion;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.exporter.JsonStorage;
@@ -24,8 +25,7 @@ import java.util.stream.StreamSupport;
 @RestController
 @RequiredArgsConstructor
 public class JsonParseController {
-
-	private final Set<String> ROLES = new HashSet<>(Arrays.asList("ADMIN"));
+	private final Set<String> ROLES = new HashSet<>(Collections.singletonList("ADMIN"));
 
 	private final JsonStorageRepository jsonStorageRepository;
 
@@ -36,7 +36,7 @@ public class JsonParseController {
 	private final SpellRepository spellRepository;
 
 	@PostMapping(value = "/api/v1/fspell")
-	public void importSpells(@RequestBody List<JsonNode> request, @RequestParam Integer versionFoundry) {
+	public void importSpells(@RequestBody List<JsonNode> request, @RequestParam FoundryVersion versionFoundry) {
 		checkUserPermissions();
 		jsonStorageRepository.saveAll(
 			request.stream()
@@ -47,9 +47,9 @@ public class JsonParseController {
 	}
 
 	@PostMapping(value = "/api/v1/fcreature")
-	public void importCreature(@RequestBody List<JsonNode> request, @RequestParam Integer versionFoundry) {
+	public void importCreature(@RequestBody List<JsonNode> request, @RequestParam FoundryVersion versionFoundry) {
 		checkUserPermissions();
-		if (versionFoundry == 10) {
+		if (versionFoundry.equals(FoundryVersion.V10)) {
 			JsonNode nodeCreature = request.get(0).get("monster");
 			List<JsonStorage> processedDataList = StreamSupport.stream(nodeCreature.spliterator(), false)
 				.map(jsonNode -> processJsonNode(jsonNode, JsonType.CREATURE, versionFoundry))
@@ -60,19 +60,19 @@ public class JsonParseController {
 		} else {
 			jsonStorageRepository.saveAll(
 				request.stream()
-					.map(jsonNode -> processJsonNode(jsonNode, JsonType.CREATURE, 11))
+					.map(jsonNode -> processJsonNode(jsonNode, JsonType.CREATURE, FoundryVersion.V11))
 					.filter(Objects::nonNull)
 					.collect(Collectors.toList())
 			);
 		}
 	}
 
-	private JsonStorage processJsonNode(JsonNode jsonNode, JsonType jsonType, Integer versionFoundry) {
+	private JsonStorage processJsonNode(JsonNode jsonNode, JsonType jsonType, FoundryVersion versionFoundry) {
 		JsonStorage jsonStorage = new JsonStorage();
 		jsonStorage.setJsonData(jsonNode.toString());
 		jsonStorage.setTypeJson(jsonType);
 		String name = jsonNode.get("name").asText();
-		if (versionFoundry == 10) {
+		if (versionFoundry.equals(FoundryVersion.V10)) {
 			if (name.contains("(")) {
 				name = name
 					.split("\\(")[1]

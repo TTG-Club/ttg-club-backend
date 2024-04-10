@@ -15,5 +15,5 @@ public class JsonStorageCompositeKey implements Serializable {
 
 	private JsonType typeJson;
 
-	private Integer versionFoundry;
+	private FoundryVersion versionFoundry;
 }

@@ -32,7 +32,7 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 	@Value("${images.token.borders}")
 	private String tokenBorders;
 
-	@Value("${ttg.url}")
+	@Value("${ttg.img.url}")
 	private String ttgWebsiteUrl;
 
 	@Override
