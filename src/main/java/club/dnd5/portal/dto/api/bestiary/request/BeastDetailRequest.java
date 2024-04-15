@@ -1,7 +1,10 @@
 package club.dnd5.portal.dto.api.bestiary.request;
 
 import club.dnd5.portal.dto.api.NameValueApi;
-import club.dnd5.portal.dto.api.bestiary.*;
+import club.dnd5.portal.dto.api.bestiary.AbilityApi;
+import club.dnd5.portal.dto.api.bestiary.LairApi;
+import club.dnd5.portal.dto.api.bestiary.LegendaryApi;
+import club.dnd5.portal.dto.api.bestiary.SenseApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.CreatureSize;
@@ -65,7 +68,7 @@ public class BeastDetailRequest {
 	@Schema(description = "Особенности")
 	private Collection<DescriptionRequest> feats;
 	@Schema(description = "Действия")
-	private Collection<DescriptionRequest> actions;
+	private Collection<ActionDetailRequest> actions;
 	@Schema(description = "Реакции")
 	private Collection<DescriptionRequest> reactions;
 	private String reaction;
