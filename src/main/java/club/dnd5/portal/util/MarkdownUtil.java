@@ -33,9 +33,9 @@ public class MarkdownUtil {
 			.template("<em>%s</em>")
 			.build(),
 
-		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
+		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}) колящего урона")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+?\\s?\\d+)?")
-			.template("<dice-roller label=\"Урон\" formula=\"%s\"/>")
+			.template("<dice-roller label=\"колящего урона\" formula=\"%s\"/>")
 			.build(),
 		Markdown.builder().mark("\\{@heal\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
