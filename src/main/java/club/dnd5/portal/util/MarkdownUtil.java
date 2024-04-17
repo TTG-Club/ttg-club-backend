@@ -33,11 +33,11 @@ public class MarkdownUtil {
 			.template("<em>%s</em>")
 			.build(),
 
-		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\})\\sколящего\\sурона")
+		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\})\\колющего\\sурона")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+?\\s?\\d+)?")
-			.template("<dice-roller label=\"колящего урона\" formula=\"%s\"/> колящего урона")
+			.template("<dice-roller label=\"колющего урона\" formula=\"%s\"/> колющего урона")
 			.build(),
-		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\})\\sдробящего\\sурона")
+		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\})\\дробящего\\sурона")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+?\\s?\\d+)?")
 			.template("<dice-roller label=\"дробящего урона\" formula=\"%s\"/> дробящего урона")
 			.build(),
