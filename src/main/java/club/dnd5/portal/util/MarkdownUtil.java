@@ -33,21 +33,13 @@ public class MarkdownUtil {
 			.template("<em>%s</em>")
 			.build(),
 
-		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\})\\колющего\\sурона")
+		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+?\\s?\\d+)?")
-			.template("<dice-roller label=\"колющего урона\" formula=\"%s\"/> колющего урона")
-			.build(),
-		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\})\\дробящего\\sурона")
-			.pattern("\\d+(к|d)\\d+(\\s?\\+?\\s?\\d+)?")
-			.template("<dice-roller label=\"дробящего урона\" formula=\"%s\"/> дробящего урона")
-			.build(),
-		Markdown.builder().mark("(\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\})\\sрубящего\\sурона")
-			.pattern("\\d+(к|d)\\d+(\\s?\\+?\\s?\\d+)?")
-			.template("<dice-roller label=\"рубящего урона\" formula=\"%s\"/> рубящего урона")
+			.template("<dice-roller label=\"Урон\" formula=\"%s\"/>")
 			.build(),
 		Markdown.builder().mark("\\{@heal\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
-			.template("<dice-roller label=\"Восстановление хитов\" formula=\"%s\"/>")
+			.template("<dice-roller label=\"Восстоновления хитов\" formula=\"%s\"/>")
 			.build(),
 		Markdown.builder().mark("\\{@dice\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
 			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
@@ -57,6 +49,7 @@ public class MarkdownUtil {
 			.pattern("\\d+")
 			.template("<dice-roller label=\"Атака\" formula=\"к20 + %1$s\">+%1$s</dice-roller>")
 			.build()
+
 	);
 
 	/**
