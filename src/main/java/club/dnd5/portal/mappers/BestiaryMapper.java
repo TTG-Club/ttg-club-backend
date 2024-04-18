@@ -3,12 +3,15 @@ package club.dnd5.portal.mappers;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.ArmorType;
+import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.creature.Creature;
+import club.dnd5.portal.model.creature.HabitatType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,6 +48,16 @@ public interface BestiaryMapper {
 		return armors.stream()
 			.map(ArmorType::valueOf)
 			.collect(Collectors.toList());
+	}
+
+	@Named("mapEnvironment")
+	default List<HabitatType> mapEnvironment(Collection<HabitatType> environment) {
+		return new ArrayList<>(environment);
+	}
+
+	@Named("mapSource")
+	default Book mapSource(String source) {
+		return new Book(source);
 	}
 
 	@Named("getNameFromNameApi")
