@@ -33,8 +33,8 @@ public class MarkdownUtil {
 			.template("<em>%s</em>")
 			.build(),
 
-		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
-			.pattern("\\d+(к|d)\\d+(\\s?\\+?\\s?\\d+)?")
+		Markdown.builder().mark("\\{@damage\\s\\d+(к|d)\\d+(\\s?(\\-|\\+|\\*)?\\s?\\d+)?}")
+			.pattern("\\d+(к|d)\\d+(\\s?(\\-|\\+|\\*)?\\s?\\d+)?")
 			.template("<dice-roller label=\"Урон\" formula=\"%s\"/>")
 			.build(),
 		Markdown.builder().mark("\\{@heal\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
@@ -49,7 +49,6 @@ public class MarkdownUtil {
 			.pattern("\\d+")
 			.template("<dice-roller label=\"Атака\" formula=\"к20 + %1$s\">+%1$s</dice-roller>")
 			.build()
-
 	);
 
 	/**
