@@ -46,7 +46,7 @@ public class Bestiary2ApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured({"ADMIN"})
 	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping("/api/v2/bestiary")
+	@PostMapping("/bestiary")
 	public void createBeast(@RequestBody BeastDetailRequest request) {
 		bestiaryService.create(request);
 
@@ -56,7 +56,7 @@ public class Bestiary2ApiController {
 	@SecurityRequirement(name = "Bearer Authentication")
 	@Secured({"ADMIN"})
 	@ResponseStatus(HttpStatus.CREATED)
-	@PutMapping("/api/v2/bestiary")
+	@PutMapping("/bestiary")
 	public void updateBeast(@RequestBody BeastDetailRequest request) {
 		bestiaryService.update(request);
 	}
