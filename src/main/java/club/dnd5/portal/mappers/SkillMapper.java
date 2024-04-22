@@ -26,7 +26,7 @@ public interface SkillMapper {
 		String name = nameValueApi.getName();
 		SkillType skillType = null;
 		for (SkillType type : SkillType.values()) {
-			if (type.getCyrilicName().equalsIgnoreCase(name)) { // Assuming you want to compare case-insensitively
+			if (type.getCyrilicName().equalsIgnoreCase(name)) {
 				skillType = type;
 				break;
 			}

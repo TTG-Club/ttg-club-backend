@@ -2,6 +2,7 @@ package club.dnd5.portal.mappers;
 
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.exception.ApiException;
+import club.dnd5.portal.exception.MappingException;
 import club.dnd5.portal.model.creature.Creature;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -14,8 +15,8 @@ import java.util.Collection;
 @Mapper(componentModel = "spring")
 public interface SpeedMapper {
 	SpeedMapper INSTANCE = Mappers.getMapper(SpeedMapper.class);
-
-	final int STANDARD_MOVEMENT = 30;
+	String SPEED_ERROR_MESSAGE = "Error encountered while mapping speeds from NameValueApi to Creature.";
+	int STANDARD_MOVEMENT = 30;
 
 	@Named("mapSpeed")
 	default void speed(Collection<NameValueApi> speeds, @MappingTarget Creature entity) {
@@ -41,6 +42,8 @@ public interface SpeedMapper {
 					short diggingSpeed = convertObjectToShort(speed.getValue());
 					entity.setDiggingSpeed(diggingSpeed);
 					break;
+				default:
+					throw new MappingException(SPEED_ERROR_MESSAGE);
 			}
 		}
 	}
