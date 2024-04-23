@@ -2,7 +2,6 @@ package club.dnd5.portal.mappers;
 
 import club.dnd5.portal.model.Language;
 import org.mapstruct.Mapper;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Collection;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 public interface LanguageMapper {
 	LanguageMapper INSTANCE = Mappers.getMapper(LanguageMapper.class);
 
-	@Named("mapLanguages")
 	default List<Language> mapLanguages(Collection<String> languages) {
 		return languages.stream()
 			.map(this::createLanguageFromName)

@@ -7,7 +7,6 @@ import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.ActionType;
 import org.mapstruct.Mapper;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.util.ArrayList;
@@ -27,11 +26,10 @@ import java.util.stream.Collectors;
  */
 @Mapper(componentModel = "spring")
 public interface ActionMapper {
+	//TODO подумать над тем, что действий много и их мне надо в 1 лист запихнуть
+
 	ActionMapper INSTANCE = Mappers.getMapper(ActionMapper.class);
 
-	List<Action> toAction(Collection<ActionDetailRequest> actions);
-
-	@Named("mapLegendaryAction")
 	default List<Action> mapLegendaryAction(LegendaryApi legendaryApi) {
 		Collection<NameValueApi> list = legendaryApi.getList();
 		List<Action> actions = new ArrayList<>();
@@ -46,7 +44,6 @@ public interface ActionMapper {
 		return actions;
 	}
 
-	@Named("mapActions")
 	default List<Action> mapActions(Collection<ActionDetailRequest> actions) {
 		return actions.stream()
 			.map(this::mapToAction)
