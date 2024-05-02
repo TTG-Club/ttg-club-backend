@@ -41,8 +41,8 @@ public class MarkdownUtil {
 			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
 			.template("<dice-roller label=\"Восстоновления хитов\" formula=\"%s\"/>")
 			.build(),
-		Markdown.builder().mark("\\{@dice\\s\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
-			.pattern("\\d+(к|d)\\d+(\\s?\\+\\s?\\d+)?")
+		Markdown.builder().mark("\\{@dice\\s\\d{0,}(к|d)\\d+(\\s?\\+\\s?\\d+)?\\}")
+			.pattern("\\d+(к|d)\\d{0,}(\\s?\\+\\s?\\d+)?")
 			.template("<dice-roller formula=\"%s\"/>")
 			.build(),
 		Markdown.builder().mark("\\{@hit\\s\\d+}")
