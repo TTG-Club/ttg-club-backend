@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
-public class RandomUtill {
+public class RandomUtils {
 	private static Random random = new Random();
+
+	private RandomUtils() {}
 
 	public static <T> List<T> getRandomObjectListFromList(List<T> entityList, int sizeList) {
 		if (entityList.isEmpty()) {
@@ -15,7 +17,6 @@ public class RandomUtill {
 		// Чтобы избегать дубликатов в коллекции
 		Set<Integer> selectedIndices = new HashSet<>();
 		List<T> resultList = new ArrayList<>();
-
 		while (resultList.size() < sizeList) {
 			int randomIndex = random.nextInt(entityList.size());
 			// Проверка находится ли уже под таким индексом объект (то есть не рандомили мы объект, который уже есть)
@@ -24,7 +25,6 @@ public class RandomUtill {
 				selectedIndices.add(randomIndex);
 			}
 		}
-
 		return resultList;
 	}
 }

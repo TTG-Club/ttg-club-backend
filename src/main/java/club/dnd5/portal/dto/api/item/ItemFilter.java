@@ -1,24 +1,29 @@
 package club.dnd5.portal.dto.api.item;
 
-import java.util.List;
-
+import club.dnd5.portal.dto.api.Randomizable;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 
 @NoArgsConstructor
 @Getter
 @Setter
-public class ItemFilter {
+public class ItemFilter implements Randomizable {
 	@JsonProperty("category")
 	List<String> categories;
-	
+	boolean random;
 	@JsonProperty("book")
 	private List<String> books;
+
+	@Override
+	public boolean getRandom() {
+		return random;
+	}
 }

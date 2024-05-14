@@ -19,7 +19,7 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
-import club.dnd5.portal.util.RandomUtill;
+import club.dnd5.portal.util.RandomUtils;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -97,7 +97,7 @@ public class MagicItemApiController {
 			if (request.getFilter().getRandom()) {
 				Pageable pageable = PageAndSortUtil.getPageable(request);
 				int sizeList = pageable.getPageSize();
-				return RandomUtill.getRandomObjectListFromList(magicItemRepository.findAll(specification)
+				return RandomUtils.getRandomObjectListFromList(magicItemRepository.findAll(specification)
 					.stream()
 					.map(MagicItemApi::new)
 					.collect(Collectors.toList()), sizeList);
