@@ -5,7 +5,7 @@ import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.item.MagicItemDetailApi;
-import club.dnd5.portal.dto.api.item.MagicItemRequesApi;
+import club.dnd5.portal.dto.api.item.MagicItemRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -44,7 +44,7 @@ public class MagicItemApiController {
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<MagicItemApi> getItems(@RequestBody MagicItemRequesApi request) {
+	public List<MagicItemApi> getItems(@RequestBody MagicItemRequestApi request) {
 		Specification<MagicItem> specification = null;
 		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
