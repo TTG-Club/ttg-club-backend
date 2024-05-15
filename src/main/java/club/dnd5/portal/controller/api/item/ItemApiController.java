@@ -15,6 +15,7 @@ import club.dnd5.portal.model.items.EquipmentType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.util.RandomUtils;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +23,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -76,6 +80,15 @@ public class ItemApiController {
 				query.orderBy(orders);
 				return cb.and();
 			});
+
+			if (request.getFilter().getRandom()) {
+				Pageable pageable = PageAndSortUtil.getPageable(request);
+				int sizeList = pageable.getPageSize();
+				return RandomUtils.getRandomObjectListFromList(itemRepository.findAll(specification)
+					.stream()
+					.map(ItemApi::new)
+					.collect(Collectors.toList()), sizeList);
+			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
 		return itemRepository.findAll(specification, pageable).toList()

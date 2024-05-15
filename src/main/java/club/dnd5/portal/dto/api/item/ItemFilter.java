@@ -18,9 +18,9 @@ import java.util.List;
 public class ItemFilter implements Randomizable {
 	@JsonProperty("category")
 	List<String> categories;
-	boolean random;
 	@JsonProperty("book")
 	private List<String> books;
+	boolean random;
 
 	@Override
 	public boolean getRandom() {
