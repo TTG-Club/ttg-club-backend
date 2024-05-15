@@ -42,14 +42,6 @@ public interface BestiaryMapper {
 	@Mapping(target = "languages", ignore = true)
 	Creature toEntity(BeastDetailRequest dto);
 
-	@Named("mapNPC")
-	default Integer mapNPC(boolean npc) {
-		if (npc == true) {
-			return 102;
-		} else {
-			return 0;
-		}
-	}
 
 	@Named("mapArmors")
 	default List<ArmorType> mapArmors(Collection<String> armors) {
