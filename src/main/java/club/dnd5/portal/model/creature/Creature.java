@@ -142,6 +142,7 @@ public class Creature implements FoundryCommon {
 	@JoinColumn(name = "creature_id")
 	private List<CreatureSpell> spells;
 
+
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
