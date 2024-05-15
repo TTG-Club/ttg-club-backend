@@ -44,7 +44,7 @@ public interface BestiaryMapper {
 
 	@Named("mapNPC")
 	default Integer mapNPC(boolean npc) {
-		if (npc) {
+		if (npc == true) {
 			return 102;
 		} else {
 			return 0;

@@ -3,7 +3,6 @@ package club.dnd5.portal.mappers;
 
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.SenseApi;
-import club.dnd5.portal.exception.MappingException;
 import club.dnd5.portal.model.creature.Creature;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -13,7 +12,18 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring")
 public interface SenseMapper {
 	SenseMapper INSTANCE = Mappers.getMapper(SenseMapper.class);
-	String SENSE_ERROR_MESSAGE = "Error encountered while mapping senses from Sense API to Creature.";
+
+	@Named("mapDarkVision")
+	default Integer mapDarkVision(SenseApi senseApi) {
+		if (senseApi.getSenses() != null) {
+			for (NameValueApi sense : senseApi.getSenses()) {
+				if ("тёмное зрение".equals(sense.getName())) {
+					return Integer.valueOf(sense.getValue().toString());
+				}
+			}
+		}
+		return 0;
+	}
 
 	@Named("fillCreatureFromSenseApi")
 	default void fillCreatureFromSenseApi(SenseApi senseApi, @MappingTarget Creature creature) {
@@ -44,7 +54,7 @@ public interface SenseMapper {
 						}
 						break;
 					default:
-						throw new MappingException(SENSE_ERROR_MESSAGE);
+						break;
 				}
 			}
 		}
