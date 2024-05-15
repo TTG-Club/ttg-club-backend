@@ -70,14 +70,14 @@ public class BeastDetailRequest {
 	@Schema(description = "Действия")
 	private Collection<ActionDetailRequest> actions;
 	@Schema(description = "Реакции")
-	private Collection<ActionDetailRequest> reactions;
+	private Collection<DescriptionRequest> reactions;
 	private String reaction;
 	@Schema(description = "Бонусные действия")
-	private Collection<ActionDetailRequest> bonusActions;
+	private Collection<DescriptionRequest> bonusActions;
 	@Schema(description = "Легенданые действия")
 	private LegendaryApi legendary;
 	@Schema(description = "Мистически действия")
-	private Collection<ActionDetailRequest> mysticalActions;
+	private Collection<DescriptionRequest> mysticalActions;
 	@Schema(description = "Текстовое описание")
 	private String description;
 	@Schema(description = "Тэги", example = "Дроу")
