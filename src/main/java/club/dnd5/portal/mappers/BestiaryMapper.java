@@ -2,13 +2,11 @@ package club.dnd5.portal.mappers;
 
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
-import club.dnd5.portal.dto.api.bestiary.request.DescriptionRequest;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.creature.CreatureFeat;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -16,7 +14,6 @@ import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,8 +23,9 @@ public interface BestiaryMapper {
 	final int STANDARD_MOVEMENT = 30;
 	BestiaryMapper INSTANCE = Mappers.getMapper(BestiaryMapper.class);
 
-	//TODO после мапера пройтись по сущностям и сделать unique значение, например как в таблице languages сами языки
-	//грубо говоря задача будет заключаться в том, что после маппера не сохранялась новые значение в таблице (сущности)
+	//TODO подумать над тем, не будет он дублировать просто напросто значения языка в бдшке
+	//То есть главная проблема на данный момент, это как находить в репе значения или
+	//как создавать свое но при этом не создавать новые значение в бдшке
 
 	@Mapping(target = "armorTypes", source = "armors", qualifiedByName = "mapArmors")
 	@Mapping(target = "immunityDamages", source = "damageImmunities")
@@ -36,7 +34,6 @@ public interface BestiaryMapper {
 	@Mapping(target = "name", source = "name", qualifiedByName = "getNameFromNameApi")
 	@Mapping(target = "altName", source = "name", qualifiedByName = "getAltNameFromNameApi")
 	@Mapping(target = "englishName", source = "name", qualifiedByName = "getEngNameFromNameApi")
-	@Mapping(target = "feats", source = "feats", qualifiedByName = "mapFeats")
 	@Mapping(target = "AC", source = "armorClass")
 	@Mapping(target = "lair", source = "lair")
 	@Mapping(target = "speed", ignore = true)
@@ -46,18 +43,6 @@ public interface BestiaryMapper {
 	@Mapping(target = "diggingSpeed", ignore = true)
 	Creature toEntity(BeastDetailRequest dto);
 
-	@Named("mapFeats")
-	default List<CreatureFeat> mapFeats(Collection<DescriptionRequest> feats) {
-		List<CreatureFeat> creatureFeats = new ArrayList<>();
-		for (DescriptionRequest request : feats) {
-			CreatureFeat creatureFeat = new CreatureFeat();
-			request.setDescription(request.getDescription());
-			creatureFeat.setName(request.getName().getRus());
-			creatureFeat.setEnglishName(request.getName().getEng());
-			creatureFeats.add(creatureFeat);
-		}
-		return creatureFeats;
-	}
 
 	@Named("mapLanguages")
 	default List<Language> mapLanguages(Collection<String> languages) {
