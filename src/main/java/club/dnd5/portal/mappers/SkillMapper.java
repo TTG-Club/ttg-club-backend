@@ -4,6 +4,7 @@ import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.creature.Skill;
 import org.mapstruct.Mapper;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 public interface SkillMapper {
 	SkillMapper INSTANCE = Mappers.getMapper(SkillMapper.class);
 
+	@Named("mapSkills")
 	default List<Skill> mapSkills(Collection<NameValueApi> skills) {
 		return skills.stream()
 			.map(this::mapNameValueApiToSkill)

@@ -3,6 +3,7 @@ package club.dnd5.portal.mappers;
 import club.dnd5.portal.dto.api.bestiary.TagApi;
 import club.dnd5.portal.model.creature.CreatureRace;
 import org.mapstruct.Mapper;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Collection;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public interface TagMapper {
 	TagMapper INSTANCE = Mappers.getMapper(TagMapper.class);
 
+	@Named("mapTags")
 	default List<CreatureRace> mapTags(Collection<TagApi> tags) {
 		return tags.stream()
 			.map(this::mapTagToCreatureRace)
@@ -25,4 +27,5 @@ public interface TagMapper {
 		creatureRace.setDescription(tag.getDescription());
 		return creatureRace;
 	}
+
 }

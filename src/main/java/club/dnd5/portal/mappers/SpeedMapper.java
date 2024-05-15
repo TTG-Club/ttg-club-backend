@@ -18,6 +18,7 @@ public interface SpeedMapper {
 	String SPEED_ERROR_MESSAGE = "Error encountered while mapping speeds from NameValueApi to Creature.";
 	int STANDARD_MOVEMENT = 30;
 
+	@Named("mapSpeed")
 	default void speed(Collection<NameValueApi> speeds, @MappingTarget Creature entity) {
 		for (NameValueApi speed : speeds) {
 			switch (speed.getName()) {

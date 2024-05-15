@@ -7,6 +7,7 @@ import club.dnd5.portal.exception.MappingException;
 import club.dnd5.portal.model.creature.Creature;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
@@ -14,6 +15,7 @@ public interface SenseMapper {
 	SenseMapper INSTANCE = Mappers.getMapper(SenseMapper.class);
 	String SENSE_ERROR_MESSAGE = "Error encountered while mapping senses from Sense API to Creature.";
 
+	@Named("fillCreatureFromSenseApi")
 	default void fillCreatureFromSenseApi(SenseApi senseApi, @MappingTarget Creature creature) {
 		if (senseApi.getPassivePerception() != null) {
 			creature.setPassivePerception((byte) Integer.parseInt(senseApi.getPassivePerception()));
