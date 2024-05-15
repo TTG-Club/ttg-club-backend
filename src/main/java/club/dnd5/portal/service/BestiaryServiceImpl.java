@@ -8,7 +8,6 @@ import club.dnd5.portal.dto.api.bestiary.BeastRequesApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.mappers.BestiaryMapper;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.ActionType;
@@ -39,8 +38,6 @@ public class BestiaryServiceImpl implements BestiaryService {
     private final BestiaryRepository beastRepository;
     private final ImageRepository imageRepository;
     private final TokenRepository tokenRepository;
-
-	private final BestiaryMapper bestiaryMapper = BestiaryMapper.INSTANCE;
 
     @Override
     public List<BeastApi> findAll(BeastRequesApi request) {
@@ -215,9 +212,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         if (exist.isPresent()) {
             throw new EntityExistsException();
         }
-		//TODO TEST
-		beast = bestiaryMapper.toEntity(request);
-
+        mapping(beast, request);
         beastRepository.save(beast);
     }
 
@@ -226,7 +221,22 @@ public class BestiaryServiceImpl implements BestiaryService {
     public void update(BeastDetailRequest request) {
         Creature beast = beastRepository.findById(request.getId())
                 .orElseThrow(PageNotFoundException::new);
-		//TODO update mapper
+        mapping(beast, request);
         beastRepository.save(beast);
+    }
+
+    private void mapping(Creature beast, BeastDetailRequest request) {
+        beast.setName(request.getName().getRus());
+        beast.setEnglishName(request.getName().getEng());
+        beast.setAltName(request.getName().getAlt());
+        beast.setType(request.getType());
+        beast.setAlignment(request.getAlignment());
+        beast.setAC(request.getArmorClass());
+
+        beast.setAverageHp(request.getHits().getAverage());
+        beast.setCountDiceHp(request.getHits().getDiceCount());
+        beast.setDiceHp(request.getHits().getHitDice());
+        beast.setBonusHP(request.getHits().getBonus());
+
     }
 }

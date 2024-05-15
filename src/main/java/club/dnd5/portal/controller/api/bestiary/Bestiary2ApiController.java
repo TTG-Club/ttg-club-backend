@@ -4,6 +4,8 @@ import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
 import club.dnd5.portal.dto.api.bestiary.BeastRequesApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
+import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
@@ -24,40 +26,41 @@ import java.util.List;
 @RequestMapping("/api/v2/")
 @RestController
 public class Bestiary2ApiController {
-	private final BestiaryService bestiaryService;
-	private final BestiaryRepository beastRepository;
-	private final ImageRepository imageRepository;
-	private final TokenRepository tokenRepository;
+    private final BestiaryService bestiaryService;
+    private final BestiaryRepository beastRepository;
+    private final ImageRepository imageRepository;
+    private final TokenRepository tokenRepository;
 
-	@Operation(summary = "Получение краткого списка сушеств")
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(value = "/bestiary")
-	public List<BeastApi> getBestiary(@ParameterObject BeastRequesApi request) {
-		return bestiaryService.findAll(request);
-	}
+    @Operation(summary = "Получение краткого списка сушеств")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/bestiary")
+    public List<BeastApi> getBestiary(@ParameterObject BeastRequesApi request) {
+        return bestiaryService.findAll(request);
+    }
 
-	@Operation(summary = "Получение сушества по английскому имени")
-	@GetMapping(value = "/bestiary/{englishName}")
-	public BeastDetailApi getBeast(@PathVariable String englishName) {
-		return bestiaryService.findOne(englishName);
-	}
+    @Operation(summary = "Получение сушества по английскому имени")
+    @GetMapping(value = "/bestiary/{englishName}")
+    public BeastDetailApi getBeast(@PathVariable String englishName) {
+        return bestiaryService.findOne(englishName);
+    }
 
-	@Operation(summary = "Добавление существа в бестиарий")
-	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured({"ADMIN"})
-	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping("/api/v2/bestiary")
-	public void createBeast(@RequestBody BeastDetailRequest request) {
-		bestiaryService.create(request);
+    @Operation(summary = "Добавление существа в бестиарий")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Secured({"ADMIN"})
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/api/v2/bestiary")
+    public void createBeast(@RequestBody BeastDetailRequest request) {
+        bestiaryService.create(request);
 
-	}
+    }
 
-	@Operation(summary = "Обнавление существа из бестиарии")
-	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured({"ADMIN"})
-	@ResponseStatus(HttpStatus.CREATED)
-	@PutMapping("/api/v2/bestiary")
-	public void updateBeast(@RequestBody BeastDetailRequest request) {
-		bestiaryService.update(request);
-	}
+    @Operation(summary = "Обнавление существа из бестиарии")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Secured({"ADMIN"})
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping("/api/v2/bestiary")
+    public void updateBeast(@RequestBody BeastDetailRequest request) {
+        bestiaryService.update(request);
+
+    }
 }
