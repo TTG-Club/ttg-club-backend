@@ -54,4 +54,5 @@ public interface SkillMapper {
 			throw new IllegalArgumentException("Unsupported type for conversion to byte: " + value.getClass());
 		}
 	}
+
 }
