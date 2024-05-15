@@ -22,8 +22,8 @@ import java.util.Collection;
 public class LegendaryApi {
 	@Schema(description = "список легендарных действий")
 	private Collection<NameValueApi> list;
-	@Schema(description = "количество возможных легендарных действий")
+	@Schema(description = "количество возсожных легендарных действий")
 	private int count;
-	@Schema(description = "свободное текстовое описание легендарных действий")
+	@Schema(description = "свобоное текстовое описание легендарных действий")
 	private String description;
 }
