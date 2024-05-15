@@ -4,11 +4,6 @@ import club.dnd5.portal.dto.api.bestiary.BeastApi;
 import club.dnd5.portal.dto.api.bestiary.BeastDetailApi;
 import club.dnd5.portal.dto.api.bestiary.BeastRequesApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
-import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.TokenRepository;
-import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.service.BestiaryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -27,9 +22,6 @@ import java.util.List;
 @RestController
 public class Bestiary2ApiController {
     private final BestiaryService bestiaryService;
-    private final BestiaryRepository beastRepository;
-    private final ImageRepository imageRepository;
-    private final TokenRepository tokenRepository;
 
     @Operation(summary = "Получение краткого списка сушеств")
     @ResponseStatus(HttpStatus.OK)
@@ -51,7 +43,6 @@ public class Bestiary2ApiController {
     @PostMapping("/api/v2/bestiary")
     public void createBeast(@RequestBody BeastDetailRequest request) {
         bestiaryService.create(request);
-
     }
 
     @Operation(summary = "Обнавление существа из бестиарии")
@@ -61,6 +52,5 @@ public class Bestiary2ApiController {
     @PutMapping("/api/v2/bestiary")
     public void updateBeast(@RequestBody BeastDetailRequest request) {
         bestiaryService.update(request);
-
     }
 }
