@@ -1,7 +1,6 @@
 package club.dnd5.portal.mappers;
 
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
-import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.creature.Creature;
@@ -17,13 +16,12 @@ import java.util.stream.Collectors;
 public interface BestiaryMapper {
 	BestiaryMapper INSTANCE = Mappers.getMapper(BestiaryMapper.class);
 
+	BeastDetailRequest toDTO(Creature entity);
+
 	@Mapping(target = "armors", source = "armorTypes", qualifiedByName = "mapArmors")
 	@Mapping(target = "damageImmunities", source = "immunityDamages", qualifiedByName = "mapImmunityDamages")
 	@Mapping(target = "damageResistances", source = "resistanceDamages", qualifiedByName = "mapResistanceDamages")
 	@Mapping(target = "damageVulnerabilities", source = "vulnerabilityDamages", qualifiedByName = "mapVulnerabilityDamages")
-	@Mapping(target = "name", qualifiedByName = "getNameFromNameApi")
-	@Mapping(target = "altName", qualifiedByName = "getAltNameFromNameApi")
-	@Mapping(target = "englishName", qualifiedByName = "getEngNameFromNameApi")
 	@Mapping(target = "lair", source = "lair")
 	Creature toEntity(BeastDetailRequest dto);
 
@@ -53,20 +51,5 @@ public interface BestiaryMapper {
 		return vulnerabilityDamages.stream()
 			.map(DamageType::valueOf)
 			.collect(Collectors.toList());
-	}
-
-	@Named("getNameFromNameApi")
-	default String getNameFromNameApi(NameApi nameApi) {
-		return nameApi.getRus();
-	}
-
-	@Named("getEngNameFromNameApi")
-	default String getEngNameFromNameApi(NameApi nameApi) {
-		return nameApi.getEng();
-	}
-
-	@Named("getAltNameFromNameApi")
-	default String getAltNameFromNameApi(NameApi nameApi) {
-		return nameApi.getAlt();
 	}
 }
