@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import java.util.*;
 
 public class RandomUtils {
-	private static Random random = new Random();
+	private static final Random random = new Random();
 
 	private RandomUtils() {}
 
