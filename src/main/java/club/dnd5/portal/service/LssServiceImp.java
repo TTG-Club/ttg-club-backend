@@ -1,7 +1,6 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.exception.ApiException;
-import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.FoundryVersion;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.classes.HeroClass;
@@ -31,7 +30,7 @@ public class LssServiceImp implements LssService {
 	@Override
 	public String findById(Integer spellId) {
 		JsonStorage jsonStorage = jsonStorageRepository
-			.findByRefIdAndTypeJsonAndVersionFoundry(spellId, JsonType.SPELL, STANDARD_FOUNDRY_VERSION).orElseThrow(PageNotFoundException::new);
+			.findByRefIdAndTypeJsonAndVersionFoundry(spellId, JsonType.SPELL, STANDARD_FOUNDRY_VERSION).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Storage was not Found"));
 		return convertFromJsonStorageToSpellLSS(jsonStorage);
 	}
 
@@ -57,13 +56,11 @@ public class LssServiceImp implements LssService {
 
 		if (optionalSpell.isPresent()) {
 			Spell spell = optionalSpell.get();
-			if (spell.getHeroClass().size() > 1) {
+			if (spell.getHeroClass().size() >= 1) {
 				for (HeroClass heroClass : spell.getHeroClass()) {
 					classList.add(heroClass.getEnglishName().toLowerCase());
 				}
 				nodeMap.put("classes", classList);
-			} else {
-				nodeMap.put("classes", spell.getHeroClass().get(0).getEnglishName());
 			}
 		}
 		jsonNode = objectMapper.convertValue(nodeMap, JsonNode.class);

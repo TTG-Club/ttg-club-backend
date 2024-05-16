@@ -18,6 +18,20 @@ public class MarkdownTest {
 			markdown.convert(description),
 			"Markup damage error");
 	}
+	@Test
+	void testDice() {
+		String description = "бросить {@dice к4} кости и {@dice 2к6}";
+		MarkdownUtil.Markdown markdown = MarkdownUtil.Markdown
+				.builder()
+				.mark(
+					"\\{@dice\\s[0-9]{0,}(к|d)[0-9]+(\\s?\\+\\s?\\d+)?\\}")
+				.pattern("[0-9]{0,}(к|d)[0-9]+(\\s?\\+\\s?\\d+)?")
+				.template("<dice-roller formula=\"%s\"/>")
+				.build();
+		assertEquals("бросить <dice-roller formula=\"к4\"/> кости и <dice-roller formula=\"2к6\"/>",
+				markdown.convert(description),
+				"Markdown dice error");
+	}
 
 	@Test
 	void testAttack() {
