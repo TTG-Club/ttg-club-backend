@@ -57,7 +57,7 @@ public class BestiaryApiController {
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}
-		Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
+		Optional<BeastFilter> filter = optionalRequest.map(BeastRequesApi::getFilter);
 		if (optionalRequest.map(BeastRequesApi::getFilter).isPresent()
 			&& optionalRequest.map(BeastRequesApi::getFilter).map(BeastFilter::getNpc).orElseGet(Collections::emptyList).isEmpty()) {
 			specification = SpecificationUtil.getAndSpecification(specification,
@@ -268,7 +268,7 @@ public class BestiaryApiController {
 				.collect(Collectors.toList()));
 		otherFilters.add(sizeFilter);
 
-		FilterApi tagFilter = new FilterApi("Тэги", "tag");
+		FilterApi tagFilter = new FilterApi("Тэги", "tag", false);
 		tagFilter.setValues(
 			tagRepository.findByOrderByName().stream()
 				.map(value -> new FilterValueApi(value.getName(), value.getId()))
@@ -297,7 +297,7 @@ public class BestiaryApiController {
 		FilterApi vulnerabilityDamageFilter = new FilterApi("Уязвимость к урону", "vulnerabilityDamage");
 		values = DamageType.getVulnerability()
 			.stream()
-			.map(damage -> new FilterValueApi(damage.getCyrillicName(), damage.name()))
+			.map(damage -> new FilterValueApi(damage.getShortName(), damage.name()))
 			.collect(Collectors.toList());
 		vulnerabilityDamageFilter.setValues(values);
 		otherFilters.add(vulnerabilityDamageFilter);
@@ -305,7 +305,7 @@ public class BestiaryApiController {
 		FilterApi resistDamageFilter = new FilterApi("Сопротивление к урону", "resistanceDamage");
 		values = DamageType.getResistance()
 			.stream()
-			.map(damage -> new FilterValueApi(damage.getCyrillicName(), damage.name()))
+			.map(damage -> new FilterValueApi(damage.getShortName(), damage.name()))
 			.collect(Collectors.toList());
 		resistDamageFilter.setValues(values);
 		otherFilters.add(resistDamageFilter);
@@ -313,7 +313,7 @@ public class BestiaryApiController {
 		FilterApi immunityDamageFilter = new FilterApi("Иммунитет к урону", "immunityDamage");
 		values = DamageType.getImmunity()
 			.stream()
-			.map(damage -> new FilterValueApi(damage.getCyrillicName(), damage.name()))
+			.map(damage -> new FilterValueApi(damage.getShortName(), damage.name()))
 			.collect(Collectors.toList());
 		immunityDamageFilter.setValues(values);
 		otherFilters.add(immunityDamageFilter);
