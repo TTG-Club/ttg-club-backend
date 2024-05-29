@@ -46,53 +46,19 @@ public class ItemApiController {
 	@Operation( summary = "Получение краткого списка снаряжения")
 	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ItemApi> getItem(@RequestBody ItemRequestApi request) {
-		Specification<Equipment> specification = null;
-		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
-		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue)
-				.orElse("").isEmpty()) {
-			specification = SpecificationUtil.getSearch(request);
-		}
-		if (request.getFilter() != null) {
-			if (!request.getFilter().getBooks().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Book, Spell> join = root.join("book", JoinType.INNER);
-					return join.get("source").in(request.getFilter().getBooks());
-				});
-			}
-			if (!request.getFilter().getCategories().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<EquipmentType, Equipment> types = root.join("types", JoinType.LEFT);
-					query.distinct(true);
-					return types.in(request.getFilter().getCategories()
-						.stream()
-						.map(EquipmentType::valueOf)
-						.collect(Collectors.toList()));
-				});
-			}
-		}
-		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-					.map(
-						order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-					)
-					.collect(Collectors.toList());
-				query.orderBy(orders);
-				return cb.and();
-			});
+		Specification<Equipment> specification = buildSpecification(request);
 
-			if (request.getFilter().getRandom()) {
-				Pageable pageable = PageAndSortUtil.getPageable(request);
-				int sizeList = pageable.getPageSize();
-				return RandomUtils.getRandomObjectListFromList(itemRepository.findAll(specification)
-					.stream()
+		if (request.getFilter() != null && request.getFilter().getRandom()) {
+			Pageable pageable = PageAndSortUtil.getPageable(request);
+			int sizeList = pageable.getPageSize();
+			return RandomUtils.getRandomObjectListFromList(
+				itemRepository.findAll(specification).stream()
 					.map(ItemApi::new)
 					.collect(Collectors.toList()), sizeList);
-			}
 		}
+
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return itemRepository.findAll(specification, pageable).toList()
-			.stream()
+		return itemRepository.findAll(specification, pageable).toList().stream()
 			.map(ItemApi::new)
 			.collect(Collectors.toList());
 	}
@@ -136,5 +102,59 @@ public class ItemApiController {
 
 		filters.setOther(otherFilters);
 		return filters;
+	}
+
+	private Specification<Equipment> buildSpecification(ItemRequestApi request) {
+		Specification<Equipment> specification = null;
+
+		if (Optional.ofNullable(request)
+			.map(RequestApi::getSearch)
+			.map(SearchRequest::getValue)
+			.map(value -> !value.isEmpty())
+			.orElse(false)) {
+			specification = SpecificationUtil.getSearch(request);
+		}
+
+		if (request.getFilter() != null) {
+			specification = addFilterSpecifications(specification, request);
+		}
+
+		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
+			specification = addOrderSpecifications(specification, request);
+		}
+
+		return specification;
+	}
+
+	private Specification<Equipment> addFilterSpecifications(Specification<Equipment> specification, ItemRequestApi request) {
+		if (!request.getFilter().getBooks().isEmpty()) {
+			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+				Join<Book, Spell> join = root.join("book", JoinType.INNER);
+				return join.get("source").in(request.getFilter().getBooks());
+			});
+		}
+
+		if (!request.getFilter().getCategories().isEmpty()) {
+			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+				Join<EquipmentType, Equipment> types = root.join("types", JoinType.LEFT);
+				query.distinct(true);
+				return types.in(request.getFilter().getCategories()
+					.stream()
+					.map(EquipmentType::valueOf)
+					.collect(Collectors.toList()));
+			});
+		}
+
+		return specification;
+	}
+
+	private Specification<Equipment> addOrderSpecifications(Specification<Equipment> specification, ItemRequestApi request) {
+		return SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+			List<Order> orders = request.getOrders().stream()
+				.map(order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField())))
+				.collect(Collectors.toList());
+			query.orderBy(orders);
+			return cb.and();
+		});
 	}
 }

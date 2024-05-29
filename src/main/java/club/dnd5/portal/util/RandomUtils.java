@@ -10,14 +10,14 @@ public class RandomUtils {
 
 	private RandomUtils() {}
 
-	public static <T> List<T> getRandomObjectListFromList(List<T> entityList, int sizeList) {
+	public static <T> List<T> getRandomObjectListFromList(List<T> entityList, int listSize) {
 		if (entityList.isEmpty()) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "The list is empty");
 		}
 		// Чтобы избегать дубликатов в коллекции
 		Set<Integer> selectedIndices = new HashSet<>();
 		List<T> resultList = new ArrayList<>();
-		while (resultList.size() < sizeList) {
+		while (resultList.size() < listSize) {
 			int randomIndex = random.nextInt(entityList.size());
 			// Проверка находится ли уже под таким индексом объект (то есть не рандомили мы объект, который уже есть)
 			if (!selectedIndices.contains(randomIndex)) {
