@@ -61,11 +61,14 @@ public class ClassApi {
 			archetypeName = heroClass.getArchetypeName();
 		}
 		switch (heroClass.getBook().getType()) {
+			case THIRD_PARTY:
+				group = new GroupApi("Классы от третьих лиц", (byte) 2);
+				break;
 			case TEST:
 				group = new GroupApi("Классы из UA", (byte) 1);
 				break;
 			case CUSTOM:
-				group = new GroupApi("Классы Homebrew", (byte) 2);
+				group = new GroupApi("Классы Homebrew", (byte) 3);
 				break;
 			default:
 				if (heroClass.isSidekick()) {
