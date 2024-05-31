@@ -20,7 +20,7 @@ public class SourceApi {
 	private String shortName;
 	@NotNull
 	private String name;
-	private String group;
+	private NameValueApi group;
 	private Boolean homebrew;
 	private Short page;
 
@@ -52,16 +52,16 @@ public class SourceApi {
 			this.page = page;
 		}
 	}
-	private String getGroupType(TypeBook bookType) {
+	private NameValueApi getGroupType(TypeBook bookType) {
 		switch (bookType) {
 			case THIRD_PARTY:
-				return  "3rd party";
+				return NameValueApi.builder().shortName("3rd").name("Контент от третьих лиц").build();
 			case TEST:
-				return  "UA";
+				return NameValueApi.builder().shortName("UA").name("Тестовый материал").build();
 			case CUSTOM:
-				return "HB";
+				return NameValueApi.builder().shortName("HB").name("Хомбрю ").build();
 			default:
-				return  "Basic";
+				return NameValueApi.builder().shortName("Basic").name("Официальные источники").build();
 		}
 	}
 }
