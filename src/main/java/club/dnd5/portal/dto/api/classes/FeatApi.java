@@ -1,10 +1,12 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.dto.api.SourceApi;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.trait.Trait;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,16 +21,19 @@ public class FeatApi {
 	protected String url;
 	private String requirements ;
 	private Boolean homebrew;
-	public FeatApi(Trait trait) {
-		name = new NameApi(trait.getName(), trait.getEnglishName());
-		url = String.format("/feats/%s", trait.getUrlName());
-		if (trait.getRequirement() != null) {
-			requirements = trait.getRequirement();
+	@Schema(description = "источник")
+	protected SourceApi source;
+	public FeatApi(Trait feat) {
+		name = new NameApi(feat.getName(), feat.getEnglishName());
+		url = String.format("/feats/%s", feat.getUrlName());
+		if (feat.getRequirement() != null) {
+			requirements = feat.getRequirement();
 		} else {
 			requirements = "Нет";
 		}
-		if (trait.getBook().getType() == TypeBook.CUSTOM) {
+		if (feat.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
+		source = new SourceApi(feat.getBook());
 	}
 }

@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.item;
 
+import club.dnd5.portal.dto.api.SourceApi;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -22,6 +23,7 @@ public class WeaponApi {
 	private TypeApi type;
 	private DamageApi damage;
 	private String price;
+	private SourceApi source;
 	
 	public WeaponApi(Weapon weapon) {
 		name = new NameApi(weapon.getName(), weapon.getEnglishName());
@@ -34,5 +36,6 @@ public class WeaponApi {
 		if (weapon.getCost() != null) {
 			price = String.format("%d %s.", weapon.getCost(), weapon.getCurrency().getName());
 		}
+		source = new SourceApi(weapon.getBook());
 	}
 }
