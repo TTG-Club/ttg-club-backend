@@ -34,6 +34,7 @@ public class ItemApi {
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
+		source = new SourceApi(item.getBook());
 	}
 
 	public ItemApi(MagicItem item) {
@@ -42,6 +43,7 @@ public class ItemApi {
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
+		source = new SourceApi(item.getBook());
 	}
 
 	public ItemApi(Treasure item) {
