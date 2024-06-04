@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -17,14 +17,14 @@ import java.util.List;
 @Setter
 public class ArmorFilter {
 	@JsonProperty("book")
-	private List<String> books;
+	private Set<String> books;
 
 	@JsonProperty("disadvantage")
-	private Boolean disadvantage;
+	private Set<String> disadvantage;
 
 	@JsonProperty("type")
-	private List<ArmorCategory> typeArmor;
+	private Set<ArmorCategory> typeArmor;
 
 	@JsonProperty("strengthRequirements")
-	private List<Integer> strengthRequirements;
+	private Set<Integer> strengthRequirements;
 }
