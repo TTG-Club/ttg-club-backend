@@ -1,5 +1,6 @@
 package club.dnd5.portal.config;
 
+import club.dnd5.portal.interceptor.RedirectToLowercaseInterceptor;
 import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
 import club.dnd5.portal.security.JwtAuthenticationFilter;
 import club.dnd5.portal.security.JwtTokenProvider;
@@ -23,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @RequiredArgsConstructor
@@ -40,6 +42,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 	private final JwtTokenProvider tokenProvider;
 	private final UserDetailsService customUserDetailsService;
+
+	@Autowired
+	private final RedirectToLowercaseInterceptor redirectToLowercaseInterceptor;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(){
@@ -107,5 +112,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 		super.configure(web);
 //		web.ignoring().antMatchers("/resources/**");
 		web.httpFirewall(new AnnotatingHttpFirewall());
+	}
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(redirectToLowercaseInterceptor);
 	}
 }
