@@ -13,7 +13,6 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Armor;
 import club.dnd5.portal.model.items.ArmorCategory;
-import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -52,7 +51,7 @@ public class ArmorApiController {
 			ArmorFilter armorFilter = request.getFilter();
 			if (!filter.map(ArmorFilter::getBooks).orElse(Collections.emptySet()).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Book, Spell> join = root.join("book", JoinType.INNER);
+					Join<Book, Armor> join = root.join("book", JoinType.INNER);
 					return join.get("source").in(request.getFilter().getBooks());
 				});
 			}
