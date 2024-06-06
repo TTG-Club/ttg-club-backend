@@ -4,6 +4,7 @@ import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.FoundryCommon;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -85,6 +86,6 @@ public class Spell implements FoundryCommon {
 	}
 
 	public String getUrlName() {
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 }
