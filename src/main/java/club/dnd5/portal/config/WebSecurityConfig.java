@@ -42,8 +42,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 	private final JwtTokenProvider tokenProvider;
 	private final UserDetailsService customUserDetailsService;
-
-	@Autowired
 	private final RedirectToLowerCaseInterceptor redirectToLowerCaseInterceptor;
 
     @Bean
