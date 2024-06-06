@@ -1,6 +1,6 @@
 package club.dnd5.portal.config;
 
-import club.dnd5.portal.interceptor.RedirectToLowercaseInterceptor;
+import club.dnd5.portal.interceptor.RedirectToLowerCaseInterceptor;
 import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
 import club.dnd5.portal.security.JwtAuthenticationFilter;
 import club.dnd5.portal.security.JwtTokenProvider;
@@ -44,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	private final UserDetailsService customUserDetailsService;
 
 	@Autowired
-	private final RedirectToLowercaseInterceptor redirectToLowercaseInterceptor;
+	private final RedirectToLowerCaseInterceptor redirectToLowerCaseInterceptor;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(){
@@ -116,6 +116,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(redirectToLowercaseInterceptor);
+		registry.addInterceptor(redirectToLowerCaseInterceptor);
 	}
 }

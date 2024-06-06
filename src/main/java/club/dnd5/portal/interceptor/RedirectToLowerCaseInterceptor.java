@@ -1,5 +1,6 @@
 package club.dnd5.portal.interceptor;
 
+import club.dnd5.portal.util.StringUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -9,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.regex.Pattern;
 
 @Component
-public class RedirectToLowercaseInterceptor implements HandlerInterceptor {
+public class RedirectToLowerCaseInterceptor implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 		String path = request.getServletPath();
@@ -26,7 +27,7 @@ public class RedirectToLowercaseInterceptor implements HandlerInterceptor {
 			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 			response.setHeader(
 				HttpHeaders.LOCATION,
-				response.encodeRedirectURL(path.toLowerCase().replace(" ", "_"))
+				response.encodeRedirectURL(StringUtil.getUrl(path))
 			);
 
 			return false;
