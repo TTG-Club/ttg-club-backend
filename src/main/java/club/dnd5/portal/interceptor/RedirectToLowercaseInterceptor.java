@@ -24,7 +24,10 @@ public class RedirectToLowercaseInterceptor implements HandlerInterceptor {
 
 		if (incorrectLetters.matcher(path).find()) {
 			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-			response.setHeader(HttpHeaders.LOCATION, path.toLowerCase().replace(" ", "_"));
+			response.setHeader(
+				HttpHeaders.LOCATION,
+				response.encodeRedirectURL(path.toLowerCase().replace(" ", "_"))
+			);
 
 			return false;
 		}
