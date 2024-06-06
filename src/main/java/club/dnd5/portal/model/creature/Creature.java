@@ -3,6 +3,7 @@ package club.dnd5.portal.model.creature;
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.ChallengeRating;
+import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -252,7 +253,7 @@ public class Creature implements FoundryCommon {
 	}
 
 	public String getUrlName() {
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 
 	public String getProficiencyBonus() {

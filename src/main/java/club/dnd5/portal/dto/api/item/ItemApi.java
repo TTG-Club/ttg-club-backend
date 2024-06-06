@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.item;
 
+import club.dnd5.portal.util.StringUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -30,7 +31,7 @@ public class ItemApi {
 
 	public ItemApi(Equipment item) {
 		name = new NameApi(item.getName(), item.getEnglishName());
-		url = String.format("/items/%s", item.getEnglishName().toLowerCase().replace(' ', '_'));
+		url = String.format("/items/%s", StringUtil.getUrl(item.getEnglishName()));
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
@@ -39,7 +40,7 @@ public class ItemApi {
 
 	public ItemApi(MagicItem item) {
 		name = new NameApi(item.getName(), item.getEnglishName());
-		url = String.format("/items/magic/%s", item.getEnglishName().toLowerCase().replace(' ', '_'));
+		url = String.format("/items/magic/%s", StringUtil.getUrl(item.getEnglishName()));
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
