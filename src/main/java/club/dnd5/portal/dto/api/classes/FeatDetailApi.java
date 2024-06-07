@@ -1,6 +1,5 @@
 package club.dnd5.portal.dto.api.classes;
 
-import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.spell.ReferenceClassApi;
 import club.dnd5.portal.model.trait.Trait;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,11 +18,10 @@ import java.util.List;
 public class FeatDetailApi extends FeatApi {
 	private String description;
 	private List<ReferenceClassApi> classes;
-	private SourceApi source;
+
 	public FeatDetailApi(Trait trait) {
 		super(trait);
 		url = null;
 		description = trait.getDescription();
-		source = new SourceApi(trait.getBook());
 	}
 }

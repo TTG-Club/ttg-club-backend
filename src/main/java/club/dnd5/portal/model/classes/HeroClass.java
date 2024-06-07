@@ -8,6 +8,7 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.thymeleaf.util.StringUtils;
@@ -30,7 +31,7 @@ public class HeroClass {
 	private String englishName;
 
 	@Column(columnDefinition = "TEXT")
-	private String description; 
+	private String description;
 
 	@OneToMany()
 	@JoinColumn(name = "hero_class_id")
@@ -47,7 +48,7 @@ public class HeroClass {
 	private String tools;
 	private String savingThrows;
 	private String archetypeName;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String equipment;
 
@@ -58,7 +59,7 @@ public class HeroClass {
 	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
 	private AbilityType spellAbility;
-	
+
 	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
 	private SpellcasterType spellcasterType = SpellcasterType.NONE;
@@ -68,7 +69,7 @@ public class HeroClass {
 	@Column(name = "ability", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private List<AbilityType> primaryAbilities;
-	
+
 	@OneToMany()
 	@JoinColumn(name = "hero_class_id")
 	private List<HeroClassTrait> traits;
@@ -86,10 +87,10 @@ public class HeroClass {
 	@Column(name = "skill", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private List<SkillType> availableSkills;
-	
+
 	@Enumerated(EnumType.STRING)
 	private Option.OptionType optionType;
-	
+
 	@Enumerated(EnumType.STRING)
 	private Rest slotsReset;
 	private boolean sidekick;
@@ -109,7 +110,7 @@ public class HeroClass {
 			return name + "ом";
 		}
 	}
-	
+
 	public String getGenitiveName() {
 		switch (name) {
 		case "Чародей":
@@ -122,11 +123,11 @@ public class HeroClass {
 			return name.toLowerCase() + "а";
 		}
 	}
-	
+
 	public String getUrlName() {
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
-	
+
 	public String getCapitalazeName() {
 		return StringUtils.capitalize(name.toLowerCase());
 	}
@@ -136,14 +137,14 @@ public class HeroClass {
 				.filter(t -> t.getLevel() == level)
 				.collect(Collectors.toList());
 	}
-	
+
 	public List<HeroClassTrait> getTraitsClear(int level) {
 		return traits.stream()
 				.filter(t -> t.getLevel() == level)
 				.filter(t -> !t.isArchitype())
 				.collect(Collectors.toList());
 	}
-	
+
 	public List<HeroClassTrait> getTraits() {
 		return traits.stream()
 				.sorted(Comparator.comparingInt(HeroClassTrait::getLevel))
@@ -158,7 +159,7 @@ public class HeroClass {
 				.collect(Collectors.toList());
 		return levelArhitypeFeats;
 	}
-	
+
 	public List<ArchetypeTrait> getArhitypeTraitNames(int archetypeId, int level){
 		List<ArchetypeTrait> levelArhitypeFeats = archetypes
 				.stream()

@@ -3,6 +3,7 @@ package club.dnd5.portal.model.god;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.HtmlConverter;
+import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -72,6 +73,6 @@ public class God {
 	}
 
 	public String getUrlName() {
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 }

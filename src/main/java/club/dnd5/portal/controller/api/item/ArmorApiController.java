@@ -13,7 +13,6 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Armor;
 import club.dnd5.portal.model.items.ArmorCategory;
-import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -30,10 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -50,31 +46,32 @@ public class ArmorApiController {
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
 			specification = SpecificationUtil.getSearch(request);
 		}
-
-		if (request.getFilter() != null) {
+		Optional<ArmorFilter> filter = Optional.ofNullable(request).map(ArmorRequestApi::getFilter);
+		if (filter.isPresent()) {
 			ArmorFilter armorFilter = request.getFilter();
-			if (!armorFilter.getBooks().isEmpty()) {
+			if (!filter.map(ArmorFilter::getBooks).orElse(Collections.emptySet()).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Book, Spell> join = root.join("book", JoinType.INNER);
+					Join<Book, Armor> join = root.join("book", JoinType.INNER);
 					return join.get("source").in(request.getFilter().getBooks());
 				});
 			}
-			if (armorFilter.getDisadvantage() != null) {
-				int disadvantage = armorFilter.getDisadvantage() ? 1 : 0;
+			if (!filter.map(ArmorFilter::getDisadvantage).orElse(Collections.emptySet()).isEmpty()) {
+				int disadvantage = filter.map(ArmorFilter::getDisadvantage)
+						.orElse(Collections.emptySet()).contains("yes") ? 1 : 0;
 				specification = SpecificationUtil.getAndSpecification(specification,
 					(root, query, cb) -> cb.equal(root.get("stelsHindrance"), disadvantage));
 			}
-			if (!armorFilter.getStrengthRequirements().isEmpty()) {
+			if (!filter.map(ArmorFilter::getStrengthRequirements).orElse(Collections.emptySet()).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
 					(root, query, cb) -> root.get("forceRequirements").in(armorFilter.getStrengthRequirements()));
 			}
-			if (!armorFilter.getTypeArmor().isEmpty()) {
+			if (!filter.map(ArmorFilter::getTypeArmor).orElse(Collections.emptySet()).isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
 					(root, query, cb) -> root.get("type").in(armorFilter.getTypeArmor()));
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return armorRepository.findAll(specification, pageable).toList()
+		return armorRepository.findAll(specification, pageable)
 			.stream()
 			.map(ArmorApi::new)
 			.collect(Collectors.toList());
@@ -83,7 +80,8 @@ public class ArmorApiController {
 	@Operation(summary = "Получение доспеха по английскому имени")
 	@PostMapping(value = "/api/v1/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ArmorDetailApi getOption(@PathVariable String englishName) {
-		return new ArmorDetailApi(armorRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new));
+		return new ArmorDetailApi(armorRepository.findByEnglishName(englishName.replace('_', ' '))
+				.orElseThrow(PageNotFoundException::new));
 	}
 
 	@Operation(summary = "Получение фильтра для снаряжение")

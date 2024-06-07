@@ -1,6 +1,7 @@
 package club.dnd5.portal.model.classes;
 
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -91,6 +92,6 @@ public class Option {
 	}
 
 	public String getUrlName() {
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 }
