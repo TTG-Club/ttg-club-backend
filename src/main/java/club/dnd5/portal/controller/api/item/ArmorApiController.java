@@ -55,7 +55,7 @@ public class ArmorApiController {
 					return join.get("source").in(request.getFilter().getBooks());
 				});
 			}
-			if (filter.map(ArmorFilter::getDisadvantage).isPresent()) {
+			if (!filter.map(ArmorFilter::getDisadvantage).orElse(Collections.emptySet()).isEmpty()) {
 				int disadvantage = filter.map(ArmorFilter::getDisadvantage)
 						.orElse(Collections.emptySet()).contains("yes") ? 1 : 0;
 				specification = SpecificationUtil.getAndSpecification(specification,
