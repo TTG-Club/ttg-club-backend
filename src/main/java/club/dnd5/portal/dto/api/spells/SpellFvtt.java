@@ -3,6 +3,7 @@ package club.dnd5.portal.dto.api.spells;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.util.StringUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -48,7 +49,7 @@ public class SpellFvtt implements Serializable {
     private Meta meta;
 
 	public SpellFvtt(Spell spell) {
-		this.id = spell.getEnglishName().toLowerCase().replace(' ', '_');
+		this.id = StringUtil.getUrl(spell.getEnglishName());
 		this.name = spell.getName();
 		this.englishName = spell.getEnglishName();
 		this.level = spell.getLevel();

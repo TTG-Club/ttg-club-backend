@@ -1,17 +1,15 @@
 package club.dnd5.portal.dto.api.classes;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.spell.ReferenceClassApi;
 import club.dnd5.portal.model.classes.Option;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -21,14 +19,12 @@ import lombok.Setter;
 public class OptionDetailApi extends OptionApi {
 	private String requirements ;
 	private String description;
-	private SourceApi source;
 	private List<ReferenceClassApi> classes;
 
 	public OptionDetailApi(Option option) {
 		super(option);
 		url = null;
 		description = option.getDescription();
-		source = new SourceApi(option.getBook());
 
 		if (option.getLevel() != null)
 		{

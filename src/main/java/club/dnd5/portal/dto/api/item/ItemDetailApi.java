@@ -1,16 +1,15 @@
 package club.dnd5.portal.dto.api.item;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import club.dnd5.portal.model.items.Equipment;
+import club.dnd5.portal.model.items.EquipmentType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import club.dnd5.portal.dto.api.SourceApi;
-import club.dnd5.portal.model.items.Equipment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -26,12 +25,13 @@ public class ItemDetailApi extends ItemApi {
 	public ItemDetailApi(Equipment item) {
 		super(item);
 		url = null;
-		source = new SourceApi(item.getBook());
 		weight = item.getWeight();
 		if (item.getDescription() != null) {
 			description = item.getDescription();
 		}
-		categories = item.getTypes().stream().map(category -> category.getCyrilicName()).collect(Collectors.toList());
+		categories = item.getTypes().stream()
+				.map(EquipmentType::getCyrilicName)
+				.collect(Collectors.toList());
 		setPrice(item.getTextCost());
 	}
 }

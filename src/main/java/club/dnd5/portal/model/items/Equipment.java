@@ -2,6 +2,7 @@ package club.dnd5.portal.model.items;
 
 import club.dnd5.portal.model.SpecificationCommon;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -62,6 +63,6 @@ public class Equipment implements SpecificationCommon {
 	}
 
 	public String getUrlName(){
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 }

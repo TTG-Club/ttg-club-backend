@@ -1,18 +1,10 @@
 package club.dnd5.portal.model.items;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "armors")
@@ -41,6 +33,6 @@ public class Armor {
 	private Book book;
 
 	public String getUrlName(){
-		return englishName.toLowerCase().replace(" ", "_");
+		return StringUtil.getUrl(englishName);
 	}
 }

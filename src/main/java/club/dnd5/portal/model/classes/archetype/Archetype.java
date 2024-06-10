@@ -1,25 +1,5 @@
 package club.dnd5.portal.model.classes.archetype;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import org.thymeleaf.util.StringUtils;
-
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -27,8 +7,17 @@ import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.SpellLevelDefinition;
+import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.thymeleaf.util.StringUtils;
+
+import javax.persistence.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "archetypes")
@@ -45,21 +34,21 @@ public class Archetype {
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
-	
+
 	private byte level;
-	
+
 	@ManyToOne(targetEntity = HeroClass.class)
 	@JoinColumn(name = "class_id")
 	private HeroClass heroClass;
-	
+
 	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
 	private SpellcasterType spellcasterType;
-	
+
 	@OneToMany()
 	@JoinColumn(name = "archetype_id")
 	private List<SpellLevelDefinition> levelDefenitions;
-	
+
 	@OneToMany()
 	@JoinColumn(name = "archetype_id")
 	private List<FeatureLevelDefinition> featureLevelDefenitions;
@@ -67,7 +56,7 @@ public class Archetype {
 	@OneToMany
 	@JoinColumn(name = "archetype_id")
 	private List<ArchetypeTrait> feats;
-	
+
 	@OneToMany
 	@JoinColumn(name = "archetype_id")
 	private List<ArchetypeSpell> spells;
@@ -79,15 +68,15 @@ public class Archetype {
 	@JoinColumn(name = "source")
 	private Book book;
 	private Short page;
-	
+
 	public Map<Integer, List<ArchetypeSpell>> getLevelSpells(){
 		return spells.stream().filter(s -> s.getLevel() > 0)
 				.collect(Collectors.groupingBy(ArchetypeSpell::getLevel, TreeMap::new,
 						Collectors.mapping(a -> a, Collectors.toList())));
 	}
-	
+
 	public boolean isOfficial() {
-		return book.getType() != null && book.getType() == TypeBook.OFFICAL;  
+		return book.getType() != null && book.getType() == TypeBook.OFFICAL;
 	}
 
 	public boolean isSetting() {
@@ -97,12 +86,12 @@ public class Archetype {
 	public String getCapitalizeName() {
 		return StringUtils.capitalizeWords(name.toLowerCase());
 	}
-	
+
 	public List<ArchetypeTrait> getFeats(){
 		return feats.stream().sorted(Comparator.comparing(ArchetypeTrait::getLevel)).collect(Collectors.toList());
 	}
 
 	public String getUrlName() {
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 }

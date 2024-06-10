@@ -1,18 +1,12 @@
 package club.dnd5.portal.model.book;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import lombok.Builder;
+import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.persistence.*;
+import java.io.Serializable;
 
 
 @NoArgsConstructor
@@ -79,6 +73,6 @@ public class Book implements Serializable, Comparable<Book>{
 	}
 
 	public String getUrlName() {
-		return englishName.replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 }

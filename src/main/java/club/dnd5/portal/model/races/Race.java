@@ -1,5 +1,15 @@
 package club.dnd5.portal.model.races;
 
+import club.dnd5.portal.model.*;
+import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.races.RaceNickname.NicknameType;
+import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+import org.thymeleaf.util.StringUtils;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -7,34 +17,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import org.thymeleaf.util.StringUtils;
-
-import club.dnd5.portal.model.AbilityBonus;
-import club.dnd5.portal.model.AbilityType;
-import club.dnd5.portal.model.CreatureSize;
-import club.dnd5.portal.model.CreatureType;
-import club.dnd5.portal.model.Language;
-import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.races.RaceNickname.NicknameType;
-import club.dnd5.portal.model.splells.Spell;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -237,6 +219,6 @@ public class Race implements Serializable {
 	}
 
 	public String getUrlName() {
-		return englishName.toLowerCase().replace(' ', '_');
+		return StringUtil.getUrl(englishName);
 	}
 }

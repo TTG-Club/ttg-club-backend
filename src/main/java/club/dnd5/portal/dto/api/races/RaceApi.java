@@ -68,8 +68,10 @@ public class RaceApi {
 			group = new GroupApi("Расы из Монстры Мультивселенной", (byte) 1);
 		} else if (race.getBook().getType() == TypeBook.TEST) {
 			group = new GroupApi("Расы Unearthed Arcana", (byte) 2);
-		} else if (race.getBook().getType() == TypeBook.CUSTOM) {
-			group = new GroupApi("Расы Homebrew", (byte) 3);
+		} else if (race.getBook().getType() == TypeBook.THIRD_PARTY) {
+			group = new GroupApi("Расы от третьих лиц", (byte) 3);
+		}  else if (race.getBook().getType() == TypeBook.CUSTOM) {
+			group = new GroupApi("Расы Homebrew", (byte) 4);
 		}
 	}
 }
