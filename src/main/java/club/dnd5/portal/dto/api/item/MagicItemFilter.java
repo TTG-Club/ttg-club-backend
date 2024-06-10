@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.item;
 
 import club.dnd5.portal.dto.api.Randomizable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,6 +24,11 @@ public class MagicItemFilter implements Randomizable {
 	List<String> charge;
 	@JsonProperty("book")
 	private List<String> books;
+
+	//Поле добавлено для абстракции, чтобы подпадало под работу
+	//SpecificationService
+	@JsonIgnore
+	List<String> categories;
 	boolean random;
 
 	@Override
