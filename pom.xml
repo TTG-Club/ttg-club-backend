@@ -23,6 +23,7 @@
 		<spring-web-flow.version>2.5.1.RELEASE</spring-web-flow.version>
 		<bootstrap.version>5.0.2</bootstrap.version>
 		<jquery.version>3.6.0</jquery.version>
+		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 	</properties>
 
 	<dependencies>
