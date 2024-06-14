@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 /**
- * Sorting util.
+ * Сортировка
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SortUtil {
