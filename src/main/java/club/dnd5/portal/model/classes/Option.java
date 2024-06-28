@@ -63,10 +63,13 @@ public class Option {
 		BOMB_FORMULA("Формулы бомб", "Alchemist", true),
 		DISCOVERIES("Открытия","Alchemist", true),
 		TRANSPLANTS("Трансплантаты","Alchemist", true),
-		BONUS_DISCIPLINES("Псионические дисциплины","Mystic", false),
-		PSIONIC_TALANT("Псионические таланты", "Mystic", false),
-		ACADEMIC_DISCIPLINES("Научные дисциплины", "Savant", true),
-		TOTEMS("Тотемы", "Shaman", true);
+		BONUS_DISCIPLINES("Псионические дисциплины: Мистик","Mystic", false),
+		PSIONIC_TALANT("Псионические таланты: Мистик", "Mystic", false),
+		ACADEMIC_DISCIPLINES("Научные дисциплиныЖ Савант", "Savant", true),
+		TOTEMS("Тотемы: Шаман", "Shaman", true),
+		FIGHTING_STYLE_ALT_FIGHTER("Боевые стили: Воин", "Fighter", true),
+		MARTIAL_EXPLOITS("Боевые приёмы: Адьтернативный воин", "Alternate Fighter", true),
+		SIGNATURE_TECHNIQUES("Фирменные техники: Альтернативный монах", "Alternate Monk", true);
 
 		private final String name;
 		private final  String className;
