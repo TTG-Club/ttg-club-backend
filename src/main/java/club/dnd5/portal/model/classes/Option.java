@@ -67,7 +67,7 @@ public class Option {
 		PSIONIC_TALANT("Псионические таланты: Мистик", "Mystic", false),
 		ACADEMIC_DISCIPLINES("Научные дисциплиныЖ Савант", "Savant", true),
 		TOTEMS("Тотемы: Шаман", "Shaman", true),
-		FIGHTING_STYLE_ALT_FIGHTER("Боевые стили: Воин", "Fighter", true),
+		FIGHTING_STYLE_ALT_FIGHTER("Боевые стили: Адьтернативный воин", "Alternate Fighter", true),
 		MARTIAL_EXPLOITS("Боевые приёмы: Адьтернативный воин", "Alternate Fighter", true),
 		SIGNATURE_TECHNIQUES("Фирменные техники: Альтернативный монах", "Alternate Monk", true);
 
