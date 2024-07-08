@@ -68,7 +68,7 @@ public class Option {
 		ACADEMIC_DISCIPLINES("Научные дисциплиныЖ Савант", "Savant", true),
 		TOTEMS("Тотемы: Шаман", "Shaman", true),
 		FIGHTING_STYLE_ALT_FIGHTER("Боевые стили: Адьтернативный воин", "Alternate Fighter", true),
-		MARTIAL_EXPLOITS("Боевые приёмы: Адьтернативный воин", "Alternate Fighter", true),
+		MARTIAL_EXPLOITS("Боевые приёмы: Альтернативный воин", "Alternate Fighter", true),
 		SIGNATURE_TECHNIQUES("Фирменные техники: Альтернативный монах", "Alternate Monk", true);
 
 		private final String name;
