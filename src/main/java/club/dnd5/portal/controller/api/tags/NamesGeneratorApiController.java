@@ -2,8 +2,8 @@ package club.dnd5.portal.controller.api.tags;
 
 import club.dnd5.portal.dto.api.tags.GeneratorNameApi;
 import club.dnd5.portal.model.CreatureType;
+import club.dnd5.portal.model.races.RaceNickname;
 import club.dnd5.portal.model.races.Sex;
-import club.dnd5.portal.repository.datatable.NameRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +18,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/")
 @RestController
 public class NamesGeneratorApiController {
-	private NameRepository nameRepository;
-
 	@GetMapping("tags/creature/type")
 	public List<String> getCreatureTags() {
 		return Arrays.stream(CreatureType.values()).map(CreatureType::getCyrillicName).collect(Collectors.toList());
+	}
+
+	@GetMapping("/tags/creature/name/type")
+	public List<String> getCreatureTypeTags () {
+		return Arrays.stream(RaceNickname.NicknameType.values()).map(RaceNickname.NicknameType::getName).collect(Collectors.toList());
 	}
 
 	@GetMapping("tags/creature/sex")

@@ -12,5 +12,7 @@ import java.util.List;
 @Builder
 public class CreatureTags {
 	private CreatureType type;
+	//TODO refactor btw
+	//чтобы возвращало именно название расс)
 	private List<String> tags;
 }
