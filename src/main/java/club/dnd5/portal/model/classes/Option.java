@@ -65,7 +65,7 @@ public class Option {
 		TRANSPLANTS("Трансплантаты","Alchemist", true),
 		BONUS_DISCIPLINES("Псионические дисциплины: Мистик","Mystic", false),
 		PSIONIC_TALANT("Псионические таланты: Мистик", "Mystic", false),
-		ACADEMIC_DISCIPLINES("Научные дисциплиныЖ Савант", "Savant", true),
+		ACADEMIC_DISCIPLINES("Научные исследования: Савант", "Savant", true),
 		TOTEMS("Тотемы: Шаман", "Shaman", true),
 		FIGHTING_STYLE_ALT_FIGHTER("Боевые стили: Адьтернативный воин", "Alternate Fighter", true),
 		MARTIAL_EXPLOITS("Боевые приёмы: Альтернативный воин", "Alternate Fighter", true),
