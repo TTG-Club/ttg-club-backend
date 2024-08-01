@@ -61,7 +61,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: magistrus/dnd5club:latest
+          tags: magistrus/dnd5club-${{ github.ref_name == 'dev' && 'dev' || 'prod' }}:latest
 
   restart-server:
     name: Update Server Workflow
