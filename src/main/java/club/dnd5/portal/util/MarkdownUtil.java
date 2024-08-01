@@ -61,7 +61,7 @@ public class MarkdownUtil {
 			return;
 		}
 		String description = feat.getDescription();
-		description = description.replace("@{beast_name}", beast.getName());
+		description = description.replace("{@beast_name}", beast.getName());
 		for (Markdown markdown: markdowns) {
 			description = markdown.convert(description);
 		}
