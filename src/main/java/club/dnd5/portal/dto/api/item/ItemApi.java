@@ -1,15 +1,13 @@
 package club.dnd5.portal.dto.api.item;
 
-import club.dnd5.portal.util.StringUtil;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Equipment;
 import club.dnd5.portal.model.items.MagicItem;
 import club.dnd5.portal.model.items.Treasure;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,7 +29,7 @@ public class ItemApi {
 
 	public ItemApi(Equipment item) {
 		name = new NameApi(item.getName(), item.getEnglishName());
-		url = String.format("/items/%s", StringUtil.getUrl(item.getEnglishName()));
+		url = String.format("/items/%s", item.getUrl());
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}
@@ -40,7 +38,7 @@ public class ItemApi {
 
 	public ItemApi(MagicItem item) {
 		name = new NameApi(item.getName(), item.getEnglishName());
-		url = String.format("/items/magic/%s", StringUtil.getUrl(item.getEnglishName()));
+		url = String.format("/items/magic/%s", item.getUrl());
 		if (item.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}

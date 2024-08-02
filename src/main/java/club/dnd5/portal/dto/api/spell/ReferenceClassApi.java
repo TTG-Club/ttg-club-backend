@@ -26,20 +26,20 @@ public class ReferenceClassApi {
 	private String parent;
 
 	public ReferenceClassApi(HeroClass heroClass){
-		name = heroClass.getCapitalazeName();
-		url = String.format("/classes/%s", heroClass.getUrlName());
+		name = heroClass.getName();
+		url = String.format("/classes/%s", heroClass.getUrl());
 		icon = String.format("class/%s", heroClass.getEnglishName().replace(' ', '-').toLowerCase());
 	}
 
 	public ReferenceClassApi(Archetype archetype) {
-		name = archetype.getCapitalizeName();
-		url = String.format("/classes/%s/%s", archetype.getHeroClass().getUrlName(), archetype.getUrlName());
-		parent = archetype.getHeroClass().getCapitalazeName();
+		name = archetype.getName();
+		url = String.format("/classes/%s/%s", archetype.getHeroClass().getUrl(), archetype.getUrl());
+		parent = archetype.getHeroClass().getName();
 	}
 
 	public ReferenceClassApi(Race race) {
-		name = race.getCapitalazeName();
-		url = String.format("/races/%s", race.getUrlName());
+		name = race.getName();
+		url = String.format("/races/%s", race.getUrl());
 	}
 
 	public ReferenceClassApi(OptionType optionType) {

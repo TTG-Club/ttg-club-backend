@@ -28,7 +28,7 @@ public class BookController {
 	public String getRule(Model model, @PathVariable String name) {
 		Book book = bookRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Источники (Books) D&D 5e", book.getName(), book.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("https://ttg.club/books/%s", book.getUrlName()));
+		model.addAttribute("metaUrl", String.format("https://ttg.club/books/%s", book.getUrl()));
 		model.addAttribute("selectedBook", "name");
 		model.addAttribute("menuTitle", "Источники");
 		return "spa";

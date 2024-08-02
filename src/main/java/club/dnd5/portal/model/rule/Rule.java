@@ -1,7 +1,7 @@
 package club.dnd5.portal.model.rule;
 
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,13 +12,13 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "rules")
-public class Rule {
+public class Rule extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String altName;
-	private String englishName;
+	@Column(nullable = false, unique = true)
+	private String url;
+
 	private String type;
 
 	@Column(columnDefinition = "TEXT")
@@ -28,7 +28,4 @@ public class Rule {
 	private Book book;
 	private Short page;
 
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
-	}
 }

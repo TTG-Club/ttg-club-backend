@@ -25,7 +25,7 @@ public class ScreenDetailApi extends ScreenApi {
 
     public ScreenDetailApi(Screen screen) {
         name = new NameApi(screen.getName(), screen.getEnglishName());
-        url = String.format("/screens/%s", screen.getUrlName());
+        url = String.format("/screens/%s", screen.getUrl());
         order = screen.getOrdering();
 
         if (Objects.nonNull(screen.getParent())) {

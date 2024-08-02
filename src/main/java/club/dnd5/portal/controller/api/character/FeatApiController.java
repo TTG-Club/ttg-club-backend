@@ -1,10 +1,10 @@
-package club.dnd5.portal.controller.api;
+package club.dnd5.portal.controller.api.character;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.classes.FeatRequestApi;
-import club.dnd5.portal.dto.api.classes.FeatApi;
+import club.dnd5.portal.dto.api.classes.TraitApi;
 import club.dnd5.portal.dto.api.classes.FeatDetailApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -43,7 +43,7 @@ public class FeatApiController {
 
 	@Operation(summary = "Получение краткого списка черт")
 	@PostMapping(value = {"/api/v1/traits","/api/v1/feats"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<FeatApi> getTraits(@RequestBody FeatRequestApi request) {
+	public List<TraitApi> getTraits(@RequestBody FeatRequestApi request) {
 		Specification<Trait> specification = null;
 		Optional<FeatRequestApi> spellRequest = Optional.ofNullable(request);
 		if (!spellRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
@@ -94,7 +94,7 @@ public class FeatApiController {
 		Pageable pageable = PageAndSortUtil.getPageable(request);
 		return featRepository.findAll(specification, pageable).toList()
 			.stream()
-			.map(FeatApi::new)
+			.map(TraitApi::new)
 			.collect(Collectors.toList());
 
 	}

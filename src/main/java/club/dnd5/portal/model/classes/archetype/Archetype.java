@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.classes.archetype;
 
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -7,10 +8,8 @@ import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.SpellLevelDefinition;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.Comparator;
@@ -23,14 +22,14 @@ import java.util.stream.Collectors;
 @Table(name = "archetypes")
 @Getter
 @Setter
-public class Archetype {
+public class Archetype extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String genitiveName;
+	@Column(nullable = false, unique = true)
+	private String url;
 
-	private String englishName;
+	private String genitiveName;
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
@@ -41,7 +40,6 @@ public class Archetype {
 	@JoinColumn(name = "class_id")
 	private HeroClass heroClass;
 
-	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
 	private SpellcasterType spellcasterType;
 
@@ -83,15 +81,8 @@ public class Archetype {
 		return book.getType() != null && book.getType() == TypeBook.SETTING;
 	}
 
-	public String getCapitalizeName() {
-		return StringUtils.capitalizeWords(name.toLowerCase());
-	}
-
 	public List<ArchetypeTrait> getFeats(){
 		return feats.stream().sorted(Comparator.comparing(ArchetypeTrait::getLevel)).collect(Collectors.toList());
 	}
 
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
-	}
 }

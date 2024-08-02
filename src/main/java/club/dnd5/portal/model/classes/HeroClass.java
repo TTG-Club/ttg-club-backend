@@ -1,17 +1,12 @@
 package club.dnd5.portal.model.classes;
 
-import club.dnd5.portal.model.AbilityType;
-import club.dnd5.portal.model.Rest;
-import club.dnd5.portal.model.SkillType;
-import club.dnd5.portal.model.SpellcasterType;
+import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.Comparator;
@@ -23,12 +18,12 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "classes")
-public class HeroClass {
+public class HeroClass extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String englishName;
+	@Column(nullable = false, unique = true)
+	private String url;
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
@@ -56,11 +51,9 @@ public class HeroClass {
 	@OrderBy("level")
 	private List<Spell> spells;
 
-	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
 	private AbilityType spellAbility;
 
-	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
 	private SpellcasterType spellcasterType = SpellcasterType.NONE;
 
@@ -72,7 +65,7 @@ public class HeroClass {
 
 	@OneToMany()
 	@JoinColumn(name = "hero_class_id")
-	private List<HeroClassTrait> traits;
+	private List<ClassFeature> traits;
 
 	private int enabledArhitypeLevel;
 
@@ -101,18 +94,18 @@ public class HeroClass {
 	private Short page;
 
 	public String getAblativeName() {
-		switch (name) {
+		switch (getName()) {
 		case "Чародей":
 			return "чародеем";
 		case "Изобретатель":
 			return "изобретателем";
 		default:
-			return name + "ом";
+			return getName() + "ом";
 		}
 	}
 
 	public String getGenitiveName() {
-		switch (name) {
+		switch (getName()) {
 		case "Чародей":
 			return "чародея";
 		case "Изобретатель":
@@ -120,34 +113,26 @@ public class HeroClass {
 		case "Напарник боец":
 			return "Напарника бойца";
 		default:
-			return name.toLowerCase() + "а";
+			return getName().toLowerCase() + "а";
 		}
 	}
 
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
-	}
-
-	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
-	}
-
-	public List<HeroClassTrait> getTraits(int level) {
+	public List<ClassFeature> getTraits(int level) {
 		return traits.stream()
 				.filter(t -> t.getLevel() == level)
 				.collect(Collectors.toList());
 	}
 
-	public List<HeroClassTrait> getTraitsClear(int level) {
+	public List<ClassFeature> getTraitsClear(int level) {
 		return traits.stream()
 				.filter(t -> t.getLevel() == level)
 				.filter(t -> !t.isArchitype())
 				.collect(Collectors.toList());
 	}
 
-	public List<HeroClassTrait> getTraits() {
+	public List<ClassFeature> getTraits() {
 		return traits.stream()
-				.sorted(Comparator.comparingInt(HeroClassTrait::getLevel))
+				.sorted(Comparator.comparingInt(ClassFeature::getLevel))
 				.collect(Collectors.toList());
 	}
 

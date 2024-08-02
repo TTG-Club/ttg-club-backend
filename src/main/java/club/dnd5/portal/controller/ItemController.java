@@ -31,7 +31,7 @@ public class ItemController {
 	public String getItem(Model model, @PathVariable String name) {
 		Equipment item = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", item.getName() + " | Снаряжение D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, item.getUrlName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, item.getUrl()));
 		model.addAttribute("metaDescription", String.format("%s (%s) снаряжение по D&D 5 редакции", item.getName(), item.getEnglishName()));
 		model.addAttribute("menuTitle", "Снаряжение");
 		return "spa";

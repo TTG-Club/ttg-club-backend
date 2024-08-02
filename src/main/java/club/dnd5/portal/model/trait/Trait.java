@@ -1,12 +1,11 @@
 package club.dnd5.portal.model.trait;
 
 import club.dnd5.portal.model.AbilityType;
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.List;
@@ -16,14 +15,13 @@ import java.util.List;
 
 @Entity
 @Table(name = "traits")
-public class Trait {
+public class Trait extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	@Column(nullable = false, unique = true)
+	private String url;
 
-	private String name;
-	private String englishName;
-	private String altName;
 	private Integer level;
 	private String requirement;
 
@@ -45,11 +43,4 @@ public class Trait {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
-	}
-	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
-	}
 }

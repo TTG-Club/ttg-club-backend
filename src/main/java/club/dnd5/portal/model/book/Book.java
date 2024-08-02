@@ -1,6 +1,6 @@
 package club.dnd5.portal.model.book;
 
-import club.dnd5.portal.util.StringUtil;
+import club.dnd5.portal.model.Name;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,15 +15,14 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "books")
-public class Book implements Serializable, Comparable<Book>{
+public class Book extends Name implements Serializable, Comparable<Book>{
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(unique = true, nullable = false)
 	private String source;
-	private String name;
-	private String altName;
-	private String englishName;
+	@Column(nullable = false, unique = true)
+	private String url;
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
@@ -65,14 +64,9 @@ public class Book implements Serializable, Comparable<Book>{
 			return false;
 		Book other = (Book) obj;
 		if (source == null) {
-			if (other.source != null)
-				return false;
+			return other.source == null;
 		} else if (!source.equals(other.source))
 			return false;
 		return true;
-	}
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
 	}
 }

@@ -1,9 +1,9 @@
 package club.dnd5.portal.model.god;
 
 import club.dnd5.portal.model.Alignment;
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.HtmlConverter;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,13 +17,13 @@ import java.util.List;
 
 @Entity
 @Table(name = "gods")
-public class God {
+public class God extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String altName;
-	private String englishName;
+	@Column(nullable = false, unique = true)
+	private String url;
+
 	private String commitment;
 
 	@Enumerated(EnumType.STRING)
@@ -70,9 +70,5 @@ public class God {
 
 	public String getRank() {
 		return rank.getName(sex);
-	}
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
 	}
 }

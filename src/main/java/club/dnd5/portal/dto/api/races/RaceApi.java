@@ -34,10 +34,10 @@ public class RaceApi {
 	public RaceApi(Race race, Set<String> books) {
 		name = new NameApi(race.getName(), race.getEnglishName());
 		if (race.getParent() == null) {
-			url = String.format("/races/%s", race.getUrlName());
+			url = String.format("/races/%s", race.getUrl());
 		}
 		else {
-			url = String.format("/races/%s/%s", race.getParent().getUrlName(), race.getUrlName());
+			url = String.format("/races/%s/%s", race.getParent().getUrl(), race.getUrl());
 		}
 		type = new SourceTypeApi(race.getBook().getType().getName(), race.getBook().getType().ordinal());
 		image = String.format("https://img.ttg.club/races/background/race-%s.webp", race.getEnglishName().replace(' ', '-').toLowerCase());

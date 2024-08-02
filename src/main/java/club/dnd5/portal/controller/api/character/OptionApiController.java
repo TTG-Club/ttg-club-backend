@@ -1,4 +1,4 @@
-package club.dnd5.portal.controller.api;
+package club.dnd5.portal.controller.api.character;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
@@ -151,7 +151,7 @@ public class OptionApiController {
 		customFilter.setHidden(Boolean.TRUE);
 
 		FilterValueApi customValue = new FilterValueApi();
-		customValue.setLabel(heroClass.getCapitalazeName());
+		customValue.setLabel(heroClass.getName());
 		customValue.setDefaultValue(Boolean.TRUE);
 		customValue.setKey(heroClass.getOptionType().name());
 		customFilter.setValues(Collections.singletonList(customValue));
@@ -163,7 +163,7 @@ public class OptionApiController {
 	}
 
 	@PostMapping("/api/v1/filters/options/{englishClassName}/{englishArchetypeName}")
-	public FilterApi getByArchitypeFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
+	public FilterApi getByArchetypeFilter(@PathVariable String englishClassName, @PathVariable String englishArchetypeName) {
 		FilterApi filters = new FilterApi();
 
 		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' '))
@@ -184,7 +184,7 @@ public class OptionApiController {
 		customFilter.setHidden(Boolean.TRUE);
 
 		FilterValueApi customValue = new FilterValueApi();
-		customValue.setLabel(heroClass.getCapitalazeName());
+		customValue.setLabel(heroClass.getName());
 		customValue.setDefaultValue(Boolean.TRUE);
 		customValue.setKey(archetype.getOptionType().name());
 		customFilter.setValues(Collections.singletonList(customValue));

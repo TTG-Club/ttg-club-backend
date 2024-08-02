@@ -2,9 +2,7 @@ package club.dnd5.portal.model.races;
 
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.races.RaceNickname.NicknameType;
 import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.thymeleaf.util.StringUtils;
@@ -23,23 +21,21 @@ import java.util.stream.Stream;
 
 @Entity
 @Table(name = "races")
-public class Race implements Serializable {
+public class Race extends Name implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String altName;
+	@Column(nullable = false, unique = true)
+	private String url;
 
-	@Column(unique = true)
-	private String englishName;
 	private Integer minAge;
 	private Integer maxAge;
 
 	@OneToMany
 	@JoinColumn(name = "race_id")
-	List<Feature> features;
+	List<RaceFeature> features;
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
@@ -99,13 +95,13 @@ public class Race implements Serializable {
 	public String getFullName() {
 		if (parent != null) {
 			String parentName = parent.getName();
-			return name.contains(parentName) ? name : name + " " + parentName;
+			return getName().contains(parentName) ? getName() : getName() + " " + parentName;
 		}
-		return name;
+		return getName();
 	}
 
 	public String getCapitalizeName() {
-		return StringUtils.capitalize(name);
+		return StringUtils.capitalize(getName());
 	}
 
 	public String getAbilityBonuses() {
@@ -155,43 +151,6 @@ public class Race implements Serializable {
 				.collect(Collectors.joining(", "));
 	}
 
-	public String getCapName() {
-		return StringUtils.capitalize(name.toLowerCase());
-	}
-
-	public boolean isDarkVision() {
-		return features.parallelStream().map(Feature::getName).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("тёмное зрение") || f.contains("темное зрение"));
-	}
-
-	public boolean isNatureArmor() {
-		return features.parallelStream().map(Feature::getName).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("природная броня") || f.contains("природный доспех"));
-	}
-
-	public boolean isAthletics() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("атлетик") && f.contains("владеете"));
-	}
-
-	public boolean isStealth() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("скрытность") && f.contains("владеете"));
-	}
-
-	public boolean isResistenceFire() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("сопротивление") && (f.contains("огнём") || f.contains("огню")));
-	}
-
-	public boolean isResistencePoison() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> (f.contains("урону ядом")));
-	}
-	public boolean isResistenceCold() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> (f.contains("урону холодом")));
-	}
 
 	public Map<Sex, Set<String>> getNames() {
 		return names.stream().collect(Collectors.groupingBy(RaceName::getSex,
@@ -206,19 +165,5 @@ public class Race implements Serializable {
 		return Stream.concat(names.stream(), parent == null ? Stream.empty() : parent.names.stream())
 				.collect(Collectors.groupingBy(RaceName::getSex,
 						Collectors.mapping(RaceName::getName, Collectors.toCollection(TreeSet::new))));
-	}
-
-	public Map<NicknameType, Set<String>> getNicknamesGroup() {
-		return nicknames.stream()
-				.collect(Collectors.groupingBy(RaceNickname::getType,
-						Collectors.mapping(RaceNickname::getName, Collectors.toCollection(TreeSet::new))));
-	}
-
-	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
-	}
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
 	}
 }

@@ -3,7 +3,6 @@ package club.dnd5.portal.model.creature;
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.ChallengeRating;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,14 +19,12 @@ import java.util.stream.Collectors;
 @Setter
 @Entity
 @Table(name = "creatures")
-public class Creature implements FoundryCommon {
+public class Creature extends Name implements FoundryCommon {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	@Column(nullable = false)
-	private String name;
-	private String altName;
-	private String englishName;
+	@Column(nullable = false, unique = true)
+	private String url;
 
 	@Enumerated(EnumType.ORDINAL)
 	private CreatureSize size;
@@ -250,10 +247,6 @@ public class Creature implements FoundryCommon {
 			.map(Skill::getBonus)
 			.findFirst()
 			.orElse(null);
-	}
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
 	}
 
 	public String getProficiencyBonus() {

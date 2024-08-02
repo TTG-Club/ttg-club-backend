@@ -24,7 +24,7 @@ public class GodApi {
 	
 	public GodApi(God god) {
 		name = new NameApi(god.getName(), god.getEnglishName());
-		url = String.format("/gods/%s", god.getUrlName());
+		url = String.format("/gods/%s", god.getUrl());
 		if (god.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}

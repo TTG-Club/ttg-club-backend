@@ -1,11 +1,10 @@
 package club.dnd5.portal.model.items;
 
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.List;
@@ -14,19 +13,18 @@ import java.util.List;
 @Setter
 
 @Entity
-@Table(name = "artifactes")
-public class MagicItem {
+@Table(name = "items_magic")
+public class MagicItem extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String englishName;
-	private String altName;
+	@Column(nullable = false, unique = true)
+	private String url;
 
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private Rarity rarity;
 
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private MagicThingType type;
 
 	private Boolean customization;
@@ -72,19 +70,6 @@ public class MagicItem {
 			return cost;
 		}
 		return consumed ? rarity.getBaseCost() / 2 : rarity.getBaseCost();
-	}
-
-	public int getBaseCost() {
-		return cost;
-	}
-
-	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
-	}
-
-	@Override
-	public String toString() {
-		return name.toLowerCase();
 	}
 
 	public String getRangeCostDMG() {
@@ -159,9 +144,5 @@ public class MagicItem {
 		default:
 			return rarity.getCyrilicName();
 		}
-	}
-
-	public String getUrlName(){
-		return StringUtil.getUrl(englishName);
 	}
 }

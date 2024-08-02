@@ -33,8 +33,8 @@ public class ClassApi {
 	private boolean sidekick;
 
 	public ClassApi(HeroClass heroClass, ClassRequestApi request) {
-		name = new NameApi(heroClass.getCapitalazeName(), heroClass.getEnglishName());
-		url = String.format("/classes/%s", heroClass.getUrlName());
+		name = new NameApi(heroClass.getName(), heroClass.getEnglishName());
+		url = String.format("/classes/%s", heroClass.getUrl());
 		source = new SourceApi(heroClass.getBook());
 		dice = String.format("к%d", heroClass.getDiceHp());
 		if (request.getSearch() != null && request.getSearch().getValue() != null

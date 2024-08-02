@@ -25,7 +25,7 @@ public class ScreenApi {
 
 	public ScreenApi(Screen screen) {
 		name = new NameApi(screen.getName(), screen.getEnglishName());
-		url = String.format("/screens/%s", screen.getUrlName());
+		url = String.format("/screens/%s", screen.getUrl());
 		order = screen.getOrdering();
 		group = screen.getCategory();
 		source = new SourceApi(screen.getBook());

@@ -22,10 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -78,9 +75,9 @@ public class ArmorApiController {
 	}
 
 	@Operation(summary = "Получение доспеха по английскому имени")
-	@PostMapping(value = "/api/v1/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ArmorDetailApi getOption(@PathVariable String englishName) {
-		return new ArmorDetailApi(armorRepository.findByEnglishName(englishName.replace('_', ' '))
+	@GetMapping(value = "/api/v1/armors/{url}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArmorDetailApi getArmor(@PathVariable String url) {
+		return new ArmorDetailApi(armorRepository.findByUrl(url)
 				.orElseThrow(PageNotFoundException::new));
 	}
 

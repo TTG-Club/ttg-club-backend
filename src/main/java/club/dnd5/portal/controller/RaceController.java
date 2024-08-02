@@ -37,8 +37,8 @@ public class RaceController {
 	public String getRace(Model model, @PathVariable String name) {
 		Race race = raceRepository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", race.getName() + " | Расы и происхождения D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.getUrlName()));
-		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.getCapitalazeName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, race.getUrl()));
+		model.addAttribute("metaDescription", String.format("%s - раса персонажа по D&D 5 редакции", race.getName()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
@@ -55,8 +55,8 @@ public class RaceController {
 			.stream()
 			.filter(r -> r.getEnglishName().equalsIgnoreCase(subraceEnglishName.replace('_', ' ')))
 			.findFirst().orElseThrow(PageNotFoundException::new);
-		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.getCapitalazeName()));
-		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.getUrlName(), subRace.getUrlName()));
+		model.addAttribute("metaTitle", String.format("%s | Расы и происхождения | Разновидности D&D 5e", subRace.getName()));
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, race.getUrl(), subRace.getUrl()));
 		model.addAttribute("metaDescription", String.format("%s - разновидность расы персонажа по D&D 5 редакции", subRace.getName()));
 		model.addAttribute("menuTitle", "Расы и происхождения");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, subRace.getId());

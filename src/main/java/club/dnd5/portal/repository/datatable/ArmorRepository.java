@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface ArmorRepository extends JpaRepository<Armor, Integer>, JpaSpecificationExecutor<Armor> {
-	Optional<Armor> findByEnglishName(String name);
+	Optional<Armor> findByUrl(String url);
 
 	@Query("SELECT c.book FROM Armor c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);

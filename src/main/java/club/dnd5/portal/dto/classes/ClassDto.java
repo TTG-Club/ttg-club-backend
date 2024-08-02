@@ -1,8 +1,5 @@
 package club.dnd5.portal.dto.classes;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.HeroClass;
@@ -10,6 +7,9 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -33,7 +33,7 @@ public class ClassDto {
 
 	public ClassDto(HeroClass hero) {
 		id = hero.getId();
-		name = hero.getCapitalazeName();
+		name = hero.getName();
 		englishName = hero.getEnglishName();
 		archetypeName = hero.getArchetypeName();
 		sidekick = hero.isSidekick() ? "Напарники" : "";
@@ -60,7 +60,7 @@ public class ClassDto {
 
 		public ArchetypeDto(Archetype archetype) {
 			id = archetype.getId();
-			name= archetype.getCapitalizeName();
+			name= archetype.getName();
 			englishName = archetype.getEnglishName();
 			book = archetype.getBook().getName();
 			bookshort = archetype.getBook().getSource();

@@ -33,7 +33,7 @@ public class WeaponController {
 	public String getWeapon(Model model, @PathVariable String name) {
 		Weapon weapon = repository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Оружие D&D 5e", weapon.getName(), weapon.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, weapon.getUrlName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, weapon.getUrl()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s D&D 5 редакции", weapon.getName(), weapon.getEnglishName(), weapon.getType().getName()));
 		model.addAttribute("menuTitle", "Оружие");
 		return "spa";

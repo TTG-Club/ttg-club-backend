@@ -1,7 +1,7 @@
 package club.dnd5.portal.model.screen;
 
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,13 +15,13 @@ import java.util.List;
 
 @Entity
 @Table(name = "screens")
-public class Screen {
+public class Screen extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String altName;
-	private String englishName;
+	@Column(nullable = false, unique = true)
+	private String url;
+
 	private String category;
 
 	@ManyToOne(cascade = { CascadeType.ALL })
@@ -39,8 +39,4 @@ public class Screen {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
-	}
 }

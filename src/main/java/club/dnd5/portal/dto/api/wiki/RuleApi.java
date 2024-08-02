@@ -22,7 +22,7 @@ public class RuleApi {
 
 	public RuleApi(Rule rule) {
 		name = new NameApi(rule.getName(), rule.getEnglishName());
-		url = String.format("/rules/%s", rule.getUrlName());
+		url = String.format("/rules/%s", rule.getUrl());
 		source = new SourceApi(rule.getBook());
 	}
 }

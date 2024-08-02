@@ -1,13 +1,11 @@
 package club.dnd5.portal.dto.api.item;
 
 import club.dnd5.portal.dto.api.SourceApi;
-import club.dnd5.portal.util.StringUtil;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import club.dnd5.portal.dto.api.classes.NameApi;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Weapon;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +26,7 @@ public class WeaponApi {
 
 	public WeaponApi(Weapon weapon) {
 		name = new NameApi(weapon.getName(), weapon.getEnglishName());
-		url = String.format("/weapons/%s", StringUtil.getUrl(weapon.getEnglishName()));
+		url = String.format("/weapons/%s", weapon.getUrl());
 		if (weapon.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}

@@ -32,7 +32,7 @@ public class RuleController {
 		Rule rule = ruleRepository.findByEnglishName(name.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s | %s | Правила и термины [Rules] D&D 5e", rule.getName(), rule.getType()));
 		model.addAttribute("metaDescription", String.format("%s (%s) Правила и термины по D&D 5 редакции", rule.getName(), rule.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, rule.getUrlName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, rule.getUrl()));
 		model.addAttribute("menuTitle", "Правила и термины");
 		return "spa";
 	}

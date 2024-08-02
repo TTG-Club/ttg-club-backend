@@ -1,7 +1,7 @@
 package club.dnd5.portal.model.items;
 
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -9,18 +9,17 @@ import javax.persistence.*;
 @Entity
 @Table(name = "armors")
 @Getter
-public class Armor {
+public class Armor extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String englishName;
-	private String altName;
+	@Column(nullable = false, unique = true)
+	private String url;
+
 	private int AC;
 	private int cost;
 	private float weight;
 
-	@Column(nullable = true)
 	private Integer forceRequirements;
 	private boolean stelsHindrance;
 
@@ -31,8 +30,4 @@ public class Armor {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
-
-	public String getUrlName(){
-		return StringUtil.getUrl(englishName);
-	}
 }

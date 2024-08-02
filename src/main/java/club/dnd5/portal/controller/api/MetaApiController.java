@@ -80,7 +80,7 @@ public class MetaApiController {
 		HeroClass heroClass = classRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Классы D&D 5e", heroClass.getName(), heroClass.getEnglishName()));
-		meta.setDescription(String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
+		meta.setDescription(String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getName(), heroClass.getEnglishName()));
 		meta.setMenu("Классы");
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
 		if (!images.isEmpty()) {
@@ -265,9 +265,9 @@ public class MetaApiController {
 		return meta;
 	}
 
-	@GetMapping(value = "/api/v1/meta/armors/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public MetaApi getArmorMeta(@PathVariable String englishName) {
-		Armor armor = armorRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+	@GetMapping(value = "/api/v1/meta/armors/{url}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MetaApi getArmorMeta(@PathVariable String url) {
+		Armor armor = armorRepository.findByUrl(url).orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
 		meta.setTitle(String.format("%s (%s) | Доспехи D&D 5e", armor.getName(), armor.getEnglishName()));
 		meta.setDescription(String.format("%s (%s) - доспехи по D&D 5 редакции", armor.getName(), armor.getEnglishName()));

@@ -4,11 +4,14 @@ import club.dnd5.portal.dto.api.PaginatedResponseApi;
 import club.dnd5.portal.dto.api.TokenApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.creature.Creature;
+import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.token.Token;
+import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +23,9 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -110,7 +116,7 @@ public class TokenApiController {
 			token.setType(type);
 		}
 		if (Objects.isNull(url)) {
-			token.setUrl("https://img.ttg.club/tokens/round/" + creature.getUrlName()
+			token.setUrl("https://img.ttg.club/tokens/round/" + creature.getUrl()
 				.replace("'", "-")
 				.replaceAll("[(),]+", "_")
 				+ ".webp");
@@ -130,4 +136,37 @@ public class TokenApiController {
 	public void deleteTokenById(@PathVariable Long id) {
 		tokenRepository.deleteById(id);
 	}
+
+    @RequiredArgsConstructor
+    @Hidden
+    @RestController
+    public static class ImageController {
+        private final ImageRepository repository;
+        private final HttpSession session;
+
+        @GetMapping("/image/{type}/{id}")
+        public String getImage(@PathVariable ImageType type, @PathVariable Integer id) {
+            return repository.findAllByTypeAndRefId(type, id).stream().findFirst().orElse(getDefault(type));
+        }
+
+        @GetMapping("/images/{type}/{id}")
+        public Collection<String> getImages(@PathVariable ImageType type, @PathVariable Integer id) {
+            Collection<String> images = repository.findAllByTypeAndRefId(type, id);
+            if (images.isEmpty()) {
+                return Collections.singleton(getDefault(type));
+            }
+            return repository.findAllByTypeAndRefId(type, id);
+        }
+
+        private String getDefault(ImageType type) {
+            Object themeObject = session.getAttribute("theme");
+            String theme;
+            if (themeObject == null) {
+                theme = "light";
+            } else {
+                theme = themeObject.toString();
+            }
+            return "/style/" + theme + "/no_img_best.png";
+        }
+    }
 }

@@ -24,7 +24,7 @@ public class BookApi {
 	private SourceApi source;
 	public BookApi(Book book) {
 		name = new NameApi(book.getName(), book.getEnglishName());
-		url = String.format("/books/%s", book.getUrlName());
+		url = String.format("/books/%s", book.getUrl());
 		type = new TypeApi(book.getType().getName(), book.getType().ordinal());
 		year = book.getYear();
 		source = new SourceApi(book);

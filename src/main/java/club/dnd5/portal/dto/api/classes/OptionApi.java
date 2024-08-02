@@ -24,7 +24,7 @@ public class OptionApi {
 	protected SourceApi source;
 	public OptionApi(Option option) {
 		name = new NameApi(option.getName(), option.getEnglishName());
-		url = String.format("/options/%s", option.getUrlName());
+		url = String.format("/options/%s", option.getUrl());
 		if (option.getBook().getType() == TypeBook.CUSTOM) {
 			homebrew = Boolean.TRUE;
 		}

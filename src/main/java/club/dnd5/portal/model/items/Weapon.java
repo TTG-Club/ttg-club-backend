@@ -2,8 +2,8 @@ package club.dnd5.portal.model.items;
 
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.Dice;
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,37 +14,32 @@ import java.util.List;
 
 @Entity
 @Table(name = "weapons")
-public class Weapon {
+public class Weapon extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	@Column(nullable = false, unique = true)
+	private String url;
 
-	private String name;
-	private String englishName;
-	private String altName;
 	private Integer cost;
 
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private Currency currency;
 
 	private float weight;
 
-	@Enumerated(EnumType.ORDINAL)
-	@Column(nullable = true)
+	@Enumerated(EnumType.STRING)
 	private Dice damageDice;
 
-	@Enumerated(EnumType.ORDINAL)
-	@Column(nullable = true)
+	@Enumerated(EnumType.STRING)
 	private Dice twoHandDamageDice;
 
-	@Column(nullable = true)
 	private Byte numberDice;
 
-	@Enumerated(EnumType.ORDINAL)
-	@Column(nullable = true)
+	@Enumerated(EnumType.STRING)
 	private DamageType damageType;
 
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private WeaponType type;
 
 	@Column(nullable = true)
@@ -80,9 +75,5 @@ public class Weapon {
 			return String.format("%s", numberDice);
 		}
 		return String.format("%d%s", numberDice, damageDice.getName());
-	}
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
 	}
 }

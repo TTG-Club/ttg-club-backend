@@ -1,4 +1,4 @@
-package club.dnd5.portal.controller.api;
+package club.dnd5.portal.controller.api.character;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
@@ -33,6 +33,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Tag(name = "Расы и происхождения", description = "API по рассам и происхождениям")
@@ -146,8 +147,7 @@ public class RacesApiController {
 		List<FilterApi> otherFilters = new ArrayList<>();
 		FilterApi levelFilter = new FilterApi("Увеличение характеристик", "abilities");
 		levelFilter.setValues(
-				EnumSet.of(AbilityType.STRENGTH, AbilityType.DEXTERITY,AbilityType.CONSTITUTION,AbilityType.INTELLIGENCE,AbilityType.WISDOM,AbilityType.CHARISMA)
-				.stream()
+				Stream.of(AbilityType.STRENGTH, AbilityType.DEXTERITY,AbilityType.CONSTITUTION,AbilityType.INTELLIGENCE,AbilityType.WISDOM,AbilityType.CHARISMA)
 				.map(value -> new FilterValueApi(value.getCyrilicName(), value.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(levelFilter);

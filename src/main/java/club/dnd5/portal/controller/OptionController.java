@@ -38,7 +38,7 @@ public class OptionController {
 	public String getOption(Model model, @PathVariable String name) {
 		Option option = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, option.getUrlName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, option.getUrl()));
 		model.addAttribute("metaDescription",
 				String.format("Описание особенности %s - %s",
 						option.getOptionTypes().stream().map(OptionType::getDisplayName).collect(Collectors.joining()),

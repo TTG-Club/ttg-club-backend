@@ -32,7 +32,7 @@ public class BeastApi {
 		name = new NameApi(beast.getName(), beast.getEnglishName());
 		type = beast.getType().getCyrillicName();
 		challengeRating = beast.getChallengeRating();
-		url = String.format("/bestiary/%s", beast.getUrlName());
+		url = String.format("/bestiary/%s", beast.getUrl());
 		source = new SourceApi(beast.getBook());
 	}
 }

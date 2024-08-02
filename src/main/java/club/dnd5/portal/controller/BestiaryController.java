@@ -36,7 +36,7 @@ public class BestiaryController {
 	public String getCreature(Model model, @PathVariable String name) {
 		Creature beast = bestiaryRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Бестиарий D&D 5e", beast.getName(), beast.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, beast.getUrlName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, beast.getUrl()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s с уровнем опасности %s",
 				beast.getName(),
 				beast.getEnglishName(),

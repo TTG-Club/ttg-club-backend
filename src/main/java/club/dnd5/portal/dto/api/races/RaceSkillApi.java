@@ -3,7 +3,7 @@ package club.dnd5.portal.dto.api.races;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import club.dnd5.portal.model.races.Feature;
+import club.dnd5.portal.model.races.RaceFeature;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +16,7 @@ public class RaceSkillApi {
 	  private String description;
 	  private Boolean subrace;
 	  private Boolean opened;
-	  public RaceSkillApi(Feature feature) {
+	  public RaceSkillApi(RaceFeature feature) {
 		name = feature.getName();
 		description = feature.getDescription();
 		if (feature.isFeature()) {

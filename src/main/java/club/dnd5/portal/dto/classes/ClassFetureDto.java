@@ -1,7 +1,7 @@
 package club.dnd5.portal.dto.classes;
 
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.classes.HeroClassTrait;
+import club.dnd5.portal.model.classes.ClassFeature;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +23,7 @@ public class ClassFetureDto {
 	private String description;
 	private Book book;
 
-	public ClassFetureDto(HeroClassTrait feature, String className) {
+	public ClassFetureDto(ClassFeature feature, String className) {
 		id = feature.getId();
 		name = feature.getName();
 		level = feature.getLevel();

@@ -2,9 +2,9 @@ package club.dnd5.portal.model.splells;
 
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.FoundryCommon;
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,21 +20,17 @@ import java.util.List;
 
 @Entity
 @Table(name = "spells")
-public class Spell implements FoundryCommon {
+public class Spell extends Name implements FoundryCommon {
 	public static final int MAX_LEVEL = 9;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	@Column(nullable = false, unique = true)
+	private String url;
 
 	private byte level;
 	private Boolean ritual;
-
-	private String name;
-	private String altName;
-
-	@Column(unique = true)
-	private String englishName;
 
 	@Enumerated(EnumType.ORDINAL)
 	private MagicSchool school;
@@ -83,9 +79,5 @@ public class Spell implements FoundryCommon {
 
 	public String getComponents() {
 		return (verbalComponent ? "В" : "") + (somaticComponent ? "C" : "") + (additionalMaterialComponent != null ? "М" : "");
-	}
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
 	}
 }

@@ -1,4 +1,4 @@
-package club.dnd5.portal.controller.api;
+package club.dnd5.portal.controller.api.character;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
@@ -345,7 +345,7 @@ public class SpellApiController {
 		customFilter.setHidden(Boolean.TRUE);
 
 		FilterValueApi customValue = new FilterValueApi();
-		customValue.setLabel(heroClass.getCapitalazeName());
+		customValue.setLabel(heroClass.getName());
 		customValue.setDefaultValue(Boolean.TRUE);
 		customValue.setKey(String.valueOf(heroClass.getId()));
 		customFilter.setValues(Collections.singletonList(customValue));
@@ -378,7 +378,7 @@ public class SpellApiController {
 		customFilter.setHidden(Boolean.TRUE);
 
 		FilterValueApi customValue = new FilterValueApi();
-		customValue.setLabel(heroClass.getCapitalazeName());
+		customValue.setLabel(heroClass.getName());
 		customValue.setDefaultValue(Boolean.TRUE);
 		if ("Eldritch_Knight".equalsIgnoreCase(englishArchetypeName) ||
 			"Arcane_Trickster".equalsIgnoreCase(englishArchetypeName)) {

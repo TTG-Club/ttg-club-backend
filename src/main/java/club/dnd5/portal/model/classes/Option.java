@@ -1,7 +1,7 @@
 package club.dnd5.portal.model.classes;
 
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,13 +15,12 @@ import java.util.List;
 
 @Entity
 @Table(name = "options")
-public class Option {
+public class Option extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String altName;
-	private String englishName;
+	@Column(nullable = false, unique = true)
+	private String url;
 
 	@ElementCollection(targetClass = OptionType.class)
 	@JoinTable(name = "option_types", joinColumns = @JoinColumn(name = "option_id"))
@@ -92,9 +91,5 @@ public class Option {
 		public String getDisplayName() {
 			return name.contains(":") ? name.substring(0, name.indexOf(":")) : name;
 		}
-	}
-
-	public String getUrlName() {
-		return StringUtil.getUrl(englishName);
 	}
 }

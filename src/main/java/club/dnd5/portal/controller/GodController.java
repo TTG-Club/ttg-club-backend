@@ -36,7 +36,7 @@ public class GodController {
 	public String getGod(Model model, @PathVariable String name) {
 		God god = repository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s (%s) | Боги D&D 5e", god.getName(), god.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, god.getUrlName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, god.getUrl()));
 		model.addAttribute("metaDescription", String.format("%s (%s) - %s %s, %s", god.getName(), god.getEnglishName(), god.getAligment().getCyrillicName(), god.getSex().getCyrilicName(), god.getCommitment()));
 		Collection<String> images = imageRepo.findAllByTypeAndRefId(ImageType.GOD, god.getId());
 		if (!images.isEmpty()) {

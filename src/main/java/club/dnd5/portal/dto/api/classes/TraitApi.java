@@ -16,16 +16,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FeatApi {
+public class TraitApi {
 	protected NameApi name;
 	protected String url;
 	private String requirements ;
 	private Boolean homebrew;
 	@Schema(description = "источник")
 	protected SourceApi source;
-	public FeatApi(Trait feat) {
+	public TraitApi(Trait feat) {
 		name = new NameApi(feat.getName(), feat.getEnglishName());
-		url = String.format("/feats/%s", feat.getUrlName());
+		url = String.format("/feats/%s", feat.getUrl());
 		if (feat.getRequirement() != null) {
 			requirements = feat.getRequirement();
 		} else {

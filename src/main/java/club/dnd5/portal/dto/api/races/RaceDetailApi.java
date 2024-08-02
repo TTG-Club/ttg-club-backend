@@ -1,7 +1,7 @@
 package club.dnd5.portal.dto.api.races;
 
 import club.dnd5.portal.dto.api.NameValueApi;
-import club.dnd5.portal.model.races.Feature;
+import club.dnd5.portal.model.races.RaceFeature;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.races.RaceNickname;
 import club.dnd5.portal.model.races.Sex;
@@ -65,7 +65,7 @@ public class RaceDetailApi extends RaceApi {
 		if (race.getParent() != null) {
 			final Set<Integer> replaceFeatureIds = race.getFeatures()
 					.stream()
-					.map(Feature::getReplaceFeatureId)
+					.map(RaceFeature::getReplaceFeatureId)
 					.filter(Objects::nonNull)
 					.collect(Collectors.toSet());
 			List<RaceSkillApi> subraceSkills = race.getFeatures()
@@ -130,7 +130,7 @@ public class RaceDetailApi extends RaceApi {
 				existingSkill.setDescription(existingSkill.getDescription() + descriptionBuilder);
 			} else {
 				// "Имена" feature doesn't exist, create a new one
-				Feature feature = new Feature();
+				RaceFeature feature = new RaceFeature();
 				feature.setName(featureName);
 				feature.setDescription(descriptionBuilder.toString());
 

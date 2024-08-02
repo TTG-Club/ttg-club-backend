@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FeatDetailApi extends FeatApi {
+public class FeatDetailApi extends TraitApi {
 	private String description;
 	private List<ReferenceClassApi> classes;
 

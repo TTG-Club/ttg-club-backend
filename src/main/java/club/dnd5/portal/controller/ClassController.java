@@ -3,7 +3,7 @@ package club.dnd5.portal.controller;
 import club.dnd5.portal.dto.classes.ClassFetureDto;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.model.classes.HeroClassTrait;
+import club.dnd5.portal.model.classes.ClassFeature;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.image.ImageType;
@@ -54,9 +54,9 @@ public class ClassController {
 	@GetMapping("/classes/{name}")
 	public String getClass(Model model, @PathVariable String name) {
 		HeroClass heroClass = classRepository.findByEnglishName(name.replace("_", " ")).orElseThrow(PageNotFoundException::new);
-		model.addAttribute("metaTitle", String.format("%s (%s) | Классы D&D 5e", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, heroClass.getUrlName()));
-		model.addAttribute("metaDescription", String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getCapitalazeName(), heroClass.getEnglishName()));
+		model.addAttribute("metaTitle", String.format("%s (%s) | Классы D&D 5e", heroClass.getName(), heroClass.getEnglishName()));
+		model.addAttribute("metaUrl", String.format("%s/%s", BASE_URL, heroClass.getUrl()));
+		model.addAttribute("metaDescription", String.format("%s (%s) - описание класса персонажа по D&D 5-редакции", heroClass.getName(), heroClass.getEnglishName()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
@@ -73,10 +73,10 @@ public class ClassController {
 				.filter(a -> a.getEnglishName().equalsIgnoreCase(archetype.replace('_', ' ')))
 				.findFirst().orElseThrow(PageNotFoundException::new);
 		model.addAttribute("metaTitle", String.format("%s - %s (%s) | Классы | Подклассы D&D 5e",
-				StringUtils.capitalize(selectedArchetype.getName().toLowerCase()), heroClass.getCapitalazeName(), heroClass.getEnglishName()));
-		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, heroClass.getUrlName(), selectedArchetype.getUrlName()));
+				StringUtils.capitalize(selectedArchetype.getName().toLowerCase()), heroClass.getName(), heroClass.getEnglishName()));
+		model.addAttribute("metaUrl", String.format("%s/%s/%s", BASE_URL, heroClass.getUrl(), selectedArchetype.getUrl()));
 		model.addAttribute("metaDescription", String.format("%s - описание %s класса %s из D&D 5 редакции",
-				selectedArchetype.getName(), heroClass.getArchetypeName(), heroClass.getCapitalazeName()));
+				selectedArchetype.getName(), heroClass.getArchetypeName(), heroClass.getName()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.SUBCLASS, selectedArchetype.getId());
 		if (!images.isEmpty()) {
 			model.addAttribute("metaImage", images.iterator().next());
@@ -241,7 +241,7 @@ public class ClassController {
 	@GetMapping("/classes/feature/{id}")
 	@ResponseBody
 	public String getClassFeatureDescription(@PathVariable Integer id) {
-		return traitRepository.findById(id).map(HeroClassTrait::getDescription).orElse("");
+		return traitRepository.findById(id).map(ClassFeature::getDescription).orElse("");
 	}
 
 	@GetMapping("/classes/archetype/feature/{id}")

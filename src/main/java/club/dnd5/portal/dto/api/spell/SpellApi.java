@@ -55,7 +55,7 @@ public class SpellApi {
 		if (spell.getAdditionalType() != null) {
 			additionalType = spell.getAdditionalType();
 		}
-		url = String.format("/spells/%s", spell.getUrlName());
+		url = String.format("/spells/%s", spell.getUrl());
 		source = new SourceApi(spell.getBook());
 		if (spell.getBook().getType() == TypeBook.CUSTOM) {
 			source.setHomebrew(Boolean.TRUE);

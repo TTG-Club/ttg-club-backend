@@ -1,7 +1,7 @@
 package club.dnd5.portal.model.items;
 
+import club.dnd5.portal.model.Name;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,13 +13,13 @@ import java.util.Set;
 
 @Entity
 @Table(name = "equipments")
-public class Equipment {
+public class Equipment extends Name {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String name;
-	private String englishName;
-	private String altName;
+	@Column(nullable = false, unique = true)
+	private String url;
+
 	private Integer cost;
 
 	@Enumerated(EnumType.ORDINAL)
@@ -50,18 +50,14 @@ public class Equipment {
 
 			switch (getCurrency()) {
 			case SM:
-				return String.valueOf(getCost() / 10f) + " " + getCurrency().getName();
+				return getCost() / 10f + " " + getCurrency().getName();
 			case GM:
-				return String.valueOf(getCost() / 100f) + " " + getCurrency().getName();
+				return getCost() / 100f + " " + getCurrency().getName();
 			case PM:
-				return String.valueOf(getCost() / 1000f) + " " + getCurrency().getName();
+				return getCost() / 1000f + " " + getCurrency().getName();
 			default:
 				return getCost() + " " + getCurrency().getName();
 			}
 		}
-	}
-
-	public String getUrlName(){
-		return StringUtil.getUrl(englishName);
 	}
 }
