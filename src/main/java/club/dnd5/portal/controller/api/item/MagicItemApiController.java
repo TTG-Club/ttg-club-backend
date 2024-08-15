@@ -2,11 +2,9 @@ package club.dnd5.portal.controller.api.item;
 
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
-import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.item.MagicItemDetailApi;
-import club.dnd5.portal.dto.api.item.MagicItemRequesApi;
-import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.dto.api.item.MagicItemRequestApi;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
@@ -15,10 +13,11 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.items.MagicItem;
 import club.dnd5.portal.model.items.MagicThingType;
 import club.dnd5.portal.model.items.Rarity;
-import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
+import club.dnd5.portal.service.SpecificationService;
 import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.util.RandomUtils;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,10 +28,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -41,26 +41,20 @@ import java.util.stream.Collectors;
 public class MagicItemApiController {
 	private final MagicItemRepository magicItemRepository;
 	private final ImageRepository imageRepository;
+	private final SpecificationService specificationService;
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<MagicItemApi> getItems(@RequestBody MagicItemRequesApi request) {
-		Specification<MagicItem> specification = null;
-		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
-		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
-			specification = SpecificationUtil.getSearch(request);
-		}
+	public List<MagicItemApi> getItems(@RequestBody MagicItemRequestApi request) {
+		Specification<MagicItem> specification = specificationService.buildSpecification(request);
 
 		if (request.getFilter() != null) {
-			if (!request.getFilter().getBooks().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Book, Spell> join = root.join("book", JoinType.INNER);
-					return join.get("source").in(request.getFilter().getBooks());
-				});
-			}
 			if (!request.getFilter().getRarity().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
-					(root, query, cb) -> root.get("rarity").in(request.getFilter().getRarity().stream().map(Rarity::valueOf).collect(Collectors.toList())));
+					(root, query, cb) -> root.get("rarity").in(request.getFilter().getRarity()
+						.stream()
+						.map(Rarity::valueOf)
+						.collect(Collectors.toList())));
 			}
 			if (!request.getFilter().getType().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(specification,
@@ -94,11 +88,19 @@ public class MagicItemApiController {
 				}
 			}
 		}
+
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return magicItemRepository.findAll(specification, pageable).toList()
+		List<MagicItemApi> items = magicItemRepository.findAll(specification, pageable).toList()
 			.stream()
 			.map(MagicItemApi::new)
 			.collect(Collectors.toList());
+
+		if (request.getFilter() != null && request.getFilter().getRandom()) {
+			int sizeList = pageable.getPageSize();
+			items = RandomUtils.getRandomObjectListFromList(items, sizeList);
+		}
+
+		return items;
 	}
 
 	@Operation(summary = "Получение магического предмета по английскому имени")
