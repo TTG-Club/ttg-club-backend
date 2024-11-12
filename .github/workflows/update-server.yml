@@ -28,7 +28,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             docker stop ttg-app-dev && docker rm ttg-app-dev
-            docker pull magistrus/dnd5club:latest
+            docker pull magistrus/ttg-club-dev:latest
             docker run \
               --network ttg-network-dev \
               --name ttg-app-dev \
@@ -43,7 +43,7 @@ jobs:
               -e dbuser=${{ secrets.DB_USER }} \
               -e dbpassword=${{ secrets.DB_PASSWORD }} \
               -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
-              -e dbname=dnd5 magistrus/dnd5club
+              -e dbname=dnd5 magistrus/ttg-club-dev
             docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
 
   prod-ssh:
@@ -59,7 +59,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             docker stop ttg-app-prod && docker rm ttg-app-prod
-            docker pull magistrus/dnd5club:latest
+            docker pull magistrus/ttg-club-prod:latest
             docker run \
               --network ttg-network-prod \
               --name ttg-app-prod \
@@ -74,5 +74,5 @@ jobs:
               -e dbuser=${{ secrets.DB_USER }} \
               -e dbpassword=${{ secrets.DB_PASSWORD }} \
               -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
-              -e dbname=dnd5 magistrus/dnd5club
+              -e dbname=dnd5 magistrus/ttg-club-prod
             docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
