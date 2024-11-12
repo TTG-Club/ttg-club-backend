@@ -10,6 +10,7 @@ import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
+import club.dnd5.portal.model.HealType;
 import club.dnd5.portal.model.TimeUnit;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -35,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -81,7 +83,7 @@ public class SpellApiController {
 				specification = SpecificationUtil.getAndSpecification(
 					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools().stream().map(MagicSchool::valueOf).collect(Collectors.toList())));
 			}
-			if (request.getFilter().getDamageTypes() != null && !request.getFilter().getDamageTypes().isEmpty()) {
+			if (!CollectionUtils.isEmpty(request.getFilter().getDamageTypes())) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
 					Join<DamageType, Spell> join = root.join("damageType", JoinType.LEFT);
 					query.distinct(true);
@@ -89,6 +91,16 @@ public class SpellApiController {
 						.stream()
 						.map(DamageType::valueOf)
 						.collect(Collectors.toList()));
+				});
+			}
+			if (!CollectionUtils.isEmpty(request.getFilter().getHealTypes())) {
+				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+					Join<HealType, Spell> join = root.join("healType", JoinType.LEFT);
+					query.distinct(true);
+					return join.in(request.getFilter().getHealTypes()
+							.stream()
+							.map(HealType::valueOf)
+							.collect(Collectors.toList()));
 				});
 			}
 			if (request.getFilter().getRitual() != null && !request.getFilter().getRitual().isEmpty()) {
@@ -260,6 +272,14 @@ public class SpellApiController {
 				.map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
+		FilterApi healTypeFilter = new FilterApi("Лечение", "healType");
+		values = new ArrayList<>(2);
+		values.add(new FilterValueApi("хиты", "hp"));
+		values.add(new FilterValueApi("временные хиты", "thp"));
+		damageTypeFilter.setValues(Arrays.stream(HealType.values())
+				.map(t -> new FilterValueApi(t.getName(), t.name()))
+				.collect(Collectors.toList()));
+		otherFilters.add(healTypeFilter);
 
 		FilterApi timecastFilter = new FilterApi("Время накладывания", "timecast");
 		values = new ArrayList<>();
