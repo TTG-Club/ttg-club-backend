@@ -275,7 +275,7 @@ public class SpellApiController {
 		otherFilters.add(damageTypeFilter);
 
 		FilterApi healTypeFilter = new FilterApi("Лечение", "healType");
-		damageTypeFilter.setValues(Arrays.stream(HealType.values())
+		healTypeFilter.setValues(Arrays.stream(HealType.values())
 				.map(t -> new FilterValueApi(t.getName(), t.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(healTypeFilter);
