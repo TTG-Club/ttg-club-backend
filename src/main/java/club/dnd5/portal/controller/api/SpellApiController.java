@@ -273,9 +273,6 @@ public class SpellApiController {
 				.collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
 		FilterApi healTypeFilter = new FilterApi("Лечение", "healType");
-		values = new ArrayList<>(2);
-		values.add(new FilterValueApi("хиты", "hp"));
-		values.add(new FilterValueApi("временные хиты", "thp"));
 		damageTypeFilter.setValues(Arrays.stream(HealType.values())
 				.map(t -> new FilterValueApi(t.getName(), t.name()))
 				.collect(Collectors.toList()));
