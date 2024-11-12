@@ -9,6 +9,7 @@ import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.HealType;
 import club.dnd5.portal.model.TimeUnit;
@@ -272,11 +273,18 @@ public class SpellApiController {
 				.map(value -> new FilterValueApi(value.getCyrillicName(), value.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(damageTypeFilter);
+
 		FilterApi healTypeFilter = new FilterApi("Лечение", "healType");
 		damageTypeFilter.setValues(Arrays.stream(HealType.values())
 				.map(t -> new FilterValueApi(t.getName(), t.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(healTypeFilter);
+
+		FilterApi savingthrowFilter = new FilterApi("Спасбросок", "savingThrow");
+		damageTypeFilter.setValues(AbilityType.getBaseAbility().stream()
+				.map(t -> new FilterValueApi(t.getCyrilicName(), t.name()))
+				.collect(Collectors.toList()));
+		otherFilters.add(savingthrowFilter);
 
 		FilterApi timecastFilter = new FilterApi("Время накладывания", "timecast");
 		values = new ArrayList<>();
