@@ -40,6 +40,8 @@ public class SpellFilter {
     private List<String> damageTypes;
     @JsonProperty("healType")
     private List<String> healTypes;
+    @JsonProperty("savingThrow")
+    private List<String> savingThrows;
 
     private Boolean homebrew;
     private Boolean settings;
