@@ -9,6 +9,7 @@ import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.HealType;
 import club.dnd5.portal.model.TimeUnit;
@@ -100,6 +101,16 @@ public class SpellApiController {
 					return join.in(request.getFilter().getHealTypes()
 							.stream()
 							.map(HealType::valueOf)
+							.collect(Collectors.toList()));
+				});
+			}
+			if (!CollectionUtils.isEmpty(request.getFilter().getSavingThrows())) {
+				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+					Join<AbilityType, Spell> join = root.join("savingthrows", JoinType.LEFT);
+					query.distinct(true);
+					return join.in(request.getFilter().getSavingThrows()
+							.stream()
+							.map(AbilityType::valueOf)
 							.collect(Collectors.toList()));
 				});
 			}
@@ -278,6 +289,12 @@ public class SpellApiController {
 				.map(t -> new FilterValueApi(t.getName(), t.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(healTypeFilter);
+
+		FilterApi savingthrowFilter = new FilterApi("Спасбросок", "savingThrow");
+		savingthrowFilter.setValues(AbilityType.getBaseAbility().stream()
+				.map(t -> new FilterValueApi(t.getCyrilicName(), t.name()))
+				.collect(Collectors.toList()));
+		otherFilters.add(savingthrowFilter);
 
 		FilterApi timecastFilter = new FilterApi("Время накладывания", "timecast");
 		values = new ArrayList<>();
