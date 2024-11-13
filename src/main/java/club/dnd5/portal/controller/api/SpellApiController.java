@@ -104,6 +104,16 @@ public class SpellApiController {
 							.collect(Collectors.toList()));
 				});
 			}
+			if (!CollectionUtils.isEmpty(request.getFilter().getSavingThrows())) {
+				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
+					Join<AbilityType, Spell> join = root.join("savingthrows", JoinType.LEFT);
+					query.distinct(true);
+					return join.in(request.getFilter().getSavingThrows()
+							.stream()
+							.map(AbilityType::valueOf)
+							.collect(Collectors.toList()));
+				});
+			}
 			if (request.getFilter().getRitual() != null && !request.getFilter().getRitual().isEmpty()) {
 				if (request.getFilter().getRitual().contains("yes")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
@@ -281,7 +291,7 @@ public class SpellApiController {
 		otherFilters.add(healTypeFilter);
 
 		FilterApi savingthrowFilter = new FilterApi("Спасбросок", "savingThrow");
-		damageTypeFilter.setValues(AbilityType.getBaseAbility().stream()
+		savingthrowFilter.setValues(AbilityType.getBaseAbility().stream()
 				.map(t -> new FilterValueApi(t.getCyrilicName(), t.name()))
 				.collect(Collectors.toList()));
 		otherFilters.add(savingthrowFilter);
