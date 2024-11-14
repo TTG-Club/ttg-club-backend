@@ -55,7 +55,7 @@ import java.util.stream.IntStream;
 public class SpellApiController {
 	private static final String[][] classesMap = {{"1", "Бард"}, {"2", "Волшебник"}, {"3", "Друид"},
 		{"4", "Жрец"}, {"5", "Колдун"}, {"6", "Паладин"}, {"7", "Следопыт"}, {"8", "Чародей"},
-		{"14", "Изобретатель"}};
+		{"14", "Изобретатель"}, {"22", "Шаман"}, {"23", "Магус"}};
 
 	private final SpellRepository spellRepository;
 	private final ClassRepository classRepository;
