@@ -1,7 +1,9 @@
 package club.dnd5.portal.model.splells;
 
+import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.FoundryCommon;
+import club.dnd5.portal.model.HealType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.util.StringUtil;
@@ -70,6 +72,18 @@ public class Spell implements FoundryCommon {
 	@Column(name = "damage_type", nullable = false)
 	@Enumerated(javax.persistence.EnumType.STRING)
 	private List<DamageType> damageType;
+
+	@ElementCollection(targetClass = HealType.class)
+	@JoinTable(name = "spell_heal_type", joinColumns = @JoinColumn(name = "spell_id"))
+	@Column(name = "heal_type", nullable = false)
+	@Enumerated(javax.persistence.EnumType.STRING)
+	private List<HealType> healType;
+
+	@ElementCollection(targetClass = AbilityType.class)
+	@JoinTable(name = "spell_savingthrows", joinColumns = @JoinColumn(name = "spell_id"))
+	@Column(name = "ability", nullable = false)
+	@Enumerated(javax.persistence.EnumType.STRING)
+	private List<AbilityType> savingthrows;
 
 	@ManyToMany
 	private List<HeroClass> heroClass;

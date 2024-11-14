@@ -1,15 +1,14 @@
 package club.dnd5.portal.dto.api.spells;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -39,6 +38,10 @@ public class SpellFilter {
     private List<String> concentration;
     @JsonProperty("damageType")
     private List<String> damageTypes;
+    @JsonProperty("healType")
+    private List<String> healTypes;
+    @JsonProperty("savingThrow")
+    private List<String> savingThrows;
 
     private Boolean homebrew;
     private Boolean settings;

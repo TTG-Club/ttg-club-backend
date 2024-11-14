@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 /**
  * Состояния существ
- *
  */
 @Getter
 public enum Condition {
