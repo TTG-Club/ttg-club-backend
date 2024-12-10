@@ -62,6 +62,9 @@ public class MarkdownUtil {
 		}
 		String description = feat.getDescription();
 		description = description.replace("{@beast_name}", beast.getName());
+		if (beast.getRaceId() != 102) {
+			description = description.toLowerCase();
+		}
 		for (Markdown markdown: markdowns) {
 			description = markdown.convert(description);
 		}
