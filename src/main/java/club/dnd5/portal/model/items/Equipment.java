@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.items;
 
+import club.dnd5.portal.model.SpecificationCommon;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "equipments")
-public class Equipment {
+public class Equipment implements SpecificationCommon {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;

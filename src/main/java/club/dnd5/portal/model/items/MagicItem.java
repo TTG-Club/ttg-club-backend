@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.items;
 
+
+import club.dnd5.portal.model.SpecificationCommon;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.util.StringUtil;
@@ -15,7 +17,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "artifactes")
-public class MagicItem {
+public class MagicItem implements SpecificationCommon {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;

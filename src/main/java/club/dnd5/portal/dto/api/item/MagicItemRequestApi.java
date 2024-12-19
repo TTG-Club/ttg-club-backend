@@ -1,9 +1,8 @@
 package club.dnd5.portal.dto.api.item;
 
+import club.dnd5.portal.dto.api.RequestApi;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import club.dnd5.portal.dto.api.RequestApi;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class MagicItemRequesApi extends RequestApi {
+public class MagicItemRequestApi extends RequestApi {
     public MagicItemFilter filter;
 }
