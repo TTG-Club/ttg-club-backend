@@ -62,10 +62,10 @@ public class MarkdownUtil {
 		}
 		String description = feat.getDescription();
 		if (beast.getRaceId() != 102) {
-			description = description.replaceAll("[^.]\\s{@beast_name}",
-					beast.getName().toLowerCase());
-			description = description.replaceAll("[.]\\s{@beast_name}", ". " + beast.getName());
-			description = description.replaceAll(">{@beast_name}", ">" + beast.getName());
+			description = description.replaceAll("\\.\\s\\{@beast_name\\}", ". " + beast.getName());
+			description = description.replaceAll(">\\{@beast_name\\}", ">" + beast.getName());
+			description = description.replaceAll("\\s\\{@beast_name\\}",
+					" " + beast.getName().toLowerCase());
 		} else {
 			description = description.replace("{@beast_name}", beast.getName());
 		}
