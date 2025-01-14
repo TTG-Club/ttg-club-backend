@@ -13,6 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class MagicItemRequesApi extends RequestApi {
+public class MagicItemRequestApi extends RequestApi {
     public MagicItemFilter filter;
 }
