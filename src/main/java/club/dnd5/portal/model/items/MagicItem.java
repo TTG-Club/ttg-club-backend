@@ -42,6 +42,9 @@ public class MagicItem {
 	private boolean consumed;
 	private Integer charge;
 
+	@Column(columnDefinition = "TINYINT")
+	private boolean curse;
+
 	@Column
 	private Integer cost;
 	private Byte bonus;
@@ -72,10 +75,6 @@ public class MagicItem {
 			return cost;
 		}
 		return consumed ? rarity.getBaseCost() / 2 : rarity.getBaseCost();
-	}
-
-	public int getBaseCost() {
-		return cost;
 	}
 
 	public String getCapitalazeName() {

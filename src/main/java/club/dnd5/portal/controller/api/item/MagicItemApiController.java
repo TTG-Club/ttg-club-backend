@@ -5,7 +5,7 @@ import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.item.MagicItemDetailApi;
-import club.dnd5.portal.dto.api.item.MagicItemRequesApi;
+import club.dnd5.portal.dto.api.item.MagicItemRequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -44,7 +44,7 @@ public class MagicItemApiController {
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<MagicItemApi> getItems(@RequestBody MagicItemRequesApi request) {
+	public List<MagicItemApi> getItems(@RequestBody MagicItemRequestApi request) {
 		Specification<MagicItem> specification = null;
 		Optional<RequestApi> optionalRequest = Optional.ofNullable(request);
 		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
@@ -91,6 +91,14 @@ public class MagicItemApiController {
 				}
 				if (request.getFilter().getCharge().contains("2")) {
 					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isNull(root.get("charge")));
+				}
+			}
+			if (!request.getFilter().getCurse().isEmpty()) {
+				if (request.getFilter().getCurse().contains("1")) {
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("curse"), 1));
+				}
+				if (request.getFilter().getCurse().contains("2")) {
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("curse"), 0));
 				}
 			}
 		}
@@ -165,6 +173,13 @@ public class MagicItemApiController {
 		values.add(new FilterValueApi("нет", 2));
 		chargeFilter.setValues(values);
 		otherFilters.add(chargeFilter);
+
+		FilterApi curseFilter = new FilterApi("Проклятие", "curse");
+		List<FilterValueApi> curseValues = new ArrayList<>(2);
+		curseValues.add(new FilterValueApi("есть", 1));
+		curseValues.add(new FilterValueApi("нет", 2));
+		attumentFilter.setValues(curseValues);
+		otherFilters.add(curseFilter);
 
 		filters.setOther(otherFilters);
 		return filters;
