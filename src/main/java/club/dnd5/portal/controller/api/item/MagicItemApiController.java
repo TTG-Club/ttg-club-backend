@@ -178,7 +178,7 @@ public class MagicItemApiController {
 		List<FilterValueApi> curseValues = new ArrayList<>(2);
 		curseValues.add(new FilterValueApi("есть", 1));
 		curseValues.add(new FilterValueApi("нет", 2));
-		attumentFilter.setValues(curseValues);
+		curseFilter.setValues(curseValues);
 		otherFilters.add(curseFilter);
 
 		filters.setOther(otherFilters);
