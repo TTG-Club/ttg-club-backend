@@ -43,7 +43,7 @@ public class MagicItem {
 	private Integer charge;
 
 	@Column(columnDefinition = "TINYINT")
-	private boolean curse;
+	private Boolean curse;
 
 	@Column
 	private Integer cost;
