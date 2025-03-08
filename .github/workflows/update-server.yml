@@ -3,76 +3,31 @@ name: Update Server
 on:
   workflow_call:
 
-permissions:
-  deployments: write
-  contents: read
-  pages: write
-  actions: write
-  id-token: write
-
 concurrency:
-  group: restart-server-${{ github.ref_name }}
-  cancel-in-progress: true
+  group: update-${{ github.ref_name == 'main' && 'prod' || 'dev' }}-server
+  cancel-in-progress: false
 
 jobs:
-  dev-ssh:
-    name: Update Dev SSH Server
-    if: ${{ github.ref_name == 'dev' }}
+  update:
+    name: Update Server
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || github.ref_name == 'dev' }}
+    env:
+      CONFIG_FILE: ${{ secrets.TMWEB_SSH_PATH }}/${{ github.ref_name == 'main' && 'prod' || 'dev' }}/2014/compose.yaml
     steps:
+      - name: Generate SHA
+        run: echo "FRONTEND_SHA=$(echo -n $(date +%s) | shasum -a 256 | tr -d "\n *-")" >> $GITHUB_ENV
       - uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
+          envs: FRONTEND_SHA
+          host: ${{secrets.TMWEB_SSH_HOST}}
+          username: ${{secrets.TMWEB_SSH_USER}}
+          key: ${{secrets.TMWEB_SSH_KEY}}
+          port: ${{secrets.TMWEB_SSH_PORT}}
           script: |
-            docker stop ttg-app-dev && docker rm ttg-app-dev
-            docker pull magistrus/ttg-club-dev:latest
-            docker run \
-              --network ttg-network-dev \
-              --name ttg-app-dev \
-              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }} \
-              -p 9090:8080 \
-              -d \
-              -e spring.profiles.active=dev \
-              -e frontend.application.sha=$(echo -n $(uuidgen) | shasum -a 256 | tr -d "\n *-") \
-              -e images.root=${{ secrets.DOCKER_MOUNT_DESTINATION }} \
-              -e dbhost=ttg-db-dev \
-              -e dbport=3306 \
-              -e dbuser=${{ secrets.DB_USER }} \
-              -e dbpassword=${{ secrets.DB_PASSWORD }} \
-              -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
-              -e dbname=dnd5 magistrus/ttg-club-dev
-            docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
-
-  prod-ssh:
-    name: Update Prod SSH Server
-    if: ${{ github.ref_name == 'main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            docker stop ttg-app-prod && docker rm ttg-app-prod
-            docker pull magistrus/ttg-club-prod:latest
-            docker run \
-              --network ttg-network-prod \
-              --name ttg-app-prod \
-              -v ${{ secrets.DOCKER_MOUNT_SOURCE }}:${{ secrets.DOCKER_MOUNT_DESTINATION }} \
-              -p 9393:8080 \
-              -d \
-              -e spring.profiles.active=prod \
-              -e frontend.application.sha=$(echo -n $(uuidgen) | shasum -a 256 | tr -d "\n *-") \
-              -e images.root=${{ secrets.DOCKER_MOUNT_DESTINATION }} \
-              -e dbhost=ttg-db-prod \
-              -e dbport=3306 \
-              -e dbuser=${{ secrets.DB_USER }} \
-              -e dbpassword=${{ secrets.DB_PASSWORD }} \
-              -e emailpassword=${{ secrets.EMAIL_PASSWORD }} \
-              -e dbname=dnd5 magistrus/ttg-club-prod
+            docker compose -f ${{ env.CONFIG_FILE }} pull app && \
+              docker compose -f ${{ env.CONFIG_FILE }} build app && \
+              docker compose -f ${{ env.CONFIG_FILE }} up app \
+                --no-deps \
+                --detach
             docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
