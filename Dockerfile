@@ -6,7 +6,7 @@ WORKDIR /opt/app
 FROM base AS build
 
 COPY --link . .
-RUN mvn -B clean install -DskipTests -Dfrontend.application.sha=$(echo -n $(date +%s) | shasum -a 256 | tr -d "\n *-")
+RUN mvn -B clean install -DskipTests -Dfrontend.application.sha=
 
 
 FROM eclipse-temurin:17-jre
