@@ -2,6 +2,7 @@ name: Update Server
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 concurrency:
   group: update-${{ github.ref_name == 'main' && 'prod' || 'dev' }}-server
