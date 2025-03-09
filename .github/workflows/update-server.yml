@@ -16,10 +16,10 @@ jobs:
       CONFIG_FILE: ${{ secrets.TMWEB_SSH_PATH }}/${{ github.ref_name == 'main' && 'prod' || 'dev' }}/2014/compose.yaml
     steps:
       - name: Generate SHA
-        run: echo "FRONTEND_SHA=$(echo -n $(date +%s) | shasum -a 256 | tr -d "\n *-")" >> $GITHUB_ENV
+        run: echo "FRONTEND_APPLICATION_SHA=$(echo -n $(date +%s) | shasum -a 256 | tr -d "\n *-")" >> $GITHUB_ENV
       - uses: appleboy/ssh-action@master
         with:
-          envs: FRONTEND_SHA
+          envs: FRONTEND_APPLICATION_SHA
           host: ${{secrets.TMWEB_SSH_HOST}}
           username: ${{secrets.TMWEB_SSH_USER}}
           key: ${{secrets.TMWEB_SSH_KEY}}
