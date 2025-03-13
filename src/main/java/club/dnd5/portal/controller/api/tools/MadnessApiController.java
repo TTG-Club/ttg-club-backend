@@ -39,6 +39,9 @@ public class MadnessApiController {
 
 	@PostMapping("/api/v1/tools/madness")
 	public Collection<MadnessApi> getItems(@RequestBody RequestMadnessApi request) {
+		if (request.getCount() > 99) {
+			return Collections.emptyList();
+		}
 		MadnessType madnessType;
 		if (request.getType() == null)
 		{
