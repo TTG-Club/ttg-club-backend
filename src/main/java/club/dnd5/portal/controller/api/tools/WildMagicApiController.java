@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Tag(name = "Утилиты", description = "Api для генерация дикой магии")
@@ -33,6 +30,9 @@ public class WildMagicApiController {
 
 	@PostMapping("/api/v1/tools/wildmagic")
 	public Collection<WildMagicApi> getItems(@RequestBody RequestWildMagicApi request) {
+		if (request.getCount() > 99) {
+			return Collections.emptyList();
+		}
 		Collection<WildMagicApi> wildMagics = new ArrayList<>(request.getCount());
 		List<WildMagic> items = wildMagicRepository.findAllByBook(request.getSources());
 		for (int i = 0; i < request.getCount(); i++) {
