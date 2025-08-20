@@ -84,8 +84,30 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
-  restart-server:
-    name: Update Server Workflow
+  update:
+    name: Update Server
     needs: build
-    uses: ./.github/workflows/update-server.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || github.ref_name == 'dev' }}
+    concurrency:
+      group: update-${{ github.ref_name == 'main' && 'prod' || 'dev' }}-server
+      cancel-in-progress: false
+    env:
+      CONFIG_FILE: ${{ secrets.BEGET_SSH_PATH }}/${{ github.ref_name == 'main' && 'prod' || 'dev' }}/2014/compose.yaml
+    steps:
+      - name: Generate SHA
+        run: echo "FRONTEND_APPLICATION_SHA=$(echo -n $(date +%s) | shasum -a 256 | tr -d "\n *-")" >> $GITHUB_ENV
+      - uses: appleboy/ssh-action@master
+        with:
+          envs: FRONTEND_APPLICATION_SHA
+          host: ${{secrets.BEGET_SSH_HOST}}
+          username: ${{secrets.BEGET_SSH_USER}}
+          key: ${{secrets.BEGET_SSH_KEY}}
+          port: ${{secrets.BEGET_SSH_PORT}}
+          script: |
+            docker compose -f ${{ env.CONFIG_FILE }} pull app && \
+              docker compose -f ${{ env.CONFIG_FILE }} build app && \
+              docker compose -f ${{ env.CONFIG_FILE }} up app \
+                --no-deps \
+                --detach
+            docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &
