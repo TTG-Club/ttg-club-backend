@@ -50,7 +50,7 @@ public class InvitationServiceImpl implements InvitationService {
 		String uniqueIdentifier;
 		do {
 			uniqueIdentifier = UUID.randomUUID().toString();
-			invitationLink = generateInvitationLink(profiles[0], valueProvider.getDevUrl(), valueProvider.getTtgUrl(), uniqueIdentifier);
+			invitationLink = generateInvitationLink(valueProvider.getAppUrl(), uniqueIdentifier);
 		} while (invitationRepository.existsByLink(invitationLink));
 
 		invitation.setUniqueIdentifier(uniqueIdentifier);
@@ -243,13 +243,7 @@ public class InvitationServiceImpl implements InvitationService {
 		return days * MILLISECONDS_IN_DAY;
 	}
 
-	private String generateInvitationLink(String activeProfile, String devUrl, String ttgUrl, String uniqueIdentifier) {
-		String baseUrl;
-		if ("local".equals(activeProfile)) {
-			baseUrl = "http://localhost:8080/api/v1";
-		} else {
-			baseUrl = "dev".equals(activeProfile) ? devUrl : ttgUrl;
-		}
+	private String generateInvitationLink(String baseUrl, String uniqueIdentifier) {
 		return baseUrl + "/invitation/" + uniqueIdentifier;
 	}
 
