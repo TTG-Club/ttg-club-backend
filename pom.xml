@@ -24,6 +24,8 @@
 		<bootstrap.version>5.0.2</bootstrap.version>
 		<jquery.version>3.6.0</jquery.version>
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
+
+        <frontend.application.sha>unknown</frontend.application.sha>
 	</properties>
 
 	<dependencies>
