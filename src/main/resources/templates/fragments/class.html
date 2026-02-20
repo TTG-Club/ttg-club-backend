@@ -78,14 +78,13 @@
               </detail-tooltip>
 							</th:block></td>
 						<td th:each="featureLevel : *{featureLevelDefenitions}"
-							th:with="byLevel = ${featureLevel.getByLevel(level)}"
-							th:text="${
-                           byLevel == 0 ? '—' :
-                           byLevel == -1 ? '∞' :
-                           (featureLevel.prefix != null ? featureLevel.prefix : '') +
-                           byLevel +
-                           (featureLevel.sufix != null ? featureLevel.sufix : '')
-                        ">
+							th:with="byLevel=${featureLevel.getByLevel(level)}"
+							th:text="${(byLevel == 0) ? '—' : ((byLevel == -1) ? '∞' :
+                          (featureLevel.prefix != null ? featureLevel.prefix : '') +
+                          ('' + byLevel) +
+                          (featureLevel.sufix != null ? featureLevel.sufix : '')
+                        )}">
+						</td>
 						</td>
 						<th:block th:unless="*{levelDefenitions.empty}">
 							<th:block th:unless="*{spellcasterType.name() eq 'NONE'}">
