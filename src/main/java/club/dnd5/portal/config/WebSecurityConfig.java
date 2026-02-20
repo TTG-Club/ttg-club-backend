@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -43,6 +44,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	private final JwtTokenProvider tokenProvider;
 	private final UserDetailsService customUserDetailsService;
 	private final RedirectToLowerCaseInterceptor redirectToLowerCaseInterceptor;
+
+	@Value("${allowed-origin-patterns}")
+	private String[] originPatterns;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(){
@@ -97,10 +101,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	public void addCorsMappings(CorsRegistry registry) {
 		 registry
 			 .addMapping("/**")
-			 .allowedOrigins(
-				 "https://ttg.club/",
-				 "https://dev.ttg.club/"
-			 )
+			 .allowedOriginPatterns(originPatterns)
 			 .allowedMethods("*")
 			 .allowCredentials(true);
 	}

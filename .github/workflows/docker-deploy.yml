@@ -84,8 +84,28 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
-  restart-server:
-    name: Update Server Workflow
+  update:
+    name: Update Server
     needs: build
-    uses: ./.github/workflows/update-server.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || github.ref_name == 'dev' }}
+    concurrency:
+      group: update-${{ github.ref_name == 'main' && 'prod' || 'dev' }}-server
+      cancel-in-progress: false
+    env:
+      SERVICE_NAME: 5e14-${{ github.ref_name == 'main' && 'prod' || 'dev' }}-app
+      CONFIG_FILE: ${{ secrets.BEGET_SSH_PATH }}/${{ github.ref_name == 'main' && 'prod' || 'dev' }}/5e14/compose.yaml
+    steps:
+      - uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.BEGET_SSH_HOST}}
+          username: ${{secrets.BEGET_SSH_USER}}
+          key: ${{secrets.BEGET_SSH_KEY}}
+          port: ${{secrets.BEGET_SSH_PORT}}
+          script: |
+            docker compose -f ${{ env.CONFIG_FILE }} pull ${{ env.SERVICE_NAME }} && \
+              docker compose -f ${{ env.CONFIG_FILE }} build ${{ env.SERVICE_NAME }} && \
+              docker compose -f ${{ env.CONFIG_FILE }} up ${{ env.SERVICE_NAME }} \
+                --no-deps \
+                --detach
+            docker rmi $(docker images --filter "dangling=true" -q --no-trunc) &

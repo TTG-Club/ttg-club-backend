@@ -53,12 +53,7 @@ public class EmailService {
 		String recipientAddress = user.getEmail();
 		String subject = "Сброс пароля на ttg.club";
 		String[] profiles = this.environment.getActiveProfiles();
-		String confirmationUrl;
-		if ("dev".equals(profiles[0])) {
-			confirmationUrl = valueProvider.getDevUrl() + resetText + token;
-		} else {
-			confirmationUrl = valueProvider.getTtgUrl() + resetText + token;
-		}
+		String confirmationUrl = valueProvider.getAppUrl() + resetText + token;
 
 		String message = "Для сброса пароля перейдите по ссылке и введите новый пароль:";
 		sendEmail(recipientAddress, subject, message, confirmationUrl);
