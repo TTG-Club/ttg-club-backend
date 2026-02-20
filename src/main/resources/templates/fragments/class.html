@@ -85,7 +85,6 @@
                           (featureLevel.sufix != null ? featureLevel.sufix : '')
                         )}">
 						</td>
-						</td>
 						<th:block th:unless="*{levelDefenitions.empty}">
 							<th:block th:unless="*{spellcasterType.name() eq 'NONE'}">
 								<td th:text="${heroClass.levelDefenitions[level - 1].slot1 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot1}" />
