@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru"
-	  xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorate="~{layouts/layout}">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
 <head>
 	<title th:text="${heroClass.name}"></title>
 </head>
@@ -13,55 +10,29 @@
 			<summary class="h4 feet_show"><span>Хиты</span></summary>
 			<div class="content">
 				<p class="class_stats">
-					<b>Кость Хитов:</b>
-					<dice-roller th:formula="|1к*{diceHp}|"></dice-roller>
-					за каждый уровень
+					<b>Кость Хитов:</b> <dice-roller th:formula="|1к*{diceHp}|"></dice-roller> за каждый уровень
 				</p>
 				<p class="class_stats">
-					<b>Хиты на 1 уровне:</b>
-					<span th:text="*{diceHp}"></span>
-					+ ваш модификатор <strong>Телосложения</strong>
+					<b>Хиты на 1 уровне:</b> <span th:text="*{diceHp}"></span> + ваш модификатор <strong>Телосложения</strong>
 				</p>
 				<p class="class_stats">
-					<b>Хиты на следующих уровнях:</b>
-					<dice-roller th:formula="|1к*{diceHp}|"></dice-roller>
-					(или [[*{diceHp/2 + 1}]])
-					+ модификатор <strong>Телосложения</strong>
-					за каждый уровень этого класса, после первого (минимум 1)
+					<b>Хиты на следующих уровнях:</b> <dice-roller th:formula="|1к*{diceHp}|"></dice-roller> (или [[*{diceHp/2 + 1}]]) + модификатор <strong>Телосложения</strong>  за каждый уровень этого класса, после
+					первого (минимум 1)
 				</p>
 			</div>
 		</details>
 	</th:block>
 
-	<!-- ===================== ТАБЛИЦА КЛАССА ===================== -->
-
-	<div class="table-responsive class">
+	<div class="table-responsive class" >
 		<table>
 			<thead>
 			<tr align="center">
-				<th rowspan="2" style="width: 24px">
-					<span class="tip" v-tippy="'Уровень в классе'">Ур.</span>
-				</th>
-				<th rowspan="2" style="width: 24px">
-					<span class="tip" v-tippy="'Бонус мастерства'">БМ</span>
-				</th>
+				<th rowspan="2" style="width: 24px"><span class="tip" v-tippy="'Уровень в классе'">Ур.</span></th>
+				<th rowspan="2" style="width: 24px"><span class="tip" v-tippy="'Бонус мастерства'">БМ</span></th>
 				<th rowspan="2" class="align_left">Умения</th>
-
-				<th th:each="featurelevelDefinition : *{featureLevelDefenitions}"
-					align="center"
-					rowspan="2"
-					th:text="${featurelevelDefinition.name}"
-					style="width: 5%">
-				</th>
-
-				<th th:unless="*{levelDefenitions.empty}"
-					align="center"
-					colspan="9"
-					class="bb">
-					Ячейки заклинаний на уровень заклинаний
-				</th>
+				<th th:each="featurelevelDefinition : *{featureLevelDefenitions}" align="center" rowspan="2" th:text="${featurelevelDefinition.name}" style="width: 5%">Умения</th>
+				<th th:unless="*{levelDefenitions.empty}" align="center" colspan="9" class="bb">Ячейки заклинаний на уровень заклинаний</th>
 			</tr>
-
 			<th:block th:unless="*{levelDefenitions.empty}">
 				<th:block th:unless="${heroClass.spellcasterType.name() eq 'NONE'}">
 					<tr align="center">
@@ -70,8 +41,7 @@
 						<th class="mini_lvl">3</th>
 						<th class="mini_lvl">4</th>
 						<th class="mini_lvl">5</th>
-
-						<th:block th:unless="*{spellcasterType.name() eq 'HALF'}">
+						<th:block th:unless="*{spellcasterType.name() eq 'HALF'}" class="mini_lvl">
 							<th class="mini_lvl">6</th>
 							<th class="mini_lvl">7</th>
 							<th class="mini_lvl">8</th>
@@ -81,80 +51,155 @@
 				</th:block>
 			</th:block>
 			</thead>
-
 			<tbody th:with="levelDef=${ {0,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6} }">
-
 			<tr th:each="level : ${#numbers.sequence(1, 20)}" align="center">
+				<td align="center" th:text="${level}" />
+				<td align="center" th:text="${'+' + levelDef[level]}" />
+				<td class="align_left"><th:block th:each="trait, iter : ${heroClass.getTraits(level)}">
+					<detail-tooltip
+							th:unless=${trait.architype}
+							th:url="|/classes/feature/${trait.id}|"
+					>
+						<a
+								class="tip_scroll"
+								th:href="|#c${trait.child eq null ? trait.id : trait.child}|"
+								th:utext="|${trait.name.toLowerCase() + trait.suffix}${iter.last or iter.size eq 1 ? '': ', '}|"
+						></a>
+					</detail-tooltip>
 
-				<td th:text="${level}"></td>
-				<td th:text="${'+' + levelDef[level]}"></td>
-
-				<!-- ======= БЛОК УМЕНИЙ ======= -->
-
-				<td class="align_left">
-					<th:block th:each="trait, iter : ${heroClass.getTraits(level)}"
-							  th:remove="tag">
-
-						<detail-tooltip
-								th:unless="${trait.architype}"
-								th:url="|/classes/feature/${trait.id}|">
-							<a class="tip_scroll"
-							   th:href="|#c${trait.child eq null ? trait.id : trait.child}|"
-							   th:text="${trait.name.toLowerCase() + trait.suffix}">
-							</a>
-						</detail-tooltip>
-
-						<detail-tooltip
-								th:if="${trait.architype}"
-								th:url="|/classes/feature/${trait.id}|">
-							<a th:href="${'#arc'}"
-							   th:text="${trait.name.toLowerCase() + trait.suffix}">
-							</a>
-						</detail-tooltip>
-
-						<span th:if="${!iter.last}">, </span>
-
-					</th:block>
-				</td>
-
-				<!-- ======= FEATURE LEVEL DEFINITIONS ======= -->
-
+					<detail-tooltip
+							th:if=${trait.architype}
+							th:url="|/classes/feature/${trait.id}|"
+					>
+						<a
+								th:href="${'#arc'}"
+								th:utext="|${trait.name.toLowerCase() + trait.suffix}${iter.last or iter.size eq 1 ? '': ', '}|"
+						></a>
+					</detail-tooltip>
+				</th:block></td>
 				<td th:each="featureLevel : *{featureLevelDefenitions}"
 					th:with="byLevel=${featureLevel.getByLevel(level)}"
-					th:text="${(byLevel == 0) ? '—' :
-                              ((byLevel == -1) ? '∞' :
-                              (featureLevel.prefix != null ? featureLevel.prefix : '') +
-                              ('' + byLevel) +
-                              (featureLevel.sufix != null ? featureLevel.sufix : '')
-                              )}">
+					th:text="${(byLevel == 0) ? '—' : ((byLevel == -1) ? '∞' :
+                          (featureLevel.prefix != null ? featureLevel.prefix : '') +
+                          ('' + byLevel) +
+                          (featureLevel.sufix != null ? featureLevel.sufix : '')
+                        )}">
 				</td>
-
-				<!-- ======= SPELL SLOTS ======= -->
-
+				</td>
 				<th:block th:unless="*{levelDefenitions.empty}">
 					<th:block th:unless="*{spellcasterType.name() eq 'NONE'}">
-
-						<td th:text="${heroClass.levelDefenitions[level - 1].slot1 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot1}"></td>
-						<td th:text="${heroClass.levelDefenitions[level - 1].slot2 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot2}"></td>
-						<td th:text="${heroClass.levelDefenitions[level - 1].slot3 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot3}"></td>
-						<td th:text="${heroClass.levelDefenitions[level - 1].slot4 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot4}"></td>
-						<td th:text="${heroClass.levelDefenitions[level - 1].slot5 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot5}"></td>
-
+						<td th:text="${heroClass.levelDefenitions[level - 1].slot1 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot1}" />
+						<td th:text="${heroClass.levelDefenitions[level - 1].slot2 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot2}" />
+						<td th:text="${heroClass.levelDefenitions[level - 1].slot3 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot3}" />
+						<td th:text="${heroClass.levelDefenitions[level - 1].slot4 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot4}" />
+						<td th:text="${heroClass.levelDefenitions[level - 1].slot5 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot5}" />
 						<th:block th:unless="*{spellcasterType.name() eq 'HALF'}">
-							<td th:text="${heroClass.levelDefenitions[level - 1].slot6 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot6}"></td>
-							<td th:text="${heroClass.levelDefenitions[level - 1].slot7 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot7}"></td>
-							<td th:text="${heroClass.levelDefenitions[level - 1].slot8 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot8}"></td>
-							<td th:text="${heroClass.levelDefenitions[level - 1].slot9 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot9}"></td>
+							<td th:text="${heroClass.levelDefenitions[level - 1].slot6 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot6}" />
+							<td th:text="${heroClass.levelDefenitions[level - 1].slot7 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot7}" />
+							<td th:text="${heroClass.levelDefenitions[level - 1].slot8 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot8}" />
+							<td th:text="${heroClass.levelDefenitions[level - 1].slot9 eq 0 ? '—' : heroClass.levelDefenitions[level - 1].slot9}" />
 						</th:block>
-
 					</th:block>
 				</th:block>
-
 			</tr>
 			</tbody>
 		</table>
 	</div>
 
+	<th:block th:fragment="classInfo2(selectedArchetype)">
+		<details open>
+			<summary class="h4"><span>Владение</span></summary>
+			<div class="content">
+				<p class="class_stats">
+					<b>Доспехи:</b> <span th:utext="*{armor}"></span>
+				</p>
+				<p class="class_stats">
+					<b>Оружие:</b> <span th:utext="*{weapon}"></span>
+				</p>
+				<p class="class_stats">
+					<b>Инструменты:</b> <span th:utext="*{tools}"></span>
+				</p>
+				<p class="class_stats">
+					<b>Спаcброски:</b> <span th:text="*{savingThrows}"></span>
+				</p>
+				<p class="class_stats">
+					<b>Навыки:</b> Выберите [[*{skillAvailableCount}]] навыка из следующих:
+					<th:block th:if="*{skillAvailableCount == 18}">Выберите [[*{skillAvailableCount}]] любых навыка.</th:block>
+					<th:block th:each="skill, iterStat : *{availableSkills}" th:text="${iterStat.last} ? ${skill.cyrilicName} : ${skill.cyrilicName} + ', '" />
+				</p>
+			</div>
+		</details>
+		<details open>
+			<summary class="h4" th:if="*{equipment}"><span>Снаряжение</span></summary>
+			<div class="content">
+				<p th:if="*{equipment}">
+					Вы начинаете со следующим снаряжением в дополнение к снаряжению, полученному за вашу предысторию: <span th:utext="*{equipment}"></span>
+				</p>
+			</div>
+		</details>
+	</th:block>
+	<th:block th:each="feature : ${features}">
+		<details th:if="${feature.child eq null}" open th:data-arch-source="${feature.optional eq 1 ? 'TCE':''}">
+			<summary class="h4" th:id="${'c'+feature.id}">
+				<span th:utext="${feature.name}"></span>
+				<span class="source-data tip" th:v-tippy="|'${feature.book.name}'|" th:text="${feature.book.source}">Source</span>
+			</summary>
+			<div class="content">
+				<div class="caption_text">
+					<span th:text="${feature.type}"></span>
+					<a href="/rules/optional_class_features" th:if="${feature.optional}" class="tip optional-rules" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</a>
+				</div>
+				<div th:utext="${feature.description}"></div>
+			</div>
+		</details>
+	</th:block>
+	<span id="arc"/>
+	<th:block th:each="archetype : *{archetypes}">
+		<details class="spoiler feet_show archetype_item" th:classappend="${archetype.book.type.name() eq 'CUSTOM' ? 'custom_source hide_block': archetype.book.type.name() eq 'SETTING' ? 'setting_source hide_block':''}" th:data-arch-source="${archetype.book.source}">
+			<summary class="h4">
+				<span th:text="${archetype.name}"></span>
+				<span class="source-data tip" th:text="${archetype.book.source}" th:title="${archetype.book.name}"></span>
+			</summary>
+			<div class="content">
+				<div th:utext="${archetype.description}"></div>
+				<table th:unless=${archetype.spells.empty}>
+					<thead>
+					<tr>
+						<th align="center" th:unless="${heroClass.id eq 5}" class="text-center">Уровень<br>[[${heroClass.genitiveName}]]
+						</th>
+						<th align="center" th:if="${heroClass.id eq 5}" class="text-center">Уровень<br>заклинания
+						</th>
+						<th align="left">Заклинания</th>
+					</tr>
+					</thead>
+					<tr th:each="element : ${archetype.levelSpells}">
+						<td align="center" th:text="${element.key}"></td>
+						<td><th:block th:each="spell, iterStat : ${element.value}">
+							<detail-tooltip th:url="|/spells/${spell.spell.englishName}|" type="spell">
+								<a class="tip_spell" th:href="@{'/spells/' + ${spell.spell.englishName}}" th:title="${spell.spell.name}"
+								   th:text="|${spell.spell.name.toLowerCase()} [${spell.spell.englishName.toLowerCase()}]|"></a>
+							</detail-tooltip>
+							<span th:if="${spell.advenced}" th:text="| (${spell.advenced})|"></span>
+							<span th:if="${not iterStat.last}">, </span>
+						</th:block></td>
+					</tr>
+					<tbody>
+					</tbody>
+				</table>
+				<div th:each="feature : ${archetype.feats}">
+					<h4 class="header_separator" th:id="${'c'+feature.id}">
+						<span th:utext="${feature.name}"/>
+					</h4>
+					<p class="caption_text" th:text="${feature.displayLevel}"></p>
+					<div th:utext="${feature.description}"></div>
+				</div>
+			</div>
+		</details>
+	</th:block>
+	<div th:object="${heroClass}" th:fragment="images">
+		<img style="width: 300px; height: auto;" th:each="image : ${images}" th:src="${image}">
+	</div>
 </th:block>
 </body>
 </html>
+
