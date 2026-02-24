@@ -73,7 +73,7 @@
 					>
 						<a
 								th:href="${'#arc'}"
-								th:utext="|${trait.name.toLowerCase() + trait.suffix}${iter.last or iter.size eq 1 ? '': ', '}|"
+								th:utext="|${trait.name.toLowerCase().trim() + trait.suffix}${iter.last or iter.size eq 1 ? '': ', '}|"
 						></a>
 					</detail-tooltip>
 				</th:block></td>
@@ -84,7 +84,6 @@
                           ('' + byLevel) +
                           (featureLevel.sufix != null ? featureLevel.sufix : '')
                         )}">
-				</td>
 				</td>
 				<th:block th:unless="*{levelDefenitions.empty}">
 					<th:block th:unless="*{spellcasterType.name() eq 'NONE'}">
@@ -202,4 +201,3 @@
 </th:block>
 </body>
 </html>
-
