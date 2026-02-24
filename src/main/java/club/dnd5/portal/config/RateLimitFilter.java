@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -19,9 +20,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-//@Component
+@Component
 public class RateLimitFilter extends OncePerRequestFilter
 {
+    private static final String ANONYMOUS_USER = "anonymousUser";
+
     private final RateLimitProperties properties;
 
     private final Map<String, BucketEntry> buckets = new ConcurrentHashMap<>();
@@ -38,6 +41,12 @@ public class RateLimitFilter extends OncePerRequestFilter
             FilterChain filterChain
     ) throws IOException, ServletException
     {
+        if (shouldSkip(request))
+        {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String clientKey = resolveClientKey(request);
 
         BucketEntry entry = buckets.computeIfAbsent(
@@ -55,6 +64,8 @@ public class RateLimitFilter extends OncePerRequestFilter
         if (result.isConsumed())
         {
             response.setHeader("X-RateLimit-Remaining", String.valueOf(result.getRemainingTokens()));
+            // Можно временно включить, чтобы на проде увидеть ключ прямо в ответе:
+            // response.setHeader("X-RateLimit-Key", clientKey);
             filterChain.doFilter(request, response);
             return;
         }
@@ -64,32 +75,66 @@ public class RateLimitFilter extends OncePerRequestFilter
         response.setStatus(429);
         response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSeconds));
         response.setHeader("X-RateLimit-Remaining", "0");
+        // response.setHeader("X-RateLimit-Key", clientKey);
         response.setContentType(MediaType.TEXT_PLAIN_VALUE);
         response.getWriter().write("Too many requests");
     }
 
+    private boolean shouldSkip(HttpServletRequest request)
+    {
+        String method = request.getMethod();
+        if ("OPTIONS".equalsIgnoreCase(method))
+        {
+            return true;
+        }
+
+        String uri = request.getRequestURI();
+        // не режем health/metrics, иначе Prometheus/healthcheck быстро сожрёт лимит
+        return uri != null && uri.startsWith("/actuator");
+    }
+
     /**
      * Ключ лимита:
-     * - если пользователь авторизован: user:<username>
-     * - иначе: ip:<ip> (с учётом X-Forwarded-For)
+     * - если пользователь авторизован (не anonymous): user:<username>
+     * - иначе: ip:<ip> (X-Real-IP / X-Forwarded-For / remoteAddr)
      */
     private String resolveClientKey(HttpServletRequest request)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated() && authentication.getName() != null)
+        if (authentication != null
+                && authentication.isAuthenticated()
+                && authentication.getName() != null
+                && !ANONYMOUS_USER.equals(authentication.getName()))
         {
             return "user:" + authentication.getName();
         }
 
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isEmpty())
+        String ip = resolveClientIp(request);
+        return "ip:" + ip;
+    }
+
+    private String resolveClientIp(HttpServletRequest request)
+    {
+        String realIp = request.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.trim().isEmpty())
         {
-            String ip = forwarded.split(",")[0].trim();
-            return "ip:" + ip;
+            return realIp.trim();
         }
 
-        return "ip:" + request.getRemoteAddr();
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.trim().isEmpty())
+        {
+            // Обычно XFF = "client, proxy1, proxy2"
+            // При корректной настройке прокси первый адрес = клиент
+            String first = forwarded.split(",")[0].trim();
+            if (!first.isEmpty())
+            {
+                return first;
+            }
+        }
+
+        return request.getRemoteAddr();
     }
 
     /**
@@ -198,21 +243,19 @@ public class RateLimitFilter extends OncePerRequestFilter
 
         ConsumeResult tryConsume()
         {
-            long retryAfterSeconds = 0;
-
             synchronized (this)
             {
                 refillIfNeeded();
 
-                if (tokens >= (long) 1)
+                if (tokens >= 1L)
                 {
-                    tokens -= 1;
+                    tokens -= 1L;
                     return new ConsumeResult(true, tokens, 0);
                 }
 
                 long now = System.currentTimeMillis();
-                long waitMillis = Math.max(0, nextRefillEpochMillis - now);
-                retryAfterSeconds = Math.max(1, Duration.ofMillis(waitMillis).getSeconds());
+                long waitMillis = Math.max(0L, nextRefillEpochMillis - now);
+                long retryAfterSeconds = Math.max(1L, Duration.ofMillis(waitMillis).getSeconds());
 
                 return new ConsumeResult(false, 0, retryAfterSeconds);
             }
@@ -224,11 +267,18 @@ public class RateLimitFilter extends OncePerRequestFilter
 
             if (now >= nextRefillEpochMillis)
             {
-                // greedy refill: раз в window добавляем refillTokens, не превышая capacity
                 tokens = Math.min(capacity, tokens + refillTokens);
 
-                long windowsPassed = Math.max(1, (now - nextRefillEpochMillis) / window.toMillis() + 1);
-                nextRefillEpochMillis = nextRefillEpochMillis + windowsPassed * window.toMillis();
+                long windowMillis = window.toMillis();
+                if (windowMillis <= 0L)
+                {
+                    // защита от некорректной конфигурации
+                    nextRefillEpochMillis = now + 1000L;
+                    return;
+                }
+
+                long windowsPassed = Math.max(1L, (now - nextRefillEpochMillis) / windowMillis + 1L);
+                nextRefillEpochMillis = nextRefillEpochMillis + windowsPassed * windowMillis;
             }
         }
 
