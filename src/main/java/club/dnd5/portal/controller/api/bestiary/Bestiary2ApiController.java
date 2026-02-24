@@ -17,20 +17,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequiredArgsConstructor
-@Tag(name = "Бестиарий v2", description = "API для сущест из бестиария")
+@Tag(name = "Бестиарий v2", description = "API для существ из бестиария")
 @RequestMapping("/api/v2/")
 @RestController
 public class Bestiary2ApiController {
     private final BestiaryService bestiaryService;
 
-    @Operation(summary = "Получение краткого списка сушеств")
+    @Operation(summary = "Получение краткого списка существ")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/bestiary")
     public List<BeastApi> getBestiary(@ParameterObject BeastRequesApi request) {
         return bestiaryService.findAll(request);
     }
 
-    @Operation(summary = "Получение сушества по английскому имени")
+    @Operation(summary = "Получение существа по английскому имени")
     @GetMapping(value = "/bestiary/{englishName}")
     public BeastDetailApi getBeast(@PathVariable String englishName) {
         return bestiaryService.findOne(englishName);
@@ -45,7 +45,7 @@ public class Bestiary2ApiController {
         bestiaryService.create(request);
     }
 
-    @Operation(summary = "Обнавление существа из бестиарии")
+    @Operation(summary = "Обновление существа из бестиарии")
     @SecurityRequirement(name = "Bearer Authentication")
     @Secured({"ADMIN"})
     @ResponseStatus(HttpStatus.CREATED)

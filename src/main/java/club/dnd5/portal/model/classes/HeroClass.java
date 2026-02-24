@@ -29,7 +29,8 @@ public class HeroClass {
 	private Integer id;
 	private String name;
 	private String englishName;
-
+	@Column(name = "name_accusative")
+	private String accusativeName;
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
@@ -152,21 +153,19 @@ public class HeroClass {
 	}
 
 	public List<ArchetypeTrait> getArhitypeTraitNames(int level){
-		List<ArchetypeTrait> levelArhitypeFeats = archetypes
-				.stream()
-				.flatMap(a -> a.getFeats().stream())
-				.filter(t-> t.getLevel() == level)
-				.collect(Collectors.toList());
-		return levelArhitypeFeats;
+        return archetypes
+                .stream()
+                .flatMap(a -> a.getFeats().stream())
+                .filter(t-> t.getLevel() == level)
+                .collect(Collectors.toList());
 	}
 
 	public List<ArchetypeTrait> getArhitypeTraitNames(int archetypeId, int level){
-		List<ArchetypeTrait> levelArhitypeFeats = archetypes
-				.stream()
-				.filter(a -> a.getId() == archetypeId)
-				.flatMap(a -> a.getFeats().stream())
-				.filter(t-> t.getLevel() == level)
-				.collect(Collectors.toList());
-		return levelArhitypeFeats;
+        return archetypes
+                .stream()
+                .filter(a -> a.getId() == archetypeId)
+                .flatMap(a -> a.getFeats().stream())
+                .filter(t-> t.getLevel() == level)
+                .collect(Collectors.toList());
 	}
 }

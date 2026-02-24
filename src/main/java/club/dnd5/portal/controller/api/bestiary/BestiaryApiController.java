@@ -49,7 +49,7 @@ public class BestiaryApiController {
 	private final ImageRepository imageRepository;
 	private final TokenRepository tokenRepository;
 
-	@Operation(summary = "Получение краткого списка сушеств")
+	@Operation(summary = "Получение краткого списка существ")
 	@PostMapping(value = "/api/v1/bestiary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<BeastApi> getBestiary(@RequestBody BeastRequesApi request) {
 		Specification<Creature> specification = null;
@@ -196,7 +196,7 @@ public class BestiaryApiController {
 			.collect(Collectors.toList());
 	}
 
-	@Operation(summary = "Получение сушества по английскому имени")
+	@Operation(summary = "Получение существа по английскому имени")
 	@PostMapping(value = "/api/v1/bestiary/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BeastDetailApi getBeast(@PathVariable String englishName) {
 		Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
@@ -233,7 +233,7 @@ public class BestiaryApiController {
 
 		List<FilterApi> otherFilters = new ArrayList<>();
 
-		FilterApi npcFilter = new FilterApi("Именнованые НИП", "npc");
+		FilterApi npcFilter = new FilterApi("Именованные НИП", "npc");
 		npcFilter.setType("toggle");
 		npcFilter.setValues(Collections.singletonList(
 			new FilterValueApi("показать именованных НИП", "showNpc", Boolean.TRUE)));

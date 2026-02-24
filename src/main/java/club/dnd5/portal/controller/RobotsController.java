@@ -13,7 +13,7 @@ import java.io.InputStream;
 public class RobotsController {
 	@GetMapping(value = {"/robots", "/robot", "/robot.txt", "/robots.txt", "/null"})
 	public void robots(HttpServletResponse response) {
-		InputStream resourceAsStream = null;
+		InputStream resourceAsStream;
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
 			resourceAsStream = classLoader.getResourceAsStream("robots.txt");
@@ -21,7 +21,7 @@ public class RobotsController {
 			response.setContentType("text/plain");
 			IOUtils.copy(resourceAsStream, response.getOutputStream());
 			response.flushBuffer();
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 
 		}
 	}
@@ -36,7 +36,7 @@ public class RobotsController {
 			response.setContentType("text/plain");
 			IOUtils.copy(resourceAsStream, response.getOutputStream());
 			response.flushBuffer();
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 
 		}
 	}

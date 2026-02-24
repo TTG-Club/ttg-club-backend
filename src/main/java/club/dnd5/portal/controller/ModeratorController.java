@@ -1,16 +1,5 @@
 package club.dnd5.portal.controller;
 
-import java.util.Map;
-
-import javax.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import club.dnd5.portal.dto.bestiary.BeastForm;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.ArmorType;
@@ -22,10 +11,19 @@ import club.dnd5.portal.model.creature.Condition;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.transaction.Transactional;
+import java.util.Map;
+
+@RequiredArgsConstructor
 public class ModeratorController {
-	@Autowired
-	private BestiaryRepository bestiaryRepository;
+	private final BestiaryRepository bestiaryRepository;
 
 	@GetMapping ("/profile/beast")
 	public String getProfileForm(Model model) {

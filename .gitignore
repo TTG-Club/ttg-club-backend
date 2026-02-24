@@ -20,3 +20,5 @@ _test
 .project
 
 .settings/org.eclipse.jdt.core.prefs
+
+.env
