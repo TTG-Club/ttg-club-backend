@@ -69,7 +69,9 @@ public class Option {
 		TOTEMS("Тотемы: Шаман", "Shaman", true),
 		FIGHTING_STYLE_ALT_FIGHTER("Боевые стили: Адьтернативный воин", "Alternate Fighter", true),
 		MARTIAL_EXPLOITS("Боевые приёмы: Альтернативный воин", "Alternate Fighter", true),
-		SIGNATURE_TECHNIQUES("Фирменные техники: Альтернативный монах", "Alternate Monk", true);
+		SIGNATURE_TECHNIQUES("Фирменные техники: Альтернативный монах", "Alternate Monk", true),
+		SAVAGE_EXPLOITS("Дикие приёмы: Альтернативный варвар", "Alternate Barbarian", true),
+		DEGREE_EXPLOITS("Коварные приёмы: Альтернативный плут", "Alternate Rogue", true);
 
 		private final String name;
 		private final  String className;
