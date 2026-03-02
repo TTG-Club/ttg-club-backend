@@ -1,12 +1,11 @@
 package club.dnd5.portal.model;
 
-import java.util.EnumSet;
-import java.util.Set;
-
-import org.thymeleaf.util.StringUtils;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.thymeleaf.util.StringUtils;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Характеристики 
@@ -26,7 +25,7 @@ public enum AbilityType {
 	CHOICE_UNIQUE("к 2 другим"),
 	CHOICE_DOUBLE("+2 и +1 / +1 к трем");
 
-	private String cyrilicName;
+	private final String cyrilicName;
 
 	public String getShortName() {
 		switch (this) {
@@ -47,25 +46,6 @@ public enum AbilityType {
 		}
 	}
 
-	public static AbilityType parseShortName(String shortName) {
-		switch (shortName) {
-			case "Сил":
-				return AbilityType.STRENGTH;
-			case "Лов":
-				return AbilityType.DEXTERITY;
-			case "Тел":
-				return AbilityType.CONSTITUTION;
-			case "Инт":
-				return AbilityType.INTELLIGENCE;
-			case "Мдр":
-			case "Муд":			
-				return AbilityType.WISDOM;
-			case "Хар":
-				return AbilityType.CHARISMA;
-		}
-		return null;
-	}
-	
 	public String getCapitalizeName() {
 		return StringUtils.capitalize(name().toLowerCase());
 	}
@@ -77,10 +57,6 @@ public enum AbilityType {
 			}
 		}
 		return null;
-	}
-
-	public static byte getModifier(byte ability) {
-		return (byte) ((ability - 10) < 0 ? (ability - 11) / 2 : (ability - 10) / 2);
 	}
 
 	public static Set<AbilityType> getBaseAbility(){

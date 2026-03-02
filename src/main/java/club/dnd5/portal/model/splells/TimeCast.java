@@ -1,5 +1,10 @@
 package club.dnd5.portal.model.splells;
 
+import club.dnd5.portal.model.TimeUnit;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,11 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import club.dnd5.portal.model.TimeUnit;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -30,11 +30,6 @@ public class TimeCast {
 	@Column(nullable = false)
 	private TimeUnit unit;
 	private String condition;
-	
-	public TimeCast(int number, TimeUnit unit) {
-		this.number = number;
-		this.unit = unit;
-	}
 
 	public String getName(){
 		if (condition == null) {

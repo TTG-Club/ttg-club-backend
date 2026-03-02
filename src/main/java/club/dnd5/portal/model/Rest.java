@@ -9,5 +9,6 @@ public enum Rest {
 	SHORT("короткий отдых"),
 	LONG("продолжительный отдых"),
 	FULL("полный отдых"),;
+
 	private final String cyrillicName;
 }

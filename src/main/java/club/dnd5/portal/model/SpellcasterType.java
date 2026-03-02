@@ -11,5 +11,5 @@ public enum SpellcasterType {
 	PARTLY(4),
 	NONE(0);
 
-	private int maxSpellLevel;
+	private final int maxSpellLevel;
 }

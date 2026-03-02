@@ -11,9 +11,10 @@ public enum TimeUnit {
 	ACTION("действие"), 
 	ROUND("ход"),
 	MINUTE("минута"),
-	HOUR("час");
+	HOUR("час"),
+	ON_HIT("при попадании");
 
-	private String name;
+	private final String name;
 
 	public String getName(int number) {
 		switch (this) {

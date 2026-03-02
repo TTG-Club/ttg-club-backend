@@ -10,6 +10,6 @@ public enum MadnessType {
 	LONG("долговременное", "1к10 × 10 часов"), 
 	UNLIMITED("бессрочное", "до исцеления");
 	
-	private String cyrilicName;
-	private String duration;
+	private final String cyrilicName;
+	private final String duration;
 }
