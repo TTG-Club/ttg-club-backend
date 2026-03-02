@@ -31,7 +31,10 @@ public class TimeCast {
 	private TimeUnit unit;
 	private String condition;
 
-	public String getName(){
+	public String getName() {
+		if (unit == TimeUnit.ON_HIT) {
+			return unit.getName();
+		}
 		if (condition == null) {
 			return String.format("%d %s", number, unit.getName(number));
 		}
