@@ -34,6 +34,7 @@ jobs:
     name: Build Docker image
     needs: build-front
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || github.ref_name == 'dev' }}
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
       image_name: ${{ steps.set_image_name.outputs.IMAGE_NAME }}
@@ -48,6 +49,9 @@ jobs:
           LOWER_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
           echo "IMAGE_NAME=$LOWER_NAME" >> $GITHUB_ENV
           echo "IMAGE_NAME=$LOWER_NAME" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - uses: actions/download-artifact@v4
         with:
@@ -70,8 +74,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=${{ github.ref_name == 'main' && 'release' || 'dev' }}-${{ github.sha }}
-            type=raw,value=${{ github.ref_name }}
+            type=sha,prefix=${{ github.ref_name == 'main' && 'release-' || 'dev-' }},format=short
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -90,6 +93,14 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Sign image
+        run: |
+          cosign sign --yes \
+          "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}@${{ steps.push.outputs.digest }}"
 
   update:
     name: Update Server
