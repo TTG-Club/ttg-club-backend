@@ -16,6 +16,7 @@ permissions:
   attestations: write
   id-token: write
   actions: write
+  pages: write
 
 env:
   REGISTRY: ${{ secrets.REGISTRY_URL }}
