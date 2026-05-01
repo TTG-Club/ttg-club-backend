@@ -1,9 +1,9 @@
 package club.dnd5.portal.model.god;
 
-import java.util.Arrays;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @AllArgsConstructor
 @Getter
@@ -27,7 +27,8 @@ public enum Domain {
 	REPOSE("Упокоение"),
 	UNDEFINE("Нет жрецов"); 
 
-	private String cyrilicName;
+	private final String cyrilicName;
+
 	public static Domain parse(String value) {
 		return Arrays.stream(values())
 				.filter(d -> d.getCyrilicName().equals(value))

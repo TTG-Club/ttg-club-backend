@@ -1,25 +1,18 @@
 package club.dnd5.portal.repository.user;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-
+import club.dnd5.portal.model.user.Bookmark;
+import club.dnd5.portal.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import club.dnd5.portal.model.user.Bookmark;
-import club.dnd5.portal.model.user.User;
+import java.util.Collection;
+import java.util.UUID;
 
 @Repository
 public interface BookmarkRepository extends JpaRepository<Bookmark, UUID> {
 	Collection<Bookmark> findByUser(User user);
 
 	Collection<Bookmark> findByUserAndParentIsNull(User user);
-	Collection<Bookmark> findByParent(Bookmark parent);
-
-	Collection<Bookmark> findByUrl(String url);
-
-	Optional<Bookmark> findByUserAndOrder(User user, int order);
 
 	Collection<Bookmark> findByParentUuid(UUID uuid);
 }

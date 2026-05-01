@@ -14,8 +14,8 @@ public enum ActionDataType {
 	HEAL("h", "восстановл"), 
 	TEMP_HEAL("th", "временных хитов");
 
-	private String shortName;
-	private String name;
+	private final String shortName;
+	private final String name;
 	
 	public static String parse(String text) {
 		for (ActionDataType type : values()) {

@@ -50,11 +50,11 @@ public class Equipment {
 
 			switch (getCurrency()) {
 			case SM:
-				return String.valueOf(getCost() / 10f) + " " + getCurrency().getName();
+				return getCost() / 10f + " " + getCurrency().getName();
 			case GM:
-				return String.valueOf(getCost() / 100f) + " " + getCurrency().getName();
+				return getCost() / 100f + " " + getCurrency().getName();
 			case PM:
-				return String.valueOf(getCost() / 1000f) + " " + getCurrency().getName();
+				return getCost() / 1000f + " " + getCurrency().getName();
 			default:
 				return getCost() + " " + getCurrency().getName();
 			}

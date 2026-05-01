@@ -1,9 +1,9 @@
 package club.dnd5.portal.model.items;
 
-import java.util.Arrays;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
@@ -23,7 +23,7 @@ public enum MagicThingType
   AMMUNITION("аммуниция"),           //11
   WEAPON("оружие");                  //12
 
-  private String cyrilicName;
+  private final String cyrilicName;
 
   public static MagicThingType parse(String value) {
 	  return Arrays.stream(values()).filter(t -> t.getCyrilicName().equals(value)).findFirst().orElseThrow(IllegalArgumentException::new);

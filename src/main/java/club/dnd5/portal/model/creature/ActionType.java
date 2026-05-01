@@ -12,5 +12,6 @@ public enum ActionType {
 	BONUS("Бонусные действия"),
 	LAIR("Действия логова"),
 	MYSTICAL("Мистическое действие");
-	private String name;
+
+	private final String name;
 }

@@ -28,11 +28,8 @@ public class JsonParseController {
 	private final Set<String> ROLES = new HashSet<>(Collections.singletonList("ADMIN"));
 
 	private final JsonStorageRepository jsonStorageRepository;
-
 	private final BestiaryRepository bestiaryRepository;
-
 	private final UserRepository userRepository;
-
 	private final SpellRepository spellRepository;
 
 	@PostMapping(value = "/api/v1/fspell")
@@ -84,13 +81,13 @@ public class JsonParseController {
 			}
 		} else {
 			if (name.contains("/")) {
-				name = name.split("/")[1].trim().replaceAll("-", " ").trim();
+				name = name.split("/")[1].trim().replace("-", " ").trim();
 			} else {
 				return null;
 			}
 		}
-		Optional<?> entityOptional = null;
-		Integer id = null;
+		Optional<?> entityOptional = Optional.empty();
+		Integer id;
 		if (jsonType == JsonType.SPELL) {
 			entityOptional = spellRepository.findByEnglishName(name);
 		} else if (jsonType == JsonType.CREATURE) {
@@ -99,7 +96,7 @@ public class JsonParseController {
 		if (entityOptional.isPresent()) {
 			if (jsonType == JsonType.SPELL) {
 				id = ((Spell) entityOptional.get()).getId();
-			} else if (jsonType == JsonType.CREATURE) {
+			} else {
 				id = ((Creature) entityOptional.get()).getId();
 			}
 		} else {

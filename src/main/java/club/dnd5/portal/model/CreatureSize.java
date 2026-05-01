@@ -16,6 +16,7 @@ public enum CreatureSize {
 	SMALL_MEDIUM("Средний или Маленький", "Средняя или Маленькая", "Среднее или Маленькое");
 
 	private final String [] names;
+
 	CreatureSize(String... names){
 		this.names = names;
 	}

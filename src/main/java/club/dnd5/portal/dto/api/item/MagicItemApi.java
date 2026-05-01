@@ -28,9 +28,9 @@ public class MagicItemApi extends ItemApi {
 		rarity = new RarityApi(item.getRarity().name().toLowerCase().replace('_', '-'), item.getRarity().getShort(), item.getTextRarity());
 		source = new SourceApi(item.getBook());
 		if (item.getCustomization()) {
-			customization = item.getCustomization();
+			customization = true;
 		}
-		setPrice(item.getRarity().getRandomPrice(item));
+		setPrice(Rarity.getRandomPrice(item));
 	}
 
 	public void setRarity(Rarity rarity) {
