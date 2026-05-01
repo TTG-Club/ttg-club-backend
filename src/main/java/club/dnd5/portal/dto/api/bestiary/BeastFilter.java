@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 public class BeastFilter {
-	@Schema(description = "уровени опасности")
+	@Schema(description = "уровни опасности")
 	@JsonProperty("challengeRating")
 	private List<String> challengeRatings;
 	@Schema(description = "типы существ")

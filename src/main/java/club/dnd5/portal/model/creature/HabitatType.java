@@ -1,12 +1,12 @@
 package club.dnd5.portal.model.creature;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
@@ -27,8 +27,8 @@ public enum HabitatType {
 	DESERT("пустыня", "desert"),
 	TROPICS("тропики", null);
 
-	private String name;
-	private String xmlName;
+	private final String name;
+	private final String xmlName;
 
 	public static Set<HabitatType> types(){
 		return Arrays.stream(values()).filter(t -> t.xmlName != null).collect(Collectors.toSet());

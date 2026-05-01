@@ -1,10 +1,11 @@
 package club.dnd5.portal.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -14,41 +15,58 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtTokenProvider tokenProvider;
-    private final UserDetailsService customUserDetailsService;
+    private final ExternalAuthClient externalAuthClient;
+    private final ExternalAuthUserSynchronizer userSynchronizer;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // get JWT (token) from http request
         String token = getJWTfromRequest(request);
-        // validate token
-        if(StringUtils.hasText(token) && tokenProvider.validateToken(token)){
-            // get username from token
-            String username = tokenProvider.getUsernameFromJWT(token);
-            // load user associated with token
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        if (StringUtils.hasText(token) && !isAuthenticated()) {
+            try {
+                ExternalAuthUser user = externalAuthClient.me(token);
+                userSynchronizer.sync(user);
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
-            );
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            // set spring security
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        principalName(user), null, getAuthorities(user.getRoles()));
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            } catch (RuntimeException exception) {
+                SecurityContextHolder.clearContext();
+            }
         }
         filterChain.doFilter(request, response);
     }
 
-    // Bearer <accessToken>
     private String getJWTfromRequest(HttpServletRequest request){
             String bearerToken = request.getHeader("Authorization");
             if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
                 return bearerToken.substring(7, bearerToken.length());
             }
             return null;
+    }
+
+    private boolean isAuthenticated() {
+        return SecurityContextHolder.getContext().getAuthentication() != null
+                && !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken);
+    }
+
+    private String principalName(ExternalAuthUser user) {
+        return StringUtils.hasText(user.getEmail()) ? user.getEmail() : user.getUsername();
+    }
+
+    private Collection<? extends GrantedAuthority> getAuthorities(List<String> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return AuthorityUtils.createAuthorityList("ROLE_USER");
+        }
+
+        return AuthorityUtils.createAuthorityList(roles.stream()
+                .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role).toArray(String[]::new));
     }
 }

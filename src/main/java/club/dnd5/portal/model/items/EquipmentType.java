@@ -1,9 +1,9 @@
 package club.dnd5.portal.model.items;
 
-import java.util.Arrays;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
@@ -50,7 +50,7 @@ public enum EquipmentType {
 	SIEGE_EQUIPMENT("Осадное снаряжение"),
 	;
 
-	private String cyrilicName;
+	private final String cyrilicName;
 
 	public static EquipmentType parse(String type) {
 		return Arrays.stream(values())

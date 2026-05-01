@@ -1,5 +1,8 @@
 package club.dnd5.portal.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -9,17 +12,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import lombok.Getter;
-import lombok.Setter;
-
+/**
+ * Безумие персонажей
+ */
 @Getter
 @Setter
 
 @Entity
 @Table(name = "hero_madness")
-/**
- * Безумие персонажей
- */
 public class Madness {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,6 @@ public class Madness {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 	
-	@Column(nullable = true)
 	private String other;
 	
 	@Column(name = "type")

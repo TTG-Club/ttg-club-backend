@@ -10,5 +10,6 @@ public enum TavernaCategory {
 	ORDINARY("Обычное"), 
 	EXPENSIVE("Дорогое"),
 	ELITE("Элитное");
-	private String name;
+
+	private final String name;
 }

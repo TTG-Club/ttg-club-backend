@@ -1,5 +1,10 @@
 package club.dnd5.portal.model.encounters;
 
+import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.creature.HabitatType;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,11 +16,6 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.creature.HabitatType;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -48,10 +48,4 @@ public class RandomEncounterRow {
 	@JoinColumn(name = "source")
 	private Book book;
 
-	public String getK100() {
-		if (start == end) {
-			return String.format("%02d", start);
-		}
-		return String.format("%02d-%02d", end, start);
-	}
 }

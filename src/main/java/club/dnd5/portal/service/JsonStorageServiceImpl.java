@@ -7,6 +7,7 @@ import club.dnd5.portal.model.JsonStorageCompositeKey;
 import club.dnd5.portal.model.JsonType;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.exporter.JsonStorage;
+import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.token.Token;
 import club.dnd5.portal.repository.JsonStorageRepository;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
@@ -29,6 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -42,13 +45,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private final BestiaryRepository bestiaryRepository;
 
-	private final String imgType = "круглый";
-
-	private final String magicSchool = "https://img.ttg.club/magic/";
-
-	private final String srcType = "вид сверху";
-
-	public List<String> getAllJson(JsonType jsonType, FoundryVersion versionFoundry) {
+    public List<String> getAllJson(JsonType jsonType, FoundryVersion versionFoundry) {
 		List<JsonStorage> jsonStorageList = jsonStorageRepository.findAllByTypeJsonAndVersionFoundry(jsonType, versionFoundry);
 		if (jsonStorageList.isEmpty()) {
 			throw new PageNotFoundException();
@@ -100,8 +97,8 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 				modifyImgSpell(jsonStorage.getRefId(), rootNode);
 			}
 			jsonStorage.setJsonData(mapper.writeValueAsString(rootNode));
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException ioException) {
+			log.error("Error load json", ioException);
 			return Optional.ofNullable(jsonStorage);
 		}
 		return Optional.ofNullable(jsonStorage);
@@ -138,9 +135,10 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 	}
 
 	private void modifyImgSpell(Integer spellId, JsonNode rootNode) {
-		if (((ObjectNode) rootNode).get("img").asText().contains("laaru")) {
+		if (rootNode.get("img").asText().contains("laaru")) {
 			Spell spell = spellRepository.findById(spellId).get();
-			String link = magicSchool + spell.getSchool().getMagicSchool(spell.getSchool().getName()) + ".webp";
+            String magicSchool = "https://img.ttg.club/magic/";
+            String link = magicSchool + MagicSchool.getMagicSchool(spell.getSchool().getName()) + ".webp";
 			((ObjectNode) rootNode).put("img", link);
 		}
 	}
@@ -154,7 +152,8 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 
 	private void modifyImgCreature(Integer creatureId, JsonNode rootNode) {
 		String imgFiveETools = "";
-		Optional<Token> imgToken = tokenRepository.findByRefIdAndType(creatureId, imgType).stream().findFirst();
+        String imgType = "круглый";
+        Optional<Token> imgToken = tokenRepository.findByRefIdAndType(creatureId, imgType).stream().findFirst();
 		if (imgToken.isPresent()) {
 			((ObjectNode) rootNode).put("img", imgToken.get().getUrl());
 		} else {
@@ -163,7 +162,8 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 				creature.getBook().getSource(), creature.getEnglishName()));
 			((ObjectNode) rootNode).put("img", imgFiveETools);
 		}
-		Optional<Token> srcToken = tokenRepository.findByRefIdAndType(creatureId, srcType).stream().findFirst();
+        String srcType = "вид сверху";
+        Optional<Token> srcToken = tokenRepository.findByRefIdAndType(creatureId, srcType).stream().findFirst();
 		ObjectNode prototypeNode = (ObjectNode) rootNode.get("prototypeToken");
 		if (prototypeNode != null) {
 			ObjectNode textureNode = prototypeNode.with("texture");

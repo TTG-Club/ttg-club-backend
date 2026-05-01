@@ -1,9 +1,10 @@
 package club.dnd5.portal.config;
 
 import club.dnd5.portal.interceptor.RedirectToLowerCaseInterceptor;
+import club.dnd5.portal.security.ExternalAuthClient;
+import club.dnd5.portal.security.ExternalAuthUserSynchronizer;
 import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
 import club.dnd5.portal.security.JwtAuthenticationFilter;
-import club.dnd5.portal.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +42,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 	private final UserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
-	private final JwtTokenProvider tokenProvider;
-	private final UserDetailsService customUserDetailsService;
+	private final ExternalAuthClient externalAuthClient;
+	private final ExternalAuthUserSynchronizer userSynchronizer;
 	private final RedirectToLowerCaseInterceptor redirectToLowerCaseInterceptor;
 
 	@Value("${allowed-origin-patterns}")
@@ -50,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(){
-        return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
+        return new JwtAuthenticationFilter(externalAuthClient, userSynchronizer);
     }
 
 	@Bean

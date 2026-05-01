@@ -25,5 +25,5 @@ public enum PersonalizationType {
 	CREED("Убеждение"),
 	BAUBLE("Безделушка");
 
-	private String name;
+	private final String name;
 }

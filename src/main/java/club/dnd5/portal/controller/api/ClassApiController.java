@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,9 +60,8 @@ public class ClassApiController {
 		return classRepo.findAll(specification)
 				.stream()
 				.map(classObject -> new ClassApi(classObject, request))
-				.filter(classApi -> request.getFilter() != null ?
-						request.getFilter().getBooks().contains(classApi.getSource().getShortName()) || (classApi.isSidekick() && request.getFilter().getBooks().contains("TCE"))
-						: true)
+				.filter(classApi -> request.getFilter() == null || request.getFilter().getBooks()
+						.contains(classApi.getSource().getShortName()) || (classApi.isSidekick() && request.getFilter().getBooks().contains("TCE")))
 				.collect(Collectors.toList());
 	}
 
@@ -104,7 +102,7 @@ public class ClassApiController {
 		List<FilterApi> others = new ArrayList<>();
 		FilterApi hillDiceFilter = new FilterApi("Кость хитов", "hitdice");
 		hillDiceFilter.setValues(
-				EnumSet.of(Dice.d6, Dice.d8, Dice.d10, Dice.d12).stream()
+				Stream.of(Dice.d6, Dice.d8, Dice.d10, Dice.d12)
 				.map(dice -> new FilterValueApi(dice.getName(), dice.getMaxValue()))
 				.collect(Collectors.toList())
 		);

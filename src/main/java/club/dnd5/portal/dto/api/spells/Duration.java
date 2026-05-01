@@ -1,15 +1,14 @@
 package club.dnd5.portal.dto.api.spells;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import lombok.Getter;
-import lombok.Setter;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -26,12 +25,12 @@ public class Duration {
 		this.raw = duration;
 	    if (duration.equals("Мгновенная")) {
 	    	type = "instant";
-	    } else if (duration.toLowerCase().equals("пока не рассеется") || duration.equals("До развеивания") || duration.equals("До рассеивания")) {
+	    } else if (duration.equalsIgnoreCase("пока не рассеется") || duration.equals("До развеивания") || duration.equals("До рассеивания")) {
 	    	type = "permanent";
-	    	ends = Arrays.asList("dispel");
+	    	ends = Collections.singletonList("dispel");
 	    }
 	    if (duration.contains(" не сработает")) {
-	    	ends = Arrays.asList("trigger");
+	    	ends = Collections.singletonList("trigger");
 	    }
 	    Matcher matcher = Pattern.compile("\\d+").matcher(duration);
 		if(matcher.find()) {

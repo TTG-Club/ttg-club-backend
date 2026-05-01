@@ -34,7 +34,7 @@ public class BeastDetailApi extends BeastApi {
 	private String proficiencyBonus;
 	@Schema(description = "размер")
 	private SizeApi size;
-	@Schema(description = "мировоозрение")
+	@Schema(description = "мировоззрение")
 	private String alignment;
 	@Schema(description = "значение класса доспеха")
 	private Byte armorClass;
