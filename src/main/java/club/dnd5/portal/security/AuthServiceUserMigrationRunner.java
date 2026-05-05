@@ -51,6 +51,7 @@ public class AuthServiceUserMigrationRunner implements ApplicationRunner {
             log.warn("Auth-service user migration is enabled, but auth-service.user-migration.admin-token is empty");
             return;
         }
+        int migrated = 0;
         for (int i = 0; i < 17; i++) {
             Pageable pageable = PageAndSortUtil.getPageable(i, 1000);
 
@@ -64,11 +65,10 @@ public class AuthServiceUserMigrationRunner implements ApplicationRunner {
                 return;
             }
 
-            int migrated = 0;
             for (List<LegacyUserImportRequest> batch : batches(users)) {
                 importBatch(batch);
                 migrated += batch.size();
-                log.info("Auth-service user migration progress: {}/{}", migrated, users.size());
+                log.info("Auth-service user migration progress: {}", migrated);
             }
             log.info("Auth-service user migration finished: {} users sent", migrated);
         }
