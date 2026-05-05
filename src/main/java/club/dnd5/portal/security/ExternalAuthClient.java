@@ -23,12 +23,17 @@ import java.util.Map;
 @Component
 public class ExternalAuthClient {
     private static final String BEARER_PREFIX = "Bearer ";
+    private static final String FRONTEND_ORIGIN_HEADER = "X-Frontend-Origin";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl;
+    private final String frontendOrigin;
 
-    public ExternalAuthClient(@Value("${auth-service.base-url}") String baseUrl) {
+    public ExternalAuthClient(
+            @Value("${auth-service.base-url}") String baseUrl,
+            @Value("${app.url:}") String frontendOrigin) {
         this.baseUrl = trimTrailingSlash(baseUrl);
+        this.frontendOrigin = trimTrailingSlash(frontendOrigin);
     }
 
     public JWTAuthResponse login(LoginDto loginDto) {
@@ -61,7 +66,7 @@ public class ExternalAuthClient {
         ResponseEntity<Map> response = restTemplate.exchange(
                 url("/api/auth/register"),
                 HttpMethod.POST,
-                jsonEntity(body),
+                jsonEntity(body, true),
                 Map.class);
 
         return toExternalUser(response.getBody(), ExternalAuthTokenClaims.fromToken(null));
@@ -83,7 +88,7 @@ public class ExternalAuthClient {
         restTemplate.exchange(
                 url("/api/account/password/reset-request"),
                 HttpMethod.POST,
-                jsonEntity(body),
+                jsonEntity(body, true),
                 Void.class);
     }
 
@@ -146,8 +151,17 @@ public class ExternalAuthClient {
     }
 
     private HttpEntity<Map<String, Object>> jsonEntity(Map<String, Object> body) {
+        return jsonEntity(body, false);
+    }
+
+    private HttpEntity<Map<String, Object>> jsonEntity(Map<String, Object> body, boolean includeFrontendOrigin) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        if (includeFrontendOrigin && StringUtils.hasText(frontendOrigin)) {
+            headers.set(FRONTEND_ORIGIN_HEADER, frontendOrigin);
+        }
+
         return new HttpEntity<>(body, headers);
     }
 
