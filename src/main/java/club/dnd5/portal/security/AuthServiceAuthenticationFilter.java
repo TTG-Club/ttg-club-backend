@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class AuthServiceAuthenticationFilter extends OncePerRequestFilter {
     private final ExternalAuthClient externalAuthClient;
     private final ExternalAuthUserSynchronizer userSynchronizer;
 
@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String token = getJWTfromRequest(request);
+        String token = getTokenFromRequest(request);
         if (StringUtils.hasText(token) && !isAuthenticated()) {
             try {
                 ExternalAuthUser user = externalAuthClient.me(token);
@@ -44,12 +44,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String getJWTfromRequest(HttpServletRequest request){
-            String bearerToken = request.getHeader("Authorization");
-            if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
-                return bearerToken.substring(7, bearerToken.length());
+    private String getTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        if (request.getCookies() != null) {
+            for (javax.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("dnd5_user_token".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
+                    return cookie.getValue();
+                }
             }
-            return null;
+        }
+        return null;
     }
 
     private boolean isAuthenticated() {

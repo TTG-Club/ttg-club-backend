@@ -47,6 +47,7 @@ public class AuthApiController {
 				cookie.setMaxAge(24 * 60 * 60);
 			}
 			cookie.setPath("/");
+			cookie.setHttpOnly(true);
 			response.addCookie(cookie);
 
 			return ResponseEntity.ok(authResponse);
@@ -73,8 +74,9 @@ public class AuthApiController {
 	@PostMapping("/signout")
 	public ResponseEntity<?> signout(HttpSession session, HttpServletResponse response) {
 		Cookie cookie = new Cookie("dnd5_user_token", "");
-		cookie.setMaxAge(-1);
+		cookie.setMaxAge(0);
 		cookie.setPath("/");
+		cookie.setHttpOnly(true);
 		response.addCookie(cookie);
 		session.invalidate();
 		return ResponseEntity.ok().build();
@@ -119,7 +121,13 @@ public class AuthApiController {
 
 	@Operation(summary = "Check token exist")
 	@GetMapping("/token/validate")
-	public TokenValidationApi existToken(@RequestParam String token) {
-		return new TokenValidationApi(true, "");
+	public ResponseEntity<TokenValidationApi> existToken(@RequestParam String token) {
+		try {
+			return ResponseEntity.ok(new TokenValidationApi(externalAuthClient.validateAccessToken(token), ""));
+		}
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode())
+					.body(new TokenValidationApi(false, exception.getResponseBodyAsString()));
+		}
 	}
 }
