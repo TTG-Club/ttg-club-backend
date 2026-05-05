@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -97,6 +98,22 @@ public class ExternalAuthClient {
                 Void.class);
     }
 
+    public void validatePasswordResetToken(String token) {
+        restTemplate.exchange(
+                urlWithToken("/api/account/password/reset-token/validate", token),
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                Void.class);
+    }
+
+    public void verifyEmail(String token) {
+        restTemplate.exchange(
+                urlWithToken("/api/auth/verify-email", token),
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                Void.class);
+    }
+
     public void changePassword(String accessToken, ChangePassword passwordDto) {
         Map<String, Object> body = new HashMap<>();
         body.put("currentPassword", passwordDto.getCurrentPassword());
@@ -149,6 +166,12 @@ public class ExternalAuthClient {
 
     private String url(String path) {
         return baseUrl + path;
+    }
+
+    private String urlWithToken(String path, String token) {
+        return UriComponentsBuilder.fromHttpUrl(url(path))
+                .queryParam("token", token)
+                .toUriString();
     }
 
     private static String trimTrailingSlash(String value) {

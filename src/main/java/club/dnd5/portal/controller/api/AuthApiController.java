@@ -90,14 +90,19 @@ public class AuthApiController {
 
 	@Operation(summary = "Change password by token")
 	@PostMapping("/change/password")
-	public ResponseEntity<?> changePassword(@RequestBody ChangePassword passwordDto) {
+	public ResponseEntity<?> changePassword(
+			@RequestBody ChangePassword passwordDto,
+			@CookieValue(value = "dnd5_user_token", required = false) String cookieToken) {
 		try {
 			if (StringUtils.hasText(passwordDto.getResetToken())) {
 				externalAuthClient.confirmPasswordReset(passwordDto.getResetToken(), passwordDto.getPassword());
 				return ResponseEntity.ok().build();
 			}
-			if (StringUtils.hasText(passwordDto.getUserToken()) && StringUtils.hasText(passwordDto.getCurrentPassword())) {
-				externalAuthClient.changePassword(passwordDto.getUserToken(), passwordDto);
+			String accessToken = StringUtils.hasText(passwordDto.getUserToken())
+					? passwordDto.getUserToken()
+					: cookieToken;
+			if (StringUtils.hasText(accessToken) && StringUtils.hasText(passwordDto.getCurrentPassword())) {
+				externalAuthClient.changePassword(accessToken, passwordDto);
 				return ResponseEntity.ok().build();
 			}
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -116,6 +121,31 @@ public class AuthApiController {
 		}
 		catch (HttpStatusCodeException exception) {
 			return ResponseEntity.status(exception.getStatusCode()).build();
+		}
+	}
+
+	@Operation(summary = "Verify password reset token")
+	@GetMapping("/password/reset-token/validate")
+	public ResponseEntity<TokenValidationApi> validatePasswordResetToken(@RequestParam String token) {
+		try {
+			externalAuthClient.validatePasswordResetToken(token);
+			return ResponseEntity.ok(new TokenValidationApi(true, ""));
+		}
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode())
+					.body(new TokenValidationApi(false, exception.getResponseBodyAsString()));
+		}
+	}
+
+	@Operation(summary = "Verify user email by token")
+	@GetMapping("/verify-email")
+	public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+		try {
+			externalAuthClient.verifyEmail(token);
+			return ResponseEntity.ok().build();
+		}
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode()).body(exception.getResponseBodyAsString());
 		}
 	}
 
