@@ -14,6 +14,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -105,6 +108,15 @@ public class ExternalAuthClient {
                 Void.class);
     }
 
+    public boolean validateAccessToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            return false;
+        }
+
+        me(token);
+        return true;
+    }
+
     private ExternalAuthUser toExternalUser(Map body, ExternalAuthTokenClaims claims) {
         ExternalAuthUser user = new ExternalAuthUser();
         user.setId(firstNotBlank(stringValue(body, "id"), claims.getSubject()));
@@ -112,7 +124,7 @@ public class ExternalAuthClient {
         user.setEmail(firstNotBlank(stringValue(body, "email"), claims.getEmail()));
         user.setEnabled(booleanValue(body, "enabled", true));
         user.setEmailVerified(booleanValue(body, "emailVerified", false));
-        user.setRoles(claims.getRoles());
+        user.setRoles(firstNotEmpty(rolesValue(body, "roles"), claims.getRoles()));
         return user;
     }
 
@@ -163,5 +175,34 @@ public class ExternalAuthClient {
 
     private static String firstNotBlank(String first, String second) {
         return StringUtils.hasText(first) ? first : second;
+    }
+
+    private static List<String> firstNotEmpty(List<String> first, List<String> second) {
+        return first == null || first.isEmpty() ? second : first;
+    }
+
+    private static List<String> rolesValue(Map body, String key) {
+        if (body == null || body.get(key) == null) {
+            return Collections.emptyList();
+        }
+
+        Object value = body.get(key);
+        if (value instanceof List) {
+            List<String> roles = new ArrayList<>();
+            ((List<?>) value).forEach(role -> roles.add(String.valueOf(role)));
+            return roles;
+        }
+
+        if (value instanceof String && StringUtils.hasText((String) value)) {
+            List<String> roles = new ArrayList<>();
+            for (String role : ((String) value).split(",")) {
+                if (StringUtils.hasText(role)) {
+                    roles.add(role.trim());
+                }
+            }
+            return roles;
+        }
+
+        return Collections.emptyList();
     }
 }

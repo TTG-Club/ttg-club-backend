@@ -9,8 +9,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Hidden
 @Controller
 public class UserController {
-	@GetMapping("/reset/password")
+	@GetMapping("/reset-password")
 	public String getResetPasswordForm(Model model, @RequestParam String token) {
+		return "spa";
+	}
+
+	@GetMapping("/verify-email")
+	public String getVerifyEmailForm(Model model, @RequestParam String token) {
 		return "spa";
 	}
 }
