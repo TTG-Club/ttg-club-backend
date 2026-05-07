@@ -48,6 +48,7 @@ public class AuthApiController {
 			}
 			cookie.setPath("/");
 			cookie.setHttpOnly(true);
+			cookie.setSecure(true);
 			response.addCookie(cookie);
 
 			return ResponseEntity.ok(authResponse);
