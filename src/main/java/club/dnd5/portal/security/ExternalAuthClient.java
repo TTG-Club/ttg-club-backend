@@ -19,11 +19,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Component
 public class ExternalAuthClient {
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String FRONTEND_ORIGIN_HEADER = "X-Frontend-Origin";
+    private static final Pattern TOKEN_PATTERN = Pattern.compile("^[A-Za-z0-9._-]{1,2048}$");
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl;
@@ -183,9 +185,16 @@ public class ExternalAuthClient {
     }
 
     private String urlWithToken(String path, String token) {
+        validateToken(token);
         return UriComponentsBuilder.fromHttpUrl(url(path))
                 .queryParam("token", token)
                 .toUriString();
+    }
+
+    private static void validateToken(String token) {
+        if (!StringUtils.hasText(token) || !TOKEN_PATTERN.matcher(token).matches()) {
+            throw new IllegalArgumentException("Invalid token format");
+        }
     }
 
     private static String trimTrailingSlash(String value) {
