@@ -6,10 +6,10 @@ import lombok.Getter;
 
 @Getter
 public class NamedListApi {
-	private NameApi name;
-	private SourceTypeApi type;
-	private SourceApi source;
-	private String url;
+	private final NameApi name;
+	private final SourceTypeApi type;
+	private final SourceApi source;
+	private final String url;
 
 	public NamedListApi(Archetype archetype) {
 		name = new NameApi(archetype.getCapitalizeName(), archetype.getEnglishName());

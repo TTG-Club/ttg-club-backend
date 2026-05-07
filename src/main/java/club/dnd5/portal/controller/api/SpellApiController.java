@@ -251,8 +251,7 @@ public class SpellApiController {
 		otherFilters.add(getLevelsFilter(9));
 
 		FilterApi spellClassFilter = new FilterApi("Классы", "class");
-		spellClassFilter.setValues(IntStream.range(0, classesMap.length)
-			.mapToObj(indexSpellClass -> new FilterValueApi(classesMap[indexSpellClass][1], classesMap[indexSpellClass][0]))
+		spellClassFilter.setValues(Arrays.stream(classesMap).map(strings -> new FilterValueApi(strings[1], strings[0]))
 			.collect(Collectors.toList()));
 		otherFilters.add(spellClassFilter);
 
@@ -378,7 +377,6 @@ public class SpellApiController {
 		customFilter.setName("Классы");
 		customFilter.setKey("class");
 		customFilter.setHidden(Boolean.TRUE);
-
 		FilterValueApi customValue = new FilterValueApi();
 		customValue.setLabel(heroClass.getCapitalazeName());
 		customValue.setDefaultValue(Boolean.TRUE);

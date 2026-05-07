@@ -13,7 +13,5 @@ public interface NewsBannerRepository extends JpaRepository<NewsBanner, Integer>
 
 	Optional<NewsBanner> findByActive(boolean active);
 
-	long countByActive(boolean active);
-
 	Page<NewsBanner> findAll(Specification<NewsBanner> specification, Pageable pageable);
 }

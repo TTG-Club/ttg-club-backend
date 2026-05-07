@@ -1,5 +1,10 @@
 package club.dnd5.portal.model.background;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum LifeStyle {
 	ANYTHING("Никудышное"),
 	BEGGARLY("Нищенское"),
@@ -9,13 +14,5 @@ public enum LifeStyle {
 	RICH("Богатое"),
 	ARISTOCRATIC("Аристократическое");
 	
-	private String cyrilicName;
-	
-	LifeStyle(String cyrilicName){
-		this.cyrilicName = cyrilicName;
-	}
-	
-	public String getCyrilicName() {
-		return cyrilicName;
-	}
+	private final String cyrilicName;
 }

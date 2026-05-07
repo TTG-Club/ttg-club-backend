@@ -20,7 +20,8 @@ import java.util.UUID;
 @Component
 public class EmailService {
 	private final Environment environment;
-	private static final String resetText = "/reset/password?token=";
+	private static final String resetText = "/reset-password?token=";
+	private static final String verifyEmailText = "/verify-email?token=";
 	private final ValueProvider valueProvider;
 	@Qualifier("userServiceImpl")
 	private final UserService userService;
@@ -40,7 +41,7 @@ public class EmailService {
 
 		String recipientAddress = user.getEmail();
 		String subject = "Подтверждение регистрации";
-		String confirmationUrl = "https://dev.ttg.club/confirm/email?token=" + token;
+		String confirmationUrl = valueProvider.getAppUrl() + verifyEmailText + token;
 		String message = "Подтвердите ваш email адрес, перейдя по ссылке::";
 		sendEmail(recipientAddress, subject, message, confirmationUrl);
 	}

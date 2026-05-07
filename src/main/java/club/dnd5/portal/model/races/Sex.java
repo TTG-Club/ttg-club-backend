@@ -11,5 +11,5 @@ public enum Sex {
 	CHILD("Детские"),
 	UNISEX("Унисекс");
 	
-	private String cyrilicName;
+	private final String cyrilicName;
 }

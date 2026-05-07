@@ -12,8 +12,6 @@ import java.io.Serializable;
 public class JsonStorageCompositeKey implements Serializable {
 
 	private Integer refId;
-
 	private JsonType typeJson;
-
 	private FoundryVersion versionFoundry;
 }

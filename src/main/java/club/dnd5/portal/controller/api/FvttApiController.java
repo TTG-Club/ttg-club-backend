@@ -50,7 +50,7 @@ public class FvttApiController {
 		} else {
 			HttpHeaders responseHeaders = createResponseHeaders("spells_list");
 			List<String> spellsList = jsonStorageService.getAllJson(JsonType.SPELL, version);
-			String jsonData = null;
+			String jsonData;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(spellsList);
 			} catch (JsonProcessingException e) {
@@ -79,7 +79,7 @@ public class FvttApiController {
 		} else {
 			HttpHeaders responseHeaders = createResponseHeaders("creature_list");
 			List<String> bestiaryList = jsonStorageService.getAllJson(JsonType.CREATURE, version);
-			String jsonData = null;
+			String jsonData;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(bestiaryList);
 			} catch (JsonProcessingException e) {

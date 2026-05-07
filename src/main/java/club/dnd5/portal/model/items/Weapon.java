@@ -30,27 +30,21 @@ public class Weapon {
 	private float weight;
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(nullable = true)
 	private Dice damageDice;
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(nullable = true)
 	private Dice twoHandDamageDice;
 
-	@Column(nullable = true)
 	private Byte numberDice;
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(nullable = true)
 	private DamageType damageType;
 
 	@Enumerated(EnumType.ORDINAL)
 	private WeaponType type;
 
-	@Column(nullable = true)
 	private Short minDistance;
 
-	@Column(nullable = true)
 	private Short maxDistance;
 
 	@ManyToMany
@@ -76,7 +70,7 @@ public class Weapon {
 			return String.format("%s", damageDice.getName());
 
 		}
-		if (damageDice == null && numberDice != null) {
+		if (damageDice == null) {
 			return String.format("%s", numberDice);
 		}
 		return String.format("%d%s", numberDice, damageDice.getName());

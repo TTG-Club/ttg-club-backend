@@ -129,7 +129,7 @@ public class OptionApiController {
 		otherFilters.add(classOptionFilter);
 
 		otherFilters.add(getLevelsFilter());
-		otherFilters.add(getPrerequsitFilter(optionRepository.findAlldPrerequisite()));
+		otherFilters.add(getPrerequisiteFilter(optionRepository.findAlldPrerequisite()));
 
 		filters.setOther(otherFilters);
 		return filters;
@@ -142,11 +142,11 @@ public class OptionApiController {
 		HeroClass heroClass = classRepository.findByEnglishName(englishClassName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		List<FilterApi> otherFilters = new ArrayList<>();
 		otherFilters.add(getLevelsFilter(heroClass.getOptionType()));
-		otherFilters.add(getPrerequsitFilter(optionRepository.findAlldPrerequisite(heroClass.getOptionType())));
+		otherFilters.add(getPrerequisiteFilter(optionRepository.findAlldPrerequisite(heroClass.getOptionType())));
 
 		List<FilterApi> customFilters = new ArrayList<>();
 		FilterApi customFilter = new FilterApi();
-		customFilter.setName("Классовые особености");
+		customFilter.setName("Классовые особенности");
 		customFilter.setKey("classOption");
 		customFilter.setHidden(Boolean.TRUE);
 
@@ -175,11 +175,11 @@ public class OptionApiController {
 
 		List<FilterApi> otherFilters = new ArrayList<>();
 		otherFilters.add(getLevelsFilter(heroClass.getOptionType()));
-		otherFilters.add(getPrerequsitFilter(optionRepository.findAlldPrerequisite(heroClass.getOptionType())));
+		otherFilters.add(getPrerequisiteFilter(optionRepository.findAlldPrerequisite(heroClass.getOptionType())));
 
 		List<FilterApi> customFilters = new ArrayList<>();
 		FilterApi customFilter = new FilterApi();
-		customFilter.setName("Классовые особености");
+		customFilter.setName("Классовые особенности");
 		customFilter.setKey("classOption");
 		customFilter.setHidden(Boolean.TRUE);
 
@@ -217,7 +217,7 @@ public class OptionApiController {
 		return levelsFilter;
 	}
 
-	private FilterApi getPrerequsitFilter(Collection<String> prerequisite) {
+	private FilterApi getPrerequisiteFilter(Collection<String> prerequisite) {
 		FilterApi prerequisiteFilter = new FilterApi("Требования", "prerequsite");
 		if (prerequisite.size() == 1) {
 			prerequisiteFilter.setHidden(Boolean.TRUE);

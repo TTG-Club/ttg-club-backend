@@ -10,13 +10,9 @@ import lombok.Setter;
 @Setter
 public class NewsBannerApi {
 	private String name;
-
 	private String description;
-
 	private String image;
-
 	private String url;
-
 	private boolean active;
 
 	public NewsBannerApi (NewsBanner newsBanner) {

@@ -1,5 +1,10 @@
 package club.dnd5.portal.model.items;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum WeaponType {
 	SIMPLE_MELE("Простое рукопашное"),
 	SIMPLE_RANGED("Простое дальнобойное"),
@@ -8,13 +13,5 @@ public enum WeaponType {
 	EXOTIC_MELE("Экзотическое рукопашное оружие"), 
 	EXOTIC_RANGED("Экзотическое дальнобойное оружие");
 	
-	private String name;
-
-	WeaponType(String name){
-		this.name= name;
-	}
-	
-	public String getName() {
-		return name;
-	}
+	private final String name;
 }

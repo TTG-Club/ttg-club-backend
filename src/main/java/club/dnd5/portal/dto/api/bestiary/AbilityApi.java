@@ -20,7 +20,7 @@ import lombok.Setter;
 public class AbilityApi {
 	@Schema(description = "Значение Силы", example = "10")
 	private int str;
-	@Schema(description = "Значение Ловеости", example = "10")
+	@Schema(description = "Значение Ловкости", example = "10")
 	private int dex;
 	@Schema(description = "Значение Телосложения", example = "10")
 	private int con;

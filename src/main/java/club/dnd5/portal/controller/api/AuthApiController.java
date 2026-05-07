@@ -6,113 +6,80 @@ import club.dnd5.portal.dto.user.ChangePassword;
 import club.dnd5.portal.dto.user.LoginDto;
 import club.dnd5.portal.dto.user.SignUpDto;
 import club.dnd5.portal.dto.user.UserDto;
-import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.user.Role;
-import club.dnd5.portal.model.user.User;
-import club.dnd5.portal.repository.VerificationToken;
-import club.dnd5.portal.repository.user.RoleRepository;
-import club.dnd5.portal.repository.user.UserRepository;
-import club.dnd5.portal.repository.user.VerificationTokenRepository;
+import club.dnd5.portal.security.ExternalAuthClient;
+import club.dnd5.portal.security.ExternalAuthUser;
+import club.dnd5.portal.security.ExternalAuthUserSynchronizer;
 import club.dnd5.portal.security.JWTAuthResponse;
-import club.dnd5.portal.security.JwtTokenProvider;
-import club.dnd5.portal.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.sql.Date;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Optional;
 
 @RequiredArgsConstructor
-@Tag(name = "Авторизация и регистрация", description = "The User API")
+@Tag(name = "Authorization and registration", description = "The User API")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthApiController {
-	private final AuthenticationManager authenticationManager;
-	private final UserRepository userRepository;
-	private final RoleRepository roleRepository;
-	private final JwtTokenProvider tokenProvider;
-	private final PasswordEncoder passwordEncoder;
-	private final VerificationTokenRepository verificationTokenRepository;
-	private final EmailService emailService;
+	private final ExternalAuthClient externalAuthClient;
+	private final ExternalAuthUserSynchronizer userSynchronizer;
 
 	@Operation(summary = "User authorization by nickname or email address")
 	@PostMapping("/signin")
 	public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto loginDto, HttpServletResponse response) {
 		try {
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+			JWTAuthResponse authResponse = externalAuthClient.login(loginDto);
+			ExternalAuthUser externalUser = externalAuthClient.me(authResponse.getAccessToken());
+			userSynchronizer.sync(externalUser);
 
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-
-			String token = tokenProvider.generateToken(authentication);
-
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		    Cookie cookie = new Cookie("dnd5_user_token", token);
-		    if (loginDto.getRemember()) {
-			    cookie.setMaxAge(365 * 24 * 60 * 60);
-		    }
-		    else {
-		    	cookie.setMaxAge(1 * 24 * 60 * 60);
-		    }
+			Cookie cookie = new Cookie("dnd5_user_token", authResponse.getAccessToken());
+			if (Boolean.TRUE.equals(loginDto.getRemember())) {
+				cookie.setMaxAge(365 * 24 * 60 * 60);
+			}
+			else {
+				cookie.setMaxAge(24 * 60 * 60);
+			}
 			cookie.setPath("/");
-		    response.addCookie(cookie);
+			cookie.setHttpOnly(true);
+			cookie.setSecure(true);
+			response.addCookie(cookie);
 
-			return ResponseEntity.ok(new JWTAuthResponse(token));
+			return ResponseEntity.ok(authResponse);
 		}
-		catch (BadCredentialsException e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode()).build();
 		}
 	}
 
 	@Operation(summary = "New user registration")
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto) {
-
-		if (userRepository.existsByUsername(signUpDto.getUsername())) {
-			return new ResponseEntity<>("Username is already taken!", HttpStatus.BAD_REQUEST);
+		try {
+			ExternalAuthUser externalUser = externalAuthClient.register(signUpDto);
+			userSynchronizer.sync(externalUser);
+			return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
 		}
-
-		if (userRepository.existsByEmail(signUpDto.getEmail())) {
-			return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode()).body(exception.getResponseBodyAsString());
 		}
-
-		User user = new User();
-		user.setName(signUpDto.getUsername());
-		user.setUsername(signUpDto.getUsername());
-		user.setEmail(signUpDto.getEmail());
-		user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-		user.setEnabled(Boolean.TRUE);
-
-		Role roles = roleRepository.findByName("USER").get();
-		user.setRoles(Collections.singletonList(roles));
-
-		userRepository.save(user);
-		return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
 	}
 
 	@Operation(summary = "Log out user current session")
 	@PostMapping("/signout")
 	public ResponseEntity<?> signout(HttpSession session, HttpServletResponse response) {
-	    Cookie cookie = new Cookie("dnd5_user_token", "");
-	    cookie.setMaxAge(-1);
+		Cookie cookie = new Cookie("dnd5_user_token", "");
+		cookie.setMaxAge(0);
 		cookie.setPath("/");
-	    response.addCookie(cookie);
+		cookie.setHttpOnly(true);
+		cookie.setSecure(true);
+		response.addCookie(cookie);
 		session.invalidate();
 		return ResponseEntity.ok().build();
 	}
@@ -120,62 +87,79 @@ public class AuthApiController {
 	@Operation(summary = "Nickname and mailing address check")
 	@PostMapping("/exist")
 	public ResponseEntity<?> isUserNotExist(@RequestBody UserDto user) {
-		if (user.getUsername() != null) {
-			if (userRepository.existsByUsername(user.getUsername())) {
-				return ResponseEntity.status(HttpStatus.CONFLICT).build();
-			}
-		}
-		if (user.getEmail() != null) {
-			if (userRepository.existsByEmail(user.getEmail())) {
-				return ResponseEntity.status(HttpStatus.CONFLICT).build();
-			}
-		}
 		return ResponseEntity.ok().build();
 	}
 
 	@Operation(summary = "Change password by token")
 	@PostMapping("/change/password")
-	public ResponseEntity<?> changePassword(@RequestBody ChangePassword passwordDto) {
-		if (passwordDto.getResetToken() != null) {
-			VerificationToken token = verificationTokenRepository.findByToken(passwordDto.getResetToken()).orElseThrow(PageNotFoundException::new);
-			User user = token.getUser();
-			user.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
-			userRepository.save(user);
-			token.setExpiryDate(VerificationToken.calculateExpiryDate(0));
-			verificationTokenRepository.save(token);
-			return ResponseEntity.ok().build();
-		}
-		else if (passwordDto.getUserToken() != null) {
-			String userName = tokenProvider.getUsernameFromJWT(passwordDto.getUserToken());
-			Optional<User> user = userRepository.findByEmailOrUsername(userName, userName);
-			if (user.isPresent()) {
-				User changeUser = user.get();
-				changeUser.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
-				userRepository.save(changeUser);
-				return ResponseEntity.status(HttpStatus.OK).build();
+	public ResponseEntity<?> changePassword(
+			@RequestBody ChangePassword passwordDto,
+			@CookieValue(value = "dnd5_user_token", required = false) String cookieToken) {
+		try {
+			if (StringUtils.hasText(passwordDto.getResetToken())) {
+				externalAuthClient.confirmPasswordReset(passwordDto.getResetToken(), passwordDto.getPassword());
+				return ResponseEntity.ok().build();
 			}
+			String accessToken = StringUtils.hasText(passwordDto.getUserToken())
+					? passwordDto.getUserToken()
+					: cookieToken;
+			if (StringUtils.hasText(accessToken) && StringUtils.hasText(passwordDto.getCurrentPassword())) {
+				externalAuthClient.changePassword(accessToken, passwordDto);
+				return ResponseEntity.ok().build();
+			}
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode()).body(exception.getResponseBodyAsString());
+		}
 	}
 
 	@Operation(summary = "Send token for reset password by email")
 	@GetMapping("/change/password")
 	public ResponseEntity<UserApi> changeUserPassword(String email) {
-		Optional<User> user = userRepository.findByEmail(email);
-		emailService.changePassword(user.get());
-		return ResponseEntity.ok().build();
+		try {
+			externalAuthClient.requestPasswordReset(email);
+			return ResponseEntity.ok().build();
+		}
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode()).build();
+		}
+	}
+
+	@Operation(summary = "Verify password reset token")
+	@GetMapping("/password/reset-token/validate")
+	public ResponseEntity<TokenValidationApi> validatePasswordResetToken(@RequestParam String token) {
+		try {
+			externalAuthClient.validatePasswordResetToken(token);
+			return ResponseEntity.ok(new TokenValidationApi(true, ""));
+		}
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode())
+					.body(new TokenValidationApi(false, exception.getResponseBodyAsString()));
+		}
+	}
+
+	@Operation(summary = "Verify user email by token")
+	@GetMapping("/verify-email")
+	public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+		try {
+			externalAuthClient.verifyEmail(token);
+			return ResponseEntity.ok().build();
+		}
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode()).body(exception.getResponseBodyAsString());
+		}
 	}
 
 	@Operation(summary = "Check token exist")
 	@GetMapping("/token/validate")
-	public TokenValidationApi existToken(@RequestParam String token) {
-		Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
-		if (!verificationToken.isPresent()) {
-			return new TokenValidationApi(false, "Неверный токен");
+	public ResponseEntity<TokenValidationApi> existToken(@RequestParam String token) {
+		try {
+			return ResponseEntity.ok(new TokenValidationApi(externalAuthClient.validateAccessToken(token), ""));
 		}
-		if (verificationToken.get().getExpiryDate().before(new Date(Calendar.getInstance().getTime().getTime()))){
-			return new TokenValidationApi(false, "Время использование токена истекло!");
+		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode())
+					.body(new TokenValidationApi(false, exception.getResponseBodyAsString()));
 		}
-		return new TokenValidationApi(true, "");
 	}
 }

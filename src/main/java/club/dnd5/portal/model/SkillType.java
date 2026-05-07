@@ -9,18 +9,18 @@ import java.util.stream.Collectors;
 import static club.dnd5.portal.model.AbilityType.*;
 
 /**
- * Навыки 
+ * Навыки
  */
 public enum SkillType {
 	ATHLETICS (STRENGTH, "Атлетика"), // 0
 	ACROBATICS (DEXTERITY, "Акробатика"), // 1
-	SLEIGHT_OF_HAND (DEXTERITY, "Лoвкость рук", "Ловкость Рук"), // 2
+	SLEIGHT_OF_HAND (DEXTERITY, "Ловкость рук", "Ловкость Рук"), // 2
 	STEALTH (DEXTERITY, "Скрытность"), // 3
 	ARCANA (INTELLIGENCE, "Магия"), // 4
 	HISTORY (INTELLIGENCE, "История"), // 5
-	INVESTIGATION (INTELLIGENCE, "Анализ", "Расследование"), //6 
-	NATURE (INTELLIGENCE, "Природа", "Естествознание"), //7 
-	RELIGION (INTELLIGENCE, "Религия"), //8 
+	INVESTIGATION (INTELLIGENCE, "Анализ", "Расследование"), //6
+	NATURE (INTELLIGENCE, "Природа", "Естествознание"), //7
+	RELIGION (INTELLIGENCE, "Религия"), //8
 	ANIMAL_HANDLING (WISDOM, "Уход за животными", "Обращение с животными"), // 9
 	INSIGHT (WISDOM,"Проницательность"), //10
 	MEDICINE (WISDOM, "Медицина"), //11
@@ -38,7 +38,6 @@ public enum SkillType {
 
 	private final Set<String> cyrilicNames;
 
-	
 	SkillType(AbilityType ability, String ... cyrilicNames){
 		this.ability = ability;
 		this.cyrilicName = cyrilicNames[0];

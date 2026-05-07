@@ -11,7 +11,7 @@ public enum GodSex {
 	PHILOSOPHY("философия"),
 	UNDEFINE("божество");
 	
-	private String cyrilicName;
+	private final String cyrilicName;
 	
 	public static GodSex parse(String sex) {
 		for (GodSex godSex : values()) {

@@ -56,7 +56,7 @@ public class LssServiceImp implements LssService {
 
 		if (optionalSpell.isPresent()) {
 			Spell spell = optionalSpell.get();
-			if (spell.getHeroClass().size() >= 1) {
+			if (!spell.getHeroClass().isEmpty()) {
 				for (HeroClass heroClass : spell.getHeroClass()) {
 					classList.add(heroClass.getEnglishName().toLowerCase());
 				}
@@ -69,7 +69,7 @@ public class LssServiceImp implements LssService {
 
 	private void removeChildrenNodeWhichDontUsedForLssFormat(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
 		ObjectNode object = (ObjectNode) jsonNode;
-		fieldsToRemove.stream().forEach(object::remove);
+		fieldsToRemove.forEach(object::remove);
 		objectMapper.writeValueAsString(object);
 	}
 }

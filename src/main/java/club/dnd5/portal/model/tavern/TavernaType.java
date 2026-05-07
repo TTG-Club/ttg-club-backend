@@ -5,11 +5,12 @@ import java.util.Random;
 public enum TavernaType {
 	BEER("Пивная", "Кабак", "Бар", "Паб", "Дом эля", "Пивоварня"), 
 	INN("Постоялый двор", "Трактир", "Таверна", "Логово"), 
-	HOTEL("Гостиница", "Отель", "Дом", "Гостинный двор");
+	HOTEL("Гостиница", "Отель", "Дом", "Гостиный двор");
 	
 	private final Random rnd = new Random();
 
-	private String[] names;
+	private final String[] names;
+
 	TavernaType(String... names){
 		this.names = names;
 	}

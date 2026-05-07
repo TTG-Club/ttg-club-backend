@@ -6,9 +6,9 @@ import club.dnd5.portal.model.tavern.Atmosphere;
 import club.dnd5.portal.model.tavern.TavernaName;
 import club.dnd5.portal.model.tavern.TavernaPrefixName;
 import club.dnd5.portal.model.tavern.TavernaType;
-import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.datatable.RaceRepository;
-import club.dnd5.portal.repository.tavern.*;
+import club.dnd5.portal.repository.tavern.AtmosphereRepository;
+import club.dnd5.portal.repository.tavern.TavernaNameRepository;
+import club.dnd5.portal.repository.tavern.TavernaPrefixNameRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,7 +16,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -30,17 +34,9 @@ public class TavernToolController {
 
 	private final TavernaNameRepository nameRepo;
 	private final TavernaPrefixNameRepository prefixRepo;
-	private final RaceRepository raceRepo;
-	private final AtmosphereRepoditory atmosphereRepo;
-	private final TopicDiscussedRepository topicRepo;
-	private final RandomEventRepository eventRepo;
-	private final VisitorRepository visitorRepo;
-	private final ClassRepository classRepo;
-	private final TavernaDishRepository dishRepo;
-	private final TavernaDrinkRepository drinkRepo;
-	private final DrinkEffectsRepository drinkEffectRepo;
+	private final AtmosphereRepository atmosphereRepo;
 
-	private Set<String> generatedNames = new HashSet<>();
+	private final Set<String> generatedNames = new HashSet<>();
 
 	@GetMapping("/tools/tavern")
 	public String getForm(Model model) {
@@ -116,7 +112,6 @@ public class TavernToolController {
 
 	@GetMapping("/tools/tavern/habitates/")
 	public String getHabitats(Model model) {
-		//model.addAttribute("selected",  habitats.get(rnd.nextInt(habitats.size())));
 		model.addAttribute("habitates", habitats);
 		return "tools/tavern :: habitates";
 	}
