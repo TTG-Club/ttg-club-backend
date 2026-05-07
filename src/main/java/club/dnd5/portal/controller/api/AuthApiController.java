@@ -78,6 +78,7 @@ public class AuthApiController {
 		cookie.setMaxAge(0);
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
+		cookie.setSecure(true);
 		response.addCookie(cookie);
 		session.invalidate();
 		return ResponseEntity.ok().build();
