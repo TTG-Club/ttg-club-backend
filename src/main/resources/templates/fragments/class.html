@@ -110,13 +110,13 @@
 			<summary class="h4"><span>Владение</span></summary>
 			<div class="content">
 				<p class="class_stats">
-					<b>Доспехи:</b> <span th:utext="*{armor}"></span>
+					<b>Доспехи:</b> <span th:utext="${@htmlFragmentCleaner.clean(heroClass.armor)}"></span>
 				</p>
 				<p class="class_stats">
-					<b>Оружие:</b> <span th:utext="*{weapon}"></span>
+					<b>Оружие:</b> <span th:utext="${@htmlFragmentCleaner.clean(heroClass.weapon)}"></span>
 				</p>
 				<p class="class_stats">
-					<b>Инструменты:</b> <span th:utext="*{tools}"></span>
+					<b>Инструменты:</b> <span th:utext="${@htmlFragmentCleaner.clean(heroClass.tools)}"></span>
 				</p>
 				<p class="class_stats">
 					<b>Спаcброски:</b> <span th:text="*{savingThrows}"></span>
@@ -131,9 +131,10 @@
 		<details open>
 			<summary class="h4" th:if="*{equipment}"><span>Снаряжение</span></summary>
 			<div class="content">
-				<p th:if="*{equipment}">
-					Вы начинаете со следующим снаряжением в дополнение к снаряжению, полученному за вашу предысторию: <span th:utext="*{equipment}"></span>
-				</p>
+				<th:block th:if="*{equipment}">
+					<p>Вы начинаете со следующим снаряжением в дополнение к снаряжению, полученному за вашу предысторию:</p>
+					<div th:utext="${@htmlFragmentCleaner.clean(heroClass.equipment)}"></div>
+				</th:block>
 			</div>
 		</details>
 	</th:block>
@@ -148,7 +149,7 @@
 					<span th:text="${feature.type}"></span>
 					<a href="/rules/optional_class_features" th:if="${feature.optional}" class="tip optional-rules" v-tippy="'Эта опция представлена в книге «Котёл Таши со всякой всячиной». Всё в этой книге опционально: поговорите с Мастером и решите, можно ли вам получить умение или опцию, если вы соответствуете его требованиям. По договорённости с Мастером вы можете использовать некоторые из них, все или ни одну.'"> (опционально)</a>
 				</div>
-				<div th:utext="${feature.description}"></div>
+				<div th:utext="${@htmlFragmentCleaner.clean(feature.description)}"></div>
 			</div>
 		</details>
 	</th:block>
@@ -160,7 +161,7 @@
 				<span class="source-data tip" th:text="${archetype.book.source}" th:title="${archetype.book.name}"></span>
 			</summary>
 			<div class="content">
-				<div th:utext="${archetype.description}"></div>
+				<div th:utext="${@htmlFragmentCleaner.clean(archetype.description)}"></div>
 				<table th:unless=${archetype.spells.empty}>
 					<thead>
 					<tr>
@@ -190,7 +191,7 @@
 						<span th:utext="${feature.name}"/>
 					</h4>
 					<p class="caption_text" th:text="${feature.displayLevel}"></p>
-					<div th:utext="${feature.description}"></div>
+					<div th:utext="${@htmlFragmentCleaner.clean(feature.description)}"></div>
 				</div>
 			</div>
 		</details>
