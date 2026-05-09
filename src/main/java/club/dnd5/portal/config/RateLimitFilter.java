@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitFilter extends OncePerRequestFilter
 {
     private static final String ANONYMOUS_USER = "anonymousUser";
+    private static final String ONLINE_HEARTBEAT_URI = "/api/online/heartbeat";
 
     private final RateLimitProperties properties;
 
@@ -89,6 +90,11 @@ public class RateLimitFilter extends OncePerRequestFilter
         }
 
         String uri = request.getRequestURI();
+        if (ONLINE_HEARTBEAT_URI.equals(uri))
+        {
+            return true;
+        }
+
         // не режем health/metrics, иначе Prometheus/healthcheck быстро сожрёт лимит
         return uri != null && uri.startsWith("/actuator");
     }
