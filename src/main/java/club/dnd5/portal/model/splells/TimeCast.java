@@ -29,6 +29,7 @@ public class TimeCast {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private TimeUnit unit;
+	@Column(name = "`condition`")
 	private String condition;
 
 	public String getName() {
