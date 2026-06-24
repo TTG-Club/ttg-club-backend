@@ -7,6 +7,7 @@ import club.dnd5.portal.dto.api.spell.ReferenceClassApi;
 import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequestApi;
+import club.dnd5.portal.dto.api.spell.SpellSaveApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
@@ -23,7 +24,9 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.splells.TimeCast;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
+import club.dnd5.portal.repository.datatable.TimeCastRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,14 +38,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import java.util.*;
@@ -60,6 +70,8 @@ public class SpellApiController {
 	private final SpellRepository spellRepository;
 	private final ClassRepository classRepository;
 	private final ArchetypeSpellRepository archetypeSpellRepository;
+	private final BookRepository bookRepository;
+	private final TimeCastRepository timeCastRepository;
 
 	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -217,6 +229,46 @@ public class SpellApiController {
 	@PostMapping(value = "/api/v1/spells/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<SpellDetailApi> getSpell(@PathVariable String englishName) {
 		Spell spell = spellRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		SpellDetailApi spellApi = getSpellDetail(spell);
+		return ResponseEntity.ok(spellApi);
+	}
+
+	@Operation(summary = "Создание заклинания в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/spells", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<SpellDetailApi> createSpell(@Valid @RequestBody SpellSaveApi request) {
+		if (spellRepository.findByEnglishName(request.getEnglishName()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spell with the same englishName already exists");
+		}
+
+		Spell spell = new Spell();
+		applySpellRequest(spell, request);
+		spell.setBook(getCustomBook());
+		spell.setHeroClass(Collections.emptyList());
+		spell = spellRepository.saveAndFlush(spell);
+		saveTimeCast(spell, request);
+		return ResponseEntity.ok(getSpellDetail(spellRepository.saveAndFlush(spell)));
+	}
+
+	@Operation(summary = "Обновление заклинания в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PatchMapping(value = "/api/v1/workshop/spells/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<SpellDetailApi> updateSpell(@PathVariable Integer id, @Valid @RequestBody SpellSaveApi request) {
+		Spell spell = spellRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		if (spellRepository.findByEnglishName(request.getEnglishName())
+			.filter(existing -> !existing.getId().equals(id))
+			.isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spell with the same englishName already exists");
+		}
+
+		applySpellRequest(spell, request);
+		saveTimeCast(spell, request);
+		return ResponseEntity.ok(getSpellDetail(spellRepository.saveAndFlush(spell)));
+	}
+
+	private SpellDetailApi getSpellDetail(Spell spell) {
 		SpellDetailApi spellApi = new SpellDetailApi(spell);
 		List<Archetype> archetypes = archetypeSpellRepository.findAllBySpell(spell.getId());
 		if (!archetypes.isEmpty()) {
@@ -226,7 +278,61 @@ public class SpellApiController {
 		if (!races.isEmpty()) {
 			spellApi.setRaces(races.stream().map(ReferenceClassApi::new).collect(Collectors.toList()));
 		}
-		return ResponseEntity.ok(spellApi);
+		return spellApi;
+	}
+
+	private void applySpellRequest(Spell spell, SpellSaveApi request) {
+		spell.setName(request.getName().trim());
+		spell.setEnglishName(request.getEnglishName().trim());
+		spell.setLevel(request.getLevel());
+		spell.setSchool(request.getSchool());
+		spell.setAdditionalType(trimToNull(request.getAdditionalType()));
+		spell.setRitual(Boolean.TRUE.equals(request.getRitual()));
+		spell.setConcentration(Boolean.TRUE.equals(request.getConcentration()));
+		spell.setVerbalComponent(request.isVerbalComponent());
+		spell.setSomaticComponent(request.isSomaticComponent());
+		spell.setConsumable(Boolean.TRUE.equals(request.getConsumable()));
+		spell.setAdditionalMaterialComponent(trimToNull(request.getMaterialComponent()));
+		spell.setDistance(request.getRange().trim());
+		spell.setDuration(request.getDuration().trim());
+		spell.setDescription(request.getDescription().trim());
+		spell.setUpperLevel(trimToNull(request.getUpper()));
+		spell.setSrd(Boolean.FALSE);
+		if (spell.getDamageType() == null) {
+			spell.setDamageType(Collections.emptyList());
+		}
+		if (spell.getHealType() == null) {
+			spell.setHealType(Collections.emptyList());
+		}
+		if (spell.getSavingthrows() == null) {
+			spell.setSavingthrows(Collections.emptyList());
+		}
+		if (spell.getHeroClass() == null) {
+			spell.setHeroClass(Collections.emptyList());
+		}
+	}
+
+	private void saveTimeCast(Spell spell, SpellSaveApi request) {
+		if (spell.getId() != null) {
+			timeCastRepository.deleteBySpellId(spell.getId());
+		}
+		TimeCast timeCast = new TimeCast();
+		timeCast.setNumber(request.getTimeNumber());
+		timeCast.setUnit(request.getTimeUnit());
+		timeCast.setCondition(trimToNull(request.getTimeCondition()));
+		spell.setTimes(Collections.singletonList(timeCastRepository.save(timeCast)));
+	}
+
+	private Book getCustomBook() {
+		return bookRepository.findFirstByType(TypeBook.CUSTOM)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+	}
+
+	private String trimToNull(String value) {
+		if (!StringUtils.hasText(value)) {
+			return null;
+		}
+		return value.trim();
 	}
 
 	@Operation(summary = "Фильтры для заклинаний")
