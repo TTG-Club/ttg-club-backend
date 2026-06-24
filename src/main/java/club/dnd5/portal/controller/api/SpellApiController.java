@@ -310,16 +310,19 @@ public class SpellApiController {
 	}
 
 	private void saveTimeCast(Spell spell, SpellSaveApi request) {
-		TimeCast timeCast = new TimeCast();
+		if (spell.getTimes() == null) {
+			spell.setTimes(new ArrayList<>());
+		}
+		TimeCast timeCast;
+		if (spell.getTimes().isEmpty()) {
+			timeCast = new TimeCast();
+			spell.getTimes().add(timeCast);
+		} else {
+			timeCast = spell.getTimes().get(0);
+		}
 		timeCast.setNumber(request.getTimeNumber());
 		timeCast.setUnit(request.getTimeUnit());
 		timeCast.setCondition(trimToNull(request.getTimeCondition()));
-		if (spell.getTimes() == null) {
-			spell.setTimes(new ArrayList<>());
-		} else {
-			spell.getTimes().clear();
-		}
-		spell.getTimes().add(timeCast);
 	}
 
 	private Book getCustomBook() {
