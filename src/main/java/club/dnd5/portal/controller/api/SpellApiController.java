@@ -26,7 +26,6 @@ import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import club.dnd5.portal.repository.datatable.TimeCastRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,7 +70,6 @@ public class SpellApiController {
 	private final ClassRepository classRepository;
 	private final ArchetypeSpellRepository archetypeSpellRepository;
 	private final BookRepository bookRepository;
-	private final TimeCastRepository timeCastRepository;
 
 	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -245,8 +243,7 @@ public class SpellApiController {
 		Spell spell = new Spell();
 		applySpellRequest(spell, request);
 		spell.setBook(getCustomBook());
-		spell.setHeroClass(Collections.emptyList());
-		spell = spellRepository.saveAndFlush(spell);
+		spell.setHeroClass(new ArrayList<>());
 		saveTimeCast(spell, request);
 		return ResponseEntity.ok(getSpellDetail(spellRepository.saveAndFlush(spell)));
 	}
@@ -299,28 +296,30 @@ public class SpellApiController {
 		spell.setUpperLevel(trimToNull(request.getUpper()));
 		spell.setSrd(Boolean.FALSE);
 		if (spell.getDamageType() == null) {
-			spell.setDamageType(Collections.emptyList());
+			spell.setDamageType(new ArrayList<>());
 		}
 		if (spell.getHealType() == null) {
-			spell.setHealType(Collections.emptyList());
+			spell.setHealType(new ArrayList<>());
 		}
 		if (spell.getSavingthrows() == null) {
-			spell.setSavingthrows(Collections.emptyList());
+			spell.setSavingthrows(new ArrayList<>());
 		}
 		if (spell.getHeroClass() == null) {
-			spell.setHeroClass(Collections.emptyList());
+			spell.setHeroClass(new ArrayList<>());
 		}
 	}
 
 	private void saveTimeCast(Spell spell, SpellSaveApi request) {
-		if (spell.getId() != null) {
-			timeCastRepository.deleteBySpellId(spell.getId());
-		}
 		TimeCast timeCast = new TimeCast();
 		timeCast.setNumber(request.getTimeNumber());
 		timeCast.setUnit(request.getTimeUnit());
 		timeCast.setCondition(trimToNull(request.getTimeCondition()));
-		spell.setTimes(Collections.singletonList(timeCastRepository.save(timeCast)));
+		if (spell.getTimes() == null) {
+			spell.setTimes(new ArrayList<>());
+		} else {
+			spell.getTimes().clear();
+		}
+		spell.getTimes().add(timeCast);
 	}
 
 	private Book getCustomBook() {
