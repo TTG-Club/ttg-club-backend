@@ -2,7 +2,7 @@ package club.dnd5.portal.dto.bestiary;
 
 import java.util.stream.Collectors;
 
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.creature.HabitatType;
@@ -38,7 +38,7 @@ public class CreatureDto {
 		name = creature.getName();
 		altName = creature.getAltName();
 		englishName = creature.getEnglishName();
-		size = creature.getSize().getSizeName(creature.getType()) + " (" + StringUtils.capitalize(creature.getSize().name().toLowerCase()) + " - " + creature.getSize().getCell() + ")";
+		size = creature.getSize().getSizeName(creature.getType()) + " (" + StringUtil.capitalize(creature.getSize().name().toLowerCase()) + " - " + creature.getSize().getCell() + ")";
 		type = creature.getType().getCyrillicName();
 		englishType = creature.getType().name().toLowerCase();
 		alignment = creature.getAligment();

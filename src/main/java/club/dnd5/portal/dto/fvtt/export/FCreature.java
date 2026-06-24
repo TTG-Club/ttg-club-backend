@@ -6,7 +6,7 @@ import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Creature;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class FCreature {
 		type = "npc";
 		system = new FSystem(creature);
 		img = String.format("https://5e.tools/img/%s/%s.png",
-				creature.getBook().getSource(), StringUtils.capitalizeWords(creature.getEnglishName()));
+				creature.getBook().getSource(), StringUtil.capitalizeWords(creature.getEnglishName()));
 		token = new FToken(creature);
 		creature.getFeats().stream()
 			.map(FItem::new)

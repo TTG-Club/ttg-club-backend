@@ -11,7 +11,6 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.Comparator;
@@ -130,7 +129,7 @@ public class HeroClass {
 	}
 
 	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
+		return StringUtil.capitalize(name.toLowerCase());
 	}
 
 	public List<HeroClassTrait> getTraits(int level) {

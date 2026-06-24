@@ -1,7 +1,7 @@
 package club.dnd5.portal.model.creature;
 
 import lombok.Getter;
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -46,7 +46,7 @@ public enum Condition {
 	}
 
 	public String getName() {
-		return StringUtils.capitalizeWords(cyrillicName.toLowerCase());
+		return StringUtil.capitalizeWords(cyrillicName.toLowerCase());
 	}
 
 	public static Condition parse(String stateString) {

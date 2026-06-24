@@ -6,7 +6,7 @@ import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 @Getter
 @Setter
@@ -61,7 +61,7 @@ public class ClassFetureDto {
 			className += "а";
 		}
 		child = feature.getChild();
-		type+= ", умение " + StringUtils.capitalizeWords(className.toLowerCase());
+		type+= ", умение " + StringUtil.capitalizeWords(className.toLowerCase());
 		if (feature.getOptional() == 1) {
 			optional = "";
 		}

@@ -2,7 +2,7 @@ package club.dnd5.portal.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -47,7 +47,7 @@ public enum AbilityType {
 	}
 
 	public String getCapitalizeName() {
-		return StringUtils.capitalize(name().toLowerCase());
+		return StringUtil.capitalize(name().toLowerCase());
 	}
 
 	public static AbilityType parse(String name) {

@@ -7,7 +7,6 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -105,7 +104,7 @@ public class Race implements Serializable {
 	}
 
 	public String getCapitalizeName() {
-		return StringUtils.capitalize(name);
+		return StringUtil.capitalize(name);
 	}
 
 	public String getAbilityBonuses() {
@@ -156,7 +155,7 @@ public class Race implements Serializable {
 	}
 
 	public String getCapName() {
-		return StringUtils.capitalize(name.toLowerCase());
+		return StringUtil.capitalize(name.toLowerCase());
 	}
 
 	public boolean isDarkVision() {
@@ -215,7 +214,7 @@ public class Race implements Serializable {
 	}
 
 	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
+		return StringUtil.capitalize(name.toLowerCase());
 	}
 
 	public String getUrlName() {

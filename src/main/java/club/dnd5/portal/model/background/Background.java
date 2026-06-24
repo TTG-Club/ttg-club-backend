@@ -7,7 +7,6 @@ import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.List;
@@ -74,7 +73,7 @@ public class Background {
 	private Short page;
 
 	public String getCapitalazeName() {
-		return StringUtils.capitalizeWords(name.toLowerCase());
+		return StringUtil.capitalizeWords(name.toLowerCase());
 	}
 
 	public String getUrlName() {

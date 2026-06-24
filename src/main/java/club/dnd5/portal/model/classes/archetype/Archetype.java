@@ -10,7 +10,6 @@ import club.dnd5.portal.model.classes.SpellLevelDefinition;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.Comparator;
@@ -84,7 +83,7 @@ public class Archetype {
 	}
 
 	public String getCapitalizeName() {
-		return StringUtils.capitalizeWords(name.toLowerCase());
+		return StringUtil.capitalizeWords(name.toLowerCase());
 	}
 
 	public List<ArchetypeTrait> getFeats(){
