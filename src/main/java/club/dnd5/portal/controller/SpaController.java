@@ -1,13 +1,18 @@
 package club.dnd5.portal.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Hidden
 @Controller
 public class SpaController {
-	private static final String INDEX = "forward:/index.html";
+	private static final Resource INDEX = new ClassPathResource("templates/spa.html");
 
 	@GetMapping({
 		"/",
@@ -91,7 +96,11 @@ public class SpaController {
 		"/weapons",
 		"/weapons/{name}"
 	})
-	public String getIndex() {
-		return INDEX;
+	@ResponseBody
+	public ResponseEntity<Resource> getIndex() {
+		return ResponseEntity
+			.ok()
+			.contentType(MediaType.TEXT_HTML)
+			.body(INDEX);
 	}
 }
