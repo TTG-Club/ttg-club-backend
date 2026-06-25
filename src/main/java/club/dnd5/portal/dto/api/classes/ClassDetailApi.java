@@ -264,18 +264,21 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final String anchor;
 		private final String tooltipUrl;
+		private final boolean archetype;
 
 		private TraitLinkApi(HeroClassTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			String child = trait.getChild() == null ? trait.getId().toString() : trait.getChild();
 			anchor = String.format("#c%s", child);
 			tooltipUrl = String.format("/classes/feature/%d", trait.getId());
+			archetype = false;
 		}
 
 		private TraitLinkApi(ArchetypeTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			anchor = String.format("#a%d", trait.getId());
 			tooltipUrl = String.format("/classes/archetype/feature/%d", trait.getId());
+			archetype = true;
 		}
 
 		private static String normalizeTraitName(String name, String suffix) {
