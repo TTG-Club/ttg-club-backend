@@ -13,6 +13,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ArmorDetailApi extends ArmorApi {
+	private Integer id;
+	private Integer armorClassRaw;
+	private Integer cost;
+	private String typeRaw;
 	private Float weight;
 	private String description;
 	private Boolean disadvantage;
@@ -21,7 +25,11 @@ public class ArmorDetailApi extends ArmorApi {
 	
 	public ArmorDetailApi(Armor armor) {
 		super(armor);
+		id = armor.getId();
 		url = null;
+		armorClassRaw = armor.getAC();
+		cost = armor.getCost();
+		typeRaw = armor.getType().name();
 		weight = armor.getWeight();
 		description = armor.getDescription();
 		if (armor.isStelsHindrance()) {

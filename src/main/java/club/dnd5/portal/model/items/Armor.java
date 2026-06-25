@@ -3,12 +3,14 @@ package club.dnd5.portal.model.items;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "armors")
 @Getter
+@Setter
 public class Armor {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

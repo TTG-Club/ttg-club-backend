@@ -7,6 +7,7 @@ import club.dnd5.portal.dto.api.item.ArmorApi;
 import club.dnd5.portal.dto.api.item.ArmorDetailApi;
 import club.dnd5.portal.dto.api.item.ArmorFilter;
 import club.dnd5.portal.dto.api.item.ArmorRequestApi;
+import club.dnd5.portal.dto.api.item.ArmorSaveApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
@@ -14,6 +15,7 @@ import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Armor;
 import club.dnd5.portal.model.items.ArmorCategory;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,11 +24,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import java.util.*;
@@ -37,6 +42,7 @@ import java.util.stream.Collectors;
 @RestController
 public class ArmorApiController {
 	private final ArmorRepository armorRepository;
+	private final BookRepository bookRepository;
 
 	@Operation(summary = "Получение краткого списка доспехов")
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -82,6 +88,35 @@ public class ArmorApiController {
 	public ArmorDetailApi getOption(@PathVariable String englishName) {
 		return new ArmorDetailApi(armorRepository.findByEnglishName(englishName.replace('_', ' '))
 				.orElseThrow(PageNotFoundException::new));
+	}
+
+	@Operation(summary = "Создание доспеха в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/armors", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArmorDetailApi createArmor(@Valid @RequestBody ArmorSaveApi request) {
+		if (armorRepository.findByEnglishName(request.getEnglishName()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Armor with the same englishName already exists");
+		}
+		Armor armor = new Armor();
+		armor.setBook(getCustomBook());
+		applyArmorRequest(armor, request);
+		return new ArmorDetailApi(armorRepository.saveAndFlush(armor));
+	}
+
+	@Operation(summary = "Обновление доспеха в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PatchMapping(value = "/api/v1/workshop/armors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArmorDetailApi updateArmor(@PathVariable Integer id, @Valid @RequestBody ArmorSaveApi request) {
+		Armor armor = armorRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		armorRepository.findByEnglishName(request.getEnglishName())
+			.filter(existing -> !existing.getId().equals(id))
+			.ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Armor with the same englishName already exists");
+			});
+		applyArmorRequest(armor, request);
+		return new ArmorDetailApi(armorRepository.saveAndFlush(armor));
 	}
 
 	@Operation(summary = "Получение фильтра для снаряжение")
@@ -131,5 +166,27 @@ public class ArmorApiController {
 
 		filters.setOther(otherFilters);
 		return filters;
+	}
+
+	private void applyArmorRequest(Armor armor, ArmorSaveApi request) {
+		armor.setName(request.getName().trim());
+		armor.setEnglishName(request.getEnglishName().trim());
+		armor.setAltName(trimToNull(request.getAltName()));
+		armor.setAC(request.getArmorClass() == null ? 0 : request.getArmorClass());
+		armor.setCost(request.getCost() == null ? 0 : request.getCost());
+		armor.setWeight(request.getWeight() == null ? 0 : request.getWeight());
+		armor.setForceRequirements(request.getForceRequirements());
+		armor.setStelsHindrance(Boolean.TRUE.equals(request.getStealthHindrance()));
+		armor.setType(request.getType());
+		armor.setDescription(trimToNull(request.getDescription()));
+	}
+
+	private Book getCustomBook() {
+		return bookRepository.findFirstByType(TypeBook.CUSTOM)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+	}
+
+	private String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
 	}
 }
