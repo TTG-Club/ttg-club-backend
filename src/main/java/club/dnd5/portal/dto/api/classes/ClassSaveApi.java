@@ -46,4 +46,5 @@ public class ClassSaveApi {
 	private boolean sidekick;
 	private String icon;
 	private Short page;
+	private List<ClassTraitSaveApi> classTraits;
 }

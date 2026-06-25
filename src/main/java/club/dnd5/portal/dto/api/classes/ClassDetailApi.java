@@ -49,6 +49,7 @@ public class ClassDetailApi extends ClassApi {
 	private Rest slotsReset;
 	private int enabledArhitypeLevel;
 	private Short page;
+	private Collection<ClassTraitApi> classTraits;
 
 	public ClassDetailApi(HeroClass heroClass, Collection<String> images, ClassRequestApi request) {
 		super(heroClass, request);
@@ -63,6 +64,13 @@ public class ClassDetailApi extends ClassApi {
 		slotsReset = heroClass.getSlotsReset();
 		enabledArhitypeLevel = heroClass.getEnabledArhitypeLevel();
 		page = heroClass.getPage();
+		classTraits = heroClass.getTraits() == null
+			? Collections.emptyList()
+			: heroClass.getTraits()
+				.stream()
+				.filter(trait -> !trait.isArchitype())
+				.map(ClassTraitApi::new)
+				.collect(Collectors.toList());
 		tabs.add(new ClassTabAp("Навыки", String.format("/classes/fragment/%s", heroClass.getUrlName()), "traits", 0, true));
 		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/description", heroClass.getUrlName()), "description", 1, true));
 		if (heroClass.getSpellcasterType() != null && heroClass.getSpellcasterType() != SpellcasterType.NONE) {
@@ -95,6 +103,27 @@ public class ClassDetailApi extends ClassApi {
 			tabs.add(new ClassTabAp(archetype.getOptionType().getDisplayName(), String.format("/filters/options/%s/%s", heroClass.getUrlName(), archetype.getUrlName()), "options", 4, false));
 		}
 		traits = new ClassTraitsApi(heroClass, archetype);
+	}
+
+	@Getter
+	public static class ClassTraitApi {
+		private final Integer id;
+		private final String name;
+		private final String suffix;
+		private final int level;
+		private final String description;
+		private final boolean optional;
+		private final String child;
+
+		private ClassTraitApi(HeroClassTrait trait) {
+			id = trait.getId();
+			name = trait.getName();
+			suffix = trait.getSuffix();
+			level = trait.getLevel();
+			description = trait.getDescription();
+			optional = trait.getOptional() == 1;
+			child = trait.getChild();
+		}
 	}
 
 	@Getter

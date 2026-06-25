@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -133,12 +134,18 @@ public class HeroClass {
 	}
 
 	public List<HeroClassTrait> getTraits(int level) {
+		if (traits == null) {
+			return Collections.emptyList();
+		}
 		return traits.stream()
 				.filter(t -> t.getLevel() == level)
 				.collect(Collectors.toList());
 	}
 
 	public List<HeroClassTrait> getTraitsClear(int level) {
+		if (traits == null) {
+			return Collections.emptyList();
+		}
 		return traits.stream()
 				.filter(t -> t.getLevel() == level)
 				.filter(t -> !t.isArchitype())
@@ -146,12 +153,18 @@ public class HeroClass {
 	}
 
 	public List<HeroClassTrait> getTraits() {
+		if (traits == null) {
+			return Collections.emptyList();
+		}
 		return traits.stream()
 				.sorted(Comparator.comparingInt(HeroClassTrait::getLevel))
 				.collect(Collectors.toList());
 	}
 
 	public List<ArchetypeTrait> getArhitypeTraitNames(int level){
+		if (archetypes == null) {
+			return Collections.emptyList();
+		}
         return archetypes
                 .stream()
                 .flatMap(a -> a.getFeats().stream())
@@ -160,6 +173,9 @@ public class HeroClass {
 	}
 
 	public List<ArchetypeTrait> getArhitypeTraitNames(int archetypeId, int level){
+		if (archetypes == null) {
+			return Collections.emptyList();
+		}
         return archetypes
                 .stream()
                 .filter(a -> a.getId() == archetypeId)

@@ -11,11 +11,13 @@ import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.classes.ArchetypeRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
+import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
 import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +54,7 @@ public class ClassApiController {
 	private final ArchetypeRepository archetypeRepository;
 	private final ImageRepository imageRepository;
 	private final BookRepository bookRepository;
+	private final HeroClassTraitRepository heroClassTraitRepository;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -108,6 +112,8 @@ public class ClassApiController {
 		heroClass.setArchetypes(Collections.emptyList());
 		applyClassRequest(heroClass, request);
 		HeroClass saved = classRepo.saveAndFlush(heroClass);
+		syncClassTraits(saved, request);
+		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
 		return ResponseEntity.ok(new ClassDetailApi(saved, Collections.emptyList(), new ClassRequestApi()));
 	}
 
@@ -120,9 +126,11 @@ public class ClassApiController {
 			.filter(existing -> !existing.getId().equals(id))
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Class with the same englishName already exists");
-			});
+		});
 		applyClassRequest(heroClass, request);
 		HeroClass saved = classRepo.saveAndFlush(heroClass);
+		syncClassTraits(saved, request);
+		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, saved.getId());
 		return ResponseEntity.ok(new ClassDetailApi(saved, images, new ClassRequestApi()));
 	}
@@ -181,6 +189,44 @@ public class ClassApiController {
 		heroClass.setSidekick(request.isSidekick());
 		heroClass.setIcon(trimToNull(request.getIcon()));
 		heroClass.setPage(request.getPage());
+	}
+
+	private void syncClassTraits(HeroClass heroClass, ClassSaveApi request) {
+		if (request.getClassTraits() == null) {
+			return;
+		}
+		List<HeroClassTrait> existingTraits = heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(heroClass.getId());
+		Map<Integer, HeroClassTrait> existingById = existingTraits.stream()
+			.collect(Collectors.toMap(HeroClassTrait::getId, trait -> trait));
+		List<HeroClassTrait> traits = request.getClassTraits().stream()
+			.filter(traitRequest -> StringUtils.hasText(traitRequest.getName()))
+			.filter(traitRequest -> StringUtils.hasText(traitRequest.getDescription()))
+			.map(traitRequest -> {
+				HeroClassTrait trait = traitRequest.getId() == null
+					? new HeroClassTrait()
+					: existingById.getOrDefault(traitRequest.getId(), new HeroClassTrait());
+				trait.setName(traitRequest.getName().trim());
+				trait.setSuffix(trimToNull(traitRequest.getSuffix()));
+				trait.setLevel(traitRequest.getLevel());
+				trait.setDescription(traitRequest.getDescription().trim());
+				trait.setOptional(traitRequest.isOptional() ? 1 : 0);
+				trait.setChild(trimToNull(traitRequest.getChild()));
+				trait.setArchitype(false);
+				trait.setHeroClass(heroClass);
+				trait.setBook(heroClass.getBook());
+				return trait;
+			})
+			.collect(Collectors.toList());
+		heroClassTraitRepository.saveAll(traits);
+		heroClassTraitRepository.flush();
+		List<Integer> ids = traits.stream()
+			.map(HeroClassTrait::getId)
+			.collect(Collectors.toList());
+		if (ids.isEmpty()) {
+			heroClassTraitRepository.deleteClassTraits(heroClass.getId());
+		} else {
+			heroClassTraitRepository.deleteClassTraitsNotIn(heroClass.getId(), ids);
+		}
 	}
 
 	private Book getCustomBook() {
