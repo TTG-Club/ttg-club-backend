@@ -37,6 +37,8 @@ public class BeastDetailRequest {
 	private Alignment alignment;
 	@Schema(description = "КД", example = "10", required = true)
 	private Byte armorClass;
+	@Schema(description = "свободный текст для КД")
+	private String armorText;
 	@Schema(description = "список доспехов")
 	private Collection<String> armors;
 	@Schema(description = "хиты", required = true)
