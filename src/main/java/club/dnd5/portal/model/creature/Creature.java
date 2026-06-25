@@ -190,16 +190,42 @@ public class Creature implements FoundryCommon {
 	}
 
 	public String getHpFormula() {
-		if (bonusHP == null && diceHp == null && suffixHP == null) {
+		if (countDiceHp == null || getDiceHp() == null) {
+			if (suffixHP != null) {
+				return String.format("%d %s", averageHp, suffixHP);
+			}
 			return String.format("%d", averageHp);
 		}
-		if (bonusHP == null && diceHp == null && suffixHP != null) {
-			return String.format("%d %s", averageHp, suffixHP);
+		short constitutionBonus = getBonusHP();
+		if (constitutionBonus == 0) {
+			return String.format("%d%s", countDiceHp, getDiceHp().name());
 		}
-		if (bonusHP == null) {
-			return String.format("%d%s", countDiceHp, diceHp.name());
+		return String.format("%d%s%s%d", countDiceHp, getDiceHp().name(), constitutionBonus >= 0 ? "+" : "-", Math.abs(constitutionBonus));
+	}
+
+	public short getAverageHp() {
+		if (countDiceHp == null || size == null || size.getHitDice() == null) {
+			return averageHp;
 		}
-		return String.format("%d%s%s%d", countDiceHp, diceHp.name(), bonusHP >= 0 ? "+" : "-", Math.abs(bonusHP));
+		return (short) Math.floor(countDiceHp * size.getHitAverage() + getBonusHP());
+	}
+
+	public Dice getDiceHp() {
+		if (size == null || size.getHitDice() == null) {
+			return diceHp;
+		}
+		return size.getHitDice();
+	}
+
+	public Short getBonusHP() {
+		if (countDiceHp == null) {
+			return bonusHP;
+		}
+		return (short) (getConstitutionModifier() * countDiceHp);
+	}
+
+	private int getConstitutionModifier() {
+		return (int) Math.floor((constitution - 10) / 2.0);
 	}
 
 	public String getSense() {

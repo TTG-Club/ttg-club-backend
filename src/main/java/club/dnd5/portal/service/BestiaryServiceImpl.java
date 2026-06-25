@@ -263,10 +263,10 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setAC(request.getArmorClass());
         beast.setBonusAC(trimToNull(request.getHits().getText()));
 
-        beast.setAverageHp(request.getHits().getAverage());
         beast.setCountDiceHp(request.getHits().getDiceCount());
-        beast.setDiceHp(request.getHits().getHitDice());
-        beast.setBonusHP(request.getHits().getBonus());
+        beast.setAverageHp((short) 0);
+        beast.setDiceHp(null);
+        beast.setBonusHP(null);
         beast.setSuffixHP(null);
         beast.setChallengeRating(trimToNull(request.getChallengeRating()));
         beast.setExp(0);
