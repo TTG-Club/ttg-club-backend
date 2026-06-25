@@ -23,4 +23,8 @@ public class NameValueApi {
 	private Object value;
 	@Schema(description = "дополнительный бонус если есть")
 	private Object additional;
+	@Schema(description = "флаг markdown")
+	private Boolean markdown;
+	@Schema(description = "сколько существ используют это действие")
+	private Long sharedUsageCount;
 }

@@ -211,7 +211,7 @@ public class BestiaryServiceImpl implements BestiaryService {
     public BeastDetailApi findOne(String englishName) {
         Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
                 .orElseThrow(PageNotFoundException::new);
-        BeastDetailApi beastApi = new BeastDetailApi(beast);
+        BeastDetailApi beastApi = new BeastDetailApi(beast, beastRepository::countByActionId);
         Collection<String> images = new ArrayList<>();
         tokenRepository.findByRefIdAndType(beast.getId(), "круглый")
                 .stream()
@@ -421,7 +421,7 @@ public class BestiaryServiceImpl implements BestiaryService {
                     feat.setName(item.getName().getRus().trim());
                     feat.setEnglishName(trimToNull(item.getName().getEng()));
                     feat.setDescription(trimToNull(item.getDescription()));
-                    feat.setMarkdown(true);
+                    feat.setMarkdown(item.getMarkdown() == null || item.getMarkdown());
                     return feat;
                 })
                 .collect(Collectors.toList());
@@ -442,24 +442,24 @@ public class BestiaryServiceImpl implements BestiaryService {
     private List<Action> mapActions(Collection<DescriptionRequest> request, ActionType type) {
         return nullToEmpty(request).stream()
                 .filter(item -> item.getName() != null && StringUtils.hasText(item.getName().getRus()))
-                .map(item -> createAction(item.getName().getRus(), item.getName().getEng(), item.getDescription(), type))
+                .map(item -> createAction(item.getName().getRus(), item.getName().getEng(), item.getDescription(), item.getMarkdown(), type))
                 .collect(Collectors.toList());
     }
 
     private List<Action> mapNameValueActions(Collection<NameValueApi> request, ActionType type) {
         return nullToEmpty(request).stream()
                 .filter(item -> StringUtils.hasText(item.getName()))
-                .map(item -> createAction(item.getName(), null, item.getValue() == null ? null : item.getValue().toString(), type))
+                .map(item -> createAction(item.getName(), null, item.getValue() == null ? null : item.getValue().toString(), true, type))
                 .collect(Collectors.toList());
     }
 
-    private Action createAction(String name, String englishName, String description, ActionType type) {
+    private Action createAction(String name, String englishName, String description, Boolean markdown, ActionType type) {
         Action action = new Action();
         action.setName(name.trim());
         action.setEnglishName(trimToNull(englishName));
         action.setDescription(StringUtils.hasText(description) ? description.trim() : "");
         action.setActionType(type);
-        action.setMarkdown(true);
+        action.setMarkdown(markdown == null || markdown);
         return action;
     }
 
