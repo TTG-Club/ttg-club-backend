@@ -264,21 +264,21 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final String anchor;
 		private final String tooltipUrl;
-		private final boolean archetype;
+		private final boolean archetypeFeature;
 
 		private TraitLinkApi(HeroClassTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			String child = trait.getChild() == null ? trait.getId().toString() : trait.getChild();
 			anchor = String.format("#c%s", child);
 			tooltipUrl = String.format("/classes/feature/%d", trait.getId());
-			archetype = false;
+			archetypeFeature = false;
 		}
 
 		private TraitLinkApi(ArchetypeTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			anchor = String.format("#a%d", trait.getId());
 			tooltipUrl = String.format("/classes/archetype/feature/%d", trait.getId());
-			archetype = true;
+			archetypeFeature = true;
 		}
 
 		private static String normalizeTraitName(String name, String suffix) {
@@ -296,6 +296,7 @@ public class ClassDetailApi extends ClassApi {
 		private final String description;
 		private final Source source;
 		private final boolean optional;
+		private final boolean archetypeFeature;
 
 		private TraitApi(HeroClassTrait trait) {
 			id = String.format("c%d", trait.getId());
@@ -304,6 +305,7 @@ public class ClassDetailApi extends ClassApi {
 			description = trait.getDescription();
 			source = new Source(trait.getBook());
 			optional = trait.getOptional() == 1;
+			archetypeFeature = false;
 		}
 
 		private TraitApi(ArchetypeTrait trait, Archetype archetype) {
@@ -313,6 +315,7 @@ public class ClassDetailApi extends ClassApi {
 			description = trait.getDescription();
 			source = new Source(trait.getBook());
 			optional = false;
+			archetypeFeature = true;
 		}
 
 		private static String levelSuffix(int level) {
