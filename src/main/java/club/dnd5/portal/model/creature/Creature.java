@@ -122,12 +122,12 @@ public class Creature implements FoundryCommon {
 
 	// спаброски
 	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "creature_id")
+	@JoinColumn(name = "creature_id", nullable = false)
 	private List<SavingThrow> savingThrows;
 
 	// навыки
 	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "creature_id")
+	@JoinColumn(name = "creature_id", nullable = false)
 	private List<Skill> skills;
 
 	@ManyToMany

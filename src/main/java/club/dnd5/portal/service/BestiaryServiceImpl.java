@@ -457,7 +457,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         Action action = new Action();
         action.setName(name.trim());
         action.setEnglishName(trimToNull(englishName));
-        action.setDescription(trimToNull(description));
+        action.setDescription(StringUtils.hasText(description) ? description.trim() : "");
         action.setActionType(type);
         action.setMarkdown(true);
         return action;
