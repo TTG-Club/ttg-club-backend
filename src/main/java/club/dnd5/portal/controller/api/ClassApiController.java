@@ -5,6 +5,7 @@ import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.ClassApi;
 import club.dnd5.portal.dto.api.classes.ClassDetailApi;
 import club.dnd5.portal.dto.api.classes.ClassRequestApi;
+import club.dnd5.portal.dto.api.classes.ClassSaveApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
@@ -15,20 +16,29 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.classes.ArchetypeRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +50,7 @@ public class ClassApiController {
 	private final ClassRepository classRepo;
 	private final ArchetypeRepository archetypeRepository;
 	private final ImageRepository imageRepository;
+	private final BookRepository bookRepository;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -80,6 +91,42 @@ public class ClassApiController {
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.SUBCLASS, archetype.getId());
 		return ResponseEntity.ok(new ClassDetailApi(archetype, images, request));
 	}
+
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/classes", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ClassDetailApi> createClass(@Valid @RequestBody ClassSaveApi request) {
+		if (classRepo.findByEnglishName(request.getEnglishName()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Class with the same englishName already exists");
+		}
+		HeroClass heroClass = new HeroClass();
+		heroClass.setBook(getCustomBook());
+		heroClass.setLevelDefenitions(Collections.emptyList());
+		heroClass.setFeatureLevelDefenitions(Collections.emptyList());
+		heroClass.setSpells(Collections.emptyList());
+		heroClass.setTraits(Collections.emptyList());
+		heroClass.setArchetypes(Collections.emptyList());
+		applyClassRequest(heroClass, request);
+		HeroClass saved = classRepo.saveAndFlush(heroClass);
+		return ResponseEntity.ok(new ClassDetailApi(saved, Collections.emptyList(), new ClassRequestApi()));
+	}
+
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PatchMapping(value = "/api/v1/workshop/classes/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ClassDetailApi> updateClass(@PathVariable Integer id, @Valid @RequestBody ClassSaveApi request) {
+		HeroClass heroClass = classRepo.findById(id).orElseThrow(PageNotFoundException::new);
+		classRepo.findByEnglishName(request.getEnglishName())
+			.filter(existing -> !existing.getId().equals(id))
+			.ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Class with the same englishName already exists");
+			});
+		applyClassRequest(heroClass, request);
+		HeroClass saved = classRepo.saveAndFlush(heroClass);
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, saved.getId());
+		return ResponseEntity.ok(new ClassDetailApi(saved, images, new ClassRequestApi()));
+	}
+
 	@PostMapping("/api/v1/filters/classes")
 	public FilterApi getClassFilter() {
 		return getClassFilters();
@@ -109,5 +156,39 @@ public class ClassApiController {
 		others.add(hillDiceFilter);
 		filters.setOther(others);
 		return filters;
+	}
+
+	private void applyClassRequest(HeroClass heroClass, ClassSaveApi request) {
+		heroClass.setName(request.getName().trim());
+		heroClass.setEnglishName(request.getEnglishName().trim());
+		heroClass.setAccusativeName(trimToNull(request.getAccusativeName()));
+		heroClass.setDescription(request.getDescription().trim());
+		heroClass.setDiceHp(request.getDiceHp());
+		heroClass.setArmor(trimToNull(request.getArmor()));
+		heroClass.setWeapon(trimToNull(request.getWeapon()));
+		heroClass.setTools(trimToNull(request.getTools()));
+		heroClass.setSavingThrows(trimToNull(request.getSavingThrows()));
+		heroClass.setArchetypeName(trimToNull(request.getArchetypeName()));
+		heroClass.setEquipment(trimToNull(request.getEquipment()));
+		heroClass.setSpellAbility(request.getSpellAbility());
+		heroClass.setSpellcasterType(request.getSpellcasterType());
+		heroClass.setPrimaryAbilities(request.getPrimaryAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getPrimaryAbilities()));
+		heroClass.setEnabledArhitypeLevel(request.getEnabledArhitypeLevel());
+		heroClass.setSkillAvailableCount(request.getSkillAvailableCount());
+		heroClass.setAvailableSkills(request.getAvailableSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getAvailableSkills()));
+		heroClass.setOptionType(request.getOptionType());
+		heroClass.setSlotsReset(request.getSlotsReset());
+		heroClass.setSidekick(request.isSidekick());
+		heroClass.setIcon(trimToNull(request.getIcon()));
+		heroClass.setPage(request.getPage());
+	}
+
+	private Book getCustomBook() {
+		return bookRepository.findFirstByType(TypeBook.CUSTOM)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+	}
+
+	private String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
 	}
 }

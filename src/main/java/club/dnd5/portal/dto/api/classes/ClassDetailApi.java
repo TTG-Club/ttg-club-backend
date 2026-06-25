@@ -14,12 +14,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import club.dnd5.portal.dto.api.spells.SpellFilter;
+import club.dnd5.portal.model.AbilityType;
+import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
+import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.SpellLevelDefinition;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
@@ -36,10 +39,30 @@ public class ClassDetailApi extends ClassApi {
 	private SpellFilter customFilter;
 	private String archetypeName;
 	private ClassTraitsApi traits;
+	private String description;
+	private String accusativeName;
+	private AbilityType spellAbility;
+	private SpellcasterType spellcasterType;
+	private Collection<AbilityType> primaryAbilities;
+	private Collection<SkillType> availableSkillsRaw;
+	private Option.OptionType optionType;
+	private Rest slotsReset;
+	private int enabledArhitypeLevel;
+	private Short page;
 
 	public ClassDetailApi(HeroClass heroClass, Collection<String> images, ClassRequestApi request) {
 		super(heroClass, request);
 		this.images = images;
+		description = heroClass.getDescription();
+		accusativeName = heroClass.getAccusativeName();
+		spellAbility = heroClass.getSpellAbility();
+		spellcasterType = heroClass.getSpellcasterType();
+		primaryAbilities = heroClass.getPrimaryAbilities() == null ? Collections.emptyList() : heroClass.getPrimaryAbilities();
+		availableSkillsRaw = heroClass.getAvailableSkills() == null ? Collections.emptyList() : heroClass.getAvailableSkills();
+		optionType = heroClass.getOptionType();
+		slotsReset = heroClass.getSlotsReset();
+		enabledArhitypeLevel = heroClass.getEnabledArhitypeLevel();
+		page = heroClass.getPage();
 		tabs.add(new ClassTabAp("Навыки", String.format("/classes/fragment/%s", heroClass.getUrlName()), "traits", 0, true));
 		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/description", heroClass.getUrlName()), "description", 1, true));
 		if (heroClass.getSpellcasterType() != null && heroClass.getSpellcasterType() != SpellcasterType.NONE) {
