@@ -77,19 +77,19 @@ public class ClassApiController {
 	}
 
 	@PostMapping(value = "/api/v1/classes/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ClassDetailApi> getClassInfo(@RequestBody ClassRequestApi request, @PathVariable String englishName) {
+	public ResponseEntity<ClassDetailApi> getClassInfo(@RequestBody(required = false) ClassRequestApi request, @PathVariable String englishName) {
 		HeroClass heroClass = classRepo.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, heroClass.getId());
-		return ResponseEntity.ok(new ClassDetailApi(heroClass, images, request));
+		return ResponseEntity.ok(new ClassDetailApi(heroClass, images, request == null ? new ClassRequestApi() : request));
 	}
 
 	@PostMapping(value = "/api/v1/classes/{className}/{archetypeName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ClassDetailApi> getArchetypeInfo(@RequestBody ClassRequestApi request, @PathVariable String className,
+	public ResponseEntity<ClassDetailApi> getArchetypeInfo(@RequestBody(required = false) ClassRequestApi request, @PathVariable String className,
 			@PathVariable String archetypeName) {
 		HeroClass heroClass = classRepo.findByEnglishName(className.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		Archetype archetype = heroClass.getArchetypes().stream().filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeName.replace('_', ' '))).findFirst().get();
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.SUBCLASS, archetype.getId());
-		return ResponseEntity.ok(new ClassDetailApi(archetype, images, request));
+		return ResponseEntity.ok(new ClassDetailApi(archetype, images, request == null ? new ClassRequestApi() : request));
 	}
 
 	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
