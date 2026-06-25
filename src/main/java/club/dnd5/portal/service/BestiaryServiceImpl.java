@@ -270,7 +270,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setSuffixHP(null);
         beast.setChallengeRating(trimToNull(request.getChallengeRating()));
         beast.setExp(0);
-        beast.setRaceId(request.isNpc() ? 102 : null);
+        beast.setRaceId(request.isNpc() ? 102 : 0);
         beast.setDescription(trimToNull(request.getDescription()));
         beast.setReaction(trimToNull(request.getReaction()));
         beast.setLegendary(request.getLegendary() == null ? null : trimToNull(request.getLegendary().getDescription()));
