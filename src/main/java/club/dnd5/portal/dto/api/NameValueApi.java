@@ -17,6 +17,8 @@ public class NameValueApi {
 	private Object key;
 	@Schema(description = "название свойства")
 	private String name;
+	@Schema(description = "английское название свойства")
+	private String englishName;
 	@Schema(description = "краткое название свойства")
 	private String shortName;
 	@Schema(description = "значение свойства", example = "2")
