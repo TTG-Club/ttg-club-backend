@@ -7,10 +7,10 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,7 +105,7 @@ public class Race implements Serializable {
 	}
 
 	public String getCapitalizeName() {
-		return StringUtils.capitalize(name);
+		return StringUtil.capitalize(name);
 	}
 
 	public String getAbilityBonuses() {
@@ -143,6 +143,9 @@ public class Race implements Serializable {
 	}
 
 	public List<AbilityBonus> getAbilityValueBonuses() {
+		if (bonuses == null) {
+			return Collections.emptyList();
+		}
 		return bonuses;
 	}
 
@@ -156,7 +159,7 @@ public class Race implements Serializable {
 	}
 
 	public String getCapName() {
-		return StringUtils.capitalize(name.toLowerCase());
+		return StringUtil.capitalize(name.toLowerCase());
 	}
 
 	public boolean isDarkVision() {
@@ -194,28 +197,38 @@ public class Race implements Serializable {
 	}
 
 	public Map<Sex, Set<String>> getNames() {
+		if (names == null) {
+			return Collections.emptyMap();
+		}
 		return names.stream().collect(Collectors.groupingBy(RaceName::getSex,
 				Collectors.mapping(RaceName::getName, Collectors.toCollection(TreeSet::new))));
 	}
 
 	public List<RaceNickname> getAllNicknames() {
-		return Stream.concat(nicknames.stream(), parent == null ? Stream.empty() : parent.getNicknames().stream()).collect(Collectors.toList());
+		Stream<RaceNickname> current = nicknames == null ? Stream.empty() : nicknames.stream();
+		Stream<RaceNickname> parentNicknames = parent == null || parent.getNicknames() == null ? Stream.empty() : parent.getNicknames().stream();
+		return Stream.concat(current, parentNicknames).collect(Collectors.toList());
 	}
 
 	public Map<Sex, Set<String>> getAllNames() {
-		return Stream.concat(names.stream(), parent == null ? Stream.empty() : parent.names.stream())
+		Stream<RaceName> current = names == null ? Stream.empty() : names.stream();
+		Stream<RaceName> parentNames = parent == null || parent.names == null ? Stream.empty() : parent.names.stream();
+		return Stream.concat(current, parentNames)
 				.collect(Collectors.groupingBy(RaceName::getSex,
 						Collectors.mapping(RaceName::getName, Collectors.toCollection(TreeSet::new))));
 	}
 
 	public Map<NicknameType, Set<String>> getNicknamesGroup() {
+		if (nicknames == null) {
+			return Collections.emptyMap();
+		}
 		return nicknames.stream()
 				.collect(Collectors.groupingBy(RaceNickname::getType,
 						Collectors.mapping(RaceNickname::getName, Collectors.toCollection(TreeSet::new))));
 	}
 
 	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
+		return StringUtil.capitalize(name.toLowerCase());
 	}
 
 	public String getUrlName() {

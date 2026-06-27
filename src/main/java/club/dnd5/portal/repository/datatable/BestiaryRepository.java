@@ -18,4 +18,7 @@ public interface BestiaryRepository extends JpaRepository<Creature, Integer>, Jp
 
 	@Query("SELECT c.book FROM Creature c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
+
+	@Query("SELECT COUNT(c) FROM Creature c JOIN c.actions a WHERE a.id = :actionId")
+	long countByActionId(@Param("actionId") Integer actionId);
 }

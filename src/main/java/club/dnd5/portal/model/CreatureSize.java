@@ -7,17 +7,21 @@ import java.util.Set;
 
 @Getter
 public enum CreatureSize {
-	TINY("Крошечный","Крошечная", "Крошечное"), // 0
-	SMALL("Маленький", "Маленькая", "Маленькое"), // 1
-	MEDIUM("Средний", "Средняя", "Среднее"), // 2
-	LARGE("Большой", "Большая", "Большое"), // 3
-	HUGE("Огромный", "Огромная", "Огромное"), // 4
-	GARGANTUAN("Громадный", "Громадная", "Громадное"), //5
-	SMALL_MEDIUM("Средний или Маленький", "Средняя или Маленькая", "Среднее или Маленькое");
+	TINY(Dice.d4, 2.5f, "Крошечный","Крошечная", "Крошечное"), // 0
+	SMALL(Dice.d6, 3.5f, "Маленький", "Маленькая", "Маленькое"), // 1
+	MEDIUM(Dice.d8, 4.5f, "Средний", "Средняя", "Среднее"), // 2
+	LARGE(Dice.d10, 5.5f, "Большой", "Большая", "Большое"), // 3
+	HUGE(Dice.d12, 6.5f, "Огромный", "Огромная", "Огромное"), // 4
+	GARGANTUAN(Dice.d20, 10.5f, "Громадный", "Громадная", "Громадное"), //5
+	SMALL_MEDIUM(Dice.d8, 4.5f, "Средний или Маленький", "Средняя или Маленькая", "Среднее или Маленькое");
 
 	private final String [] names;
+	private final Dice hitDice;
+	private final float hitAverage;
 
-	CreatureSize(String... names){
+	CreatureSize(Dice hitDice, float hitAverage, String... names){
+		this.hitDice = hitDice;
+		this.hitAverage = hitAverage;
 		this.names = names;
 	}
 

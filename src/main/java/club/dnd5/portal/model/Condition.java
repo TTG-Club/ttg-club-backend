@@ -13,7 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 import club.dnd5.portal.model.book.Book;
 import lombok.AllArgsConstructor;
@@ -57,6 +57,6 @@ public class Condition {
 	}
 	
 	public String getName() {
-		return StringUtils.capitalizeWords(name.toLowerCase());
+		return StringUtil.capitalizeWords(name.toLowerCase());
 	}
 }

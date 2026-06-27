@@ -6,6 +6,7 @@ import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.item.WeaponApi;
 import club.dnd5.portal.dto.api.item.WeaponDetailApi;
 import club.dnd5.portal.dto.api.item.WeaponRequesApi;
+import club.dnd5.portal.dto.api.item.WeaponSaveApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
@@ -14,6 +15,7 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Weapon;
 import club.dnd5.portal.model.items.WeaponProperty;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
@@ -25,11 +27,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import java.util.*;
@@ -43,6 +48,8 @@ public class WeaponApiController {
 	private WeaponRepository weaponRepository;
 	@Autowired
 	private WeaponPropertyDatatableRepository propertyRepository;
+	@Autowired
+	private BookRepository bookRepository;
 
 	@Operation(summary = "Получение краткого списка оружия")
 	@PostMapping(value = "/api/v1/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -109,6 +116,35 @@ public class WeaponApiController {
 		);
 	}
 
+	@Operation(summary = "Создание оружия в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
+	public WeaponDetailApi createWeapon(@Valid @RequestBody WeaponSaveApi request) {
+		if (weaponRepository.findByEnglishName(request.getEnglishName()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Weapon with the same englishName already exists");
+		}
+		Weapon weapon = new Weapon();
+		weapon.setBook(getCustomBook());
+		applyWeaponRequest(weapon, request);
+		return new WeaponDetailApi(weaponRepository.saveAndFlush(weapon));
+	}
+
+	@Operation(summary = "Обновление оружия в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PatchMapping(value = "/api/v1/workshop/weapons/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public WeaponDetailApi updateWeapon(@PathVariable Integer id, @Valid @RequestBody WeaponSaveApi request) {
+		Weapon weapon = weaponRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		weaponRepository.findByEnglishName(request.getEnglishName())
+			.filter(existing -> !existing.getId().equals(id))
+			.ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Weapon with the same englishName already exists");
+			});
+		applyWeaponRequest(weapon, request);
+		return new WeaponDetailApi(weaponRepository.saveAndFlush(weapon));
+	}
+
 	@PostMapping("/api/v1/filters/weapons")
 	public FilterApi getWeaponsFilter() {
 		FilterApi filters = new FilterApi();
@@ -150,5 +186,36 @@ public class WeaponApiController {
 
 		filters.setOther(otherFilters);
 		return filters;
+	}
+
+	private void applyWeaponRequest(Weapon weapon, WeaponSaveApi request) {
+		weapon.setName(request.getName().trim());
+		weapon.setEnglishName(request.getEnglishName().trim());
+		weapon.setAltName(trimToNull(request.getAltName()));
+		weapon.setCost(request.getCost());
+		weapon.setCurrency(request.getCurrency());
+		weapon.setWeight(request.getWeight() == null ? 0 : request.getWeight());
+		weapon.setDamageDice(request.getDamageDice());
+		weapon.setTwoHandDamageDice(request.getTwoHandDamageDice());
+		weapon.setNumberDice(request.getNumberDice());
+		weapon.setDamageType(request.getDamageType());
+		weapon.setType(request.getType());
+		weapon.setMinDistance(request.getMinDistance());
+		weapon.setMaxDistance(request.getMaxDistance());
+		weapon.setProperties(request.getProperties() == null || request.getProperties().isEmpty()
+			? new ArrayList<>()
+			: propertyRepository.findAllById(request.getProperties()));
+		weapon.setAmmo(request.getAmmo());
+		weapon.setDescription(trimToNull(request.getDescription()));
+		weapon.setSpecial(trimToNull(request.getSpecial()));
+	}
+
+	private Book getCustomBook() {
+		return bookRepository.findFirstByType(TypeBook.CUSTOM)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+	}
+
+	private String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
 	}
 }

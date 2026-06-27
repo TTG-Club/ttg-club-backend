@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ClassApi {
+	private Integer id;
 	protected NameApi name;
 	protected String url;
 	private SourceApi source;
@@ -33,6 +34,7 @@ public class ClassApi {
 	private boolean sidekick;
 
 	public ClassApi(HeroClass heroClass, ClassRequestApi request) {
+		id = heroClass.getId();
 		name = new NameApi(heroClass.getCapitalazeName(), heroClass.getEnglishName());
 		url = String.format("/classes/%s", heroClass.getUrlName());
 		source = new SourceApi(heroClass.getBook());

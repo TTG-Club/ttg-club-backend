@@ -19,39 +19,69 @@ import java.util.stream.Collectors;
 @Getter
 public class RaceDetailApi extends RaceApi {
 	private String description;
+	private String altName;
+	private Integer minAge;
+	private Integer maxAge;
 	private String size;
+	private String sizeRaw;
+	private String typeRaw;
 	private Collection<NameValueApi> speed = new ArrayList<>(5);
 	private Collection<String> images;
 	private Integer darkvision;
+	private Integer fly;
+	private Integer climb;
+	private Integer swim;
+	private Boolean origin;
+	private boolean view;
+	private String icon;
+	private Short page;
+	private Integer parentId;
+	private Collection<RaceFeatureApi> features;
 	protected Collection<RaceSkillApi> skills;
 
 	public RaceDetailApi(Race race, Set<String> books) {
 		super(race, books);
 		description = race.getDescription();
+		altName = race.getAltName();
+		minAge = race.getMinAge();
+		maxAge = race.getMaxAge();
 		url = null;
 		type = race.getType().getCyrillicName();
+		typeRaw = race.getType().name();
 		size = race.getSize().getCyrillicName();
+		sizeRaw = race.getSize().name();
 		speed.add(NameValueApi.builder().value(race.getSpeed()).build());
 		if (Objects.nonNull(race.getFly())) {
+			fly = race.getFly();
 			speed.add(NameValueApi.builder()
 				.name("летая")
 				.value(race.getFly())
 				.build());
 		}
 		if (Objects.nonNull(race.getClimb())) {
+			climb = race.getClimb();
 			speed.add(NameValueApi.builder()
 				.name("лазая")
 				.value(race.getClimb())
 				.build());
 		}
 		if (Objects.nonNull(race.getSwim())) {
+			swim = race.getSwim();
 			speed.add(NameValueApi.builder()
 				.name("плавая")
 				.value(race.getSwim())
 				.build());
 		}
 		darkvision = race.getDarkvision();
-		if (!race.getSubRaces().isEmpty()) {
+		origin = race.getOrigin();
+		view = race.isView();
+		icon = race.getIcon();
+		page = race.getPage();
+		parentId = race.getParent() == null ? null : race.getParent().getId();
+		features = race.getFeatures() == null
+			? Collections.emptyList()
+			: race.getFeatures().stream().map(RaceFeatureApi::new).collect(Collectors.toList());
+		if (race.getSubRaces() != null && !race.getSubRaces().isEmpty()) {
 			subraces = race.getSubRaces()
 				.stream()
 				.filter(r -> books.isEmpty() || books.contains(r.getBook().getSource()))
@@ -61,25 +91,48 @@ public class RaceDetailApi extends RaceApi {
 		fillSkill(race);
 	}
 
+	@Getter
+	public static class RaceFeatureApi {
+		private final Integer id;
+		private final String name;
+		private final String englishName;
+		private final String description;
+		private final boolean feature;
+		private final Integer replaceFeatureId;
+
+		private RaceFeatureApi(Feature feature) {
+			id = feature.getId();
+			name = feature.getName();
+			englishName = feature.getEnglishName();
+			description = feature.getDescription();
+			this.feature = feature.isFeature();
+			replaceFeatureId = feature.getReplaceFeatureId();
+		}
+	}
+
 	protected void fillSkill(Race race) {
 		if (race.getParent() != null) {
-			final Set<Integer> replaceFeatureIds = race.getFeatures()
+			List<Feature> raceFeatures = race.getFeatures() == null ? Collections.emptyList() : race.getFeatures();
+			List<Feature> parentFeatures = race.getParent().getFeatures() == null ? Collections.emptyList() : race.getParent().getFeatures();
+			final Set<Integer> replaceFeatureIds = raceFeatures
 					.stream()
 					.map(Feature::getReplaceFeatureId)
 					.filter(Objects::nonNull)
 					.collect(Collectors.toSet());
-			List<RaceSkillApi> subraceSkills = race.getFeatures()
+			List<RaceSkillApi> subraceSkills = raceFeatures
 					.stream()
 					.map(RaceSkillApi::new)
 					.peek(api -> api.setSubrace(Boolean.TRUE))
 					.collect(Collectors.toList());
-			skills = race.getParent().getFeatures()
+			skills = parentFeatures
 					.stream().filter(skill -> !replaceFeatureIds.contains(skill.getId()))
 					.map(RaceSkillApi::new)
 					.collect(Collectors.toList());
 			skills.addAll(subraceSkills);
 		} else {
-			skills = race.getFeatures().stream().map(RaceSkillApi::new).collect(Collectors.toList());
+			skills = race.getFeatures() == null
+				? new ArrayList<>()
+				: race.getFeatures().stream().map(RaceSkillApi::new).collect(Collectors.toList());
 		}
 		raceFeatureName(skills, race.getAllNames(), race.getAllNicknames());
 	}
@@ -108,7 +161,7 @@ public class RaceDetailApi extends RaceApi {
 				List<String> nicknamesOfType = nickNames.stream()
 					.filter(nickname -> nickname.getType() == nicknameType)
 					.map(RaceNickname::getName)
-					.sorted()  // Sort the nicknames alphabetically
+					.sorted()
 					.collect(Collectors.toList());
 
 				if (!nicknamesOfType.isEmpty()) {
@@ -126,10 +179,8 @@ public class RaceDetailApi extends RaceApi {
 
 		if (!descriptionBuilder.toString().isEmpty()) {
 			if (existingSkill != null) {
-				// "Имена" feature already exists, update its description
 				existingSkill.setDescription(existingSkill.getDescription() + descriptionBuilder);
 			} else {
-				// "Имена" feature doesn't exist, create a new one
 				Feature feature = new Feature();
 				feature.setName(featureName);
 				feature.setDescription(descriptionBuilder.toString());

@@ -5,10 +5,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.book.TypeBook;
 
 import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecificationExecutor<Book> {
 	Optional<Book> findByEnglishName(String name);
+
+	Optional<Book> findFirstByType(TypeBook type);
 }

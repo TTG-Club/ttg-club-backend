@@ -1,6 +1,5 @@
 package club.dnd5.portal.controller.tools;
 
-import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.races.Sex;
 import club.dnd5.portal.model.tavern.Atmosphere;
 import club.dnd5.portal.model.tavern.TavernaName;
@@ -12,11 +11,9 @@ import club.dnd5.portal.repository.tavern.TavernaPrefixNameRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -28,23 +25,12 @@ import java.util.stream.Collectors;
 @Controller
 public class TavernToolController {
 	private static final Random rnd = new Random();
-	private static final Set<HabitatType> habitats = EnumSet.of(HabitatType.SWAMP, HabitatType.CITY,
-			HabitatType.MOUNTAIN, HabitatType.VILLAGE, HabitatType.UNDERGROUND, HabitatType.ARCTIC, HabitatType.WATERS,
-			HabitatType.DESERT, HabitatType.GRASSLAND, HabitatType.FOREST, HabitatType.TROPICS);
 
 	private final TavernaNameRepository nameRepo;
 	private final TavernaPrefixNameRepository prefixRepo;
 	private final AtmosphereRepository atmosphereRepo;
 
 	private final Set<String> generatedNames = new HashSet<>();
-
-	@GetMapping("/tools/tavern")
-	public String getForm(Model model) {
-		model.addAttribute("metaTitle", "Генератор таверны");
-		model.addAttribute("metaUrl", "https://ttg.club/tools/tavern");
-		model.addAttribute("metaDescription", "Генерация таверны - название, атмосфера, список блюд и выпивки");
-		return "tools/tavern";
-	}
 
 	@GetMapping("/tools/tavern/name")
 	@ResponseBody
@@ -110,17 +96,11 @@ public class TavernToolController {
 		return tavernName;
 	}
 
-	@GetMapping("/tools/tavern/habitates/")
-	public String getHabitats(Model model) {
-		model.addAttribute("habitates", habitats);
-		return "tools/tavern :: habitates";
-	}
-
 	@GetMapping("/tools/tavern/atmosphere/")
 	@ResponseBody
 	public String getAtmosphere() {
 		List<Atmosphere> atmospheres = atmosphereRepo.findAll();
 		Atmosphere atmosphere = atmospheres.get(rnd.nextInt(atmospheres.size()));
-		return "<h5>"+atmosphere.getName() + "</h5> <br>" + atmosphere.getDescription();
+		return "<h5>" + atmosphere.getName() + "</h5> <br>" + atmosphere.getDescription();
 	}
 }

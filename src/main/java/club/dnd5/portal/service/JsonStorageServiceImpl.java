@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -158,7 +158,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 			((ObjectNode) rootNode).put("img", imgToken.get().getUrl());
 		} else {
 			Creature creature = bestiaryRepository.findById(creatureId).get();
-			imgFiveETools = StringUtils.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
+			imgFiveETools = StringUtil.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
 				creature.getBook().getSource(), creature.getEnglishName()));
 			((ObjectNode) rootNode).put("img", imgFiveETools);
 		}

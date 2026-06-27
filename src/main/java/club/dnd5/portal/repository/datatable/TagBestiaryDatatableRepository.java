@@ -9,4 +9,6 @@ import java.util.Collection;
 @Repository
 public interface TagBestiaryDatatableRepository extends JpaRepository<CreatureRace, Integer> {
 	Collection<CreatureRace> findByOrderByName();
+
+	Collection<CreatureRace> findByNameIn(Collection<String> names);
 }

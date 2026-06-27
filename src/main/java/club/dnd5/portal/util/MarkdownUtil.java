@@ -61,7 +61,7 @@ public class MarkdownUtil {
 			return;
 		}
 		String description = feat.getDescription();
-		if (beast.getRaceId() != 102) {
+		if (!java.util.Objects.equals(beast.getRaceId(), 102)) {
 			description = description.replaceAll("\\.\\s\\{@beast_name\\}", ". " + beast.getName());
 			description = description.replaceAll(">\\{@beast_name\\}", ">" + beast.getName());
 			description = description.replaceAll("\\s\\{@beast_name\\}",

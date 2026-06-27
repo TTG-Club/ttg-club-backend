@@ -12,7 +12,7 @@ public interface BestiaryService {
 
     BeastDetailApi findOne(String englishName);
 
-    void create(BeastDetailRequest request);
+    BeastDetailApi create(BeastDetailRequest request);
 
-    void update(BeastDetailRequest request);
+    BeastDetailApi update(BeastDetailRequest request);
 }

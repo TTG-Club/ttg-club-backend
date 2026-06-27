@@ -5,7 +5,6 @@ import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.List;
@@ -78,7 +77,7 @@ public class MagicItem {
 	}
 
 	public String getCapitalazeName() {
-		return StringUtils.capitalize(name.toLowerCase());
+		return StringUtil.capitalize(name.toLowerCase());
 	}
 
 	@Override

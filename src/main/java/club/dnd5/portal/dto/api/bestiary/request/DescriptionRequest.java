@@ -14,4 +14,6 @@ public class DescriptionRequest  {
     private NameApi name;
     @Schema(description = "описание", required = true)
     private String description;
+    @Schema(description = "используется markdown")
+    private Boolean markdown;
 }

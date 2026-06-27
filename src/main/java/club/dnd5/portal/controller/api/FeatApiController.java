@@ -6,12 +6,14 @@ import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.classes.FeatRequestApi;
 import club.dnd5.portal.dto.api.classes.FeatApi;
 import club.dnd5.portal.dto.api.classes.FeatDetailApi;
+import club.dnd5.portal.dto.api.classes.FeatSaveApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.trait.Trait;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.FeatRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -22,11 +24,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import java.util.ArrayList;
@@ -40,6 +45,7 @@ import java.util.stream.Collectors;
 @RestController
 public class FeatApiController {
 	private final FeatRepository featRepository;
+	private final BookRepository bookRepository;
 
 	@Operation(summary = "Получение краткого списка черт")
 	@PostMapping(value = {"/api/v1/traits","/api/v1/feats"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -106,6 +112,35 @@ public class FeatApiController {
 		return ResponseEntity.ok(new FeatDetailApi(trait));
 	}
 
+	@Operation(summary = "Создание черты в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/feats", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<FeatDetailApi> createFeat(@Valid @RequestBody FeatSaveApi request) {
+		if (featRepository.findByEnglishName(request.getEnglishName()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feat with the same englishName already exists");
+		}
+		Trait trait = new Trait();
+		trait.setBook(getCustomBook());
+		applyFeatRequest(trait, request);
+		return ResponseEntity.ok(new FeatDetailApi(featRepository.saveAndFlush(trait)));
+	}
+
+	@Operation(summary = "Обновление черты в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PatchMapping(value = "/api/v1/workshop/feats/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<FeatDetailApi> updateFeat(@PathVariable Integer id, @Valid @RequestBody FeatSaveApi request) {
+		Trait trait = featRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		featRepository.findByEnglishName(request.getEnglishName())
+			.filter(existing -> !existing.getId().equals(id))
+			.ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feat with the same englishName already exists");
+			});
+		applyFeatRequest(trait, request);
+		return ResponseEntity.ok(new FeatDetailApi(featRepository.saveAndFlush(trait)));
+	}
+
 	@Operation(summary = "Получение фильтров для черт")
 	@PostMapping({"/api/v1/filters/traits", "/api/v1/filters/feats"})
 	public FilterApi getTraitFilter() {
@@ -144,5 +179,25 @@ public class FeatApiController {
 
 		filters.setOther(otherFilters);
 		return filters;
+	}
+
+	private void applyFeatRequest(Trait trait, FeatSaveApi request) {
+		trait.setName(request.getName().trim());
+		trait.setEnglishName(request.getEnglishName().trim());
+		trait.setAltName(trimToNull(request.getAltName()));
+		trait.setLevel(request.getLevel());
+		trait.setRequirement(trimToNull(request.getRequirement()));
+		trait.setDescription(request.getDescription().trim());
+		trait.setAbilities(request.getAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getAbilities()));
+		trait.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
+	}
+
+	private Book getCustomBook() {
+		return bookRepository.findFirstByType(TypeBook.CUSTOM)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+	}
+
+	private String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
 	}
 }

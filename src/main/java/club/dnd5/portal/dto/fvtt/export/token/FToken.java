@@ -3,7 +3,7 @@ package club.dnd5.portal.dto.fvtt.export.token;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.thymeleaf.util.StringUtils;
+import club.dnd5.portal.util.StringUtil;
 
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.dto.fvtt.export.FEffect;
@@ -82,7 +82,7 @@ public class FToken {
 			height = 1;
 			break;
 		}
-		img = StringUtils.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
+		img = StringUtil.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
 				creature.getBook().getSource(), creature.getEnglishName()));
 	}
 }

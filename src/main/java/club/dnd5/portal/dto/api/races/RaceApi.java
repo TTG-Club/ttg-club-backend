@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class RaceApi {
+	private Integer id;
 	private NameApi name;
 	protected String url;
 	private Collection<NameValueApi> abilities;
@@ -32,6 +33,7 @@ public class RaceApi {
 	private String image;
 
 	public RaceApi(Race race, Set<String> books) {
+		id = race.getId();
 		name = new NameApi(race.getName(), race.getEnglishName());
 		if (race.getParent() == null) {
 			url = String.format("/races/%s", race.getUrlName());
@@ -54,7 +56,7 @@ public class RaceApi {
 					.build())
 				.collect(Collectors.toList());
 		source = new SourceApi(race.getBook());
-		if (!race.getSubRaces().isEmpty()) {
+		if (race.getSubRaces() != null && !race.getSubRaces().isEmpty()) {
 			subraces = race.getSubRaces()
 				.stream()
 				.filter(r -> !r.isView())

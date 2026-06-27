@@ -44,7 +44,7 @@ public class Spell implements FoundryCommon {
 
 	private int timeCast;
 
-	@OneToMany
+	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "spell_id")
 	private List<TimeCast> times;
 
