@@ -46,6 +46,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -308,7 +309,7 @@ public class BestiaryServiceImpl implements BestiaryService {
     }
 
     private void mapSpeed(Creature beast, BeastDetailRequest request) {
-        beast.setSpeed((byte) getSpeedValue(request, null));
+        beast.setSpeed(toByteSpeed(getSpeedValue(request, null)));
         beast.setFlySpeed(getShortSpeedValue(request, "летая"));
         beast.setHover(hasAdditional(request, "летая", "парит") ? beast.getFlySpeed() : null);
         beast.setSwimmingSpped(getShortSpeedValue(request, "плавая"));
@@ -322,20 +323,44 @@ public class BestiaryServiceImpl implements BestiaryService {
                 .orElse(null));
     }
 
-    private int getSpeedValue(BeastDetailRequest request, String name) {
+    private BigDecimal getSpeedValue(BeastDetailRequest request, String name) {
         return nullToEmpty(request.getSpeed()).stream()
                 .filter(speed -> Objects.equals(speed.getName(), name))
                 .map(NameValueApi::getValue)
                 .filter(Number.class::isInstance)
                 .map(Number.class::cast)
-                .map(Number::intValue)
+                .map(this::toBigDecimal)
                 .findFirst()
-                .orElse(30);
+                .orElse(BigDecimal.valueOf(30));
     }
 
     private Short getShortSpeedValue(BeastDetailRequest request, String name) {
-        int value = getSpeedValue(request, name);
-        return value == 30 ? null : (short) value;
+        BigDecimal value = getSpeedValue(request, name);
+        return value.compareTo(BigDecimal.valueOf(30)) == 0 ? null : toShortSpeed(value);
+    }
+
+    private BigDecimal toBigDecimal(Number value) {
+        try {
+            return new BigDecimal(value.toString());
+        } catch (NumberFormatException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Speed must be a finite number", exception);
+        }
+    }
+
+    private byte toByteSpeed(BigDecimal value) {
+        try {
+            return value.byteValueExact();
+        } catch (ArithmeticException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Speed must be an integer in byte range", exception);
+        }
+    }
+
+    private short toShortSpeed(BigDecimal value) {
+        try {
+            return value.shortValueExact();
+        } catch (ArithmeticException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Speed must be an integer in short range", exception);
+        }
     }
 
     private boolean hasAdditional(BeastDetailRequest request, String name, String additional) {
@@ -361,7 +386,16 @@ public class BestiaryServiceImpl implements BestiaryService {
         if (request.getSenses() == null || !StringUtils.hasText(request.getSenses().getPassivePerception())) {
             return 10;
         }
-        String value = request.getSenses().getPassivePerception().replaceAll("[^0-9-].*$", "");
+        String passivePerception = request.getSenses().getPassivePerception();
+        int valueEnd = 0;
+        while (valueEnd < passivePerception.length()) {
+            char current = passivePerception.charAt(valueEnd);
+            if (current != '-' && !Character.isDigit(current)) {
+                break;
+            }
+            valueEnd++;
+        }
+        String value = passivePerception.substring(0, valueEnd);
         return StringUtils.hasText(value) ? Byte.parseByte(value) : 10;
     }
 
