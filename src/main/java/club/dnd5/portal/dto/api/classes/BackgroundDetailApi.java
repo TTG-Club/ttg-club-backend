@@ -3,6 +3,8 @@ package club.dnd5.portal.dto.api.classes;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.background.Background;
+import club.dnd5.portal.model.background.Personalization;
+import club.dnd5.portal.model.background.PersonalizationType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
@@ -11,6 +13,9 @@ import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
@@ -28,6 +33,7 @@ public class BackgroundDetailApi extends BackgroundApi {
 	private Integer startGold;
 	private String description;
 	private String personalization;
+	private Collection<BackgroundPersonalizationTableApi> personalizationTables;
 	
 	public BackgroundDetailApi(Background background) {
 		super(background);
@@ -48,6 +54,17 @@ public class BackgroundDetailApi extends BackgroundApi {
 		description = background.getDescription();
 		if (background.getPersonalization() != null) {
 			personalization = background.getPersonalization();
+		}
+		if (background.getPersonalizations() != null && !background.getPersonalizations().isEmpty()) {
+			Map<PersonalizationType, List<Personalization>> tables = background.getPersonalizations().stream()
+				.collect(Collectors.groupingBy(
+					Personalization::getType,
+					() -> new EnumMap<>(PersonalizationType.class),
+					Collectors.toList()
+				));
+			personalizationTables = tables.entrySet().stream()
+				.map(entry -> new BackgroundPersonalizationTableApi(entry.getKey(), entry.getValue()))
+				.collect(Collectors.toList());
 		}
 	}
 }
