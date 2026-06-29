@@ -263,9 +263,9 @@ public class NameGeneratorService {
 
 	private RaceData toRaceData(Race race, Set<Sex> sexes) {
 		List<PersonName> filteredNames = race.getAllNames().entrySet().stream()
-			.filter(entry -> sexes.contains(entry.getKey()) || entry.getKey() == Sex.UNISEX)
+			.filter(entry -> sexes.contains(entry.getKey()))
 			.flatMap(entry -> entry.getValue().stream()
-				.map(name -> new PersonName(name, resolveSex(entry.getKey(), sexes))))
+				.map(name -> new PersonName(name, entry.getKey())))
 			.distinct()
 			.collect(Collectors.toList());
 
@@ -280,17 +280,10 @@ public class NameGeneratorService {
 		return new RaceData(race.getFullName(), filteredNames, parts);
 	}
 
-	private Sex resolveSex(Sex sex, Set<Sex> allowed) {
-		if (sex != Sex.UNISEX) {
-			return sex;
-		}
-		return randomItem(new ArrayList<>(allowed));
-	}
-
 	private void validateSexes(Set<Sex> sexes) {
 		if (sexes == null || sexes.isEmpty()
-			|| sexes.stream().anyMatch(sex -> sex != Sex.MALE && sex != Sex.FEMALE)) {
-			throw badRequest("Выберите мужские и/или женские имена");
+			|| sexes.stream().anyMatch(sex -> sex == Sex.CHILD)) {
+			throw badRequest("Выберите мужские, женские и/или универсальные имена");
 		}
 	}
 

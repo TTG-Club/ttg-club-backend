@@ -103,6 +103,18 @@ class NameGeneratorServiceTest {
 		assertTrue(result.stream().noneMatch(item -> item.getValue().contains("Камнерез из дома")));
 	}
 
+	@Test
+	void shouldGenerateOnlyUnisexNames() {
+		NameGenerationRequest request = request(NameGenerationType.SINGLE, NameGenerationFormat.NAME_SURNAME, 1);
+		request.setSexes(Collections.singleton(Sex.UNISEX));
+
+		List<GeneratedNameApi> result = service.generate(request);
+
+		assertEquals(1, result.size());
+		assertEquals(Sex.UNISEX, result.get(0).getSex());
+		assertTrue(result.get(0).getValue().startsWith("Рин "));
+	}
+
 	private NameGenerationRequest request(
 		NameGenerationType type,
 		NameGenerationFormat format,
@@ -125,7 +137,8 @@ class NameGeneratorServiceTest {
 			new RaceName(2, "Дорн", Sex.MALE, result),
 			new RaceName(3, "Астрид", Sex.FEMALE, result),
 			new RaceName(4, "Берта", Sex.FEMALE, result),
-			new RaceName(5, "Хильда", Sex.FEMALE, result)
+			new RaceName(5, "Хильда", Sex.FEMALE, result),
+			new RaceName(6, "Рин", Sex.UNISEX, result)
 		));
 		result.setNicknames(Arrays.asList(
 			new RaceNickname(1, "Камнерез", result, NicknameType.SURNAME),
