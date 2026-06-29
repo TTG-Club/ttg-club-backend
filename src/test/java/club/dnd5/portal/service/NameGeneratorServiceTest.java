@@ -67,6 +67,19 @@ class NameGeneratorServiceTest {
 	}
 
 	@Test
+	void shouldGenerateGroupWithSharedHouse() {
+		NameGenerationRequest request = request(NameGenerationType.HOUSE, NameGenerationFormat.NICKNAME, 3);
+
+		List<GeneratedNameApi> result = service.generate(request);
+
+		Set<String> houses = result.stream()
+			.map(item -> item.getValue().substring(item.getValue().indexOf("из дома ")))
+			.collect(Collectors.toSet());
+		assertEquals(1, houses.size());
+		assertTrue(result.stream().allMatch(item -> item.getValue().contains("из дома")));
+	}
+
+	@Test
 	void shouldApplyRaceAndSexFilters() {
 		NameGenerationRequest request = request(NameGenerationType.GROUP, NameGenerationFormat.NAME_SURNAME, 2);
 		request.setRaceId(race.getId());
@@ -77,6 +90,17 @@ class NameGeneratorServiceTest {
 		assertEquals(2, result.size());
 		assertTrue(result.stream().allMatch(item -> item.getSex() == Sex.FEMALE));
 		assertTrue(result.stream().allMatch(item -> item.getRace().equals(race.getFullName())));
+	}
+
+	@Test
+	void shouldGenerateAnyFormatWithoutRemovedSurnameAndHouseCombination() {
+		NameGenerationRequest request = request(NameGenerationType.GROUP, NameGenerationFormat.ANY, 3);
+
+		List<GeneratedNameApi> result = service.generate(request);
+
+		assertEquals(3, result.size());
+		assertEquals(3, uniqueValues(result).size());
+		assertTrue(result.stream().noneMatch(item -> item.getValue().contains("Камнерез из дома")));
 	}
 
 	private NameGenerationRequest request(

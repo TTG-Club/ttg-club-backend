@@ -38,6 +38,6 @@ public class NameGeneratorApiController {
 	}
 
 	private boolean hasNames(Race race) {
-		return !race.getAllNames().isEmpty();
+		return !race.getNames().isEmpty();
 	}
 }

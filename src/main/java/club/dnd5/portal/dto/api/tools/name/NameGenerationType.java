@@ -4,5 +4,6 @@ public enum NameGenerationType {
 	SINGLE,
 	GROUP,
 	FAMILY,
-	CLAN
+	CLAN,
+	HOUSE
 }

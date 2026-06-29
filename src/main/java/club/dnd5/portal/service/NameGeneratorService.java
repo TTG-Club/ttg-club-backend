@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -28,6 +29,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class NameGeneratorService {
+	private static final List<NameGenerationFormat> RANDOM_FORMATS = Arrays.asList(
+		NameGenerationFormat.NAME_SURNAME,
+		NameGenerationFormat.NAME_CLAN,
+		NameGenerationFormat.NAME_HOUSE,
+		NameGenerationFormat.NAME_NICKNAME,
+		NameGenerationFormat.NICKNAME,
+		NameGenerationFormat.NAME_CLAN_AFFILIATION
+	);
+
 	private final RaceRepository raceRepository;
 	private final Random random = new Random();
 
@@ -38,10 +48,13 @@ public class NameGeneratorService {
 		List<RaceData> races = loadRaces(request.getRaceId(), request.getSexes());
 
 		if (request.getType() == NameGenerationType.FAMILY) {
-			return generateShared(races, count, NicknameType.SURNAME, false);
+			return generateShared(races, count, NicknameType.SURNAME, null);
 		}
 		if (request.getType() == NameGenerationType.CLAN) {
-			return generateShared(races, count, NicknameType.CLAN, true);
+			return generateShared(races, count, NicknameType.CLAN, "из клана");
+		}
+		if (request.getType() == NameGenerationType.HOUSE) {
+			return generateShared(races, count, NicknameType.HOUSE, "из дома");
 		}
 
 		return generateRegular(races, count, request.getFormat());
@@ -51,7 +64,7 @@ public class NameGeneratorService {
 		List<RaceData> races,
 		int count,
 		NicknameType sharedType,
-		boolean clan
+		String affiliation
 	) {
 		List<RaceData> eligibleRaces = races.stream()
 			.filter(race -> race.names.size() >= count && !race.parts.get(sharedType).isEmpty())
@@ -67,9 +80,9 @@ public class NameGeneratorService {
 
 		return names.stream()
 			.map(name -> new GeneratedNameApi(
-				clan
-					? name.value + " из клана " + shared
-					: name.value + " " + shared,
+				affiliation == null
+					? name.value + " " + shared
+					: name.value + " " + affiliation + " " + shared,
 				race.name,
 				name.sex
 			))
@@ -81,6 +94,10 @@ public class NameGeneratorService {
 		int count,
 		NameGenerationFormat format
 	) {
+		if (format == NameGenerationFormat.ANY) {
+			return generateAny(races, count);
+		}
+
 		List<RaceData> eligibleRaces = races.stream()
 			.filter(race -> supports(race, format))
 			.collect(Collectors.toList());
@@ -109,6 +126,53 @@ public class NameGeneratorService {
 			}
 
 			result.add(format(candidate, format));
+			if (result.size() == count) {
+				return result;
+			}
+		}
+
+		throw badRequest("Для выбранных настроек недостаточно уникальных имён");
+	}
+
+	private List<GeneratedNameApi> generateAny(List<RaceData> races, int count) {
+		List<FormattedCandidate> candidates = new ArrayList<>();
+
+		for (RaceData race : races) {
+			for (NameGenerationFormat format : RANDOM_FORMATS) {
+				if (!supports(race, format)) {
+					continue;
+				}
+
+				if (format == NameGenerationFormat.NICKNAME) {
+					for (String nickname : race.parts.get(NicknameType.NICKNAME)) {
+						candidates.add(new FormattedCandidate(
+							new Candidate(race, null, nickname),
+							format
+						));
+					}
+				} else {
+					for (PersonName name : race.names) {
+						candidates.add(new FormattedCandidate(
+							new Candidate(race, name, null),
+							format
+						));
+					}
+				}
+			}
+		}
+
+		Collections.shuffle(candidates, random);
+		List<GeneratedNameApi> result = new ArrayList<>();
+		Set<String> usedBaseNames = new HashSet<>();
+
+		for (FormattedCandidate formatted : candidates) {
+			Candidate candidate = formatted.candidate;
+			String baseName = candidate.person == null ? candidate.nickname : candidate.person.value;
+			if (!usedBaseNames.add(baseName)) {
+				continue;
+			}
+
+			result.add(format(candidate, formatted.format));
 			if (result.size() == count) {
 				return result;
 			}
@@ -283,5 +347,11 @@ public class NameGeneratorService {
 		private final RaceData race;
 		private final PersonName person;
 		private final String nickname;
+	}
+
+	@AllArgsConstructor
+	private static class FormattedCandidate {
+		private final Candidate candidate;
+		private final NameGenerationFormat format;
 	}
 }
