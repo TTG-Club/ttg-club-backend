@@ -1,6 +1,7 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.tools.name.GeneratedNameApi;
+import club.dnd5.portal.dto.api.tools.name.NameGenerationComponent;
 import club.dnd5.portal.dto.api.tools.name.NameGenerationFormat;
 import club.dnd5.portal.dto.api.tools.name.NameGenerationRequest;
 import club.dnd5.portal.dto.api.tools.name.NameGenerationType;
@@ -115,6 +116,55 @@ class NameGeneratorServiceTest {
 		assertTrue(result.get(0).getValue().startsWith("Рин "));
 	}
 
+	@Test
+	void shouldGenerateOnlyVariantsAllowedBySelectedComponents() {
+		NameGenerationRequest request = request(NameGenerationType.GROUP, null, 4);
+		request.setComponents(new HashSet<>(Arrays.asList(
+			NameGenerationComponent.NAME,
+			NameGenerationComponent.SURNAME,
+			NameGenerationComponent.NICKNAME
+		)));
+
+		List<GeneratedNameApi> result = service.generate(request);
+
+		Set<String> firstNames = new HashSet<>(Arrays.asList("Брин", "Дорн", "Астрид", "Берта", "Хильда"));
+		assertEquals(4, result.size());
+		assertTrue(result.stream().allMatch(item -> {
+			String value = item.getValue();
+			return value.equals("Несокрушимый")
+				|| firstNames.contains(value)
+				|| firstNames.stream().anyMatch(name -> value.equals(name + " Камнерез"))
+				|| firstNames.stream().anyMatch(name -> value.equals(name + " по прозвищу «Несокрушимый»"));
+		}));
+	}
+
+	@Test
+	void shouldAlwaysCombineClanAndHouseWithFirstName() {
+		NameGenerationRequest request = request(NameGenerationType.GROUP, null, 3);
+		request.setComponents(new HashSet<>(Arrays.asList(
+			NameGenerationComponent.CLAN,
+			NameGenerationComponent.HOUSE
+		)));
+
+		List<GeneratedNameApi> result = service.generate(request);
+
+		assertEquals(3, result.size());
+		assertTrue(result.stream().allMatch(item ->
+			item.getValue().matches("\\S+ (из клана Железный Молот|из дома Северный)")
+		));
+	}
+
+	@Test
+	void shouldAlwaysCombinePlaceWithFirstName() {
+		NameGenerationRequest request = request(NameGenerationType.GROUP, null, 3);
+		request.setComponents(Collections.singleton(NameGenerationComponent.FROM));
+
+		List<GeneratedNameApi> result = service.generate(request);
+
+		assertEquals(3, result.size());
+		assertTrue(result.stream().allMatch(item -> item.getValue().matches("\\S+ из Долины теней")));
+	}
+
 	private NameGenerationRequest request(
 		NameGenerationType type,
 		NameGenerationFormat format,
@@ -144,7 +194,8 @@ class NameGeneratorServiceTest {
 			new RaceNickname(1, "Камнерез", result, NicknameType.SURNAME),
 			new RaceNickname(2, "Железный Молот", result, NicknameType.CLAN),
 			new RaceNickname(3, "Северный", result, NicknameType.HOUSE),
-			new RaceNickname(4, "Несокрушимый", result, NicknameType.NICKNAME)
+			new RaceNickname(4, "Несокрушимый", result, NicknameType.NICKNAME),
+			new RaceNickname(5, "Долины теней", result, NicknameType.FROM)
 		));
 		return result;
 	}

@@ -16,8 +16,9 @@ public class NameGenerationRequest {
 	@NotNull
 	private NameGenerationType type;
 
-	@NotNull
 	private NameGenerationFormat format;
+
+	private Set<NameGenerationComponent> components;
 
 	@Min(1)
 	@Max(100)

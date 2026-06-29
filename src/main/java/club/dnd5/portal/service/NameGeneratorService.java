@@ -1,6 +1,7 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.api.tools.name.GeneratedNameApi;
+import club.dnd5.portal.dto.api.tools.name.NameGenerationComponent;
 import club.dnd5.portal.dto.api.tools.name.NameGenerationFormat;
 import club.dnd5.portal.dto.api.tools.name.NameGenerationRequest;
 import club.dnd5.portal.dto.api.tools.name.NameGenerationType;
@@ -33,6 +34,7 @@ public class NameGeneratorService {
 		NameGenerationFormat.NAME_SURNAME,
 		NameGenerationFormat.NAME_CLAN,
 		NameGenerationFormat.NAME_HOUSE,
+		NameGenerationFormat.NAME_FROM,
 		NameGenerationFormat.NAME_NICKNAME,
 		NameGenerationFormat.NICKNAME,
 		NameGenerationFormat.NAME_CLAN_AFFILIATION
@@ -56,8 +58,49 @@ public class NameGeneratorService {
 		if (request.getType() == NameGenerationType.HOUSE) {
 			return generateShared(races, count, NicknameType.HOUSE, "из дома");
 		}
+		if (request.getComponents() != null) {
+			return generateByComponents(races, count, request.getComponents());
+		}
+		if (request.getFormat() == null) {
+			throw badRequest("Выберите хотя бы один компонент имени");
+		}
 
 		return generateRegular(races, count, request.getFormat());
+	}
+
+	private List<GeneratedNameApi> generateByComponents(
+		List<RaceData> races,
+		int count,
+		Set<NameGenerationComponent> components
+	) {
+		if (components.isEmpty()) {
+			throw badRequest("Выберите хотя бы один компонент имени");
+		}
+
+		List<NameGenerationFormat> formats = new ArrayList<>();
+		if (components.contains(NameGenerationComponent.NAME)) {
+			formats.add(NameGenerationFormat.NAME);
+		}
+		if (components.contains(NameGenerationComponent.SURNAME)) {
+			formats.add(NameGenerationFormat.NAME_SURNAME);
+		}
+		if (components.contains(NameGenerationComponent.NICKNAME)) {
+			formats.add(NameGenerationFormat.NICKNAME);
+			if (components.contains(NameGenerationComponent.NAME)) {
+				formats.add(NameGenerationFormat.NAME_NICKNAME);
+			}
+		}
+		if (components.contains(NameGenerationComponent.CLAN)) {
+			formats.add(NameGenerationFormat.NAME_CLAN_AFFILIATION);
+		}
+		if (components.contains(NameGenerationComponent.HOUSE)) {
+			formats.add(NameGenerationFormat.NAME_HOUSE);
+		}
+		if (components.contains(NameGenerationComponent.FROM)) {
+			formats.add(NameGenerationFormat.NAME_FROM);
+		}
+
+		return generateAny(races, count, formats);
 	}
 
 	private List<GeneratedNameApi> generateShared(
@@ -95,7 +138,7 @@ public class NameGeneratorService {
 		NameGenerationFormat format
 	) {
 		if (format == NameGenerationFormat.ANY) {
-			return generateAny(races, count);
+			return generateAny(races, count, RANDOM_FORMATS);
 		}
 
 		List<RaceData> eligibleRaces = races.stream()
@@ -134,11 +177,15 @@ public class NameGeneratorService {
 		throw badRequest("Для выбранных настроек недостаточно уникальных имён");
 	}
 
-	private List<GeneratedNameApi> generateAny(List<RaceData> races, int count) {
+	private List<GeneratedNameApi> generateAny(
+		List<RaceData> races,
+		int count,
+		List<NameGenerationFormat> formats
+	) {
 		List<FormattedCandidate> candidates = new ArrayList<>();
 
 		for (RaceData race : races) {
-			for (NameGenerationFormat format : RANDOM_FORMATS) {
+			for (NameGenerationFormat format : formats) {
 				if (!supports(race, format)) {
 					continue;
 				}
@@ -187,6 +234,9 @@ public class NameGeneratorService {
 		String value;
 
 		switch (format) {
+			case NAME:
+				value = name;
+				break;
 			case NAME_SURNAME:
 				value = name + " " + randomPart(race, NicknameType.SURNAME);
 				break;
@@ -199,6 +249,9 @@ public class NameGeneratorService {
 				break;
 			case NAME_HOUSE:
 				value = name + " из дома " + randomPart(race, NicknameType.HOUSE);
+				break;
+			case NAME_FROM:
+				value = name + " из " + randomPart(race, NicknameType.FROM);
 				break;
 			case NAME_NICKNAME:
 				value = name + " по прозвищу «" + randomPart(race, NicknameType.NICKNAME) + "»";
@@ -229,6 +282,8 @@ public class NameGeneratorService {
 		}
 
 		switch (format) {
+			case NAME:
+				return true;
 			case NAME_SURNAME:
 				return !race.parts.get(NicknameType.SURNAME).isEmpty();
 			case NAME_SURNAME_HOUSE:
@@ -239,6 +294,8 @@ public class NameGeneratorService {
 				return !race.parts.get(NicknameType.CLAN).isEmpty();
 			case NAME_HOUSE:
 				return !race.parts.get(NicknameType.HOUSE).isEmpty();
+			case NAME_FROM:
+				return !race.parts.get(NicknameType.FROM).isEmpty();
 			case NAME_NICKNAME:
 				return !race.parts.get(NicknameType.NICKNAME).isEmpty();
 			default:
