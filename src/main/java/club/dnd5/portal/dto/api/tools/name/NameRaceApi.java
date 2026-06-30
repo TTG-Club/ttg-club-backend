@@ -8,4 +8,6 @@ import lombok.Getter;
 public class NameRaceApi {
 	private final Integer id;
 	private final String name;
+	private final Integer parentId;
+	private final boolean available;
 }

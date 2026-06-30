@@ -39,6 +39,8 @@ class NameGeneratorServiceTest {
 		race = createRace();
 		when(raceRepository.findAll()).thenReturn(Collections.singletonList(race));
 		when(raceRepository.findById(race.getId())).thenReturn(Optional.of(race));
+		when(raceRepository.findAllById(Collections.singleton(race.getId())))
+			.thenReturn(Collections.singletonList(race));
 	}
 
 	@Test
@@ -90,6 +92,17 @@ class NameGeneratorServiceTest {
 
 		assertEquals(2, result.size());
 		assertTrue(result.stream().allMatch(item -> item.getSex() == Sex.FEMALE));
+		assertTrue(result.stream().allMatch(item -> item.getRace().equals(race.getFullName())));
+	}
+
+	@Test
+	void shouldApplyMultipleRaceFilter() {
+		NameGenerationRequest request = request(NameGenerationType.GROUP, NameGenerationFormat.NAME_SURNAME, 2);
+		request.setRaceIds(Collections.singleton(race.getId()));
+
+		List<GeneratedNameApi> result = service.generate(request);
+
+		assertEquals(2, result.size());
 		assertTrue(result.stream().allMatch(item -> item.getRace().equals(race.getFullName())));
 	}
 

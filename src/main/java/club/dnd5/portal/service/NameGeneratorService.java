@@ -47,7 +47,7 @@ public class NameGeneratorService {
 		validateSexes(request.getSexes());
 
 		int count = request.getType() == NameGenerationType.SINGLE ? 1 : request.getCount();
-		List<RaceData> races = loadRaces(request.getRaceId(), request.getSexes());
+		List<RaceData> races = loadRaces(request.getRaceId(), request.getRaceIds(), request.getSexes());
 
 		if (request.getType() == NameGenerationType.FAMILY) {
 			return generateShared(races, count, NicknameType.SURNAME, null);
@@ -303,9 +303,14 @@ public class NameGeneratorService {
 		}
 	}
 
-	private List<RaceData> loadRaces(Integer raceId, Set<Sex> sexes) {
+	private List<RaceData> loadRaces(Integer raceId, Set<Integer> raceIds, Set<Sex> sexes) {
 		List<Race> races;
-		if (raceId == null) {
+		if (raceIds != null && !raceIds.isEmpty()) {
+			races = raceRepository.findAllById(raceIds);
+			if (races.size() != raceIds.size()) {
+				throw badRequest("Одна или несколько выбранных рас не найдены");
+			}
+		} else if (raceId == null) {
 			races = raceRepository.findAll();
 		} else {
 			Race race = raceRepository.findById(raceId)

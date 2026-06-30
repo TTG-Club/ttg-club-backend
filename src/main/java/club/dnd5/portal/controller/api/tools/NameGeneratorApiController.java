@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,9 +27,24 @@ public class NameGeneratorApiController {
 
 	@GetMapping("/api/v1/tools/names")
 	public List<NameRaceApi> getRaces() {
-		return raceRepository.findAll().stream()
+		List<Race> races = raceRepository.findAll();
+		Set<Integer> availableIds = races.stream()
 			.filter(this::hasNames)
-			.map(race -> new NameRaceApi(race.getId(), race.getFullName()))
+			.map(Race::getId)
+			.collect(Collectors.toSet());
+		Set<Integer> groupIds = races.stream()
+			.filter(race -> availableIds.contains(race.getId()) && race.getParent() != null)
+			.map(race -> race.getParent().getId())
+			.collect(Collectors.toCollection(HashSet::new));
+
+		return races.stream()
+			.filter(race -> availableIds.contains(race.getId()) || groupIds.contains(race.getId()))
+			.map(race -> new NameRaceApi(
+				race.getId(),
+				race.getName(),
+				race.getParent() == null ? null : race.getParent().getId(),
+				availableIds.contains(race.getId())
+			))
 			.sorted(Comparator.comparing(NameRaceApi::getName))
 			.collect(Collectors.toList());
 	}
