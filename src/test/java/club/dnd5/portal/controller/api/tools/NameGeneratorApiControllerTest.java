@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +36,32 @@ class NameGeneratorApiControllerTest {
 
 		assertEquals(1, result.size());
 		assertEquals(parent.getId(), result.get(0).getId());
+		assertTrue(result.get(0).isAvailable());
+	}
+
+	@Test
+	void shouldIncludeParentAsGroupWhenOnlySubraceHasNames() {
+		RaceRepository raceRepository = mock(RaceRepository.class);
+		Race parent = race(1, "Эльф");
+		parent.setNames(Collections.emptyList());
+		Race subrace = race(2, "Высший эльф");
+		subrace.setParent(parent);
+		subrace.setNames(Collections.singletonList(new RaceName(1, "Адар", Sex.MALE, subrace)));
+		when(raceRepository.findAll()).thenReturn(Arrays.asList(parent, subrace));
+		NameGeneratorApiController controller = new NameGeneratorApiController(
+			raceRepository,
+			mock(NameGeneratorService.class)
+		);
+
+		List<NameRaceApi> result = controller.getRaces();
+
+		assertEquals(2, result.size());
+		assertEquals(1, result.stream().filter(NameRaceApi::isAvailable).count());
+		assertEquals(parent.getId(), result.stream()
+			.filter(item -> !item.isAvailable())
+			.findFirst()
+			.orElseThrow(AssertionError::new)
+			.getId());
 	}
 
 	private Race race(int id, String name) {

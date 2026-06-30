@@ -25,6 +25,7 @@ public class NameGenerationRequest {
 	private int count = 1;
 
 	private Integer raceId;
+	private Set<Integer> raceIds;
 
 	@NotNull
 	@Size(min = 1)
