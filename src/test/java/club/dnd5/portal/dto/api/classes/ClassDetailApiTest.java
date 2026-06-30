@@ -66,6 +66,8 @@ class ClassDetailApiTest {
 		archetype.setId(10);
 		archetype.setName("Чемпион");
 		archetype.setEnglishName("Champion");
+		archetype.setLevel((byte) 3);
+		archetype.setDescription("Описание чемпиона");
 		archetype.setGenitiveName("чемпиона");
 		archetype.setHeroClass(heroClass);
 		archetype.setBook(book);
@@ -83,11 +85,12 @@ class ClassDetailApiTest {
 		);
 		List<ClassDetailApi.TraitApi> features = new ArrayList<>(details.getTraits().getFeatures());
 
-		assertEquals(Arrays.asList(1, 3, 5, 7), features.stream()
+		assertEquals(Arrays.asList(1, 3, 3, 5, 7), features.stream()
 			.map(ClassDetailApi.TraitApi::getLevel)
 			.collect(Collectors.toList()));
 		assertEquals(Arrays.asList(
 			"Умение класса 1",
+			"Чемпион",
 			"Умение подкласса 3",
 			"Умение класса 5",
 			"Умение подкласса 7"
@@ -117,6 +120,8 @@ class ClassDetailApiTest {
 		archetype.setId(10);
 		archetype.setName("Чемпион");
 		archetype.setEnglishName("Champion");
+		archetype.setLevel((byte) 3);
+		archetype.setDescription("Описание чемпиона");
 		archetype.setGenitiveName("чемпиона");
 		archetype.setHeroClass(heroClass);
 		archetype.setBook(heroClass.getBook());

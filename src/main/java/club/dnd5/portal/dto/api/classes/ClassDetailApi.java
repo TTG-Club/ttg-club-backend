@@ -228,6 +228,7 @@ public class ClassDetailApi extends ClassApi {
 				.filter(trait -> trait.getChild() == null)
 				.forEach(trait -> result.add(new TraitApi(trait)));
 			if (archetype != null) {
+				result.add(new TraitApi(archetype));
 				archetype.getFeats()
 					.stream()
 					.filter(trait -> trait.getChild() == null)
@@ -401,6 +402,7 @@ public class ClassDetailApi extends ClassApi {
 		private final Source source;
 		private final boolean optional;
 		private final boolean archetypeFeature;
+		private final boolean archetypeRoot;
 
 		private TraitApi(HeroClassTrait trait) {
 			id = String.format("c%d", trait.getId());
@@ -411,6 +413,19 @@ public class ClassDetailApi extends ClassApi {
 			source = new Source(trait.getBook());
 			optional = trait.getOptional() == 1;
 			archetypeFeature = false;
+			archetypeRoot = false;
+		}
+
+		private TraitApi(Archetype archetype) {
+			id = String.format("ad%d", archetype.getId());
+			name = archetype.getCapitalizeName();
+			level = archetype.getLevel();
+			type = archetype.getHeroClass().getArchetypeName();
+			description = archetype.getDescription();
+			source = new Source(archetype.getBook());
+			optional = false;
+			archetypeFeature = true;
+			archetypeRoot = true;
 		}
 
 		private TraitApi(ArchetypeTrait trait, Archetype archetype) {
@@ -422,6 +437,7 @@ public class ClassDetailApi extends ClassApi {
 			source = new Source(trait.getBook());
 			optional = false;
 			archetypeFeature = true;
+			archetypeRoot = false;
 		}
 
 		private static String levelSuffix(int level) {
