@@ -41,6 +41,8 @@ class BackgroundPersonalizationTableApiTest {
 		background.setName("Тестовая предыстория");
 		background.setEnglishName("Test Background");
 		background.setSkills(Collections.emptyList());
+		background.setSkillName("Background Feature");
+		background.setSkillDescription("Feature description");
 		background.setPersonalizations(Arrays.asList(
 			personalization(PersonalizationType.TRAIT, "Первая черта"),
 			personalization(PersonalizationType.TRAIT, "Вторая черта"),
@@ -53,6 +55,8 @@ class BackgroundPersonalizationTableApiTest {
 
 		BackgroundDetailApi details = new BackgroundDetailApi(background);
 
+		assertEquals("Background Feature", details.getSkillName());
+		assertEquals("Feature description", details.getSkillDescription());
 		ArrayList<BackgroundPersonalizationTableApi> tables = new ArrayList<>(details.getPersonalizationTables());
 		assertEquals(2, tables.size());
 		assertEquals(PersonalizationType.TRAIT.getName(), tables.get(0).getName());

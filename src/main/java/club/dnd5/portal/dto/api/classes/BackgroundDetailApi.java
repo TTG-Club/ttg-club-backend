@@ -32,6 +32,8 @@ public class BackgroundDetailApi extends BackgroundApi {
 	private Collection<String> equipments;
 	private Integer startGold;
 	private String description;
+	private String skillName;
+	private String skillDescription;
 	private String personalization;
 	private Collection<BackgroundPersonalizationTableApi> personalizationTables;
 	
@@ -52,6 +54,8 @@ public class BackgroundDetailApi extends BackgroundApi {
 		}
 		startGold = background.getStartMoney();
 		description = background.getDescription();
+		skillName = background.getSkillName();
+		skillDescription = background.getSkillDescription();
 		if (background.getPersonalization() != null) {
 			personalization = background.getPersonalization();
 		}

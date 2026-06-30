@@ -25,6 +25,8 @@ public class BackgroundSaveApi {
 	private Integer startGold;
 	@NotBlank
 	private String description;
+	private String skillName;
+	private String skillDescription;
 	private String personalization;
 	private String language;
 	private List<String> languages;

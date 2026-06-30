@@ -166,6 +166,8 @@ public class BackgroundApiController {
 		background.setEquipmentsText(trimToNull(request.getEquipments()));
 		background.setStartMoney(request.getStartGold() == null ? 0 : request.getStartGold());
 		background.setDescription(request.getDescription().trim());
+		background.setSkillName(trimToNull(request.getSkillName()));
+		background.setSkillDescription(trimToNull(request.getSkillDescription()));
 		background.setPersonalization(trimToNull(request.getPersonalization()));
 		background.setLanguage(trimToNull(request.getLanguage()));
 		background.setLifeStyle(request.getLifeStyle());

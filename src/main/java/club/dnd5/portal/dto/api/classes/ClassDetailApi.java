@@ -184,7 +184,9 @@ public class ClassDetailApi extends ClassApi {
 					.filter(trait -> trait.getChild() == null)
 					.forEach(trait -> result.add(new TraitApi(trait, archetype)));
 			}
-			return result;
+			return result.stream()
+				.sorted(Comparator.comparingInt(TraitApi::getLevel))
+				.collect(Collectors.toList());
 		}
 	}
 
@@ -344,6 +346,7 @@ public class ClassDetailApi extends ClassApi {
 	public static class TraitApi {
 		private final String id;
 		private final String name;
+		private final int level;
 		private final String type;
 		private final String description;
 		private final Source source;
@@ -353,6 +356,7 @@ public class ClassDetailApi extends ClassApi {
 		private TraitApi(HeroClassTrait trait) {
 			id = String.format("c%d", trait.getId());
 			name = trait.getName();
+			level = trait.getLevel();
 			type = String.format("%d-%s уровень", trait.getLevel(), levelSuffix(trait.getLevel()));
 			description = trait.getDescription();
 			source = new Source(trait.getBook());
@@ -363,6 +367,7 @@ public class ClassDetailApi extends ClassApi {
 		private TraitApi(ArchetypeTrait trait, Archetype archetype) {
 			id = String.format("a%d", trait.getId());
 			name = trait.getName();
+			level = trait.getLevel();
 			type = String.format("%d-%s уровень, умение %s", trait.getLevel(), levelSuffix(trait.getLevel()), archetype.getGenitiveName());
 			description = trait.getDescription();
 			source = new Source(trait.getBook());
