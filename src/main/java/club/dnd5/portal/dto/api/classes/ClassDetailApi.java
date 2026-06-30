@@ -25,7 +25,9 @@ import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.SpellLevelDefinition;
 import club.dnd5.portal.model.classes.archetype.Archetype;
+import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
+import club.dnd5.portal.model.splells.Spell;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -50,6 +52,7 @@ public class ClassDetailApi extends ClassApi {
 	private int enabledArhitypeLevel;
 	private Short page;
 	private Collection<ClassTraitApi> classTraits;
+	private Collection<ArchetypeSpellLevelApi> archetypeSpells;
 
 	public ClassDetailApi(HeroClass heroClass, Collection<String> images, ClassRequestApi request) {
 		super(heroClass, request);
@@ -91,6 +94,7 @@ public class ClassDetailApi extends ClassApi {
 		name.setEng(name.getEng() + " " + archetype.getEnglishName());
 		HeroClass heroClass = archetype.getHeroClass();
 		this.images = images;
+		archetypeSpells = toArchetypeSpellLevels(archetype);
 		tabs.add(new ClassTabAp("Навыки", String.format("/classes/%s/architypes/%s", heroClass.getUrlName(), archetype.getUrlName()), "traits", 0, true));
 		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/archetype/%s/description", heroClass.getUrlName(), archetype.getUrlName()), "description", 1, true));
 		if (heroClass.getSpellcasterType() != SpellcasterType.NONE || archetype.getSpellcasterType() != null) {
@@ -103,6 +107,51 @@ public class ClassDetailApi extends ClassApi {
 			tabs.add(new ClassTabAp(archetype.getOptionType().getDisplayName(), String.format("/filters/options/%s/%s", heroClass.getUrlName(), archetype.getUrlName()), "options", 4, false));
 		}
 		traits = new ClassTraitsApi(heroClass, archetype);
+	}
+
+	private Collection<ArchetypeSpellLevelApi> toArchetypeSpellLevels(Archetype archetype) {
+		if (archetype.getSpells() == null) {
+			return Collections.emptyList();
+		}
+		return archetype.getSpells()
+			.stream()
+			.filter(archetypeSpell -> archetypeSpell.getLevel() > 0 && archetypeSpell.getSpell() != null)
+			.collect(Collectors.groupingBy(ArchetypeSpell::getLevel))
+			.entrySet()
+			.stream()
+			.sorted(java.util.Map.Entry.comparingByKey())
+			.map(entry -> new ArchetypeSpellLevelApi(entry.getKey(), entry.getValue()))
+			.collect(Collectors.toList());
+	}
+
+	@Getter
+	public static class ArchetypeSpellLevelApi {
+		private final int level;
+		private final Collection<ArchetypeSpellApi> spells;
+
+		private ArchetypeSpellLevelApi(int level, Collection<ArchetypeSpell> spells) {
+			this.level = level;
+			this.spells = spells.stream()
+				.sorted(Comparator.comparing(archetypeSpell -> archetypeSpell.getSpell().getName()))
+				.map(ArchetypeSpellApi::new)
+				.collect(Collectors.toList());
+		}
+	}
+
+	@Getter
+	public static class ArchetypeSpellApi {
+		private final String name;
+		private final String englishName;
+		private final String url;
+		private final String advanced;
+
+		private ArchetypeSpellApi(ArchetypeSpell archetypeSpell) {
+			Spell spell = archetypeSpell.getSpell();
+			name = spell.getName();
+			englishName = spell.getEnglishName();
+			url = String.format("/spells/%s", spell.getUrlName());
+			advanced = archetypeSpell.getAdvenced();
+		}
 	}
 
 	@Getter
@@ -140,6 +189,7 @@ public class ClassDetailApi extends ClassApi {
 		private final Collection<FeatureLevelApi> archetypeFeatureLevels;
 		private final Collection<LevelRowApi> levels;
 		private final Collection<TraitApi> features;
+		private final TraitApi archetype;
 
 		private ClassTraitsApi(HeroClass heroClass, Archetype archetype) {
 			diceHp = heroClass.getDiceHp();
@@ -159,6 +209,7 @@ public class ClassDetailApi extends ClassApi {
 			archetypeFeatureLevels = archetype == null
 				? Collections.emptyList()
 				: toFeatureLevels(archetype.getFeatureLevelDefenitions());
+			this.archetype = archetype == null ? null : new TraitApi(archetype);
 			levels = IntStream.rangeClosed(1, 20)
 				.mapToObj(level -> new LevelRowApi(heroClass, archetype, level))
 				.collect(Collectors.toList());
@@ -352,6 +403,7 @@ public class ClassDetailApi extends ClassApi {
 		private final Source source;
 		private final boolean optional;
 		private final boolean archetypeFeature;
+		private final boolean archetypeRoot;
 
 		private TraitApi(HeroClassTrait trait) {
 			id = String.format("c%d", trait.getId());
@@ -362,6 +414,19 @@ public class ClassDetailApi extends ClassApi {
 			source = new Source(trait.getBook());
 			optional = trait.getOptional() == 1;
 			archetypeFeature = false;
+			archetypeRoot = false;
+		}
+
+		private TraitApi(Archetype archetype) {
+			id = String.format("ad%d", archetype.getId());
+			name = archetype.getCapitalizeName();
+			level = archetype.getLevel();
+			type = archetype.getHeroClass().getArchetypeName();
+			description = archetype.getDescription();
+			source = new Source(archetype.getBook());
+			optional = false;
+			archetypeFeature = true;
+			archetypeRoot = true;
 		}
 
 		private TraitApi(ArchetypeTrait trait, Archetype archetype) {
@@ -373,6 +438,7 @@ public class ClassDetailApi extends ClassApi {
 			source = new Source(trait.getBook());
 			optional = false;
 			archetypeFeature = true;
+			archetypeRoot = false;
 		}
 
 		private static String levelSuffix(int level) {
