@@ -189,6 +189,7 @@ public class ClassDetailApi extends ClassApi {
 		private final Collection<FeatureLevelApi> archetypeFeatureLevels;
 		private final Collection<LevelRowApi> levels;
 		private final Collection<TraitApi> features;
+		private final TraitApi archetype;
 
 		private ClassTraitsApi(HeroClass heroClass, Archetype archetype) {
 			diceHp = heroClass.getDiceHp();
@@ -208,6 +209,7 @@ public class ClassDetailApi extends ClassApi {
 			archetypeFeatureLevels = archetype == null
 				? Collections.emptyList()
 				: toFeatureLevels(archetype.getFeatureLevelDefenitions());
+			this.archetype = archetype == null ? null : new TraitApi(archetype);
 			levels = IntStream.rangeClosed(1, 20)
 				.mapToObj(level -> new LevelRowApi(heroClass, archetype, level))
 				.collect(Collectors.toList());
@@ -228,7 +230,6 @@ public class ClassDetailApi extends ClassApi {
 				.filter(trait -> trait.getChild() == null)
 				.forEach(trait -> result.add(new TraitApi(trait)));
 			if (archetype != null) {
-				result.add(new TraitApi(archetype));
 				archetype.getFeats()
 					.stream()
 					.filter(trait -> trait.getChild() == null)

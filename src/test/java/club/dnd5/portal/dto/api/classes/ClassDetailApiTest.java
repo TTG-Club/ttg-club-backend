@@ -85,16 +85,18 @@ class ClassDetailApiTest {
 		);
 		List<ClassDetailApi.TraitApi> features = new ArrayList<>(details.getTraits().getFeatures());
 
-		assertEquals(Arrays.asList(1, 3, 3, 5, 7), features.stream()
+		assertEquals(Arrays.asList(1, 3, 5, 7), features.stream()
 			.map(ClassDetailApi.TraitApi::getLevel)
 			.collect(Collectors.toList()));
 		assertEquals(Arrays.asList(
 			"Умение класса 1",
-			"Чемпион",
 			"Умение подкласса 3",
 			"Умение класса 5",
 			"Умение подкласса 7"
 		), features.stream().map(ClassDetailApi.TraitApi::getName).collect(Collectors.toList()));
+		assertEquals("Чемпион", details.getTraits().getArchetype().getName());
+		assertEquals(3, details.getTraits().getArchetype().getLevel());
+		assertEquals("Описание чемпиона", details.getTraits().getArchetype().getDescription());
 	}
 
 	private HeroClass baseClass() {
