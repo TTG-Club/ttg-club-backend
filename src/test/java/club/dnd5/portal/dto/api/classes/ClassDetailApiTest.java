@@ -59,7 +59,8 @@ class ClassDetailApiTest {
 		heroClass.setLevelDefenitions(Collections.emptyList());
 		heroClass.setTraits(Arrays.asList(
 			classTrait(2, "Умение класса 5", 5),
-			classTrait(1, "Умение класса 1", 1)
+			classTrait(1, "Умение класса 1", 1),
+			archetypeSelectionTrait(3, "Умение архетипа", 3)
 		));
 
 		Archetype archetype = new Archetype();
@@ -149,6 +150,12 @@ class ClassDetailApiTest {
 		trait.setId(id);
 		trait.setName(name);
 		trait.setLevel((byte) level);
+		return trait;
+	}
+
+	private HeroClassTrait archetypeSelectionTrait(int id, String name, int level) {
+		HeroClassTrait trait = classTrait(id, name, level);
+		trait.setArchitype(true);
 		return trait;
 	}
 
