@@ -228,6 +228,7 @@ public class ClassDetailApi extends ClassApi {
 			heroClass.getTraits()
 				.stream()
 				.filter(trait -> trait.getChild() == null)
+				.filter(trait -> archetype == null || !trait.isArchitype())
 				.forEach(trait -> result.add(new TraitApi(trait)));
 			if (archetype != null) {
 				archetype.getFeats()
