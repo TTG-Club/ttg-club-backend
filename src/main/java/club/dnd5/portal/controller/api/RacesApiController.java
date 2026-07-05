@@ -260,6 +260,7 @@ public class RacesApiController {
 				AbilityBonus ability = abilityRequest.getId() == null
 					? new AbilityBonus()
 					: existingById.getOrDefault(abilityRequest.getId(), new AbilityBonus());
+				ability.setRaceId(race.getId());
 				ability.setAbility(abilityRequest.getAbility());
 				ability.setBonus(abilityRequest.getBonus());
 				return ability;
@@ -291,6 +292,7 @@ public class RacesApiController {
 				Feature feature = featureRequest.getId() == null
 					? new Feature()
 					: existingById.getOrDefault(featureRequest.getId(), new Feature());
+				feature.setRaceId(race.getId());
 				feature.setName(featureRequest.getName().trim());
 				feature.setEnglishName(trimToNull(featureRequest.getEnglishName()));
 				feature.setDescription(featureRequest.getDescription().trim());

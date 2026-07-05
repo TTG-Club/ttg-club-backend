@@ -1,5 +1,6 @@
 package club.dnd5.portal.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -20,6 +21,9 @@ public class AbilityBonus {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+
+	@Column(name = "race_id", nullable = false)
+	private Integer raceId;
 
 	@Enumerated(EnumType.STRING)
 	private AbilityType ability;
