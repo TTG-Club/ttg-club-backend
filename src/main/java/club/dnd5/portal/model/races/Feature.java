@@ -28,6 +28,10 @@ public class Feature {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+
+	@Column(name = "race_id", nullable = false)
+	private Integer raceId;
+
 	private String name;
 	private String englishName;
 	@Column(columnDefinition = "TEXT")

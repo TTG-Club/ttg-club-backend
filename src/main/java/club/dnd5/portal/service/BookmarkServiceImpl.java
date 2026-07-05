@@ -8,6 +8,7 @@ import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.repository.user.BookmarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,36 +69,61 @@ public class BookmarkServiceImpl implements BookmarkService {
 	}
 
 	@Override
+	@Transactional
 	public BookmarkApi updateBookmark(final User user, final BookmarkApi bookmark) {
-		if (bookmark.getParentUUID() != null) {
-			final Optional<Bookmark> saved = bookmarkRepository.findById(UUID.fromString(bookmark.getUuid()));
-			if (saved.isPresent() && saved.get().getParent().getUuid().toString().equals(bookmark.getParentUUID())) {
-				Collection<Bookmark> chields = bookmarkRepository.findByParentUuid(UUID.fromString(bookmark.getParentUUID()));
-				if (saved.get().getOrder() > bookmark.getOrder()) {
-					chields.forEach(b -> {
-						if (b.getOrder() >= bookmark.getOrder() && b.getOrder() < saved.get().getOrder()) {
-							b.incrementOrder();
-						}
-					});
-				}
-				else {
-					chields.forEach(b -> {
-						if (b.getOrder() <= bookmark.getOrder()) {
-							b.decrimentOrder();
-						}
-					});
-				}
-				bookmarkRepository.saveAll(chields);
-			} else {
-				List<Bookmark> olds = saved.get().getParent().getChildren();
-				olds.stream().filter( b-> b.getOrder() > saved.get().getOrder()).forEach(b -> b.decrimentOrder());
-				bookmarkRepository.saveAll(olds);
-				Collection<Bookmark> chields = bookmarkRepository.findByParentUuid(UUID.fromString(bookmark.getParentUUID()));
-				chields.stream().filter(b -> b.getOrder() >= bookmark.getOrder()).forEach(b -> b.incrementOrder());
-				bookmarkRepository.saveAll(chields);
+		Bookmark saved = bookmarkRepository.findById(UUID.fromString(bookmark.getUuid()))
+			.orElseThrow(() -> new RuntimeException("Bookmark not found"));
+
+		if (bookmark.getParentUUID() != null && bookmark.getOrder() != null) {
+			UUID targetParentUuid = UUID.fromString(bookmark.getParentUUID());
+			Bookmark targetParent = bookmarkRepository.findById(targetParentUuid)
+				.orElseThrow(() -> new RuntimeException("Bookmark's group not found"));
+
+			if (saved.getParent() != null && !saved.getParent().getUuid().equals(targetParentUuid)) {
+				normalizeWithout(saved.getParent().getUuid(), saved);
 			}
+
+			reorder(targetParentUuid, saved, bookmark.getOrder());
+			saved.setParent(targetParent);
 		}
-		return new BookmarkApi(bookmarkRepository.saveAndFlush(getUpdatedBookmark(user, bookmark)));
+
+		saved.setName(bookmark.getName());
+		if (bookmark.getParentUUID() == null) {
+			saved.setOrder(bookmark.getOrder());
+		}
+		saved.setUser(user);
+		saved.setPrefix(bookmark.getPrefix());
+		saved.setUrl(bookmark.getUrl());
+
+		return new BookmarkApi(bookmarkRepository.saveAndFlush(saved));
+	}
+
+	private void reorder(UUID parentUuid, Bookmark moved, int targetOrder) {
+		List<Bookmark> siblings = orderedChildren(parentUuid);
+		siblings.removeIf(item -> item.getUuid().equals(moved.getUuid()));
+		siblings.add(Math.max(0, Math.min(targetOrder, siblings.size())), moved);
+		normalize(siblings);
+	}
+
+	private void normalizeWithout(UUID parentUuid, Bookmark removed) {
+		List<Bookmark> siblings = orderedChildren(parentUuid);
+		siblings.removeIf(item -> item.getUuid().equals(removed.getUuid()));
+		normalize(siblings);
+	}
+
+	private List<Bookmark> orderedChildren(UUID parentUuid) {
+		return bookmarkRepository.findByParentUuid(parentUuid).stream()
+			.sorted(Comparator
+				.comparing(Bookmark::getOrder, Comparator.nullsLast(Integer::compareTo))
+				.thenComparing(Bookmark::getUuid))
+			.collect(Collectors.toList());
+	}
+
+	private void normalize(List<Bookmark> bookmarks) {
+		for (int order = 0; order < bookmarks.size(); order++) {
+			bookmarks.get(order).setOrder(order);
+		}
+		bookmarkRepository.saveAll(bookmarks);
 	}
 
 	@Override
@@ -130,20 +156,4 @@ public class BookmarkServiceImpl implements BookmarkService {
 		return uuid;
 	}
 
-	private Bookmark getUpdatedBookmark(User user, BookmarkApi bookmark) {
-		Bookmark updatedBookmark = new Bookmark();
-
-		updatedBookmark.setUuid(UUID.fromString(bookmark.getUuid()));
-		updatedBookmark.setName(bookmark.getName());
-		updatedBookmark.setOrder(bookmark.getOrder());
-		updatedBookmark.setUser(user);
-		updatedBookmark.setPrefix(bookmark.getPrefix());
-		updatedBookmark.setUrl(bookmark.getUrl());
-		if (bookmark.getParentUUID() != null) {
-			Bookmark parent = bookmarkRepository.getById(UUID.fromString(bookmark.getParentUUID()));
-			parent.addChild(updatedBookmark);
-			updatedBookmark.setParent(parent);
-		}
-		return updatedBookmark;
-	}
 }
