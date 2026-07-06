@@ -13,13 +13,15 @@ import club.dnd5.portal.security.JWTAuthResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -28,32 +30,53 @@ import javax.servlet.http.HttpSession;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthApiController {
+	private static final String ACCESS_TOKEN_COOKIE = "dnd5_user_token";
+	private static final String REFRESH_TOKEN_COOKIE = "dnd5_refresh_token";
+	private static final String REFRESH_COOKIE_PATH = "/api/v1/auth";
+	private static final String REMEMBER_PREFIX = "1.";
+	private static final String SESSION_PREFIX = "0.";
+
 	private final ExternalAuthClient externalAuthClient;
 	private final ExternalAuthUserSynchronizer userSynchronizer;
 
 	@Operation(summary = "User authorization by nickname or email address")
 	@PostMapping("/signin")
-	public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto loginDto, HttpServletResponse response) {
+	public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			JWTAuthResponse authResponse = externalAuthClient.login(loginDto);
 			ExternalAuthUser externalUser = externalAuthClient.me(authResponse.getAccessToken());
 			userSynchronizer.sync(externalUser);
 
-			Cookie cookie = new Cookie("dnd5_user_token", authResponse.getAccessToken());
-			if (Boolean.TRUE.equals(loginDto.getRemember())) {
-				cookie.setMaxAge(365 * 24 * 60 * 60);
-			}
-			else {
-				cookie.setMaxAge(24 * 60 * 60);
-			}
-			cookie.setPath("/");
-			cookie.setHttpOnly(true);
-			cookie.setSecure(true);
-			response.addCookie(cookie);
+			boolean remember = Boolean.TRUE.equals(loginDto.getRemember());
+			addTokenCookies(response, authResponse, remember, isSecure(request));
 
 			return ResponseEntity.ok(authResponse);
 		}
 		catch (HttpStatusCodeException exception) {
+			return ResponseEntity.status(exception.getStatusCode()).build();
+		}
+	}
+
+	@Operation(summary = "Refresh user access token")
+	@PostMapping("/refresh")
+	public ResponseEntity<JWTAuthResponse> refresh(
+			@CookieValue(value = REFRESH_TOKEN_COOKIE, required = false) String storedRefreshToken,
+			HttpServletRequest request,
+			HttpServletResponse response) {
+		if (!StringUtils.hasText(storedRefreshToken) || storedRefreshToken.length() < 3) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		boolean remember = storedRefreshToken.startsWith(REMEMBER_PREFIX);
+		String refreshToken = storedRefreshToken.substring(2);
+
+		try {
+			JWTAuthResponse authResponse = externalAuthClient.refresh(refreshToken);
+			addTokenCookies(response, authResponse, remember, isSecure(request));
+			return ResponseEntity.ok(authResponse);
+		}
+		catch (HttpStatusCodeException exception) {
+			clearTokenCookies(response, isSecure(request));
 			return ResponseEntity.status(exception.getStatusCode()).build();
 		}
 	}
@@ -73,15 +96,43 @@ public class AuthApiController {
 
 	@Operation(summary = "Log out user current session")
 	@PostMapping("/signout")
-	public ResponseEntity<?> signout(HttpSession session, HttpServletResponse response) {
-		Cookie cookie = new Cookie("dnd5_user_token", "");
-		cookie.setMaxAge(0);
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		response.addCookie(cookie);
+	public ResponseEntity<?> signout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		clearTokenCookies(response, isSecure(request));
 		session.invalidate();
 		return ResponseEntity.ok().build();
+	}
+
+	private void addTokenCookies(HttpServletResponse response, JWTAuthResponse authResponse, boolean remember, boolean secure) {
+		addCookie(response, ACCESS_TOKEN_COOKIE, authResponse.getAccessToken(), "/",
+				cookieMaxAge(remember, authResponse.getExpiresIn()), secure);
+		String refreshValue = (remember ? REMEMBER_PREFIX : SESSION_PREFIX) + authResponse.getRefreshToken();
+		addCookie(response, REFRESH_TOKEN_COOKIE, refreshValue, REFRESH_COOKIE_PATH,
+				cookieMaxAge(remember, authResponse.getRefreshExpiresIn()), secure);
+	}
+
+	private long cookieMaxAge(boolean remember, long tokenLifetime) {
+		return remember && tokenLifetime > 0 ? tokenLifetime : -1;
+	}
+
+	private void clearTokenCookies(HttpServletResponse response, boolean secure) {
+		addCookie(response, ACCESS_TOKEN_COOKIE, "", "/", 0, secure);
+		addCookie(response, REFRESH_TOKEN_COOKIE, "", REFRESH_COOKIE_PATH, 0, secure);
+	}
+
+	private void addCookie(HttpServletResponse response, String name, String value, String path, long maxAge, boolean secure) {
+		ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, value)
+				.httpOnly(true)
+				.secure(secure)
+				.sameSite("Strict")
+				.path(path);
+		if (maxAge >= 0) {
+			builder.maxAge(maxAge);
+		}
+		response.addHeader(HttpHeaders.SET_COOKIE, builder.build().toString());
+	}
+
+	private boolean isSecure(HttpServletRequest request) {
+		return request.isSecure() || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
 	}
 
 	@Operation(summary = "Nickname and mailing address check")
