@@ -49,14 +49,20 @@ public class ExternalAuthClient {
                 jsonEntity(body),
                 Map.class);
 
-        Map responseBody = response.getBody();
-        String accessToken = stringValue(responseBody, "accessToken");
-        JWTAuthResponse authResponse = new JWTAuthResponse(accessToken);
-        String tokenType = stringValue(responseBody, "tokenType");
-        if (StringUtils.hasText(tokenType)) {
-            authResponse.setTokenType(tokenType);
-        }
-        return authResponse;
+        return toAuthResponse(response.getBody());
+    }
+
+    public JWTAuthResponse refresh(String refreshToken) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("refreshToken", refreshToken);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url("/api/auth/refresh"),
+                HttpMethod.POST,
+                jsonEntity(body),
+                Map.class);
+
+        return toAuthResponse(response.getBody());
     }
 
     public ExternalAuthUser register(SignUpDto signUpDto) {
@@ -152,6 +158,19 @@ public class ExternalAuthClient {
         return user;
     }
 
+    private JWTAuthResponse toAuthResponse(Map body) {
+        JWTAuthResponse authResponse = new JWTAuthResponse(stringValue(body, "accessToken"));
+        authResponse.setRefreshToken(stringValue(body, "refreshToken"));
+        authResponse.setExpiresIn(longValue(body, "expiresIn"));
+        authResponse.setRefreshExpiresIn(longValue(body, "refreshExpiresIn"));
+
+        String tokenType = stringValue(body, "tokenType");
+        if (StringUtils.hasText(tokenType)) {
+            authResponse.setTokenType(tokenType);
+        }
+        return authResponse;
+    }
+
     private HttpEntity<Map<String, Object>> jsonEntity(Map<String, Object> body) {
         return jsonEntity(body, false);
     }
@@ -217,6 +236,14 @@ public class ExternalAuthClient {
         }
         Object value = body.get(key);
         return value instanceof Boolean ? (Boolean) value : Boolean.parseBoolean(String.valueOf(value));
+    }
+
+    private static long longValue(Map body, String key) {
+        if (body == null || body.get(key) == null) {
+            return 0;
+        }
+        Object value = body.get(key);
+        return value instanceof Number ? ((Number) value).longValue() : Long.parseLong(String.valueOf(value));
     }
 
     private static String firstNotBlank(String first, String second) {

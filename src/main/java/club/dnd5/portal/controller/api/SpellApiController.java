@@ -155,7 +155,7 @@ public class SpellApiController {
 				}
 				if (request.getFilter().getComponents().contains("3")) {
 					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("materialComponent"), true));
+						(root, query, cb) -> cb.isNotNull(root.get("additionalMaterialComponent")));
 				}
 				if (request.getFilter().getComponents().contains("4")) {
 					specification = SpecificationUtil.getAndSpecification(specification,

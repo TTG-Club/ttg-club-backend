@@ -33,6 +33,7 @@ import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
+import club.dnd5.portal.util.ChallengeRating;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import lombok.AllArgsConstructor;
@@ -270,7 +271,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setBonusHP(null);
         beast.setSuffixHP(trimToNull(request.getHits().getText()));
         beast.setChallengeRating(trimToNull(request.getChallengeRating()));
-        beast.setExp(0);
+        beast.setExp(ChallengeRating.getExp(beast.getChallengeRating()));
         beast.setRaceId(request.isNpc() ? 102 : 0);
         beast.setDescription(trimToNull(request.getDescription()));
         beast.setReaction(trimToNull(request.getReaction()));

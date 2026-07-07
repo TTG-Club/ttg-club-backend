@@ -1,7 +1,58 @@
 package club.dnd5.portal.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class ChallengeRating {
 	private ChallengeRating() {
+	}
+
+	private static final Map<String, Integer> CR_TO_EXP = new HashMap<>();
+	static {
+		CR_TO_EXP.put("—", 0);
+		CR_TO_EXP.put("0", 10);
+		CR_TO_EXP.put("1/8", 25);
+		CR_TO_EXP.put("1/4", 50);
+		CR_TO_EXP.put("1/2", 100);
+		CR_TO_EXP.put("1", 200);
+		CR_TO_EXP.put("2", 450);
+		CR_TO_EXP.put("3", 700);
+		CR_TO_EXP.put("4", 1_100);
+		CR_TO_EXP.put("5", 1_800);
+		CR_TO_EXP.put("6", 2_300);
+		CR_TO_EXP.put("7", 2_900);
+		CR_TO_EXP.put("8", 3_900);
+		CR_TO_EXP.put("9", 5_000);
+		CR_TO_EXP.put("10", 5_900);
+		CR_TO_EXP.put("11", 7_200);
+		CR_TO_EXP.put("12", 8_400);
+		CR_TO_EXP.put("13", 10_000);
+		CR_TO_EXP.put("14", 11_500);
+		CR_TO_EXP.put("15", 13_000);
+		CR_TO_EXP.put("16", 15_000);
+		CR_TO_EXP.put("17", 18_000);
+		CR_TO_EXP.put("18", 20_000);
+		CR_TO_EXP.put("19", 22_000);
+		CR_TO_EXP.put("20", 25_000);
+		CR_TO_EXP.put("21", 33_000);
+		CR_TO_EXP.put("22", 41_000);
+		CR_TO_EXP.put("23", 50_000);
+		CR_TO_EXP.put("24", 62_000);
+		CR_TO_EXP.put("25", 75_000);
+		CR_TO_EXP.put("26", 90_000);
+		CR_TO_EXP.put("27", 105_000);
+		CR_TO_EXP.put("28", 120_000);
+		CR_TO_EXP.put("29", 135_000);
+		CR_TO_EXP.put("30", 155_000);
+	}
+
+	/**
+	 * Получение опыта по уровню опасности
+	 * @param cr уровень опасности
+	 * @return опыт
+	 */
+	public static int getExp(String cr) {
+		return CR_TO_EXP.getOrDefault(cr, 0);
 	}
 
 	/**
