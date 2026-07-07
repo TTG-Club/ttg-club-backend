@@ -28,6 +28,7 @@ public class BackgroundDetailApi extends BackgroundApi {
 	private String url;
 	private Collection<String> skills;
 	private String toolOwnership;
+	private String language;
 	private Collection<String> languages;
 	private Collection<String> equipments;
 	private Integer startGold;
@@ -46,6 +47,7 @@ public class BackgroundDetailApi extends BackgroundApi {
 			skills.add(background.getOtherSkills());
 		}
 		toolOwnership = background.getToolOwnership();
+		language = background.getLanguage();
 		if (background.getLanguages() != null && !background.getLanguages().isEmpty()) {
 			languages = background.getLanguages().stream().map(Language::getName).collect(Collectors.toList());
 		}
