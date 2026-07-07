@@ -6,7 +6,7 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +27,7 @@ class BackgroundDetailApiTest {
 		Background background = background();
 		Language common = new Language();
 		common.setName("Общий");
-		background.setLanguages(List.of(common));
+		background.setLanguages(Collections.singletonList(common));
 
 		BackgroundDetailApi result = new BackgroundDetailApi(background);
 
@@ -42,7 +42,7 @@ class BackgroundDetailApiTest {
 		background.setName("Тест");
 		background.setEnglishName("Test");
 		background.setBook(book);
-		background.setSkills(List.of());
+		background.setSkills(Collections.emptyList());
 		return background;
 	}
 }
