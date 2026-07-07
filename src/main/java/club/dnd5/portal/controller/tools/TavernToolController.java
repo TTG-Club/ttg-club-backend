@@ -1,19 +1,43 @@
 package club.dnd5.portal.controller.tools;
 
+import club.dnd5.portal.dto.api.tools.name.GeneratedNameApi;
+import club.dnd5.portal.dto.api.tools.name.NameGenerationFormat;
+import club.dnd5.portal.dto.api.tools.name.NameGenerationRequest;
+import club.dnd5.portal.dto.api.tools.name.NameGenerationType;
+import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.races.Sex;
 import club.dnd5.portal.model.tavern.Atmosphere;
+import club.dnd5.portal.model.tavern.BartenderPersonality;
+import club.dnd5.portal.model.tavern.TavernaCategory;
+import club.dnd5.portal.model.tavern.TavernaDish;
+import club.dnd5.portal.model.tavern.TavernaDrink;
+import club.dnd5.portal.model.tavern.RandomEvent;
 import club.dnd5.portal.model.tavern.TavernaName;
 import club.dnd5.portal.model.tavern.TavernaPrefixName;
 import club.dnd5.portal.model.tavern.TavernaType;
+import club.dnd5.portal.model.tavern.TopicDiscussed;
+import club.dnd5.portal.model.tavern.Visitor;
+import club.dnd5.portal.model.tavern.VisitorChance;
 import club.dnd5.portal.repository.tavern.AtmosphereRepository;
+import club.dnd5.portal.repository.tavern.TavernaDishRepository;
+import club.dnd5.portal.repository.tavern.TavernaDrinkRepository;
 import club.dnd5.portal.repository.tavern.TavernaNameRepository;
+import club.dnd5.portal.repository.tavern.RandomEventRepository;
 import club.dnd5.portal.repository.tavern.TavernaPrefixNameRepository;
+import club.dnd5.portal.repository.tavern.TopicDiscussedRepository;
+import club.dnd5.portal.repository.datatable.RaceRepository;
+import club.dnd5.portal.repository.tavern.VisitorRepository;
+import club.dnd5.portal.service.NameGeneratorService;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -29,8 +53,19 @@ public class TavernToolController {
 	private final TavernaNameRepository nameRepo;
 	private final TavernaPrefixNameRepository prefixRepo;
 	private final AtmosphereRepository atmosphereRepo;
+	private final TavernaDishRepository dishRepo;
+	private final TavernaDrinkRepository drinkRepo;
+	private final VisitorRepository visitorRepo;
+	private final TopicDiscussedRepository topicRepo;
+	private final RandomEventRepository eventRepo;
+	private final RaceRepository raceRepository;
+	private final NameGeneratorService nameGeneratorService;
 
 	private final Set<String> generatedNames = new HashSet<>();
+
+	// Кэш id рас: список не меняется за время жизни приложения, а findAll по всем
+	// расам с их связями дорогой, поэтому грузим один раз.
+	private volatile List<Integer> raceIdsCache;
 
 	@GetMapping("/tools/tavern/name")
 	@ResponseBody
@@ -102,5 +137,223 @@ public class TavernToolController {
 		List<Atmosphere> atmospheres = atmosphereRepo.findAll();
 		Atmosphere atmosphere = atmospheres.get(rnd.nextInt(atmospheres.size()));
 		return "<h5>" + atmosphere.getName() + "</h5> <br>" + atmosphere.getDescription();
+	}
+
+	@GetMapping("/tools/tavern/menu")
+	@ResponseBody
+	public String getMenu(@RequestParam(required = false) String tavernaType,
+			@RequestParam(required = false) String habitat) {
+		HabitatType type = resolveHabitat(habitat);
+
+		List<TavernaDish> dishes = dishRepo.findByHabitat(type);
+		if (dishes.isEmpty()) {
+			dishes = dishRepo.findAll();
+		}
+		List<TavernaDrink> drinks = drinkRepo.findByHabitat(type);
+		if (drinks.isEmpty()) {
+			drinks = drinkRepo.findAll();
+		}
+
+		List<TavernaDish> pickedDishes = pickRandom(dishes, 5);
+		List<TavernaDrink> pickedDrinks = pickRandom(drinks, 4);
+
+		if (pickedDishes.isEmpty() && pickedDrinks.isEmpty()) {
+			return "<h5>Меню</h5> <br>Меню этого заведения пока пустует.";
+		}
+
+		StringBuilder sb = new StringBuilder("<h5>Меню</h5>");
+		if (!pickedDishes.isEmpty()) {
+			sb.append("<p><b>Кухня</b></p><ul>");
+			for (TavernaDish dish : pickedDishes) {
+				sb.append("<li>").append(dish.getName())
+						.append(categorySuffix(dish.getCategory())).append("</li>");
+			}
+			sb.append("</ul>");
+		}
+		if (!pickedDrinks.isEmpty()) {
+			sb.append("<p><b>Напитки</b></p><ul>");
+			for (TavernaDrink drink : pickedDrinks) {
+				sb.append("<li>").append(drink.getName())
+						.append(categorySuffix(drink.getCategory())).append("</li>");
+			}
+			sb.append("</ul>");
+		}
+		return sb.toString();
+	}
+
+	@GetMapping("/tools/tavern/rumors")
+	@ResponseBody
+	public String getRumors() {
+		List<TopicDiscussed> topics = topicRepo.findAll();
+		if (topics.isEmpty()) {
+			return "<h5>Слухи</h5> <br>Сегодня в зале тихо — ни одной свежей сплетни.";
+		}
+		List<TopicDiscussed> picked = pickRandom(topics, 3);
+		StringBuilder sb = new StringBuilder("<h5>Слухи</h5><ul>");
+		for (TopicDiscussed topic : picked) {
+			sb.append("<li>").append(topic.getName()).append("</li>");
+		}
+		sb.append("</ul>");
+		return sb.toString();
+	}
+
+	@GetMapping("/tools/tavern/event")
+	@ResponseBody
+	public String getEvent() {
+		List<RandomEvent> events = eventRepo.findAll();
+		if (events.isEmpty()) {
+			return "<h5>Случайное событие</h5> <br>Пока всё идёт своим чередом — ничего необычного.";
+		}
+		RandomEvent event = events.get(rnd.nextInt(events.size()));
+		return "<h5>Случайное событие</h5> <br>" + event.getDescription();
+	}
+
+	@GetMapping("/tools/tavern/tables")
+	@ResponseBody
+	public String getTables(@RequestParam(required = false) String tavernaType) {
+		TavernaType type = resolveType(tavernaType);
+
+		int totalTables = tableCount(type);
+		int occupied = totalTables == 0 ? 0
+				: Math.max(1, (int) Math.round(totalTables * (0.4 + rnd.nextDouble() * 0.5)));
+		occupied = Math.min(occupied, totalTables);
+
+		StringBuilder sb = new StringBuilder("<h5>Столики и посетители</h5>");
+		sb.append("<p>Всего столиков: <b>").append(totalTables)
+				.append("</b>, из них занято: <b>").append(occupied).append("</b>.</p>");
+
+		List<Visitor> visitors = visitorRepo.findAll();
+		if (occupied > 0 && !visitors.isEmpty()) {
+			sb.append("<ul>");
+			for (int i = 1; i <= occupied; i++) {
+				Visitor visitor = pickVisitor(visitors, type);
+				sb.append("<li>Столик ").append(i).append(" — ")
+						.append(visitor == null ? "случайные посетители" : visitor.getName())
+						.append("</li>");
+			}
+			sb.append("</ul>");
+		}
+		return sb.toString();
+	}
+
+	@GetMapping("/tools/tavern/bartender")
+	@ResponseBody
+	public String getBartender() {
+		String name = generateBartenderName();
+		String trait = BartenderPersonality.randomTrait();
+		String weakness = BartenderPersonality.randomWeakness();
+
+		StringBuilder sb = new StringBuilder("<h5>Бармен</h5>");
+		sb.append("<p><b>").append(name).append("</b></p>");
+		sb.append("<p>Черта характера: ").append(trait).append("</p>");
+		sb.append("<p>Слабость: ").append(weakness).append("</p>");
+		return sb.toString();
+	}
+
+	private String generateBartenderName() {
+		// Выбираем одну случайную расу и передаём её id, чтобы генератор имён грузил
+		// имена только для неё (иначе ленивая подгрузка имён всех рас даёт N+1 и таймаут).
+		List<Integer> raceIds = getRaceIds();
+		for (int attempt = 0; attempt < 10 && !raceIds.isEmpty(); attempt++) {
+			Integer raceId = raceIds.get(rnd.nextInt(raceIds.size()));
+			try {
+				NameGenerationRequest request = new NameGenerationRequest();
+				request.setType(NameGenerationType.SINGLE);
+				request.setFormat(NameGenerationFormat.ANY);
+				request.setCount(1);
+				request.setRaceId(raceId);
+				request.setSexes(EnumSet.of(Sex.MALE, Sex.FEMALE, Sex.UNISEX));
+
+				List<GeneratedNameApi> names = nameGeneratorService.generate(request);
+				if (!names.isEmpty()) {
+					return names.get(0).getValue();
+				}
+			} catch (RuntimeException ignored) {
+				// у выбранной расы нет подходящих имён — пробуем другую
+			}
+		}
+		return "Хозяин заведения";
+	}
+
+	private List<Integer> getRaceIds() {
+		List<Integer> cached = raceIdsCache;
+		if (cached == null) {
+			// один запрос: id рас, у которых есть имена (без N+1 по всем расам)
+			cached = raceRepository.findIdsWithNames();
+			raceIdsCache = cached;
+		}
+		return cached;
+	}
+
+	private Visitor pickVisitor(List<Visitor> visitors, TavernaType type) {
+		int totalWeight = 0;
+		for (Visitor visitor : visitors) {
+			totalWeight += visitorWeight(visitor, type);
+		}
+		if (totalWeight <= 0) {
+			return visitors.get(rnd.nextInt(visitors.size()));
+		}
+		int roll = rnd.nextInt(totalWeight);
+		for (Visitor visitor : visitors) {
+			roll -= visitorWeight(visitor, type);
+			if (roll < 0) {
+				return visitor;
+			}
+		}
+		return visitors.get(visitors.size() - 1);
+	}
+
+	private int visitorWeight(Visitor visitor, TavernaType type) {
+		if (visitor.getChance() == null) {
+			return 0;
+		}
+		int weight = 0;
+		for (VisitorChance chance : visitor.getChance()) {
+			if (chance.getTavernaType() == type) {
+				weight += chance.getChance();
+			}
+		}
+		return weight;
+	}
+
+	private int tableCount(TavernaType type) {
+		switch (type) {
+		case BEER:
+			return 4 + rnd.nextInt(5); // 4–8
+		case HOTEL:
+			return 8 + rnd.nextInt(9); // 8–16
+		case INN:
+		default:
+			return 6 + rnd.nextInt(7); // 6–12
+		}
+	}
+
+	private HabitatType resolveHabitat(String habitat) {
+		if (habitat == null || habitat.isEmpty()) {
+			HabitatType[] values = HabitatType.values();
+			return values[rnd.nextInt(values.length)];
+		}
+		return HabitatType.valueOf(habitat);
+	}
+
+	private TavernaType resolveType(String tavernaType) {
+		if (tavernaType == null || tavernaType.isEmpty()) {
+			TavernaType[] values = TavernaType.values();
+			return values[rnd.nextInt(values.length)];
+		}
+		return TavernaType.valueOf(tavernaType);
+	}
+
+	private String categorySuffix(TavernaCategory category) {
+		return category == null ? "" : " <span>(" + category.getName() + ")</span>";
+	}
+
+	private <T> List<T> pickRandom(List<T> source, int max) {
+		if (source.isEmpty()) {
+			return Collections.emptyList();
+		}
+		List<T> copy = new ArrayList<>(source);
+		Collections.shuffle(copy, rnd);
+		return copy.subList(0, Math.min(max, copy.size()));
 	}
 }
