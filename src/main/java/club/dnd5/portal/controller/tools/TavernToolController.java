@@ -81,7 +81,7 @@ public class TavernToolController {
 		} else {
 			type = TavernaType.valueOf(tavernaType);
 		}
-		String tavernName = null;
+		String tavernName;
 		do {
 			int index = rnd.nextInt(tavernaNames.size());
 			TavernaName tavernaName = tavernaNames.get(index);
@@ -96,7 +96,9 @@ public class TavernToolController {
 			}
 			int nameType = rnd.nextInt(100);
 			if (nameType > 85) {
-				tavernaNames = tavernaNames.stream().filter(n -> n.getNames() != null).collect(Collectors.toList());
+				tavernaNames = tavernaNames.stream()
+						.filter(n -> n.getNames() != null)
+						.collect(Collectors.toList());
 				index = rnd.nextInt(tavernaNames.size());
 				TavernaName name = tavernaNames.get(index);
 				tavernName = type.getName() + " \"";
@@ -162,7 +164,7 @@ public class TavernToolController {
 		List<Atmosphere> atmospheres = atmosphereRepo.findAll();
 		Atmosphere atmosphere = atmospheres.get(rnd.nextInt(atmospheres.size()));
 		// data-visitors — уровень заполненности зала, от него зависит число посетителей за столиками
-		return "<div data-visitors=\"" + atmosphere.getVisitors() + "\"><h5>" + atmosphere.getName()
+		return "<div data-visitors=\"" + atmosphere.getVisitors() + "\"><h5>Атмосфера: " + atmosphere.getName()
 				+ "</h5> <br>" + atmosphere.getDescription() + "</div>";
 	}
 
@@ -439,9 +441,14 @@ public class TavernToolController {
 	private int dishCount(TavernaType type) {
 		switch (type) {
 		case BEER:
+		case GAMBLING_DEN:
 			return 1 + rnd.nextInt(2); // 1–2
+		case CAFE:
+			return 2 + rnd.nextInt(2); // 2–3
 		case HOTEL:
 			return 5 + rnd.nextInt(2); // 5–6
+		case RESTAURANT:
+			return 6 + rnd.nextInt(3); // 6–8
 		case INN:
 		default:
 			return 3 + rnd.nextInt(2); // 3–4
@@ -452,8 +459,14 @@ public class TavernToolController {
 		switch (type) {
 		case BEER:
 			return 4 + rnd.nextInt(5); // 4–8
+		case CAFE:
+			return 4 + rnd.nextInt(5); // 4–8
 		case HOTEL:
 			return 8 + rnd.nextInt(9); // 8–16
+		case RESTAURANT:
+			return 8 + rnd.nextInt(7); // 8–14
+		case GAMBLING_DEN:
+			return 6 + rnd.nextInt(9); // 6–14
 		case INN:
 		default:
 			return 6 + rnd.nextInt(7); // 6–12
