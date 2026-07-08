@@ -7,7 +7,9 @@ import club.dnd5.portal.dto.api.tools.name.NameGenerationType;
 import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.races.Sex;
 import club.dnd5.portal.model.tavern.Atmosphere;
-import club.dnd5.portal.model.tavern.BartenderPersonality;
+import club.dnd5.portal.model.tavern.OwnerSecret;
+import club.dnd5.portal.model.tavern.OwnerTrait;
+import club.dnd5.portal.model.tavern.OwnerWeakness;
 import club.dnd5.portal.model.tavern.TavernaCategory;
 import club.dnd5.portal.model.tavern.TavernaDish;
 import club.dnd5.portal.model.tavern.TavernaDrink;
@@ -19,6 +21,9 @@ import club.dnd5.portal.model.tavern.TopicDiscussed;
 import club.dnd5.portal.model.tavern.Visitor;
 import club.dnd5.portal.model.tavern.VisitorChance;
 import club.dnd5.portal.repository.tavern.AtmosphereRepository;
+import club.dnd5.portal.repository.tavern.OwnerSecretRepository;
+import club.dnd5.portal.repository.tavern.OwnerTraitRepository;
+import club.dnd5.portal.repository.tavern.OwnerWeaknessRepository;
 import club.dnd5.portal.repository.tavern.TavernaDishRepository;
 import club.dnd5.portal.repository.tavern.TavernaDrinkRepository;
 import club.dnd5.portal.repository.tavern.TavernaNameRepository;
@@ -58,6 +63,9 @@ public class TavernToolController {
 	private final VisitorRepository visitorRepo;
 	private final TopicDiscussedRepository topicRepo;
 	private final RandomEventRepository eventRepo;
+	private final OwnerTraitRepository ownerTraitRepo;
+	private final OwnerWeaknessRepository ownerWeaknessRepo;
+	private final OwnerSecretRepository ownerSecretRepo;
 	private final RaceRepository raceRepository;
 	private final NameGeneratorService nameGeneratorService;
 
@@ -296,18 +304,29 @@ public class TavernToolController {
 	@GetMapping("/tools/tavern/bartender")
 	@ResponseBody
 	public String getBartender() {
-		String name = generateBartenderName();
-		String trait = BartenderPersonality.randomTrait();
-		String weakness = BartenderPersonality.randomWeakness();
+		Sex ownerSex = rnd.nextBoolean() ? Sex.MALE : Sex.FEMALE;
+		String name = generateBartenderName(ownerSex);
+		String title = ownerSex == Sex.FEMALE ? "Хозяйка заведения" : "Хозяин заведения";
 
-		StringBuilder sb = new StringBuilder("<h5>Хозяин заведения</h5>");
+		StringBuilder sb = new StringBuilder("<h5>").append(title).append("</h5>");
 		sb.append("<p><b>").append(name).append("</b></p>");
-		sb.append("<p>Черта характера: ").append(trait).append("</p>");
-		sb.append("<p>Слабость: ").append(weakness).append("</p>");
+
+		OwnerTrait trait = pickOne(ownerTraitRepo.findBySexOrSexIsNull(ownerSex));
+		if (trait != null) {
+			sb.append("<p>Черта характера: ").append(trait.getDescription()).append("</p>");
+		}
+		OwnerWeakness weakness = pickOne(ownerWeaknessRepo.findBySexOrSexIsNull(ownerSex));
+		if (weakness != null) {
+			sb.append("<p>Слабость: ").append(weakness.getDescription()).append("</p>");
+		}
+		OwnerSecret secret = pickOne(ownerSecretRepo.findBySexOrSexIsNull(ownerSex));
+		if (secret != null) {
+			sb.append("<p>Секрет: ").append(secret.getDescription()).append("</p>");
+		}
 		return sb.toString();
 	}
 
-	private String generateBartenderName() {
+	private String generateBartenderName(Sex ownerSex) {
 		// Выбираем одну случайную расу и передаём её id, чтобы генератор имён грузил
 		// имена только для неё (иначе ленивая подгрузка имён всех рас даёт N+1 и таймаут).
 		List<Integer> raceIds = getRaceIds();
@@ -319,7 +338,7 @@ public class TavernToolController {
 				request.setFormat(NameGenerationFormat.ANY);
 				request.setCount(1);
 				request.setRaceId(raceId);
-				request.setSexes(EnumSet.of(Sex.MALE, Sex.FEMALE, Sex.UNISEX));
+				request.setSexes(EnumSet.of(ownerSex, Sex.UNISEX));
 
 				List<GeneratedNameApi> names = nameGeneratorService.generate(request);
 				if (!names.isEmpty()) {
@@ -544,6 +563,10 @@ public class TavernToolController {
 			return adjective.substring(0, adjective.length() - 2) + ending;
 		}
 		return adjective;
+	}
+
+	private <T> T pickOne(List<T> list) {
+		return list.isEmpty() ? null : list.get(rnd.nextInt(list.size()));
 	}
 
 	private <T> List<T> pickRandom(List<T> source, int max) {
