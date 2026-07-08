@@ -112,11 +112,33 @@ public class TavernToolController {
 					break;
 				}
 				tavernName += tavernaNames.get(index).getNames() + "\"";
-			} else if (nameType > 70) {
+			} else if (nameType > 65) {
+				// «{имя} [префикс] {имя2 в родительном}» — напр. «Череп Красного Дракона»
+				List<TavernaName> withGenitive = tavernaNames.stream()
+						.filter(n -> n.getNames() != null)
+						.collect(Collectors.toList());
+				TavernaName first = withGenitive.get(rnd.nextInt(withGenitive.size()));
+				int secondIndex = rnd.nextInt(withGenitive.size());
+				if (withGenitive.size() > 1 && withGenitive.get(secondIndex) == first) {
+					secondIndex = (secondIndex + 1) % withGenitive.size();
+				}
+				TavernaName second = withGenitive.get(secondIndex);
+				String middle = "";
+				if (rnd.nextInt(100) < 45) {
+					List<TavernaPrefixName> compatible = prefixes.stream()
+							.filter(p -> p.getObjectType() == null || p.getObjectType() == second.getObjectType())
+							.collect(Collectors.toList());
+					if (!compatible.isEmpty()) {
+						TavernaPrefixName pfx = compatible.get(rnd.nextInt(compatible.size()));
+						middle = genitivePrefix(pfx.getName(second.getSex()), second.getSex()) + " ";
+					}
+				}
+				tavernName = type.getName() + " \"" + first.getName() + " " + middle + second.getNames() + "\"";
+			} else if (nameType > 50) {
 				index = rnd.nextInt(tavernaNames.size());
 				TavernaName tavernaName2 = tavernaNames.get(index);
 				tavernName = type.getName() + " \"" + tavernaName.getName() + " и " + tavernaName2.getName() + "\"";
-			} else if (nameType > 60) {
+			} else if (nameType > 40) {
 				index = rnd.nextInt(tavernaNames.size());
 				TavernaName tavernaName2 = tavernaNames.get(index);
 				tavernName = type.getName() + " \"" + prefix.getName(tavernaName.getSex()) + " " + tavernaName.getName()
@@ -225,19 +247,31 @@ public class TavernToolController {
 
 		List<Visitor> visitors = visitorRepo.findAll();
 		if (occupied > 0 && !visitors.isEmpty()) {
-			List<String> names = generateVisitorNames(occupied);
+			int[] perTable = new int[occupied];
+			int totalPeople = 0;
+			for (int i = 0; i < occupied; i++) {
+				perTable[i] = 1 + rnd.nextInt(6); // за столиком 1–6 посетителей
+				totalPeople += perTable[i];
+			}
+			List<String> names = generateVisitorNames(totalPeople);
+			int nameIndex = 0;
 			sb.append("<ul>");
-			for (int i = 1; i <= occupied; i++) {
-				Visitor visitor = pickVisitor(visitors, type);
-				String visitorType = visitor == null ? "случайные посетители" : visitor.getName();
-				String personName = i - 1 < names.size() ? names.get(i - 1) : null;
-				sb.append("<li>Столик ").append(i).append(" — ");
-				if (personName != null) {
-					sb.append(personName).append(" (").append(visitorType).append(')');
-				} else {
-					sb.append(visitorType);
+			for (int i = 0; i < occupied; i++) {
+				sb.append("<li>Столик ").append(i + 1)
+						.append(" (посетителей: ").append(perTable[i]).append("):<ul>");
+				for (int j = 0; j < perTable[i]; j++) {
+					Visitor visitor = pickVisitor(visitors, type);
+					String visitorType = visitor == null ? "случайный посетитель" : visitor.getName();
+					String personName = nameIndex < names.size() ? names.get(nameIndex++) : null;
+					sb.append("<li>");
+					if (personName != null) {
+						sb.append(personName).append(" (").append(visitorType).append(')');
+					} else {
+						sb.append(visitorType);
+					}
+					sb.append("</li>");
 				}
-				sb.append("</li>");
+				sb.append("</ul></li>");
 			}
 			sb.append("</ul>");
 		}
@@ -290,7 +324,23 @@ public class TavernToolController {
 			return Collections.emptyList();
 		}
 		List<Integer> raceIds = getRaceIds();
-		for (int attempt = 0; attempt < 10 && !raceIds.isEmpty(); attempt++) {
+		if (raceIds.isEmpty()) {
+			return Collections.emptyList();
+		}
+		// сначала пытаемся выдать все имена одним запросом от подходящей расы
+		List<String> names = requestNames(raceIds, count, 6);
+		if (names.size() < count) {
+			// ни одна раса не даёт столько уникальных имён — берём, сколько получится
+			List<String> partial = requestNames(raceIds, Math.min(count, 12), 4);
+			if (partial.size() > names.size()) {
+				names = partial;
+			}
+		}
+		return names;
+	}
+
+	private List<String> requestNames(List<Integer> raceIds, int count, int attempts) {
+		for (int attempt = 0; attempt < attempts; attempt++) {
 			Integer raceId = raceIds.get(rnd.nextInt(raceIds.size()));
 			try {
 				NameGenerationRequest request = new NameGenerationRequest();
@@ -428,6 +478,46 @@ public class TavernToolController {
 
 	private String categorySuffix(TavernaCategory category) {
 		return category == null ? "" : " <span>(" + category.getName() + ")</span>";
+	}
+
+	// Склоняет прилагательное-префикс из именительного падежа в родительный,
+	// согласуя с родом второго слова: «Красный» → «Красного», «Злой» → «Злого»,
+	// «Поющий» → «Поющего», «Красная» → «Красной», «Синяя» → «Синей».
+	private String genitivePrefix(String adjective, Sex sex) {
+		if (sex == Sex.FEMALE) {
+			if (adjective.endsWith("аяся")) {
+				return adjective.substring(0, adjective.length() - 4) + "ейся";
+			}
+			if (adjective.endsWith("яя")) {
+				return adjective.substring(0, adjective.length() - 2) + "ей";
+			}
+			if (adjective.endsWith("ая")) {
+				char stemLast = adjective.charAt(adjective.length() - 3);
+				String ending = stemLast == 'ж' || stemLast == 'ш' || stemLast == 'щ' || stemLast == 'ч'
+						? "ей"
+						: "ой";
+				return adjective.substring(0, adjective.length() - 2) + ending;
+			}
+			return adjective;
+		}
+		if (adjective.endsWith("ийся")) {
+			return adjective.substring(0, adjective.length() - 4) + "егося";
+		}
+		if (adjective.endsWith("ый") || adjective.endsWith("ой")) {
+			return adjective.substring(0, adjective.length() - 2) + "ого";
+		}
+		if (adjective.endsWith("ое")) {
+			return adjective.substring(0, adjective.length() - 2) + "ого";
+		}
+		if (adjective.endsWith("ее")) {
+			return adjective.substring(0, adjective.length() - 2) + "его";
+		}
+		if (adjective.endsWith("ий")) {
+			char stemLast = adjective.charAt(adjective.length() - 3);
+			String ending = stemLast == 'к' || stemLast == 'г' || stemLast == 'х' ? "ого" : "его";
+			return adjective.substring(0, adjective.length() - 2) + ending;
+		}
+		return adjective;
 	}
 
 	private <T> List<T> pickRandom(List<T> source, int max) {
