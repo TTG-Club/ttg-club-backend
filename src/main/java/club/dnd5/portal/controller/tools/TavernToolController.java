@@ -213,9 +213,15 @@ public class TavernToolController {
 
 	@GetMapping("/tools/tavern/rumors")
 	@ResponseBody
-	public String getRumors() {
+	public String getRumors(@RequestParam(required = false) Integer atmosphereVisitors) {
 		String header = "<h5>Тема случайно услышанного разговора</h5> <br>";
-		List<TopicDiscussed> topics = topicRepo.findAll();
+		// visitors у темы — минимум посетителей, при котором её могут обсуждать
+		List<TopicDiscussed> topics = atmosphereVisitors == null
+				? topicRepo.findAll()
+				: topicRepo.findByVisitorsLessThanEqual(atmosphereVisitors);
+		if (topics.isEmpty()) {
+			topics = topicRepo.findAll();
+		}
 		if (topics.isEmpty()) {
 			return header + "Сегодня в зале тихо — ни одной свежей сплетни.";
 		}
@@ -225,13 +231,20 @@ public class TavernToolController {
 
 	@GetMapping("/tools/tavern/event")
 	@ResponseBody
-	public String getEvent() {
-		List<RandomEvent> events = eventRepo.findAll();
+	public String getEvent(@RequestParam(required = false) Integer atmosphereVisitors) {
+		String header = "<h5>Случайное событие</h5> <br>";
+		// visitors у события — минимум посетителей, при котором оно может произойти
+		List<RandomEvent> events = atmosphereVisitors == null
+				? eventRepo.findAll()
+				: eventRepo.findByVisitorsLessThanEqual(atmosphereVisitors);
 		if (events.isEmpty()) {
-			return "<h5>Случайное событие</h5> <br>Пока всё идёт своим чередом — ничего необычного.";
+			events = eventRepo.findAll();
+		}
+		if (events.isEmpty()) {
+			return header + "Пока всё идёт своим чередом — ничего необычного.";
 		}
 		RandomEvent event = events.get(rnd.nextInt(events.size()));
-		return "<h5>Случайное событие</h5> <br>" + event.getDescription();
+		return header + event.getDescription();
 	}
 
 	@GetMapping("/tools/tavern/tables")
