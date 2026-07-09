@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -179,18 +180,22 @@ public class TavernToolController {
 	@GetMapping("/tools/tavern/menu")
 	@ResponseBody
 	public String getMenu(@RequestParam(required = false) String tavernaType,
-			@RequestParam(required = false) String habitat) {
+			@RequestParam(required = false) String habitat,
+			@RequestParam(required = false) String serviceLevel) {
 		HabitatType habitatType = resolveHabitat(habitat);
 		TavernaType type = resolveType(tavernaType);
+		TavernaCategory category = resolveCategory(serviceLevel);
 
 		List<TavernaDish> dishes = dishRepo.findByHabitat(habitatType);
 		if (dishes.isEmpty()) {
 			dishes = dishRepo.findAll();
 		}
+		dishes = filterByCategory(dishes, category, TavernaDish::getCategory);
 		List<TavernaDrink> drinks = drinkRepo.findByHabitat(habitatType);
 		if (drinks.isEmpty()) {
 			drinks = drinkRepo.findAll();
 		}
+		drinks = filterByCategory(drinks, category, TavernaDrink::getCategory);
 
 		List<TavernaDish> pickedDishes = pickRandom(dishes, dishCount(type));
 		List<TavernaDrink> pickedDrinks = pickRandom(drinks, 4);
@@ -258,8 +263,10 @@ public class TavernToolController {
 	@GetMapping("/tools/tavern/tables")
 	@ResponseBody
 	public String getTables(@RequestParam(required = false) String tavernaType,
-			@RequestParam(required = false) Integer atmosphereVisitors) {
+			@RequestParam(required = false) Integer atmosphereVisitors,
+			@RequestParam(required = false) String serviceLevel) {
 		TavernaType type = resolveType(tavernaType);
+		TavernaCategory category = resolveCategory(serviceLevel);
 
 		int totalTables = tableCount(type);
 		int occupied = occupiedTables(totalTables, atmosphereVisitors);
@@ -276,19 +283,23 @@ public class TavernToolController {
 				perTable[i] = 1 + rnd.nextInt(6); // за столиком 1–6 посетителей
 				totalPeople += perTable[i];
 			}
-			List<String> names = generateVisitorNames(totalPeople);
+			List<GeneratedNameApi> people = generateVisitorEntries(totalPeople);
 			int nameIndex = 0;
 			sb.append("<ul>");
 			for (int i = 0; i < occupied; i++) {
 				sb.append("<li>Столик ").append(i + 1)
 						.append(" (посетителей: ").append(perTable[i]).append("):<ul>");
 				for (int j = 0; j < perTable[i]; j++) {
-					Visitor visitor = pickVisitor(visitors, type);
+					Visitor visitor = pickVisitor(visitors, type, category);
 					String visitorType = visitor == null ? "случайный посетитель" : visitor.getName();
-					String personName = nameIndex < names.size() ? names.get(nameIndex++) : null;
+					GeneratedNameApi person = nameIndex < people.size() ? people.get(nameIndex++) : null;
 					sb.append("<li>");
-					if (personName != null) {
-						sb.append(personName).append(" (").append(visitorType).append(')');
+					if (person != null) {
+						sb.append(person.getValue()).append(" (");
+						if (person.getRace() != null) {
+							sb.append(person.getRace()).append(", ");
+						}
+						sb.append(visitorType).append(')');
 					} else {
 						sb.append(visitorType);
 					}
@@ -305,11 +316,15 @@ public class TavernToolController {
 	@ResponseBody
 	public String getBartender() {
 		Sex ownerSex = rnd.nextBoolean() ? Sex.MALE : Sex.FEMALE;
-		String name = generateBartenderName(ownerSex);
+		GeneratedNameApi owner = generateOwner(ownerSex);
+		String name = owner != null ? owner.getValue() : "Безымянный";
 		String title = ownerSex == Sex.FEMALE ? "Хозяйка заведения" : "Хозяин заведения";
 
 		StringBuilder sb = new StringBuilder("<h5>").append(title).append("</h5>");
 		sb.append("<p><b>").append(name).append("</b></p>");
+		if (owner != null && owner.getRace() != null) {
+			sb.append("<p>Раса: ").append(owner.getRace()).append("</p>");
+		}
 
 		OwnerTrait trait = pickOne(ownerTraitRepo.findBySexOrSexIsNull(ownerSex));
 		if (trait != null) {
@@ -326,7 +341,7 @@ public class TavernToolController {
 		return sb.toString();
 	}
 
-	private String generateBartenderName(Sex ownerSex) {
+	private GeneratedNameApi generateOwner(Sex ownerSex) {
 		// Выбираем одну случайную расу и передаём её id, чтобы генератор имён грузил
 		// имена только для неё (иначе ленивая подгрузка имён всех рас даёт N+1 и таймаут).
 		List<Integer> raceIds = getRaceIds();
@@ -342,18 +357,19 @@ public class TavernToolController {
 
 				List<GeneratedNameApi> names = nameGeneratorService.generate(request);
 				if (!names.isEmpty()) {
-					return names.get(0).getValue();
+					return names.get(0);
 				}
 			} catch (RuntimeException ignored) {
 				// у выбранной расы нет подходящих имён — пробуем другую
 			}
 		}
-		return "Безымянный";
+		return null;
 	}
 
-	// Имена для посетителей за столиками — одним запросом (GROUP) на все занятые столики,
-	// чтобы не делать по вызову генератора имён на каждого посетителя.
-	private List<String> generateVisitorNames(int count) {
+	// Имена и расы посетителей за столиками. Генерируем пачками (GROUP) по несколько
+	// случайных рас: это даёт разнообразие рас среди гостей и при этом ограничивает
+	// число обращений к генератору (иначе ленивая подгрузка имён по каждому даёт N+1).
+	private List<GeneratedNameApi> generateVisitorEntries(int count) {
 		if (count <= 0) {
 			return Collections.emptyList();
 		}
@@ -361,40 +377,33 @@ public class TavernToolController {
 		if (raceIds.isEmpty()) {
 			return Collections.emptyList();
 		}
-		// сначала пытаемся выдать все имена одним запросом от подходящей расы
-		List<String> names = requestNames(raceIds, count, 6);
-		if (names.size() < count) {
-			// ни одна раса не даёт столько уникальных имён — берём, сколько получится
-			List<String> partial = requestNames(raceIds, Math.min(count, 12), 4);
-			if (partial.size() > names.size()) {
-				names = partial;
-			}
-		}
-		return names;
-	}
-
-	private List<String> requestNames(List<Integer> raceIds, int count, int attempts) {
-		for (int attempt = 0; attempt < attempts; attempt++) {
+		List<GeneratedNameApi> result = new ArrayList<>();
+		Set<String> usedNames = new HashSet<>();
+		// не больше 12 обращений: хватает на разнообразие рас без риска таймаута
+		for (int attempt = 0; attempt < 12 && result.size() < count; attempt++) {
 			Integer raceId = raceIds.get(rnd.nextInt(raceIds.size()));
+			int chunk = Math.min(count - result.size(), 6);
 			try {
 				NameGenerationRequest request = new NameGenerationRequest();
 				request.setType(NameGenerationType.GROUP);
 				request.setFormat(NameGenerationFormat.ANY);
-				request.setCount(count);
+				request.setCount(chunk);
 				request.setRaceId(raceId);
 				request.setSexes(EnumSet.of(Sex.MALE, Sex.FEMALE, Sex.UNISEX));
 
-				List<GeneratedNameApi> names = nameGeneratorService.generate(request);
-				if (names.size() >= count) {
-					return names.stream()
-							.map(GeneratedNameApi::getValue)
-							.collect(Collectors.toList());
+				for (GeneratedNameApi name : nameGeneratorService.generate(request)) {
+					if (usedNames.add(name.getValue())) {
+						result.add(name);
+						if (result.size() == count) {
+							break;
+						}
+					}
 				}
 			} catch (RuntimeException ignored) {
 				// у выбранной расы недостаточно уникальных имён — пробуем другую
 			}
 		}
-		return Collections.emptyList();
+		return result;
 	}
 
 	private List<Integer> getRaceIds() {
@@ -407,17 +416,17 @@ public class TavernToolController {
 		return cached;
 	}
 
-	private Visitor pickVisitor(List<Visitor> visitors, TavernaType type) {
+	private Visitor pickVisitor(List<Visitor> visitors, TavernaType type, TavernaCategory category) {
 		int totalWeight = 0;
 		for (Visitor visitor : visitors) {
-			totalWeight += visitorWeight(visitor, type);
+			totalWeight += visitorWeight(visitor, type, category);
 		}
 		if (totalWeight <= 0) {
 			return visitors.get(rnd.nextInt(visitors.size()));
 		}
 		int roll = rnd.nextInt(totalWeight);
 		for (Visitor visitor : visitors) {
-			roll -= visitorWeight(visitor, type);
+			roll -= visitorWeight(visitor, type, category);
 			if (roll < 0) {
 				return visitor;
 			}
@@ -425,13 +434,21 @@ public class TavernToolController {
 		return visitors.get(visitors.size() - 1);
 	}
 
-	private int visitorWeight(Visitor visitor, TavernaType type) {
+	// Вес посетителя для заведения данного типа и уровня обслуживания (категории).
+	// Строка шанса учитывается, если совпадает по типу и по категории; при этом
+	// незаданные (null) тип или категория в строке считаются подходящими к любому —
+	// так старые данные без категории продолжают работать по типу, как раньше.
+	private int visitorWeight(Visitor visitor, TavernaType type, TavernaCategory category) {
 		if (visitor.getChance() == null) {
 			return 0;
 		}
 		int weight = 0;
 		for (VisitorChance chance : visitor.getChance()) {
-			if (chance.getTavernaType() == type) {
+			boolean typeMatches = chance.getTavernaType() == null || chance.getTavernaType() == type;
+			boolean categoryMatches = category == null
+					|| chance.getTavernaCategory() == null
+					|| chance.getTavernaCategory() == category;
+			if (typeMatches && categoryMatches) {
 				weight += chance.getChance();
 			}
 		}
@@ -519,6 +536,32 @@ public class TavernToolController {
 			return values[rnd.nextInt(values.length)];
 		}
 		return TavernaType.valueOf(tavernaType);
+	}
+
+	// Уровень обслуживания — значение TavernaCategory (уровень цен меню).
+	// null или неизвестное значение — категорию не ограничиваем.
+	private TavernaCategory resolveCategory(String serviceLevel) {
+		if (serviceLevel == null || serviceLevel.isEmpty()) {
+			return null;
+		}
+		try {
+			return TavernaCategory.valueOf(serviceLevel);
+		} catch (IllegalArgumentException ignored) {
+			return null;
+		}
+	}
+
+	// Оставляет позиции нужной категории; если таких нет — возвращает исходный
+	// список, чтобы меню не осталось пустым для редких сочетаний территории и уровня.
+	private <T> List<T> filterByCategory(List<T> source, TavernaCategory category,
+			Function<T, TavernaCategory> categoryGetter) {
+		if (category == null) {
+			return source;
+		}
+		List<T> filtered = source.stream()
+				.filter(item -> category == categoryGetter.apply(item))
+				.collect(Collectors.toList());
+		return filtered.isEmpty() ? source : filtered;
 	}
 
 	private String categorySuffix(TavernaCategory category) {
