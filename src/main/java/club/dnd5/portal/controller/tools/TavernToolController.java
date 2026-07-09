@@ -204,12 +204,14 @@ public class TavernToolController {
 			return "<h5>Меню</h5> <br>Меню этого заведения пока пустует.";
 		}
 
+		// Категорию у позиций не выводим (уровень обслуживания един для всего меню и
+		// показан в шапке), но по нему проставляем цену — как в настоящем меню.
 		StringBuilder sb = new StringBuilder("<h5>Меню</h5>");
 		if (!pickedDishes.isEmpty()) {
 			sb.append("<p><b>Кухня</b></p><ul>");
 			for (TavernaDish dish : pickedDishes) {
 				sb.append("<li>").append(dish.getName())
-						.append(categorySuffix(dish.getCategory())).append("</li>");
+						.append(" — ").append(menuPrice(category, true)).append("</li>");
 			}
 			sb.append("</ul>");
 		}
@@ -217,7 +219,7 @@ public class TavernToolController {
 			sb.append("<p><b>Напитки</b></p><ul>");
 			for (TavernaDrink drink : pickedDrinks) {
 				sb.append("<li>").append(drink.getName())
-						.append(categorySuffix(drink.getCategory())).append("</li>");
+						.append(" — ").append(menuPrice(category, false)).append("</li>");
 			}
 			sb.append("</ul>");
 		}
@@ -538,6 +540,43 @@ public class TavernToolController {
 		return TavernaType.valueOf(tavernaType);
 	}
 
+	// Цена позиции меню по уровню обслуживания (категории заведения). Диапазоны:
+	//   Дешёвое  — блюдо 1–4 мм.,  напиток 1–2 мм.;
+	//   Обычное  — блюдо 1–4 см.,  напиток 1–2 см.;
+	//   Дорогое  — блюдо 1–3 зм.,  напиток 1–3 зм.;
+	//   Элитное  — блюдо 5–10 зм., напиток 3–10 зм.
+	private String menuPrice(TavernaCategory category, boolean dish) {
+		TavernaCategory cat = category != null ? category : TavernaCategory.ORDINARY;
+		String coin;
+		int min;
+		int max;
+		switch (cat) {
+		case CHEAP:
+			coin = "мм.";
+			min = 1;
+			max = dish ? 4 : 2;
+			break;
+		case EXPENSIVE:
+			coin = "зм.";
+			min = 1;
+			max = 3;
+			break;
+		case ELITE:
+			coin = "зм.";
+			min = dish ? 5 : 3;
+			max = 10;
+			break;
+		case ORDINARY:
+		default:
+			coin = "см.";
+			min = 1;
+			max = dish ? 4 : 2;
+			break;
+		}
+		int amount = min + rnd.nextInt(max - min + 1);
+		return amount + " " + coin;
+	}
+
 	// Уровень обслуживания — значение TavernaCategory (уровень цен меню).
 	// null или неизвестное значение — категорию не ограничиваем.
 	private TavernaCategory resolveCategory(String serviceLevel) {
@@ -562,10 +601,6 @@ public class TavernToolController {
 				.filter(item -> category == categoryGetter.apply(item))
 				.collect(Collectors.toList());
 		return filtered.isEmpty() ? source : filtered;
-	}
-
-	private String categorySuffix(TavernaCategory category) {
-		return category == null ? "" : " <span>(" + category.getName() + ")</span>";
 	}
 
 	// Склоняет прилагательное-префикс из именительного падежа в родительный,
