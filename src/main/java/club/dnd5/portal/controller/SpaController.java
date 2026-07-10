@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -197,21 +198,11 @@ public class SpaController {
 		return template;
 	}
 
-	// Экранируем путь перед вставкой в HTML-атрибут href: в URL попадают
-	// пользовательские сегменты ({name}) — защита от reflected XSS.
+	// Экранируем значения перед вставкой в HTML (href/атрибуты/текст). В путь
+	// попадают пользовательские сегменты ({name}) — защита от reflected XSS.
+	// HtmlUtils.htmlEscape экранирует < > & " и распознаётся статическим
+	// анализом (CodeQL) как санитайзер.
 	private static String escapeHtmlAttr(String value) {
-		final StringBuilder sb = new StringBuilder(value.length() + 16);
-		for (int i = 0; i < value.length(); i++) {
-			final char c = value.charAt(i);
-			switch (c) {
-				case '&': sb.append("&amp;"); break;
-				case '<': sb.append("&lt;"); break;
-				case '>': sb.append("&gt;"); break;
-				case '"': sb.append("&quot;"); break;
-				case '\'': sb.append("&#39;"); break;
-				default: sb.append(c);
-			}
-		}
-		return sb.toString();
+		return HtmlUtils.htmlEscape(value);
 	}
 }
