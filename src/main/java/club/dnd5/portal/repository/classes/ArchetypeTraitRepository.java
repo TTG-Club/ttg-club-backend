@@ -5,7 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 
+import java.util.List;
+
 @Repository
 public interface ArchetypeTraitRepository extends JpaRepository<ArchetypeTrait, Integer>{
-
+	List<ArchetypeTrait> findAllByArchetypeId(Integer archetypeId);
 }

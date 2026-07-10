@@ -6,6 +6,8 @@ import club.dnd5.portal.dto.api.classes.ClassApi;
 import club.dnd5.portal.dto.api.classes.ClassDetailApi;
 import club.dnd5.portal.dto.api.classes.ClassRequestApi;
 import club.dnd5.portal.dto.api.classes.ClassSaveApi;
+import club.dnd5.portal.dto.api.classes.ArchetypeEditApi;
+import club.dnd5.portal.dto.api.classes.ArchetypeSaveApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
@@ -13,9 +15,11 @@ import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.Archetype;
+import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.classes.ArchetypeRepository;
+import club.dnd5.portal.repository.classes.ArchetypeTraitRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
 import club.dnd5.portal.repository.datatable.BookRepository;
@@ -55,6 +59,7 @@ public class ClassApiController {
 	private final ImageRepository imageRepository;
 	private final BookRepository bookRepository;
 	private final HeroClassTraitRepository heroClassTraitRepository;
+	private final ArchetypeTraitRepository archetypeTraitRepository;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -133,6 +138,51 @@ public class ClassApiController {
 		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, saved.getId());
 		return ResponseEntity.ok(new ClassDetailApi(saved, images, new ClassRequestApi()));
+	}
+
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/classes/{className}/{archetypeName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArchetypeEditApi getArchetypeForEdit(@PathVariable String className, @PathVariable String archetypeName) {
+		HeroClass heroClass = classRepo.findByEnglishName(className.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		Archetype archetype = archetypeRepository.findByHeroClassIdAndEnglishNameIgnoreCase(heroClass.getId(), archetypeName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
+		return new ArchetypeEditApi(archetype);
+	}
+
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PatchMapping(value = "/api/v1/workshop/classes/archetypes/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArchetypeEditApi updateArchetype(@PathVariable Integer id, @Valid @RequestBody ArchetypeSaveApi request) {
+		Archetype archetype = archetypeRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		archetypeRepository.findByHeroClassIdAndEnglishNameIgnoreCase(archetype.getHeroClass().getId(), request.getEnglishName().trim())
+			.filter(existing -> !existing.getId().equals(id)).ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Archetype with the same englishName already exists");
+			});
+		archetype.setName(request.getName().trim()); archetype.setEnglishName(request.getEnglishName().trim());
+		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(request.getDescription().trim());
+		archetype.setLevel(request.getLevel()); archetype.setSpellcasterType(request.getSpellcasterType());
+		archetype.setOptionType(request.getOptionType()); archetype.setPage(request.getPage());
+		Archetype saved = archetypeRepository.saveAndFlush(archetype);
+		syncArchetypeTraits(saved, request);
+		saved.setFeats(archetypeTraitRepository.findAllByArchetypeId(saved.getId()));
+		return new ArchetypeEditApi(saved);
+	}
+
+	private void syncArchetypeTraits(Archetype archetype, ArchetypeSaveApi request) {
+		if (request.getTraits() == null) return;
+		Map<Integer, ArchetypeTrait> existing = archetypeTraitRepository.findAllByArchetypeId(archetype.getId()).stream()
+			.collect(Collectors.toMap(ArchetypeTrait::getId, trait -> trait));
+		List<ArchetypeTrait> traits = request.getTraits().stream()
+			.filter(trait -> StringUtils.hasText(trait.getName()) && StringUtils.hasText(trait.getDescription()))
+			.map(value -> {
+				ArchetypeTrait trait = value.getId() == null ? new ArchetypeTrait() : existing.getOrDefault(value.getId(), new ArchetypeTrait());
+				trait.setName(value.getName().trim()); trait.setSuffix(trimToNull(value.getSuffix())); trait.setLevel(value.getLevel());
+				trait.setDescription(value.getDescription().trim()); trait.setChild(trimToNull(value.getChild()));
+				trait.setArchetype(archetype); trait.setBook(archetype.getBook()); return trait;
+			}).collect(Collectors.toList());
+		archetypeTraitRepository.saveAll(traits); archetypeTraitRepository.flush();
+		List<Integer> retained = traits.stream().map(ArchetypeTrait::getId).collect(Collectors.toList());
+		existing.values().stream().filter(trait -> !retained.contains(trait.getId())).forEach(archetypeTraitRepository::delete);
 	}
 
 	@PostMapping("/api/v1/filters/classes")

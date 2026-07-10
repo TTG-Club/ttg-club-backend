@@ -3,11 +3,13 @@ package club.dnd5.portal.model.classes.archetype;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.splells.Spell;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "hero_class_feats")
 public class ArchetypeTrait {
