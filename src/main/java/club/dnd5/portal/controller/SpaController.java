@@ -1,18 +1,45 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.controller.api.MetaApiController;
+import club.dnd5.portal.dto.api.MetaApi;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Hidden
 @Controller
 public class SpaController {
-	private static final Resource INDEX = new ClassPathResource("templates/spa.html");
+	private static final ClassPathResource INDEX = new ClassPathResource("templates/spa.html");
+
+	// Канонический домен старого справочника (редакция 2014). На него ссылается
+	// self-canonical каждой страницы, чтобы сайт индексировался как самостоятельный
+	// и не схлопывался с новым сайтом (new.ttg.club, редакция 2024).
+	private static final String CANONICAL_ORIGIN = "https://5e14.ttg.club";
+
+	// index.html кэшируем в памяти: на каждый запрос лишь подставляем canonical,
+	// а не перечитываем ресурс с диска.
+	private static volatile String indexTemplate;
+
+	// Маркер редакции в серверном <title>/og:title — различимость от нового
+	// сайта (new.ttg.club, редакция 2024).
+	private static final String EDITION_SUFFIX = " (2014)";
+
+	// Резолвер title/description по пути запроса (переиспользует логику /api/v1/meta).
+	private final MetaApiController metaApiController;
+
+	public SpaController(MetaApiController metaApiController) {
+		this.metaApiController = metaApiController;
+	}
 
 	@GetMapping({
 		"/",
@@ -118,10 +145,73 @@ public class SpaController {
 		"/weapons/{name}"
 	})
 	@ResponseBody
-	public ResponseEntity<Resource> getIndex() {
+	public ResponseEntity<String> getIndex(HttpServletRequest request) throws IOException {
+		String path = request.getRequestURI();
+		if (path.length() > 1 && path.endsWith("/")) {
+			path = path.substring(0, path.length() - 1);
+		}
+
+		final StringBuilder head = new StringBuilder();
+
+		// self-canonical на текущий путь (в пределах этого домена).
+		head.append("<link rel=\"canonical\" href=\"")
+			.append(CANONICAL_ORIGIN).append(escapeHtmlAttr(path)).append("\"/>");
+
+		// Серверные title/description из тех же метаданных, что и /api/v1/meta,
+		// чтобы их видел Яндекс (без JS). null → просто не инжектим.
+		final MetaApi meta = metaApiController.resolveByPath(path);
+		if (meta != null) {
+			if (meta.getTitle() != null && !meta.getTitle().isEmpty()) {
+				final String title = escapeHtmlAttr(meta.getTitle() + EDITION_SUFFIX);
+				head.append("<title>").append(title).append("</title>");
+				head.append("<meta property=\"og:title\" content=\"").append(title).append("\"/>");
+			}
+			if (meta.getDescription() != null && !meta.getDescription().isEmpty()) {
+				final String description = escapeHtmlAttr(meta.getDescription());
+				head.append("<meta name=\"description\" content=\"").append(description).append("\"/>");
+				head.append("<meta property=\"og:description\" content=\"").append(description).append("\"/>");
+			}
+		}
+
+		final String html = getIndexTemplate().replace("</head>", head + "</head>");
+
 		return ResponseEntity
 			.ok()
-			.contentType(MediaType.TEXT_HTML)
-			.body(INDEX);
+			.contentType(new MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
+			.body(html);
+	}
+
+	private static String getIndexTemplate() throws IOException {
+		String template = indexTemplate;
+		if (template == null) {
+			synchronized (SpaController.class) {
+				template = indexTemplate;
+				if (template == null) {
+					try (InputStream in = INDEX.getInputStream()) {
+						template = StreamUtils.copyToString(in, StandardCharsets.UTF_8);
+					}
+					indexTemplate = template;
+				}
+			}
+		}
+		return template;
+	}
+
+	// Экранируем путь перед вставкой в HTML-атрибут href: в URL попадают
+	// пользовательские сегменты ({name}) — защита от reflected XSS.
+	private static String escapeHtmlAttr(String value) {
+		final StringBuilder sb = new StringBuilder(value.length() + 16);
+		for (int i = 0; i < value.length(); i++) {
+			final char c = value.charAt(i);
+			switch (c) {
+				case '&': sb.append("&amp;"); break;
+				case '<': sb.append("&lt;"); break;
+				case '>': sb.append("&gt;"); break;
+				case '"': sb.append("&quot;"); break;
+				case '\'': sb.append("&#39;"); break;
+				default: sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 }
