@@ -44,7 +44,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
@@ -286,15 +288,19 @@ public class TavernToolController {
 				totalPeople += perTable[i];
 			}
 			List<GeneratedNameApi> people = generateVisitorEntries(totalPeople);
-			int nameIndex = 0;
+			// Пул уже содержит несколько рас. Группируем его по расам и раздаём осознанно:
+			// часть столиков делаем мономрасовыми, часть — смешанными (без лишних запросов).
+			List<List<GeneratedNameApi>> raceGroups = groupByRace(people);
 			sb.append("<ul>");
 			for (int i = 0; i < occupied; i++) {
+				List<GeneratedNameApi> seated = seatTable(raceGroups, perTable[i]);
+				int seatedIndex = 0;
 				sb.append("<li>Столик ").append(i + 1)
 						.append(" (посетителей: ").append(perTable[i]).append("):<ul>");
 				for (int j = 0; j < perTable[i]; j++) {
 					Visitor visitor = pickVisitor(visitors, type, category);
 					String visitorType = visitor == null ? "случайный посетитель" : visitor.getName();
-					GeneratedNameApi person = nameIndex < people.size() ? people.get(nameIndex++) : null;
+					GeneratedNameApi person = seatedIndex < seated.size() ? seated.get(seatedIndex++) : null;
 					sb.append("<li>");
 					if (person != null) {
 						sb.append(person.getValue()).append(" (");
@@ -406,6 +412,58 @@ public class TavernToolController {
 			}
 		}
 		return result;
+	}
+
+	// Группирует сгенерированный пул посетителей по расам. Пустые/неизвестные расы
+	// собираются в одну группу. Списки внутри — изменяемые: из них «вычёрпываются»
+	// гости при рассадке.
+	private List<List<GeneratedNameApi>> groupByRace(List<GeneratedNameApi> people) {
+		Map<String, List<GeneratedNameApi>> byRace = new LinkedHashMap<>();
+		for (GeneratedNameApi person : people) {
+			String race = person.getRace() == null ? "" : person.getRace();
+			byRace.computeIfAbsent(race, r -> new ArrayList<>()).add(person);
+		}
+		return new ArrayList<>(byRace.values());
+	}
+
+	// Набирает посетителей за один столик из сгруппированного по расам пула.
+	// В ~55% случаев столик получается мономрасовым (если есть раса, которой хватает
+	// на всех), иначе — смешанный состав: гости берутся по кругу из разных рас.
+	// Взятые гости удаляются из групп, чтобы не попасть за другой столик.
+	private List<GeneratedNameApi> seatTable(List<List<GeneratedNameApi>> raceGroups, int need) {
+		List<GeneratedNameApi> seated = new ArrayList<>();
+		boolean preferMono = rnd.nextInt(100) < 55;
+		if (preferMono) {
+			List<List<GeneratedNameApi>> fitting = raceGroups.stream()
+					.filter(group -> group.size() >= need)
+					.collect(Collectors.toList());
+			if (!fitting.isEmpty()) {
+				List<GeneratedNameApi> group = fitting.get(rnd.nextInt(fitting.size()));
+				while (seated.size() < need && !group.isEmpty()) {
+					seated.add(group.remove(group.size() - 1));
+				}
+				return seated;
+			}
+			// нет расы, которой хватило бы на весь столик, — собираем смешанный
+		}
+		// смешанный столик: по одному гостю из каждой непустой расы по кругу
+		while (seated.size() < need) {
+			boolean tookAny = false;
+			for (List<GeneratedNameApi> group : raceGroups) {
+				if (group.isEmpty()) {
+					continue;
+				}
+				seated.add(group.remove(group.size() - 1));
+				tookAny = true;
+				if (seated.size() == need) {
+					break;
+				}
+			}
+			if (!tookAny) {
+				break; // пул исчерпан — оставшиеся места заполнит «случайный посетитель»
+			}
+		}
+		return seated;
 	}
 
 	private List<Integer> getRaceIds() {
