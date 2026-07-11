@@ -451,4 +451,77 @@ public class MetaApiController {
 		meta.setDescription(infoPage.getSubtitle());
 		return meta;
 	}
+
+	/**
+	 * Резолвит метаданные (title/description) по пути SPA-запроса, переиспользуя
+	 * ту же логику, что и REST-эндпоинты /api/v1/meta. Нужно для серверной
+	 * инъекции title/description в index.html (см. SpaController), чтобы их видели
+	 * поисковики — в первую очередь Яндекс, который не исполняет JS.
+	 * Возвращает null, если для пути нет метаданных или сущность не найдена —
+	 * тогда инъекция просто не выполняется (страница отдаётся как есть).
+	 */
+	public MetaApi resolveByPath(String path) {
+		try {
+			String p = path;
+			if (p.startsWith("/")) {
+				p = p.substring(1);
+			}
+			if (p.endsWith("/")) {
+				p = p.substring(0, p.length() - 1);
+			}
+			if (p.isEmpty()) {
+				return getNotMapping();
+			}
+			String[] s = p.split("/");
+			switch (s[0]) {
+				case "classes":
+					if (s.length == 1) return getClassesMeta();
+					if (s.length == 2) return getClassMeta(s[1]);
+					return getArchetypeMeta(s[1], s[2]);
+				case "races":
+					if (s.length == 1) return getRacesMeta();
+					if (s.length == 2) return getRaceMeta(s[1]);
+					return getSubraceMeta(s[1], s[2]).getBody();
+				case "traits":
+				case "feats":
+					return s.length == 1 ? getTraitsMeta() : getTraitMeta(s[1]);
+				case "backgrounds":
+					return s.length == 1 ? getBackgroundsMeta() : getBackgroundMeta(s[1]);
+				case "options":
+					return s.length == 1 ? getOptionsMeta() : getOptiondMeta(s[1]);
+				case "spells":
+					return s.length == 1 ? getSpellsMeta() : getSpellMeta(s[1]);
+				case "weapons":
+					return s.length == 1 ? getWeaponsMeta() : getWeaponMeta(s[1]);
+				case "armors":
+					return s.length == 1 ? getArmorsMeta() : getArmorMeta(s[1]);
+				case "items":
+					if (s.length == 1) return getItemsMeta();
+					if ("magic".equals(s[1])) {
+						return s.length == 2 ? getMagicItemsMeta() : getMagicItemMeta(s[2]);
+					}
+					return getItemMeta(s[1]);
+				case "magic-items":
+					return s.length == 1 ? getMagicItemsMeta() : getMagicItemMeta(s[1]);
+				case "bestiary":
+					return s.length == 1 ? getBeastsMeta() : getBeastMeta(s[1]);
+				case "screens":
+					return s.length == 1 ? getScreensMeta() : getScreenMeta(s[1]);
+				case "gods":
+					return s.length == 1 ? getGodsMeta() : getGodMeta(s[1]);
+				case "rules":
+					return s.length == 1 ? getRulesMeta() : getRuleMeta(s[1]);
+				case "books":
+					return s.length == 1 ? getBooksMeta() : getBooksMeta(s[1]);
+				case "info":
+					return s.length >= 2 ? getInfoMeta(s[1]) : null;
+				case "tools":
+					return (s.length >= 2 && "tokenator".equals(s[1])) ? getTokenatorMeta() : null;
+				default:
+					return null;
+			}
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }

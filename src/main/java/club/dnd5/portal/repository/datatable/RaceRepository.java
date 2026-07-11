@@ -21,4 +21,7 @@ public interface RaceRepository extends JpaRepository<Race, Integer>, JpaSpecifi
 
 	@Query("SELECT r.book FROM Race r GROUP BY r.book HAVING r.book.type = :type ORDER BY r.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
+
+	@Query("SELECT DISTINCT r.id FROM Race r JOIN r.names n")
+	List<Integer> findIdsWithNames();
 }
