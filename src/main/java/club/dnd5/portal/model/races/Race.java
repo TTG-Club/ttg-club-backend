@@ -38,7 +38,7 @@ public class Race implements Serializable {
 	private Integer maxAge;
 
 	@OneToMany
-	@JoinColumn(name = "race_id")
+	@JoinColumn(name = "race_id", insertable = false, updatable = false)
 	List<Feature> features;
 
 	@Column(columnDefinition = "TEXT")
@@ -82,7 +82,7 @@ public class Race implements Serializable {
 	private Boolean origin = true;
 
 	@OneToMany
-	@JoinColumn(name = "race_id")
+	@JoinColumn(name = "race_id", insertable = false, updatable = false)
 	private List<AbilityBonus> bonuses;
 
 	@OneToMany(fetch = FetchType.LAZY)

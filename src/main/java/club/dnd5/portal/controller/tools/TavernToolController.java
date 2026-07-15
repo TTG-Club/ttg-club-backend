@@ -17,6 +17,7 @@ import club.dnd5.portal.model.tavern.RandomEvent;
 import club.dnd5.portal.model.tavern.TavernaName;
 import club.dnd5.portal.model.tavern.TavernaPrefixName;
 import club.dnd5.portal.model.tavern.TavernaType;
+import club.dnd5.portal.model.tavern.RaceHabitatChance;
 import club.dnd5.portal.model.tavern.TopicDiscussed;
 import club.dnd5.portal.model.tavern.Visitor;
 import club.dnd5.portal.model.tavern.VisitorChance;
@@ -29,6 +30,7 @@ import club.dnd5.portal.repository.tavern.TavernaDrinkRepository;
 import club.dnd5.portal.repository.tavern.TavernaNameRepository;
 import club.dnd5.portal.repository.tavern.RandomEventRepository;
 import club.dnd5.portal.repository.tavern.TavernaPrefixNameRepository;
+import club.dnd5.portal.repository.tavern.RaceHabitatChanceRepository;
 import club.dnd5.portal.repository.tavern.TopicDiscussedRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
 import club.dnd5.portal.repository.tavern.VisitorRepository;
@@ -42,9 +44,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
@@ -68,16 +74,25 @@ public class TavernToolController {
 	private final OwnerWeaknessRepository ownerWeaknessRepo;
 	private final OwnerSecretRepository ownerSecretRepo;
 	private final RaceRepository raceRepository;
+	private final RaceHabitatChanceRepository raceHabitatRepo;
 	private final NameGeneratorService nameGeneratorService;
 
 	private final Set<String> generatedNames = new HashSet<>();
 
-	// Кэш id рас: список не меняется за время жизни приложения, а findAll по всем
-	// расам с их связями дорогой, поэтому грузим один раз.
-	private volatile List<Integer> raceIdsCache;
+	// Кэш рас (id + англ. слаг): список не меняется за время жизни приложения, а findAll
+	// по всем расам с их связями дорогой, поэтому грузим один раз.
+	private volatile List<RacePick> raceCache;
 
 	// Максимум visitors среди всех атмосфер — используется как 100%-заполненность зала.
 	private volatile Integer maxAtmosphereVisitors;
+
+	// Базовый вес расы: для местности/расы без явной строки в taverna_race_habitates
+	// (человек, неизвестные расы, а также любая раса в незаданной местности).
+	private static final int BASE_RACE_WEIGHT = 3;
+
+	// Кэш правил «раса → местность → вес» из taverna_race_habitates. Отсортирован по
+	// длине ключа (сначала самые специфичные), данные не меняются за время жизни приложения.
+	private volatile List<RaceHabitatWeights> raceHabitatCache;
 
 	@GetMapping("/tools/tavern/name")
 	@ResponseBody
@@ -266,9 +281,13 @@ public class TavernToolController {
 	@ResponseBody
 	public String getTables(@RequestParam(required = false) String tavernaType,
 			@RequestParam(required = false) Integer atmosphereVisitors,
-			@RequestParam(required = false) String serviceLevel) {
+			@RequestParam(required = false) String serviceLevel,
+			@RequestParam(required = false) String habitat) {
 		TavernaType type = resolveType(tavernaType);
 		TavernaCategory category = resolveCategory(serviceLevel);
+		// Местность влияет на то, какие расы чаще встречаются за столиками. Если не
+		// передана — расы выбираются равномерно (прежнее поведение).
+		HabitatType habitatType = resolveHabitatOrNull(habitat);
 
 		int totalTables = tableCount(type);
 		int occupied = occupiedTables(totalTables, atmosphereVisitors);
@@ -285,16 +304,20 @@ public class TavernToolController {
 				perTable[i] = 1 + rnd.nextInt(6); // за столиком 1–6 посетителей
 				totalPeople += perTable[i];
 			}
-			List<GeneratedNameApi> people = generateVisitorEntries(totalPeople);
-			int nameIndex = 0;
+			List<GeneratedNameApi> people = generateVisitorEntries(totalPeople, habitatType);
+			// Пул уже содержит несколько рас. Группируем его по расам и раздаём осознанно:
+			// часть столиков делаем мономрасовыми, часть — смешанными (без лишних запросов).
+			List<List<GeneratedNameApi>> raceGroups = groupByRace(people);
 			sb.append("<ul>");
 			for (int i = 0; i < occupied; i++) {
+				List<GeneratedNameApi> seated = seatTable(raceGroups, perTable[i]);
+				int seatedIndex = 0;
 				sb.append("<li>Столик ").append(i + 1)
 						.append(" (посетителей: ").append(perTable[i]).append("):<ul>");
 				for (int j = 0; j < perTable[i]; j++) {
 					Visitor visitor = pickVisitor(visitors, type, category);
 					String visitorType = visitor == null ? "случайный посетитель" : visitor.getName();
-					GeneratedNameApi person = nameIndex < people.size() ? people.get(nameIndex++) : null;
+					GeneratedNameApi person = seatedIndex < seated.size() ? seated.get(seatedIndex++) : null;
 					sb.append("<li>");
 					if (person != null) {
 						sb.append(person.getValue()).append(" (");
@@ -316,39 +339,43 @@ public class TavernToolController {
 
 	@GetMapping("/tools/tavern/bartender")
 	@ResponseBody
-	public String getBartender() {
+	public String getBartender(@RequestParam(required = false) String habitat) {
+		// Раса хозяина зависит от местности так же, как и у посетителей.
+		HabitatType habitatType = resolveHabitatOrNull(habitat);
 		Sex ownerSex = rnd.nextBoolean() ? Sex.MALE : Sex.FEMALE;
-		GeneratedNameApi owner = generateOwner(ownerSex);
+		GeneratedNameApi owner = generateOwner(ownerSex, habitatType);
 		String name = owner != null ? owner.getValue() : "Безымянный";
 		String title = ownerSex == Sex.FEMALE ? "Хозяйка заведения" : "Хозяин заведения";
 
+		// Каждое свойство — с новой строки через <br> (как в atmosphere/rumors): подряд
+		// идущие <p> в SPA схлопывались в одну строку.
 		StringBuilder sb = new StringBuilder("<h5>").append(title).append("</h5>");
-		sb.append("<p><b>").append(name).append("</b></p>");
+		sb.append("<b>").append(name).append("</b>");
 		if (owner != null && owner.getRace() != null) {
-			sb.append("<p>Раса: ").append(owner.getRace()).append("</p>");
+			sb.append("<br>Раса: ").append(owner.getRace());
 		}
 
 		OwnerTrait trait = pickOne(ownerTraitRepo.findBySexOrSexIsNull(ownerSex));
 		if (trait != null) {
-			sb.append("<p>Черта характера: ").append(trait.getDescription()).append("</p>");
+			sb.append("<br>Черта характера: ").append(trait.getDescription());
 		}
 		OwnerWeakness weakness = pickOne(ownerWeaknessRepo.findBySexOrSexIsNull(ownerSex));
 		if (weakness != null) {
-			sb.append("<p>Слабость: ").append(weakness.getDescription()).append("</p>");
+			sb.append("<br>Слабость: ").append(weakness.getDescription());
 		}
 		OwnerSecret secret = pickOne(ownerSecretRepo.findBySexOrSexIsNull(ownerSex));
 		if (secret != null) {
-			sb.append("<p>Секрет: ").append(secret.getDescription()).append("</p>");
+			sb.append("<br>Секрет: ").append(secret.getDescription());
 		}
 		return sb.toString();
 	}
 
-	private GeneratedNameApi generateOwner(Sex ownerSex) {
-		// Выбираем одну случайную расу и передаём её id, чтобы генератор имён грузил
+	private GeneratedNameApi generateOwner(Sex ownerSex, HabitatType habitat) {
+		// Расу выбираем с учётом местности и передаём её id, чтобы генератор имён грузил
 		// имена только для неё (иначе ленивая подгрузка имён всех рас даёт N+1 и таймаут).
-		List<Integer> raceIds = getRaceIds();
-		for (int attempt = 0; attempt < 10 && !raceIds.isEmpty(); attempt++) {
-			Integer raceId = raceIds.get(rnd.nextInt(raceIds.size()));
+		List<RacePick> races = getRaces();
+		for (int attempt = 0; attempt < 10 && !races.isEmpty(); attempt++) {
+			Integer raceId = pickRaceByHabitat(races, habitat).id;
 			try {
 				NameGenerationRequest request = new NameGenerationRequest();
 				request.setType(NameGenerationType.SINGLE);
@@ -371,19 +398,21 @@ public class TavernToolController {
 	// Имена и расы посетителей за столиками. Генерируем пачками (GROUP) по несколько
 	// случайных рас: это даёт разнообразие рас среди гостей и при этом ограничивает
 	// число обращений к генератору (иначе ленивая подгрузка имён по каждому даёт N+1).
-	private List<GeneratedNameApi> generateVisitorEntries(int count) {
+	// Расу пачки выбираем с учётом местности: в горах чаще дварфы, в подземье — дроу
+	// и дуэргары, в лесу — эльфы и т.д. (см. raceHabitatWeight).
+	private List<GeneratedNameApi> generateVisitorEntries(int count, HabitatType habitat) {
 		if (count <= 0) {
 			return Collections.emptyList();
 		}
-		List<Integer> raceIds = getRaceIds();
-		if (raceIds.isEmpty()) {
+		List<RacePick> races = getRaces();
+		if (races.isEmpty()) {
 			return Collections.emptyList();
 		}
 		List<GeneratedNameApi> result = new ArrayList<>();
 		Set<String> usedNames = new HashSet<>();
 		// не больше 12 обращений: хватает на разнообразие рас без риска таймаута
 		for (int attempt = 0; attempt < 12 && result.size() < count; attempt++) {
-			Integer raceId = raceIds.get(rnd.nextInt(raceIds.size()));
+			Integer raceId = pickRaceByHabitat(races, habitat).id;
 			int chunk = Math.min(count - result.size(), 6);
 			try {
 				NameGenerationRequest request = new NameGenerationRequest();
@@ -408,12 +437,133 @@ public class TavernToolController {
 		return result;
 	}
 
-	private List<Integer> getRaceIds() {
-		List<Integer> cached = raceIdsCache;
+	// Группирует сгенерированный пул посетителей по расам. Пустые/неизвестные расы
+	// собираются в одну группу. Списки внутри — изменяемые: из них «вычёрпываются»
+	// гости при рассадке.
+	private List<List<GeneratedNameApi>> groupByRace(List<GeneratedNameApi> people) {
+		Map<String, List<GeneratedNameApi>> byRace = new LinkedHashMap<>();
+		for (GeneratedNameApi person : people) {
+			String race = person.getRace() == null ? "" : person.getRace();
+			byRace.computeIfAbsent(race, r -> new ArrayList<>()).add(person);
+		}
+		return new ArrayList<>(byRace.values());
+	}
+
+	// Набирает посетителей за один столик из сгруппированного по расам пула.
+	// В ~55% случаев столик получается мономрасовым (если есть раса, которой хватает
+	// на всех), иначе — смешанный состав: гости берутся по кругу из разных рас.
+	// Взятые гости удаляются из групп, чтобы не попасть за другой столик.
+	private List<GeneratedNameApi> seatTable(List<List<GeneratedNameApi>> raceGroups, int need) {
+		List<GeneratedNameApi> seated = new ArrayList<>();
+		boolean preferMono = rnd.nextInt(100) < 55;
+		if (preferMono) {
+			List<List<GeneratedNameApi>> fitting = raceGroups.stream()
+					.filter(group -> group.size() >= need)
+					.collect(Collectors.toList());
+			if (!fitting.isEmpty()) {
+				List<GeneratedNameApi> group = fitting.get(rnd.nextInt(fitting.size()));
+				while (seated.size() < need && !group.isEmpty()) {
+					seated.add(group.remove(group.size() - 1));
+				}
+				return seated;
+			}
+			// нет расы, которой хватило бы на весь столик, — собираем смешанный
+		}
+		// смешанный столик: по одному гостю из каждой непустой расы по кругу
+		while (seated.size() < need) {
+			boolean tookAny = false;
+			for (List<GeneratedNameApi> group : raceGroups) {
+				if (group.isEmpty()) {
+					continue;
+				}
+				seated.add(group.remove(group.size() - 1));
+				tookAny = true;
+				if (seated.size() == need) {
+					break;
+				}
+			}
+			if (!tookAny) {
+				break; // пул исчерпан — оставшиеся места заполнит «случайный посетитель»
+			}
+		}
+		return seated;
+	}
+
+	private List<RacePick> getRaces() {
+		List<RacePick> cached = raceCache;
 		if (cached == null) {
-			// один запрос: id рас, у которых есть имена (без N+1 по всем расам)
-			cached = raceRepository.findIdsWithNames();
-			raceIdsCache = cached;
+			// один запрос: id + слаг рас, у которых есть имена (без N+1 по всем расам)
+			cached = raceRepository.findRacesWithNames().stream()
+					.map(r -> new RacePick(r.getId(), r.getEnglishName()))
+					.collect(Collectors.toList());
+			raceCache = cached;
+		}
+		return cached;
+	}
+
+	// Выбор расы с учётом местности: вес расы для местности задаёт raceHabitatWeight.
+	// Если суммарный вес нулевой (напр. местность не передана и все веса базовые) —
+	// работает как равномерный выбор.
+	private RacePick pickRaceByHabitat(List<RacePick> races, HabitatType habitat) {
+		int totalWeight = 0;
+		for (RacePick race : races) {
+			totalWeight += raceHabitatWeight(race.englishName, habitat);
+		}
+		if (totalWeight <= 0) {
+			return races.get(rnd.nextInt(races.size()));
+		}
+		int roll = rnd.nextInt(totalWeight);
+		for (RacePick race : races) {
+			roll -= raceHabitatWeight(race.englishName, habitat);
+			if (roll < 0) {
+				return race;
+			}
+		}
+		return races.get(races.size() - 1);
+	}
+
+	// Вес расы для данной местности по данным taverna_race_habitates. Без местности или
+	// для расы без правил (человек, неизвестные) — базовый вес. Для расы с правилом берётся
+	// вес её местности, иначе вес строки habitat=NULL (базовый вес расы), иначе BASE.
+	private int raceHabitatWeight(String englishName, HabitatType habitat) {
+		if (habitat == null || englishName == null) {
+			return BASE_RACE_WEIGHT;
+		}
+		String slug = englishName.toLowerCase();
+		// правила отсортированы по длине ключа: сначала самое специфичное совпадение,
+		// чтобы «half-elf» не попал под «elf», а «deep-gnome» — под «gnome».
+		for (RaceHabitatWeights rule : getRaceHabitatWeights()) {
+			if (slug.contains(rule.key)) {
+				Integer chance = rule.byHabitat.get(habitat);
+				if (chance != null) {
+					return chance;
+				}
+				return rule.fallback != null ? rule.fallback : BASE_RACE_WEIGHT;
+			}
+		}
+		return BASE_RACE_WEIGHT;
+	}
+
+	private List<RaceHabitatWeights> getRaceHabitatWeights() {
+		List<RaceHabitatWeights> cached = raceHabitatCache;
+		if (cached == null) {
+			Map<String, RaceHabitatWeights> byKey = new LinkedHashMap<>();
+			for (RaceHabitatChance row : raceHabitatRepo.findAll()) {
+				if (row.getEnglishName() == null) {
+					continue;
+				}
+				RaceHabitatWeights rule = byKey.computeIfAbsent(
+						row.getEnglishName().toLowerCase(), RaceHabitatWeights::new);
+				if (row.getHabitat() == null) {
+					rule.fallback = row.getChance();
+				} else {
+					rule.byHabitat.put(row.getHabitat(), row.getChance());
+				}
+			}
+			cached = new ArrayList<>(byKey.values());
+			// длинные ключи первыми — самое специфичное совпадение по подстроке
+			cached.sort(Comparator.comparingInt((RaceHabitatWeights r) -> r.key.length()).reversed());
+			raceHabitatCache = cached;
 		}
 		return cached;
 	}
@@ -530,6 +680,19 @@ public class TavernToolController {
 			return values[rnd.nextInt(values.length)];
 		}
 		return HabitatType.valueOf(habitat);
+	}
+
+	// В отличие от resolveHabitat не подставляет случайную местность: null означает
+	// «местность не задана» — расы посетителей тогда выбираются равномерно.
+	private HabitatType resolveHabitatOrNull(String habitat) {
+		if (habitat == null || habitat.isEmpty()) {
+			return null;
+		}
+		try {
+			return HabitatType.valueOf(habitat);
+		} catch (IllegalArgumentException ignored) {
+			return null;
+		}
 	}
 
 	private TavernaType resolveType(String tavernaType) {
@@ -654,5 +817,29 @@ public class TavernToolController {
 		List<T> copy = new ArrayList<>(source);
 		Collections.shuffle(copy, rnd);
 		return copy.subList(0, Math.min(max, copy.size()));
+	}
+
+	// Раса из кэша: id для генератора имён и англ. слаг для взвешивания по местности.
+	private static final class RacePick {
+		private final Integer id;
+		private final String englishName;
+
+		private RacePick(Integer id, String englishName) {
+			this.id = id;
+			this.englishName = englishName;
+		}
+	}
+
+	// Правила весов одной группы рас (ключ — подстрока слага) по местностям.
+	// byHabitat — вес для конкретных местностей; fallback — вес строки habitat=NULL
+	// (базовый вес расы в прочих местностях), может отсутствовать.
+	private static final class RaceHabitatWeights {
+		private final String key;
+		private final Map<HabitatType, Integer> byHabitat = new EnumMap<>(HabitatType.class);
+		private Integer fallback;
+
+		private RaceHabitatWeights(String key) {
+			this.key = key;
+		}
 	}
 }

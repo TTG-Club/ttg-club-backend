@@ -22,6 +22,14 @@ public interface RaceRepository extends JpaRepository<Race, Integer>, JpaSpecifi
 	@Query("SELECT r.book FROM Race r GROUP BY r.book HAVING r.book.type = :type ORDER BY r.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
 
-	@Query("SELECT DISTINCT r.id FROM Race r JOIN r.names n")
-	List<Integer> findIdsWithNames();
+	@Query("SELECT DISTINCT r.id AS id, r.englishName AS englishName FROM Race r JOIN r.names n")
+	List<RaceWithName> findRacesWithNames();
+
+	// id и англ. слаг рас, у которых есть имена — для взвешивания рас по местности
+	// без ленивой подгрузки всех связей расы.
+	interface RaceWithName {
+		Integer getId();
+
+		String getEnglishName();
+	}
 }
