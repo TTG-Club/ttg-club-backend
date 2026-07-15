@@ -410,7 +410,7 @@ public class ClassDetailApi extends ClassApi {
 			id = String.format("c%d", trait.getId());
 			name = trait.getName();
 			level = trait.getLevel();
-			type = String.format("%d-%s уровень", trait.getLevel(), levelSuffix(trait.getLevel()));
+			type = String.format("%d-й уровень", trait.getLevel());
 			description = trait.getDescription();
 			source = new Source(trait.getBook());
 			optional = trait.getOptional() == 1;
@@ -434,16 +434,12 @@ public class ClassDetailApi extends ClassApi {
 			id = String.format("a%d", trait.getId());
 			name = trait.getName();
 			level = trait.getLevel();
-			type = String.format("%d-%s уровень, умение %s", trait.getLevel(), levelSuffix(trait.getLevel()), archetype.getGenitiveName());
+			type = String.format("%d-й уровень, умение %s", trait.getLevel(), archetype.getGenitiveName());
 			description = trait.getDescription();
 			source = new Source(trait.getBook());
 			optional = false;
 			archetypeFeature = true;
 			archetypeRoot = false;
-		}
-
-		private static String levelSuffix(int level) {
-			return level >= 5 && level <= 8 ? "го" : "й";
 		}
 	}
 
