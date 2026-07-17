@@ -8,7 +8,10 @@ import club.dnd5.portal.dto.api.classes.ClassRequestApi;
 import club.dnd5.portal.dto.api.classes.ClassSaveApi;
 import club.dnd5.portal.dto.api.classes.ArchetypeEditApi;
 import club.dnd5.portal.dto.api.classes.ArchetypeSaveApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.exception.PageNotFoundException;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -24,6 +27,7 @@ import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
 import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,12 +59,16 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @RestController
 public class ClassApiController {
+	private static final String ENTITY_TYPE_CLASS = "CLASS";
+	private static final String ENTITY_TYPE_ARCHETYPE = "ARCHETYPE";
+
 	private final ClassRepository classRepo;
 	private final ArchetypeRepository archetypeRepository;
 	private final ImageRepository imageRepository;
 	private final BookRepository bookRepository;
 	private final HeroClassTraitRepository heroClassTraitRepository;
 	private final ArchetypeTraitRepository archetypeTraitRepository;
+	private final AuditService auditService;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -119,6 +128,7 @@ public class ClassApiController {
 		HeroClass saved = classRepo.saveAndFlush(heroClass);
 		syncClassTraits(saved, request);
 		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
+		auditService.record(ENTITY_TYPE_CLASS, saved.getId(), RevisionOperation.CREATE, request);
 		return ResponseEntity.ok(new ClassDetailApi(saved, Collections.emptyList(), new ClassRequestApi()));
 	}
 
@@ -137,7 +147,33 @@ public class ClassApiController {
 		syncClassTraits(saved, request);
 		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, saved.getId());
+		auditService.record(ENTITY_TYPE_CLASS, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(new ClassDetailApi(saved, images, new ClassRequestApi()));
+	}
+
+	@Operation(summary = "История изменений класса")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/classes/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getClassRevisions(@PathVariable Integer id) {
+		classRepo.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE_CLASS, id);
+	}
+
+	@Operation(summary = "Состояние класса на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/classes/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ClassSaveApi getClassRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		classRepo.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE_CLASS, id, revision, ClassSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление класса из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/classes/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ClassDetailApi> restoreClassRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		ClassSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE_CLASS, id, revision, ClassSaveApi.class);
+		return updateClass(id, snapshot);
 	}
 
 	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
@@ -165,7 +201,33 @@ public class ClassApiController {
 		Archetype saved = archetypeRepository.saveAndFlush(archetype);
 		syncArchetypeTraits(saved, request);
 		saved.setFeats(archetypeTraitRepository.findAllByArchetypeId(saved.getId()));
+		auditService.record(ENTITY_TYPE_ARCHETYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return new ArchetypeEditApi(saved);
+	}
+
+	@Operation(summary = "История изменений архетипа")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/classes/archetypes/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getArchetypeRevisions(@PathVariable Integer id) {
+		archetypeRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE_ARCHETYPE, id);
+	}
+
+	@Operation(summary = "Состояние архетипа на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/classes/archetypes/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArchetypeSaveApi getArchetypeRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		archetypeRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE_ARCHETYPE, id, revision, ArchetypeSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление архетипа из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/classes/archetypes/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArchetypeEditApi restoreArchetypeRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		ArchetypeSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE_ARCHETYPE, id, revision, ArchetypeSaveApi.class);
+		return updateArchetype(id, snapshot);
 	}
 
 	private void syncArchetypeTraits(Archetype archetype, ArchetypeSaveApi request) {

@@ -7,7 +7,10 @@ import club.dnd5.portal.dto.api.classes.BackgroundApi;
 import club.dnd5.portal.dto.api.classes.BackgroundDetailApi;
 import club.dnd5.portal.dto.api.classes.BackgroundSaveApi;
 import club.dnd5.portal.dto.api.classes.FeatRequestApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
@@ -45,9 +48,12 @@ import java.util.stream.Collectors;
 @Tag(name = "Предыстории", description = "API по предысториям")
 @RestController
 public class BackgroundApiController {
+	private static final String ENTITY_TYPE = "BACKGROUND";
+
 	private final BackgroundRepository backgroundRepository;
 	private final BookRepository bookRepository;
 	private final LanguageRepository languageRepository;
+	private final AuditService auditService;
 
 	@Operation(summary = "Получения краткого списка предисторий")
 	@PostMapping(value = "/api/v1/backgrounds", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -109,7 +115,9 @@ public class BackgroundApiController {
 		Background background = new Background();
 		background.setBook(getCustomBook());
 		applyBackgroundRequest(background, request);
-		return ResponseEntity.ok(new BackgroundDetailApi(backgroundRepository.saveAndFlush(background)));
+		Background saved = backgroundRepository.saveAndFlush(background);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
+		return ResponseEntity.ok(new BackgroundDetailApi(saved));
 	}
 
 	@Operation(summary = "Обновление предыстории в мастерской")
@@ -124,7 +132,34 @@ public class BackgroundApiController {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Background with the same englishName already exists");
 			});
 		applyBackgroundRequest(background, request);
-		return ResponseEntity.ok(new BackgroundDetailApi(backgroundRepository.saveAndFlush(background)));
+		Background saved = backgroundRepository.saveAndFlush(background);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
+		return ResponseEntity.ok(new BackgroundDetailApi(saved));
+	}
+
+	@Operation(summary = "История изменений предыстории")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/backgrounds/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getBackgroundRevisions(@PathVariable Integer id) {
+		backgroundRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@Operation(summary = "Состояние предыстории на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/backgrounds/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public BackgroundSaveApi getBackgroundRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		backgroundRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, BackgroundSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление предыстории из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/backgrounds/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<BackgroundDetailApi> restoreBackgroundRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		BackgroundSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, BackgroundSaveApi.class);
+		return updateBackground(id, snapshot);
 	}
 
 	@PostMapping("/api/v1/filters/backgrounds")

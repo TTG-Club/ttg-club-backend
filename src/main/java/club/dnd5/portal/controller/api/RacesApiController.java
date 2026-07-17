@@ -8,7 +8,10 @@ import club.dnd5.portal.dto.api.classes.RaceRequestApi;
 import club.dnd5.portal.dto.api.races.RaceApi;
 import club.dnd5.portal.dto.api.races.RaceDetailApi;
 import club.dnd5.portal.dto.api.races.RaceSaveApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.AbilityType;
@@ -24,6 +27,7 @@ import club.dnd5.portal.repository.datatable.RaceFeatureRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,11 +56,14 @@ import java.util.stream.Collectors;
 @Tag(name = "Расы и происхождения", description = "API по рассам и происхождениям")
 @RestController
 public class RacesApiController {
+	private static final String ENTITY_TYPE = "RACE";
+
 	private final RaceRepository raceRepository;
 	private final ImageRepository imageRepository;
 	private final BookRepository bookRepository;
 	private final RaceAbilityBonusRepository raceAbilityBonusRepository;
 	private final RaceFeatureRepository raceFeatureRepository;
+	private final AuditService auditService;
 
 	@PostMapping(value = "/api/v1/races", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RaceApi> getRaces(@RequestBody RaceRequestApi request) {
@@ -199,6 +207,7 @@ public class RacesApiController {
 		syncFeatures(saved, request);
 		saved.setBonuses(raceAbilityBonusRepository.findAllByRaceId(saved.getId()));
 		saved.setFeatures(raceFeatureRepository.findAllByRaceId(saved.getId()));
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
 		return ResponseEntity.ok(new RaceDetailApi(saved, Collections.emptySet()));
 	}
 
@@ -223,7 +232,33 @@ public class RacesApiController {
 		if (!images.isEmpty()) {
 			raceApi.setImages(images);
 		}
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(raceApi);
+	}
+
+	@Operation(summary = "История изменений расы")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/races/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getRaceRevisions(@PathVariable Integer id) {
+		raceRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@Operation(summary = "Состояние расы на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/races/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public RaceSaveApi getRaceRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		raceRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, RaceSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление расы из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/races/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<RaceDetailApi> restoreRaceRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		RaceSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, RaceSaveApi.class);
+		return updateRace(id, snapshot);
 	}
 
 	private void applyRaceRequest(Race race, RaceSaveApi request) {

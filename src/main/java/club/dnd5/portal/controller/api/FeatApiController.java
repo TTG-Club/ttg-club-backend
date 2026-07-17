@@ -7,7 +7,10 @@ import club.dnd5.portal.dto.api.classes.FeatRequestApi;
 import club.dnd5.portal.dto.api.classes.FeatApi;
 import club.dnd5.portal.dto.api.classes.FeatDetailApi;
 import club.dnd5.portal.dto.api.classes.FeatSaveApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
@@ -44,8 +47,11 @@ import java.util.stream.Collectors;
 @Tag(name = "Черты", description = "API по чертам")
 @RestController
 public class FeatApiController {
+	private static final String ENTITY_TYPE = "FEAT";
+
 	private final FeatRepository featRepository;
 	private final BookRepository bookRepository;
+	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка черт")
 	@PostMapping(value = {"/api/v1/traits","/api/v1/feats"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -123,7 +129,9 @@ public class FeatApiController {
 		Trait trait = new Trait();
 		trait.setBook(getCustomBook());
 		applyFeatRequest(trait, request);
-		return ResponseEntity.ok(new FeatDetailApi(featRepository.saveAndFlush(trait)));
+		Trait saved = featRepository.saveAndFlush(trait);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
+		return ResponseEntity.ok(new FeatDetailApi(saved));
 	}
 
 	@Operation(summary = "Обновление черты в мастерской")
@@ -138,7 +146,34 @@ public class FeatApiController {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feat with the same englishName already exists");
 			});
 		applyFeatRequest(trait, request);
-		return ResponseEntity.ok(new FeatDetailApi(featRepository.saveAndFlush(trait)));
+		Trait saved = featRepository.saveAndFlush(trait);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
+		return ResponseEntity.ok(new FeatDetailApi(saved));
+	}
+
+	@Operation(summary = "История изменений черты")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/feats/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getFeatRevisions(@PathVariable Integer id) {
+		featRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@Operation(summary = "Состояние черты на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/feats/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public FeatSaveApi getFeatRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		featRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, FeatSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление черты из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/feats/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<FeatDetailApi> restoreFeatRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		FeatSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, FeatSaveApi.class);
+		return updateFeat(id, snapshot);
 	}
 
 	@Operation(summary = "Получение фильтров для черт")

@@ -8,7 +8,10 @@ import club.dnd5.portal.dto.api.item.ArmorDetailApi;
 import club.dnd5.portal.dto.api.item.ArmorFilter;
 import club.dnd5.portal.dto.api.item.ArmorRequestApi;
 import club.dnd5.portal.dto.api.item.ArmorSaveApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -41,8 +44,11 @@ import java.util.stream.Collectors;
 @Tag(name = "Доспехи (броня)", description = "The Armor API")
 @RestController
 public class ArmorApiController {
+	private static final String ENTITY_TYPE = "ARMOR";
+
 	private final ArmorRepository armorRepository;
 	private final BookRepository bookRepository;
+	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка доспехов")
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -101,7 +107,9 @@ public class ArmorApiController {
 		Armor armor = new Armor();
 		armor.setBook(getCustomBook());
 		applyArmorRequest(armor, request);
-		return new ArmorDetailApi(armorRepository.saveAndFlush(armor));
+		Armor saved = armorRepository.saveAndFlush(armor);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
+		return new ArmorDetailApi(saved);
 	}
 
 	@Operation(summary = "Обновление доспеха в мастерской")
@@ -116,7 +124,34 @@ public class ArmorApiController {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Armor with the same englishName already exists");
 			});
 		applyArmorRequest(armor, request);
-		return new ArmorDetailApi(armorRepository.saveAndFlush(armor));
+		Armor saved = armorRepository.saveAndFlush(armor);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
+		return new ArmorDetailApi(saved);
+	}
+
+	@Operation(summary = "История изменений доспеха")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/armors/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getArmorRevisions(@PathVariable Integer id) {
+		armorRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@Operation(summary = "Состояние доспеха на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/armors/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArmorSaveApi getArmorRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		armorRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, ArmorSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление доспеха из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/armors/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArmorDetailApi restoreArmorRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		ArmorSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, ArmorSaveApi.class);
+		return updateArmor(id, snapshot);
 	}
 
 	@Operation(summary = "Получение фильтра для снаряжение")

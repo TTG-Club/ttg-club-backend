@@ -8,7 +8,10 @@ import club.dnd5.portal.dto.api.spell.SpellApi;
 import club.dnd5.portal.dto.api.spell.SpellDetailApi;
 import club.dnd5.portal.dto.api.spell.SpellRequestApi;
 import club.dnd5.portal.dto.api.spell.SpellSaveApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
@@ -44,6 +47,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,10 +70,13 @@ public class SpellApiController {
 		{"4", "Жрец"}, {"5", "Колдун"}, {"6", "Паладин"}, {"7", "Следопыт"}, {"8", "Чародей"},
 		{"14", "Изобретатель"}, {"22", "Шаман"}, {"23", "Магус"}};
 
+	private static final String ENTITY_TYPE = "SPELL";
+
 	private final SpellRepository spellRepository;
 	private final ClassRepository classRepository;
 	private final ArchetypeSpellRepository archetypeSpellRepository;
 	private final BookRepository bookRepository;
+	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -245,7 +252,9 @@ public class SpellApiController {
 		spell.setBook(getCustomBook());
 		spell.setHeroClass(new ArrayList<>());
 		saveTimeCast(spell, request);
-		return ResponseEntity.ok(getSpellDetail(spellRepository.saveAndFlush(spell)));
+		Spell saved = spellRepository.saveAndFlush(spell);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
+		return ResponseEntity.ok(getSpellDetail(saved));
 	}
 
 	@Operation(summary = "Обновление заклинания в мастерской")
@@ -262,7 +271,34 @@ public class SpellApiController {
 
 		applySpellRequest(spell, request);
 		saveTimeCast(spell, request);
-		return ResponseEntity.ok(getSpellDetail(spellRepository.saveAndFlush(spell)));
+		Spell saved = spellRepository.saveAndFlush(spell);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
+		return ResponseEntity.ok(getSpellDetail(saved));
+	}
+
+	@Operation(summary = "История изменений заклинания")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/spells/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getSpellRevisions(@PathVariable Integer id) {
+		spellRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@Operation(summary = "Состояние заклинания на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/spells/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public SpellSaveApi getSpellRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		spellRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, SpellSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление заклинания из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/spells/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<SpellDetailApi> restoreSpellRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		SpellSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, SpellSaveApi.class);
+		return updateSpell(id, snapshot);
 	}
 
 	private SpellDetailApi getSpellDetail(Spell spell) {
