@@ -221,7 +221,8 @@ public class FeatApiController {
 		trait.setEnglishName(request.getEnglishName().trim());
 		trait.setAltName(trimToNull(request.getAltName()));
 		trait.setLevel(request.getLevel());
-		trait.setRequirement(trimToNull(request.getRequirement()));
+		String requirement = trimToNull(request.getRequirement());
+		trait.setRequirement(requirement == null ? "Нет" : requirement);
 		trait.setDescription(request.getDescription().trim());
 		trait.setAbilities(request.getAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getAbilities()));
 		trait.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
