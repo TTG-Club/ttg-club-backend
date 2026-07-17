@@ -76,6 +76,10 @@ public class MagicItem {
 		return consumed ? rarity.getBaseCost() / 2 : rarity.getBaseCost();
 	}
 
+	public Integer getRawCost() {
+		return cost;
+	}
+
 	public String getCapitalazeName() {
 		return StringUtil.capitalize(name.toLowerCase());
 	}

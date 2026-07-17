@@ -21,17 +21,39 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class MagicItemDetailApi extends MagicItemApi {
+	private Integer id;
 	private String description;
 	private Boolean customization;
 	private Collection<UrlApi> detailType;
 	private Collection<String> detailCustamization;
 	private PriceApi cost;
 	private Collection<String> images;
+	private String rarityRaw;
+	private String typeRaw;
+	private String altName;
+	private String custSpecial;
+	private String specialRaw;
+	private Boolean consumed;
+	private Integer charge;
+	private Boolean curse;
+	private Integer costRaw;
+	private Byte bonus;
 
 	public MagicItemDetailApi(MagicItem item) {
 		super(item);
+		id = item.getId();
 		url = null;
 		description = item.getDescription();
+		rarityRaw = item.getRarity().name();
+		typeRaw = item.getType().name();
+		altName = item.getAltName();
+		custSpecial = item.getCustSpecial();
+		specialRaw = item.getSpecial();
+		consumed = item.isConsumed();
+		charge = item.getCharge();
+		curse = item.getCurse();
+		costRaw = item.getRawCost();
+		bonus = item.getBonus();
 		if (item.getCustomization()) {
 			customization = Boolean.TRUE;
 		}
