@@ -6,6 +6,7 @@ import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.item.MagicItemDetailApi;
 import club.dnd5.portal.dto.api.item.MagicItemRequestApi;
+import club.dnd5.portal.dto.api.item.MagicItemSaveApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -17,6 +18,7 @@ import club.dnd5.portal.model.items.MagicThingType;
 import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -25,10 +27,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +49,7 @@ import java.util.stream.Collectors;
 public class MagicItemApiController {
 	private final MagicItemRepository magicItemRepository;
 	private final ImageRepository imageRepository;
+	private final BookRepository bookRepository;
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -120,6 +129,65 @@ public class MagicItemApiController {
 		}
 		return itemApi;
 	}
+
+	@Operation(summary = "Создание магического предмета в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MagicItemDetailApi createItem(@Valid @RequestBody MagicItemSaveApi request) {
+		if (magicItemRepository.findByEnglishName(request.getEnglishName()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Magic item with the same englishName already exists");
+		}
+		MagicItem item = new MagicItem();
+		item.setBook(getCustomBook());
+		item.setCustClasses(new ArrayList<>());
+		item.setWeapons(new ArrayList<>());
+		item.setArmors(new ArrayList<>());
+		applyItemRequest(item, request);
+		return new MagicItemDetailApi(magicItemRepository.saveAndFlush(item));
+	}
+
+	@Operation(summary = "Обновление магического предмета в мастерской")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PatchMapping(value = "/api/v1/workshop/items/magic/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MagicItemDetailApi updateItem(@PathVariable Integer id, @Valid @RequestBody MagicItemSaveApi request) {
+		MagicItem item = magicItemRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		magicItemRepository.findByEnglishName(request.getEnglishName())
+			.filter(existing -> !existing.getId().equals(id))
+			.ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Magic item with the same englishName already exists");
+			});
+		applyItemRequest(item, request);
+		return new MagicItemDetailApi(magicItemRepository.saveAndFlush(item));
+	}
+
+	private void applyItemRequest(MagicItem item, MagicItemSaveApi request) {
+		item.setName(request.getName().trim());
+		item.setEnglishName(request.getEnglishName().trim());
+		item.setAltName(trimToNull(request.getAltName()));
+		item.setRarity(request.getRarity());
+		item.setType(request.getType());
+		item.setCustomization(Boolean.TRUE.equals(request.getCustomization()));
+		item.setCustSpecial(trimToNull(request.getCustSpecial()));
+		item.setSpecial(trimToNull(request.getSpecial()));
+		item.setDescription(request.getDescription().trim());
+		item.setConsumed(Boolean.TRUE.equals(request.getConsumed()));
+		item.setCharge(request.getCharge());
+		item.setCurse(Boolean.TRUE.equals(request.getCurse()));
+		item.setCost(request.getCost());
+		item.setBonus(request.getBonus());
+	}
+
+	private Book getCustomBook() {
+		return bookRepository.findFirstByType(TypeBook.CUSTOM)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+	}
+
+	private String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
+	}
+
 	@Operation(summary = "Получение фильтра для магических предметов")
 	@PostMapping("/api/v1/filters/items/magic")
 	public FilterApi getMagicItemsFilter() {
