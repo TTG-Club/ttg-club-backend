@@ -7,7 +7,10 @@ import club.dnd5.portal.dto.api.item.WeaponApi;
 import club.dnd5.portal.dto.api.item.WeaponDetailApi;
 import club.dnd5.portal.dto.api.item.WeaponRequesApi;
 import club.dnd5.portal.dto.api.item.WeaponSaveApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.Dice;
@@ -44,12 +47,16 @@ import java.util.stream.Collectors;
 @Tag(name = "Оружие", description = "API оружия")
 @RestController
 public class WeaponApiController {
+	private static final String ENTITY_TYPE = "WEAPON";
+
 	@Autowired
 	private WeaponRepository weaponRepository;
 	@Autowired
 	private WeaponPropertyDatatableRepository propertyRepository;
 	@Autowired
 	private BookRepository bookRepository;
+	@Autowired
+	private AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка оружия")
 	@PostMapping(value = "/api/v1/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -127,7 +134,9 @@ public class WeaponApiController {
 		Weapon weapon = new Weapon();
 		weapon.setBook(getCustomBook());
 		applyWeaponRequest(weapon, request);
-		return new WeaponDetailApi(weaponRepository.saveAndFlush(weapon));
+		Weapon saved = weaponRepository.saveAndFlush(weapon);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
+		return new WeaponDetailApi(saved);
 	}
 
 	@Operation(summary = "Обновление оружия в мастерской")
@@ -142,7 +151,34 @@ public class WeaponApiController {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Weapon with the same englishName already exists");
 			});
 		applyWeaponRequest(weapon, request);
-		return new WeaponDetailApi(weaponRepository.saveAndFlush(weapon));
+		Weapon saved = weaponRepository.saveAndFlush(weapon);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
+		return new WeaponDetailApi(saved);
+	}
+
+	@Operation(summary = "История изменений оружия")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/weapons/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getWeaponRevisions(@PathVariable Integer id) {
+		weaponRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@Operation(summary = "Состояние оружия на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/weapons/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public WeaponSaveApi getWeaponRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		weaponRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, WeaponSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление оружия из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/weapons/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public WeaponDetailApi restoreWeaponRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		WeaponSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, WeaponSaveApi.class);
+		return updateWeapon(id, snapshot);
 	}
 
 	@PostMapping("/api/v1/filters/weapons")

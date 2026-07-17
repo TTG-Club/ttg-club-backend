@@ -7,7 +7,10 @@ import club.dnd5.portal.dto.api.item.MagicItemApi;
 import club.dnd5.portal.dto.api.item.MagicItemDetailApi;
 import club.dnd5.portal.dto.api.item.MagicItemRequestApi;
 import club.dnd5.portal.dto.api.item.MagicItemSaveApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
+import club.dnd5.portal.model.audit.RevisionOperation;
+import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
@@ -47,9 +50,12 @@ import java.util.stream.Collectors;
 @Tag(name = "Магические предметы", description = "The Magic Item API")
 @RestController
 public class MagicItemApiController {
+	private static final String ENTITY_TYPE = "MAGIC_ITEM";
+
 	private final MagicItemRepository magicItemRepository;
 	private final ImageRepository imageRepository;
 	private final BookRepository bookRepository;
+	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -144,7 +150,9 @@ public class MagicItemApiController {
 		item.setWeapons(new ArrayList<>());
 		item.setArmors(new ArrayList<>());
 		applyItemRequest(item, request);
-		return new MagicItemDetailApi(magicItemRepository.saveAndFlush(item));
+		MagicItem saved = magicItemRepository.saveAndFlush(item);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
+		return new MagicItemDetailApi(saved);
 	}
 
 	@Operation(summary = "Обновление магического предмета в мастерской")
@@ -159,7 +167,34 @@ public class MagicItemApiController {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Magic item with the same englishName already exists");
 			});
 		applyItemRequest(item, request);
-		return new MagicItemDetailApi(magicItemRepository.saveAndFlush(item));
+		MagicItem saved = magicItemRepository.saveAndFlush(item);
+		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
+		return new MagicItemDetailApi(saved);
+	}
+
+	@Operation(summary = "История изменений магического предмета")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/items/magic/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RevisionInfoApi> getItemRevisions(@PathVariable Integer id) {
+		magicItemRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@Operation(summary = "Состояние магического предмета на указанной ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/items/magic/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MagicItemSaveApi getItemRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		magicItemRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, MagicItemSaveApi.class);
+	}
+
+	@Operation(summary = "Восстановление магического предмета из ревизии")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	@PostMapping(value = "/api/v1/workshop/items/magic/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MagicItemDetailApi restoreItemRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		MagicItemSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, MagicItemSaveApi.class);
+		return updateItem(id, snapshot);
 	}
 
 	private void applyItemRequest(MagicItem item, MagicItemSaveApi request) {

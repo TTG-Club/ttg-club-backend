@@ -44,8 +44,8 @@ public class Spell implements FoundryCommon {
 
 	private int timeCast;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "spell_id")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "spell_id", nullable = false)
 	private List<TimeCast> times;
 
 	private String distance;
