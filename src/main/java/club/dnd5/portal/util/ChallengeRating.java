@@ -55,7 +55,7 @@ public final class ChallengeRating {
 	 * @return опыт
 	 */
 	public static int getExp(String cr) {
-		if (cr == null || cr.isBlank()) {
+		if (cr == null || cr.trim().isEmpty()) {
 			return 0;
 		}
 		Integer exp = CR_TO_EXP.get(cr);
