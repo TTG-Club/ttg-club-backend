@@ -66,6 +66,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         	.antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
         	.antMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
         	.antMatchers("/api/v1/auth/**").permitAll()
+        	// Трекер инициативы: анонимный доступ разрешён (создание анонимного трекера и работа
+        	// по ключу X-Tracker-Key); контроль доступа — в сервисе (владелец по JWT либо ключ).
+        	.antMatchers("/api/v2/tools/initiative/**").permitAll()
         	.antMatchers("/swagger-ui/**").permitAll()
         	.antMatchers("/swagger-resources/**").permitAll()
         	.antMatchers("/swagger-ui.html").permitAll()
