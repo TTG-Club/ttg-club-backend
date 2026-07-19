@@ -133,6 +133,8 @@ public class SpaController {
 		"/workshop/weapons/{name}/edit",
 		"/tools/ability-calc",
 		"/tools/encounters",
+		"/tools/initiative",
+		"/tools/initiative/{id}",
 		"/tools/items/magic",
 		"/tools/madness",
 		"/tools/names",

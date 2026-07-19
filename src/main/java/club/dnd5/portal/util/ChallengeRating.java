@@ -1,8 +1,11 @@
 package club.dnd5.portal.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public final class ChallengeRating {
 	private ChallengeRating() {
 	}
@@ -52,7 +55,15 @@ public final class ChallengeRating {
 	 * @return опыт
 	 */
 	public static int getExp(String cr) {
-		return CR_TO_EXP.getOrDefault(cr, 0);
+		if (cr == null || cr.trim().isEmpty()) {
+			return 0;
+		}
+		Integer exp = CR_TO_EXP.get(cr);
+		if (exp == null) {
+			log.warn("Неизвестный уровень опасности '{}' — сохраняю опыт как 0", cr);
+			return 0;
+		}
+		return exp;
 	}
 
 	/**

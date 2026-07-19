@@ -174,6 +174,16 @@ public class Creature implements FoundryCommon {
 
 	private Short page;
 
+	/**
+	 * Опыт существа всегда определяется уровнем опасности,
+	 * поэтому пересчитываем его при любом сохранении, каким бы путём оно ни шло.
+	 */
+	@PrePersist
+	@PreUpdate
+	private void syncExpWithChallengeRating() {
+		this.exp = ChallengeRating.getExp(challengeRating);
+	}
+
 	public String getSizeName() {
 		return size.getSizeName(type);
 	}

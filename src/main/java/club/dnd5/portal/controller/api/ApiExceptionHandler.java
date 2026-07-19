@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api;
 
 import club.dnd5.portal.dto.api.ApiErrorResponse;
+import club.dnd5.portal.exception.ApiException;
 import org.hibernate.JDBCException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.dao.DataAccessException;
@@ -16,6 +17,17 @@ import java.sql.SQLException;
 
 @RestControllerAdvice(basePackages = "club.dnd5.portal.controller.api")
 public class ApiExceptionHandler {
+	@ExceptionHandler(ApiException.class)
+	public ResponseEntity<ApiErrorResponse> handleApiException(
+		ApiException exception,
+		HttpServletRequest request
+	) {
+		HttpStatus status = exception.getStatus();
+		return ResponseEntity
+			.status(status)
+			.body(new ApiErrorResponse(status.value(), status.getReasonPhrase(), exception.getMessage(), request.getRequestURI()));
+	}
+
 	@ExceptionHandler(ResponseStatusException.class)
 	public ResponseEntity<ApiErrorResponse> handleResponseStatusException(
 		ResponseStatusException exception,
