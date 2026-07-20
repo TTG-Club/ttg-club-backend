@@ -17,14 +17,24 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class OptionDetailApi extends OptionApi {
+	private Integer id;
 	private String requirements ;
 	private String description;
 	private List<ReferenceClassApi> classes;
+	private String altName;
+	private Integer level;
+	private String prerequisite;
+	private List<Option.OptionType> optionTypes;
 
 	public OptionDetailApi(Option option) {
 		super(option);
 		url = null;
+		id = option.getId();
 		description = option.getDescription();
+		altName = option.getAltName();
+		level = option.getLevel();
+		prerequisite = option.getPrerequisite();
+		optionTypes = option.getOptionTypes();
 
 		if (option.getLevel() != null)
 		{
