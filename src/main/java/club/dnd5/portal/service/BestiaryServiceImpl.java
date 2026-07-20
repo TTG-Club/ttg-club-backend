@@ -296,9 +296,9 @@ public class BestiaryServiceImpl implements BestiaryService {
                 .map(Condition::valueOf)
                 .collect(Collectors.toList()));
         beast.setHabitates(new ArrayList<>(nullToEmpty(request.getEnvironment())));
-        beast.setSavingThrows(mapSavingThrows(request.getSavingThrows()));
-        beast.setSkills(mapSkills(request.getSkills()));
-        beast.setFeats(mapFeats(request.getFeats()));
+        beast.setSavingThrows(replaceAll(beast.getSavingThrows(), mapSavingThrows(request.getSavingThrows())));
+        beast.setSkills(replaceAll(beast.getSkills(), mapSkills(request.getSkills())));
+        beast.setFeats(replaceAll(beast.getFeats(), mapFeats(request.getFeats())));
         beast.setActions(mapActions(request));
         beast.setLanguages(mapLanguages(request.getLanguages()));
         beast.setRaces(mapTags(request.getTags()));
@@ -430,6 +430,19 @@ public class BestiaryServiceImpl implements BestiaryService {
                     return savingThrow;
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Обновляет коллекцию, помеченную orphanRemoval, не подменяя её экземпляр:
+     * Hibernate удалит исчезнувшие элементы только если менять ту же коллекцию.
+     */
+    private <T> List<T> replaceAll(List<T> current, List<T> values) {
+        if (current == null) {
+            return new ArrayList<>(values);
+        }
+        current.clear();
+        current.addAll(values);
+        return current;
     }
 
     private List<Skill> mapSkills(Collection<NameValueApi> request) {

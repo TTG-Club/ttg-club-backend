@@ -121,19 +121,19 @@ public class Creature implements FoundryCommon {
 	private String proficiencyBonus;
 
 	// спаброски
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "creature_id", nullable = false)
 	private List<SavingThrow> savingThrows;
 
 	// навыки
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "creature_id", nullable = false)
 	private List<Skill> skills;
 
 	@ManyToMany
 	private List<Language> languages;
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CreatureFeat> feats;
 
 	@ManyToMany(cascade = CascadeType.ALL)
