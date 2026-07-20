@@ -47,4 +47,7 @@ public class ClassSaveApi {
 	private String icon;
 	private Short page;
 	private List<ClassTraitSaveApi> classTraits;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

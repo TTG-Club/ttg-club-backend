@@ -24,4 +24,7 @@ public class FeatSaveApi {
 	private String description;
 	private List<AbilityType> abilities;
 	private List<SkillType> skills;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

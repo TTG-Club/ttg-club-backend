@@ -11,12 +11,12 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.trait.Trait;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.FeatRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -50,7 +50,7 @@ public class FeatApiController {
 	private static final String ENTITY_TYPE = "FEAT";
 
 	private final FeatRepository featRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка черт")
@@ -127,7 +127,7 @@ public class FeatApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feat with the same englishName already exists");
 		}
 		Trait trait = new Trait();
-		trait.setBook(getCustomBook());
+		trait.setBook(bookResolver.getCustomBook());
 		applyFeatRequest(trait, request);
 		Trait saved = featRepository.saveAndFlush(trait);
 		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
@@ -226,11 +226,7 @@ public class FeatApiController {
 		trait.setDescription(request.getDescription().trim());
 		trait.setAbilities(request.getAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getAbilities()));
 		trait.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+		bookResolver.find(request.getSource()).ifPresent(trait::setBook);
 	}
 
 	private String trimToNull(String value) {

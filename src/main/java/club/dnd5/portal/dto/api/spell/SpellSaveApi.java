@@ -55,4 +55,7 @@ public class SpellSaveApi {
 	private String description;
 
 	private String upper;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

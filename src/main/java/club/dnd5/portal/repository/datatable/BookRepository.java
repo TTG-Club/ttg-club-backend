@@ -13,5 +13,7 @@ import java.util.Optional;
 public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecificationExecutor<Book> {
 	Optional<Book> findByEnglishName(String name);
 
+	Optional<Book> findBySource(String source);
+
 	Optional<Book> findFirstByType(TypeBook type);
 }

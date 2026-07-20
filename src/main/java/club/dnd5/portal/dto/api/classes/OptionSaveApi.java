@@ -24,4 +24,7 @@ public class OptionSaveApi {
 	private Integer level;
 	@NotBlank
 	private String description;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

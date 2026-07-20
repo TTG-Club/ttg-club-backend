@@ -11,6 +11,7 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.Dice;
@@ -18,7 +19,6 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Weapon;
 import club.dnd5.portal.model.items.WeaponProperty;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
@@ -54,7 +54,7 @@ public class WeaponApiController {
 	@Autowired
 	private WeaponPropertyDatatableRepository propertyRepository;
 	@Autowired
-	private BookRepository bookRepository;
+	private BookResolver bookResolver;
 	@Autowired
 	private AuditService auditService;
 
@@ -132,7 +132,7 @@ public class WeaponApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Weapon with the same englishName already exists");
 		}
 		Weapon weapon = new Weapon();
-		weapon.setBook(getCustomBook());
+		weapon.setBook(bookResolver.getCustomBook());
 		applyWeaponRequest(weapon, request);
 		Weapon saved = weaponRepository.saveAndFlush(weapon);
 		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
@@ -244,11 +244,7 @@ public class WeaponApiController {
 		weapon.setAmmo(request.getAmmo());
 		weapon.setDescription(trimToNull(request.getDescription()));
 		weapon.setSpecial(trimToNull(request.getSpecial()));
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+		bookResolver.find(request.getSource()).ifPresent(weapon::setBook);
 	}
 
 	private String trimToNull(String value) {

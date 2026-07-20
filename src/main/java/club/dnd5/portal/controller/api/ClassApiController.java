@@ -12,6 +12,7 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -25,7 +26,6 @@ import club.dnd5.portal.repository.classes.ArchetypeRepository;
 import club.dnd5.portal.repository.classes.ArchetypeTraitRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,7 +65,7 @@ public class ClassApiController {
 	private final ClassRepository classRepo;
 	private final ArchetypeRepository archetypeRepository;
 	private final ImageRepository imageRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final HeroClassTraitRepository heroClassTraitRepository;
 	private final ArchetypeTraitRepository archetypeTraitRepository;
 	private final AuditService auditService;
@@ -118,7 +118,7 @@ public class ClassApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Class with the same englishName already exists");
 		}
 		HeroClass heroClass = new HeroClass();
-		heroClass.setBook(getCustomBook());
+		heroClass.setBook(bookResolver.getCustomBook());
 		heroClass.setLevelDefenitions(Collections.emptyList());
 		heroClass.setFeatureLevelDefenitions(Collections.emptyList());
 		heroClass.setSpells(Collections.emptyList());
@@ -301,6 +301,7 @@ public class ClassApiController {
 		heroClass.setSidekick(request.isSidekick());
 		heroClass.setIcon(trimToNull(request.getIcon()));
 		heroClass.setPage(request.getPage());
+		bookResolver.find(request.getSource()).ifPresent(heroClass::setBook);
 	}
 
 	private void syncClassTraits(HeroClass heroClass, ClassSaveApi request) {
@@ -339,11 +340,6 @@ public class ClassApiController {
 		} else {
 			heroClassTraitRepository.deleteClassTraitsNotIn(heroClass.getId(), ids);
 		}
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
 	}
 
 	private String trimToNull(String value) {

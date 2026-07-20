@@ -16,7 +16,6 @@ import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.ActionType;
 import club.dnd5.portal.model.creature.Condition;
@@ -31,7 +30,6 @@ import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.LanguageRepository;
 import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
 import club.dnd5.portal.util.ChallengeRating;
 import club.dnd5.portal.util.PageAndSortUtil;
@@ -57,7 +55,7 @@ public class BestiaryServiceImpl implements BestiaryService {
     private final BestiaryRepository beastRepository;
     private final ImageRepository imageRepository;
     private final TokenRepository tokenRepository;
-    private final BookRepository bookRepository;
+    private final BookResolver bookResolver;
     private final LanguageRepository languageRepository;
     private final TagBestiaryDatatableRepository tagRepository;
 
@@ -236,7 +234,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         }
         mapping(beast, request);
         if (beast.getBook() == null) {
-            beast.setBook(getCustomBook());
+            beast.setBook(bookResolver.getCustomBook());
         }
         return new BeastDetailApi(beastRepository.saveAndFlush(beast));
     }
@@ -298,15 +296,13 @@ public class BestiaryServiceImpl implements BestiaryService {
                 .map(Condition::valueOf)
                 .collect(Collectors.toList()));
         beast.setHabitates(new ArrayList<>(nullToEmpty(request.getEnvironment())));
-        beast.setSavingThrows(mapSavingThrows(request.getSavingThrows()));
-        beast.setSkills(mapSkills(request.getSkills()));
-        beast.setFeats(mapFeats(request.getFeats()));
+        beast.setSavingThrows(replaceAll(beast.getSavingThrows(), mapSavingThrows(request.getSavingThrows())));
+        beast.setSkills(replaceAll(beast.getSkills(), mapSkills(request.getSkills())));
+        beast.setFeats(replaceAll(beast.getFeats(), mapFeats(request.getFeats())));
         beast.setActions(mapActions(request));
         beast.setLanguages(mapLanguages(request.getLanguages()));
         beast.setRaces(mapTags(request.getTags()));
-        if (StringUtils.hasText(request.getSource())) {
-            bookRepository.findByEnglishName(request.getSource()).ifPresent(beast::setBook);
-        }
+        bookResolver.find(request.getSource()).ifPresent(beast::setBook);
     }
 
     private void mapSpeed(Creature beast, BeastDetailRequest request) {
@@ -436,6 +432,19 @@ public class BestiaryServiceImpl implements BestiaryService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Обновляет коллекцию, помеченную orphanRemoval, не подменяя её экземпляр:
+     * Hibernate удалит исчезнувшие элементы только если менять ту же коллекцию.
+     */
+    private <T> List<T> replaceAll(List<T> current, List<T> values) {
+        if (current == null) {
+            return new ArrayList<>(values);
+        }
+        current.clear();
+        current.addAll(values);
+        return current;
+    }
+
     private List<Skill> mapSkills(Collection<NameValueApi> request) {
         return nullToEmpty(request).stream()
                 .map(value -> {
@@ -510,11 +519,6 @@ public class BestiaryServiceImpl implements BestiaryService {
             return new ArrayList<>();
         }
         return new ArrayList<>(tagRepository.findByNameIn(tags));
-    }
-
-    private Book getCustomBook() {
-        return bookRepository.findFirstByType(TypeBook.CUSTOM)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
     }
 
     private byte toByte(Object value) {

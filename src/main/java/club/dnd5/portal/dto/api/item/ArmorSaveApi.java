@@ -25,4 +25,7 @@ public class ArmorSaveApi {
 	@NotNull
 	private ArmorCategory type;
 	private String description;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

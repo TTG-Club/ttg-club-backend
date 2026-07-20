@@ -37,4 +37,7 @@ public class WeaponSaveApi {
 	private Byte ammo;
 	private String description;
 	private String special;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

@@ -12,6 +12,7 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
@@ -27,7 +28,6 @@ import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.splells.TimeCast;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -75,7 +75,7 @@ public class SpellApiController {
 	private final SpellRepository spellRepository;
 	private final ClassRepository classRepository;
 	private final ArchetypeSpellRepository archetypeSpellRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка заклинаний")
@@ -248,8 +248,8 @@ public class SpellApiController {
 		}
 
 		Spell spell = new Spell();
+		spell.setBook(bookResolver.getCustomBook());
 		applySpellRequest(spell, request);
-		spell.setBook(getCustomBook());
 		spell.setHeroClass(new ArrayList<>());
 		saveTimeCast(spell, request);
 		Spell saved = spellRepository.saveAndFlush(spell);
@@ -343,6 +343,7 @@ public class SpellApiController {
 		if (spell.getHeroClass() == null) {
 			spell.setHeroClass(new ArrayList<>());
 		}
+		bookResolver.find(request.getSource()).ifPresent(spell::setBook);
 	}
 
 	private void saveTimeCast(Spell spell, SpellSaveApi request) {
@@ -359,11 +360,6 @@ public class SpellApiController {
 		timeCast.setNumber(request.getTimeNumber());
 		timeCast.setUnit(request.getTimeUnit());
 		timeCast.setCondition(trimToNull(request.getTimeCondition()));
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
 	}
 
 	private String trimToNull(String value) {
