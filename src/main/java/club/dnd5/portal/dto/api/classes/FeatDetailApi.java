@@ -24,12 +24,16 @@ public class FeatDetailApi extends FeatApi {
 	private List<String> abilities;
 	private List<String> skills;
 	private List<ReferenceClassApi> classes;
+	private String altName;
+	private Integer level;
 
 	public FeatDetailApi(Trait trait) {
 		super(trait);
 		id = trait.getId();
 		url = null;
 		description = trait.getDescription();
+		altName = trait.getAltName();
+		level = trait.getLevel();
 		abilities = (trait.getAbilities() == null ? Collections.<AbilityType>emptyList() : trait.getAbilities())
 			.stream().map(ability -> ability.name()).collect(java.util.stream.Collectors.toList());
 		skills = (trait.getSkills() == null ? Collections.<SkillType>emptyList() : trait.getSkills())
