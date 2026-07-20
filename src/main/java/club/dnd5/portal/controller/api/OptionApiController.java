@@ -19,9 +19,9 @@ import club.dnd5.portal.model.classes.Option.OptionType;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,7 +59,7 @@ public class OptionApiController {
 
 	private final OptionRepository optionRepository;
 	private final ClassRepository classRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final AuditService auditService;
 
 	@PostMapping(value = "/api/v1/options", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -130,7 +130,7 @@ public class OptionApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Option with the same englishName already exists");
 		}
 		Option option = new Option();
-		option.setBook(getCustomBook());
+		option.setBook(bookResolver.getCustomBook());
 		applyOptionRequest(option, request);
 		Option saved = optionRepository.saveAndFlush(option);
 		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
@@ -314,11 +314,7 @@ public class OptionApiController {
 		option.setPrerequisite(prerequisite == null ? "Нет" : prerequisite);
 		option.setDescription(request.getDescription().trim());
 		option.setOptionTypes(new ArrayList<>(request.getOptionTypes()));
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+		bookResolver.find(request.getSource()).ifPresent(option::setBook);
 	}
 
 	private String trimToNull(String value) {

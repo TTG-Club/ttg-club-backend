@@ -5,9 +5,9 @@ import club.dnd5.portal.dto.api.spells.SpellFilter;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
@@ -36,7 +36,7 @@ class SpellApiControllerTest {
 			spellRepository,
 			mock(ClassRepository.class),
 			mock(ArchetypeSpellRepository.class),
-			mock(BookRepository.class),
+			mock(BookResolver.class),
 			mock(AuditService.class)
 		);
 		SpellFilter filter = new SpellFilter(

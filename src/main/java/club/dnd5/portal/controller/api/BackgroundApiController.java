@@ -11,6 +11,7 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
@@ -20,7 +21,6 @@ import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.LanguageRepository;
 import club.dnd5.portal.repository.datatable.BackgroundRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +51,7 @@ public class BackgroundApiController {
 	private static final String ENTITY_TYPE = "BACKGROUND";
 
 	private final BackgroundRepository backgroundRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final LanguageRepository languageRepository;
 	private final AuditService auditService;
 
@@ -113,7 +113,7 @@ public class BackgroundApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Background with the same englishName already exists");
 		}
 		Background background = new Background();
-		background.setBook(getCustomBook());
+		background.setBook(bookResolver.getCustomBook());
 		applyBackgroundRequest(background, request);
 		Background saved = backgroundRepository.saveAndFlush(background);
 		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
@@ -209,11 +209,7 @@ public class BackgroundApiController {
 		background.setLanguages(request.getLanguages() == null || request.getLanguages().isEmpty()
 			? new ArrayList<>()
 			: languageRepository.findByNameIn(request.getLanguages()));
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+		bookResolver.find(request.getSource()).ifPresent(background::setBook);
 	}
 
 	private String trimToNull(String value) {

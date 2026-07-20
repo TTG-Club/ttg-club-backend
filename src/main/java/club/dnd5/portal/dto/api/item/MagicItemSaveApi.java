@@ -32,4 +32,7 @@ public class MagicItemSaveApi {
 	private Boolean curse;
 	private Integer cost;
 	private Byte bonus;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

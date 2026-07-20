@@ -44,4 +44,7 @@ public class RaceSaveApi {
 	private List<RaceAbilitySaveApi> abilities;
 	@Valid
 	private List<RaceFeatureSaveApi> features;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

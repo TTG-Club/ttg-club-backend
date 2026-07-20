@@ -31,4 +31,7 @@ public class BackgroundSaveApi {
 	private String language;
 	private List<String> languages;
 	private LifeStyle lifeStyle;
+
+	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
+	private String source;
 }

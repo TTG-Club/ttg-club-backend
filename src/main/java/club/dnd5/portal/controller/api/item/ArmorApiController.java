@@ -12,13 +12,13 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.items.Armor;
 import club.dnd5.portal.model.items.ArmorCategory;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +47,7 @@ public class ArmorApiController {
 	private static final String ENTITY_TYPE = "ARMOR";
 
 	private final ArmorRepository armorRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка доспехов")
@@ -105,7 +105,7 @@ public class ArmorApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Armor with the same englishName already exists");
 		}
 		Armor armor = new Armor();
-		armor.setBook(getCustomBook());
+		armor.setBook(bookResolver.getCustomBook());
 		applyArmorRequest(armor, request);
 		Armor saved = armorRepository.saveAndFlush(armor);
 		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.CREATE, request);
@@ -214,11 +214,7 @@ public class ArmorApiController {
 		armor.setStelsHindrance(Boolean.TRUE.equals(request.getStealthHindrance()));
 		armor.setType(request.getType());
 		armor.setDescription(trimToNull(request.getDescription()));
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+		bookResolver.find(request.getSource()).ifPresent(armor::setBook);
 	}
 
 	private String trimToNull(String value) {

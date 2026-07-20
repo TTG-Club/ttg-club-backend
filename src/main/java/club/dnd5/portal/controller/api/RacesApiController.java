@@ -12,6 +12,7 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.AbilityType;
@@ -21,7 +22,6 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.RaceAbilityBonusRepository;
 import club.dnd5.portal.repository.datatable.RaceFeatureRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
@@ -60,7 +60,7 @@ public class RacesApiController {
 
 	private final RaceRepository raceRepository;
 	private final ImageRepository imageRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final RaceAbilityBonusRepository raceAbilityBonusRepository;
 	private final RaceFeatureRepository raceFeatureRepository;
 	private final AuditService auditService;
@@ -197,7 +197,7 @@ public class RacesApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Race with the same englishName already exists");
 		}
 		Race race = new Race();
-		race.setBook(getCustomBook());
+		race.setBook(bookResolver.getCustomBook());
 		race.setSubRaces(Collections.emptyList());
 		race.setNames(Collections.emptyList());
 		race.setNicknames(Collections.emptyList());
@@ -280,6 +280,7 @@ public class RacesApiController {
 		race.setView(request.isView());
 		race.setIcon(trimToNull(request.getIcon()));
 		race.setPage(request.getPage());
+		bookResolver.find(request.getSource()).ifPresent(race::setBook);
 	}
 
 	private void syncAbilities(Race race, RaceSaveApi request) {
@@ -346,11 +347,6 @@ public class RacesApiController {
 		} else {
 			raceFeatureRepository.deleteByRaceIdAndIdNotIn(race.getId(), ids);
 		}
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
 	}
 
 	private String trimToNull(String value) {

@@ -11,6 +11,7 @@ import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
@@ -21,7 +22,6 @@ import club.dnd5.portal.model.items.MagicThingType;
 import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
-import club.dnd5.portal.repository.datatable.BookRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -54,7 +54,7 @@ public class MagicItemApiController {
 
 	private final MagicItemRepository magicItemRepository;
 	private final ImageRepository imageRepository;
-	private final BookRepository bookRepository;
+	private final BookResolver bookResolver;
 	private final AuditService auditService;
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
@@ -145,7 +145,7 @@ public class MagicItemApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Magic item with the same englishName already exists");
 		}
 		MagicItem item = new MagicItem();
-		item.setBook(getCustomBook());
+		item.setBook(bookResolver.getCustomBook());
 		item.setCustClasses(new ArrayList<>());
 		item.setWeapons(new ArrayList<>());
 		item.setArmors(new ArrayList<>());
@@ -212,11 +212,7 @@ public class MagicItemApiController {
 		item.setCurse(Boolean.TRUE.equals(request.getCurse()));
 		item.setCost(request.getCost());
 		item.setBonus(request.getBonus());
-	}
-
-	private Book getCustomBook() {
-		return bookRepository.findFirstByType(TypeBook.CUSTOM)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOM source book is not configured"));
+		bookResolver.find(request.getSource()).ifPresent(item::setBook);
 	}
 
 	private String trimToNull(String value) {
