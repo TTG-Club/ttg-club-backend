@@ -276,7 +276,9 @@ public class RacesApiController {
 		race.setFly(request.getFly());
 		race.setClimb(request.getClimb());
 		race.setSwim(request.getSwim());
-		race.setOrigin(request.getOrigin());
+		// origin — трёхзначный флаг: TRUE у происхождений, null у обычных рас.
+		// false в базе нежелателен, так как группировка проверяет только на null.
+		race.setOrigin(Boolean.TRUE.equals(request.getOrigin()) ? Boolean.TRUE : null);
 		race.setView(request.isView());
 		race.setIcon(trimToNull(request.getIcon()));
 		race.setPage(request.getPage());
