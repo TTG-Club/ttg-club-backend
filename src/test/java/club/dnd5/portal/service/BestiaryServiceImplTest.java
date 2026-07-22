@@ -3,7 +3,9 @@ package club.dnd5.portal.service;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.SenseApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
+import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.creature.Creature;
+import club.dnd5.portal.model.creature.SavingThrow;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -11,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -70,6 +73,21 @@ class BestiaryServiceImplTest {
         byte passivePerception = ReflectionTestUtils.invokeMethod(service, "parsePassivePerception", request);
 
         assertEquals(10, passivePerception);
+    }
+
+    @Test
+    void removesDuplicateSavingThrowsByAbility() {
+        List<NameValueApi> request = Arrays.asList(
+                NameValueApi.builder().key(AbilityType.STRENGTH).value(3).build(),
+                NameValueApi.builder().key(AbilityType.DEXTERITY).value(4).build(),
+                NameValueApi.builder().key(AbilityType.STRENGTH).value(5).build());
+
+        List<SavingThrow> savingThrows = ReflectionTestUtils.invokeMethod(service, "mapSavingThrows", request);
+
+        assertEquals(2, savingThrows.size());
+        assertEquals(AbilityType.STRENGTH, savingThrows.get(0).getAbility());
+        assertEquals(5, savingThrows.get(0).getBonus());
+        assertEquals(AbilityType.DEXTERITY, savingThrows.get(1).getAbility());
     }
 
     private BeastDetailRequest requestWithSpeed(NameValueApi... speed) {
