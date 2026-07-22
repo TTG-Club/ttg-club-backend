@@ -421,15 +421,15 @@ public class BestiaryServiceImpl implements BestiaryService {
     }
 
     private List<SavingThrow> mapSavingThrows(Collection<NameValueApi> request) {
-        return nullToEmpty(request).stream()
-                .map(value -> {
-                    SavingThrow savingThrow = new SavingThrow();
-                    savingThrow.setAbility(AbilityType.valueOf(value.getKey().toString()));
-                    savingThrow.setBonus(toByte(value.getValue()));
-                    savingThrow.setAdditionalBonus(value.getAdditional() == null ? null : value.getAdditional().toString());
-                    return savingThrow;
-                })
-                .collect(Collectors.toList());
+        Map<AbilityType, SavingThrow> savingThrows = new LinkedHashMap<>();
+        nullToEmpty(request).forEach(value -> {
+            SavingThrow savingThrow = new SavingThrow();
+            savingThrow.setAbility(AbilityType.valueOf(value.getKey().toString()));
+            savingThrow.setBonus(toByte(value.getValue()));
+            savingThrow.setAdditionalBonus(value.getAdditional() == null ? null : value.getAdditional().toString());
+            savingThrows.put(savingThrow.getAbility(), savingThrow);
+        });
+        return new ArrayList<>(savingThrows.values());
     }
 
     /**
