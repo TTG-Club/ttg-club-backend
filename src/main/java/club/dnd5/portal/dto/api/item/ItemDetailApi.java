@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
@@ -17,21 +19,36 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ItemDetailApi extends ItemApi {
+	private Integer id;
 	private Float weight;
 	private String description;
 	private List<String> categories;
 	private String image;
-	
+	private String altName;
+	private Integer cost;
+	private String currency;
+	private List<String> categoriesRaw;
+
 	public ItemDetailApi(Equipment item) {
 		super(item);
+		id = item.getId();
 		url = null;
 		weight = item.getWeight();
 		if (item.getDescription() != null) {
 			description = item.getDescription();
 		}
-		categories = item.getTypes().stream()
+		Set<EquipmentType> types = item.getTypes() == null ? Collections.emptySet() : item.getTypes();
+		categories = types.stream()
 				.map(EquipmentType::getCyrilicName)
 				.collect(Collectors.toList());
+		categoriesRaw = types.stream()
+				.map(EquipmentType::name)
+				.collect(Collectors.toList());
+		altName = item.getAltName();
+		cost = item.getCost();
+		if (item.getCurrency() != null) {
+			currency = item.getCurrency().name();
+		}
 		setPrice(item.getTextCost());
 	}
 }
