@@ -17,11 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Locale;
 
 /**
  * Прокси публичного API сервиса комментариев (comments.ttg.club).
@@ -56,9 +58,11 @@ public class CommentsProxyController {
 
     private final RestTemplate restTemplate = buildRestTemplate();
     private final String baseUrl;
+    private final URI baseUri;
 
     public CommentsProxyController(@Value("${comments-service.base-url}") String baseUrl) {
         this.baseUrl = trimTrailingSlash(baseUrl);
+        this.baseUri = URI.create(this.baseUrl);
     }
 
     @RequestMapping({"", "/**"})
@@ -94,6 +98,8 @@ public class CommentsProxyController {
                     byte[].class);
 
             return relay(upstream);
+        } catch (IllegalArgumentException invalidTarget) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } catch (ResourceAccessException connectionError) {
             // Сервис недоступен (таймаут, отказ соединения) — отдаём 502, чтобы
             // фронт показал ошибку загрузки, а не пустой 500 монолита.
@@ -123,20 +129,55 @@ public class CommentsProxyController {
     }
 
     /**
-     * Полный адрес запроса к сервису: базовый URL плюс путь и query как есть.
-     * Путь и строка запроса берутся из сервлета уже закодированными, поэтому
-     * повторного кодирования не требуется — используется URI-перегрузка
-     * exchange (без раскрытия шаблонных переменных).
+     * Полный адрес запроса к сервису: только в пределах настроенного baseUrl.
+     * Запрещаем любые попытки выйти за origin/prefix базового URL.
      */
     private URI targetUri(HttpServletRequest request) {
-        StringBuilder target = new StringBuilder(baseUrl).append(request.getRequestURI());
-
+        String requestUri = request.getRequestURI();
         String query = request.getQueryString();
-        if (StringUtils.hasText(query)) {
-            target.append('?').append(query);
+
+        String pathWithinProxy = requestUri;
+        String mappingPrefix = "/api/v1/comments";
+        if (pathWithinProxy.startsWith(mappingPrefix)) {
+            pathWithinProxy = pathWithinProxy.substring(mappingPrefix.length());
+        }
+        if (!pathWithinProxy.startsWith("/")) {
+            pathWithinProxy = "/" + pathWithinProxy;
         }
 
-        return URI.create(target.toString());
+        URI resolved = UriComponentsBuilder.fromUri(baseUri)
+                .replacePath(baseUri.getPath() + pathWithinProxy)
+                .replaceQuery(query)
+                .build(true)
+                .toUri()
+                .normalize();
+
+        if (!sameOrigin(baseUri, resolved)) {
+            throw new IllegalArgumentException("Resolved URI is outside configured origin");
+        }
+
+        String basePath = baseUri.getPath() == null ? "" : baseUri.getPath();
+        String resolvedPath = resolved.getPath() == null ? "" : resolved.getPath();
+        if (!resolvedPath.startsWith(basePath + "/") && !resolvedPath.equals(basePath)) {
+            throw new IllegalArgumentException("Resolved URI is outside configured path prefix");
+        }
+
+        return resolved;
+    }
+
+    private boolean sameOrigin(URI expectedBase, URI candidate) {
+        String expectedScheme = expectedBase.getScheme() == null ? "" : expectedBase.getScheme().toLowerCase(Locale.ROOT);
+        String candidateScheme = candidate.getScheme() == null ? "" : candidate.getScheme().toLowerCase(Locale.ROOT);
+
+        String expectedHost = expectedBase.getHost() == null ? "" : expectedBase.getHost().toLowerCase(Locale.ROOT);
+        String candidateHost = candidate.getHost() == null ? "" : candidate.getHost().toLowerCase(Locale.ROOT);
+
+        int expectedPort = expectedBase.getPort();
+        int candidatePort = candidate.getPort();
+
+        return expectedScheme.equals(candidateScheme)
+                && expectedHost.equals(candidateHost)
+                && expectedPort == candidatePort;
     }
 
     /**
