@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.proxy;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Locale;
 
@@ -57,12 +59,11 @@ public class CommentsProxyController {
     private static final int READ_TIMEOUT_MS = 15_000;
 
     private final RestTemplate restTemplate = buildRestTemplate();
-    private final String baseUrl;
     private final URI baseUri;
 
     public CommentsProxyController(@Value("${comments-service.base-url}") String baseUrl) {
-        this.baseUrl = trimTrailingSlash(baseUrl);
-        this.baseUri = URI.create(this.baseUrl);
+        String baseUrl1 = trimTrailingSlash(baseUrl);
+        this.baseUri = URI.create(baseUrl1);
     }
 
     @RequestMapping({"", "/**"})
@@ -203,7 +204,16 @@ public class CommentsProxyController {
     }
 
     private static RestTemplate buildRestTemplate() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        // Не следовать за редиректами апстрима: origin проверяется только на
+        // исходном URI, а 3xx мог бы увести запрос на внутренний адрес (SSRF).
+        // Прокси должен отдать редирект фронту, а не ходить по нему сам.
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(@NonNull HttpURLConnection connection, @NonNull String httpMethod) throws IOException {
+                super.prepareConnection(connection, httpMethod);
+                connection.setInstanceFollowRedirects(false);
+            }
+        };
         factory.setConnectTimeout(CONNECT_TIMEOUT_MS);
         factory.setReadTimeout(READ_TIMEOUT_MS);
 
@@ -214,7 +224,7 @@ public class CommentsProxyController {
         // превратиться в исключение и 500.
         template.setErrorHandler(new DefaultResponseErrorHandler() {
             @Override
-            public boolean hasError(ClientHttpResponse response) throws IOException {
+            public boolean hasError(@NonNull ClientHttpResponse response) {
                 return false;
             }
         });
