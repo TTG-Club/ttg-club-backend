@@ -22,6 +22,12 @@ public class User {
 	private String username;
 	private String password;
 	private String email;
+
+	// Отображаемое имя для комментариев (и прочих мест, где логин показывать не хочется).
+	// null — имя не задано, и везде показывается username. Колонку добавляет ddl-auto=update.
+	@Column(name = "display_name", length = 24)
+	private String displayName;
+
 	private LocalDateTime createDate;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)

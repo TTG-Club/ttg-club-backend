@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.item;
 
 import club.dnd5.portal.model.items.ArmorCategory;
+import club.dnd5.portal.model.items.Armor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,4 +29,18 @@ public class ArmorSaveApi {
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
+
+	public ArmorSaveApi(Armor armor) {
+		name = armor.getName();
+		englishName = armor.getEnglishName();
+		altName = armor.getAltName();
+		armorClass = armor.getAC();
+		cost = armor.getCost();
+		weight = armor.getWeight();
+		forceRequirements = armor.getForceRequirements();
+		stealthHindrance = armor.isStelsHindrance();
+		type = armor.getType();
+		description = armor.getDescription();
+		source = armor.getBook() == null ? null : armor.getBook().getSource();
+	}
 }

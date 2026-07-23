@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
 import club.dnd5.portal.model.classes.Option.OptionType;
+import club.dnd5.portal.model.classes.Option;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,4 +28,15 @@ public class OptionSaveApi {
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
+
+	public OptionSaveApi(Option option) {
+		name = option.getName();
+		englishName = option.getEnglishName();
+		altName = option.getAltName();
+		optionTypes = option.getOptionTypes();
+		prerequisite = option.getPrerequisite();
+		level = option.getLevel();
+		description = option.getDescription();
+		source = option.getBook() == null ? null : option.getBook().getSource();
+	}
 }

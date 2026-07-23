@@ -2,6 +2,8 @@ package club.dnd5.portal.dto.api.classes;
 
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.background.LifeStyle;
+import club.dnd5.portal.model.background.Background;
+import club.dnd5.portal.model.Language;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,4 +36,24 @@ public class BackgroundSaveApi {
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
+
+	public BackgroundSaveApi(Background background) {
+		name = background.getName();
+		englishName = background.getEnglishName();
+		altName = background.getAltName();
+		skills = background.getSkills();
+		otherSkills = background.getOtherSkills();
+		toolOwnership = background.getToolOwnership();
+		equipments = background.getEquipmentsText();
+		startGold = background.getStartMoney();
+		description = background.getDescription();
+		skillName = background.getSkillName();
+		skillDescription = background.getSkillDescription();
+		personalization = background.getPersonalization();
+		language = background.getLanguage();
+		languages = background.getLanguages() == null ? java.util.Collections.emptyList()
+			: background.getLanguages().stream().map(Language::getName).collect(java.util.stream.Collectors.toList());
+		lifeStyle = background.getLifeStyle();
+		source = background.getBook() == null ? null : background.getBook().getSource();
+	}
 }

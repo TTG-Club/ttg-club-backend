@@ -5,6 +5,8 @@ import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
+import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.model.classes.HeroClassTrait;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -50,4 +52,35 @@ public class ClassSaveApi {
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
+
+	public ClassSaveApi(HeroClass heroClass) {
+		this(heroClass, heroClass.getTraits());
+	}
+
+	public ClassSaveApi(HeroClass heroClass, List<HeroClassTrait> traits) {
+		name = heroClass.getName();
+		englishName = heroClass.getEnglishName();
+		accusativeName = heroClass.getAccusativeName();
+		description = heroClass.getDescription();
+		diceHp = heroClass.getDiceHp();
+		armor = heroClass.getArmor();
+		weapon = heroClass.getWeapon();
+		tools = heroClass.getTools();
+		savingThrows = heroClass.getSavingThrows();
+		archetypeName = heroClass.getArchetypeName();
+		equipment = heroClass.getEquipment();
+		spellAbility = heroClass.getSpellAbility();
+		spellcasterType = heroClass.getSpellcasterType();
+		primaryAbilities = heroClass.getPrimaryAbilities();
+		enabledArhitypeLevel = (short) heroClass.getEnabledArhitypeLevel();
+		skillAvailableCount = heroClass.getSkillAvailableCount();
+		availableSkills = heroClass.getAvailableSkills();
+		optionType = heroClass.getOptionType();
+		slotsReset = heroClass.getSlotsReset();
+		sidekick = heroClass.isSidekick();
+		icon = heroClass.getIcon();
+		page = heroClass.getPage();
+		classTraits = traits.stream().map(ClassTraitSaveApi::new).collect(java.util.stream.Collectors.toList());
+		source = heroClass.getBook() == null ? null : heroClass.getBook().getSource();
+	}
 }

@@ -123,9 +123,9 @@ public class ArmorApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Armor with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new ArmorSaveApi(armor));
 		applyArmorRequest(armor, request);
 		Armor saved = armorRepository.saveAndFlush(armor);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return new ArmorDetailApi(saved);
 	}
 

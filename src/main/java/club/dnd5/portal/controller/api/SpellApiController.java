@@ -269,10 +269,10 @@ public class SpellApiController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spell with the same englishName already exists");
 		}
 
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new SpellSaveApi(spell));
 		applySpellRequest(spell, request);
 		saveTimeCast(spell, request);
 		Spell saved = spellRepository.saveAndFlush(spell);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(getSpellDetail(saved));
 	}
 

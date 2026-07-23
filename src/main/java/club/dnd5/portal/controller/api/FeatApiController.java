@@ -145,9 +145,9 @@ public class FeatApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Feat with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new FeatSaveApi(trait));
 		applyFeatRequest(trait, request);
 		Trait saved = featRepository.saveAndFlush(trait);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(new FeatDetailApi(saved));
 	}
 
