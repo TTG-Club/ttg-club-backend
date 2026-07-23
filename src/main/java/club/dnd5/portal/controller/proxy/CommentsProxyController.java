@@ -134,20 +134,16 @@ public class CommentsProxyController {
      * Запрещаем любые попытки выйти за origin/prefix базового URL.
      */
     private URI targetUri(HttpServletRequest request) {
+        // Путь запроса ({@code /api/v1/comments/count}) форвардится в сервис как есть:
+        // base-url — это origin сервиса (без пути), а comments-service отдаёт публичный
+        // API под тем же префиксом {@code /api/v1/comments/**}. Префикс срезать нельзя —
+        // иначе в сервис уходит {@code /count}, которого у него нет, и security отвечает
+        // 401 (неизвестный путь требует авторизации) даже гостю.
         String requestUri = request.getRequestURI();
         String query = request.getQueryString();
 
-        String pathWithinProxy = requestUri;
-        String mappingPrefix = "/api/v1/comments";
-        if (pathWithinProxy.startsWith(mappingPrefix)) {
-            pathWithinProxy = pathWithinProxy.substring(mappingPrefix.length());
-        }
-        if (!pathWithinProxy.startsWith("/")) {
-            pathWithinProxy = "/" + pathWithinProxy;
-        }
-
         URI resolved = UriComponentsBuilder.fromUri(baseUri)
-                .replacePath(baseUri.getPath() + pathWithinProxy)
+                .replacePath(baseUri.getPath() + requestUri)
                 .replaceQuery(query)
                 .build(true)
                 .toUri()
