@@ -134,6 +134,7 @@ public class Creature implements FoundryCommon {
 	private List<Language> languages;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "creature_id")
 	private List<CreatureFeat> feats;
 
 	@ManyToMany(cascade = CascadeType.ALL)
@@ -269,11 +270,7 @@ public class Creature implements FoundryCommon {
 			.collect(Collectors.toList());
 	}
 
-	public List<Action> getActions(){
- 		return actions;
-	}
-
-	public Byte getSavingThrow(AbilityType abilityType) {
+    public Byte getSavingThrow(AbilityType abilityType) {
 		return savingThrows.stream()
 			.filter(st-> st.getAbility() == abilityType)
 			.map(SavingThrow::getBonus)
