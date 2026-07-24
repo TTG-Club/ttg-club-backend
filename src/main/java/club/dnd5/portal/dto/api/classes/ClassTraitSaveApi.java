@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.classes.HeroClassTrait;
+import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,4 +25,23 @@ public class ClassTraitSaveApi {
 	private String description;
 	private boolean optional;
 	private String child;
+
+	public ClassTraitSaveApi(HeroClassTrait trait) {
+		id = trait.getId();
+		name = trait.getName();
+		suffix = trait.getSuffix();
+		level = trait.getLevel();
+		description = trait.getDescription();
+		optional = trait.getOptional() != 0;
+		child = trait.getChild();
+	}
+
+	public ClassTraitSaveApi(ArchetypeTrait trait) {
+		id = trait.getId();
+		name = trait.getName();
+		suffix = trait.getSuffix();
+		level = trait.getLevel();
+		description = trait.getDescription();
+		child = trait.getChild();
+	}
 }

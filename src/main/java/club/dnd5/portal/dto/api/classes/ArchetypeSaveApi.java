@@ -2,6 +2,8 @@ package club.dnd5.portal.dto.api.classes;
 
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
+import club.dnd5.portal.model.classes.archetype.Archetype;
+import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,4 +26,20 @@ public class ArchetypeSaveApi {
 	private Option.OptionType optionType;
 	private Short page;
 	private List<ClassTraitSaveApi> traits;
+
+	public ArchetypeSaveApi(Archetype archetype) {
+		this(archetype, archetype.getFeats());
+	}
+
+	public ArchetypeSaveApi(Archetype archetype, List<ArchetypeTrait> archetypeTraits) {
+		name = archetype.getName();
+		englishName = archetype.getEnglishName();
+		genitiveName = archetype.getGenitiveName();
+		description = archetype.getDescription();
+		level = archetype.getLevel();
+		spellcasterType = archetype.getSpellcasterType();
+		optionType = archetype.getOptionType();
+		page = archetype.getPage();
+		traits = archetypeTraits.stream().map(ClassTraitSaveApi::new).collect(java.util.stream.Collectors.toList());
+	}
 }

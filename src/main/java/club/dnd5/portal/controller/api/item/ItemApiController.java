@@ -139,9 +139,9 @@ public class ItemApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new ItemSaveApi(item));
 		applyItemRequest(item, request);
 		Equipment saved = itemRepository.saveAndFlush(item);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return new ItemDetailApi(saved);
 	}
 

@@ -166,9 +166,9 @@ public class MagicItemApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Magic item with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new MagicItemSaveApi(item));
 		applyItemRequest(item, request);
 		MagicItem saved = magicItemRepository.saveAndFlush(item);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return new MagicItemDetailApi(saved);
 	}
 

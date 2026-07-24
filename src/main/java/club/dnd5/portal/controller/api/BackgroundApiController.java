@@ -131,9 +131,9 @@ public class BackgroundApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Background with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new BackgroundSaveApi(background));
 		applyBackgroundRequest(background, request);
 		Background saved = backgroundRepository.saveAndFlush(background);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(new BackgroundDetailApi(saved));
 	}
 

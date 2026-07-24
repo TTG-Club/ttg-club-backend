@@ -18,12 +18,14 @@ public class UserApi {
 	private String username;
 	private String name;
 	private String email;
+	private String displayName;
 	private List<String> roles;
 
 	public UserApi(User user) {
 		username = user.getUsername();
 		name = user.getName();
 		email = user.getEmail();
+		displayName = user.getDisplayName();
 		roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toList());
 	}
 }

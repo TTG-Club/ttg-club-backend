@@ -221,6 +221,8 @@ public class RacesApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Race with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE,
+			new RaceSaveApi(race, raceAbilityBonusRepository.findAllByRaceId(id), raceFeatureRepository.findAllByRaceId(id)));
 		applyRaceRequest(race, request);
 		Race saved = raceRepository.saveAndFlush(race);
 		syncAbilities(saved, request);
@@ -232,7 +234,6 @@ public class RacesApiController {
 		if (!images.isEmpty()) {
 			raceApi.setImages(images);
 		}
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(raceApi);
 	}
 

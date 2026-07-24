@@ -142,12 +142,13 @@ public class ClassApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Class with the same englishName already exists");
 		});
+		auditService.record(ENTITY_TYPE_CLASS, id, RevisionOperation.UPDATE,
+			new ClassSaveApi(heroClass, heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(id)));
 		applyClassRequest(heroClass, request);
 		HeroClass saved = classRepo.saveAndFlush(heroClass);
 		syncClassTraits(saved, request);
 		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.CLASS, saved.getId());
-		auditService.record(ENTITY_TYPE_CLASS, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(new ClassDetailApi(saved, images, new ClassRequestApi()));
 	}
 
@@ -194,6 +195,8 @@ public class ClassApiController {
 			.filter(existing -> !existing.getId().equals(id)).ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Archetype with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE_ARCHETYPE, id, RevisionOperation.UPDATE,
+			new ArchetypeSaveApi(archetype, archetypeTraitRepository.findAllByArchetypeId(id)));
 		archetype.setName(request.getName().trim()); archetype.setEnglishName(request.getEnglishName().trim());
 		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(request.getDescription().trim());
 		archetype.setLevel(request.getLevel()); archetype.setSpellcasterType(request.getSpellcasterType());
@@ -201,7 +204,6 @@ public class ClassApiController {
 		Archetype saved = archetypeRepository.saveAndFlush(archetype);
 		syncArchetypeTraits(saved, request);
 		saved.setFeats(archetypeTraitRepository.findAllByArchetypeId(saved.getId()));
-		auditService.record(ENTITY_TYPE_ARCHETYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return new ArchetypeEditApi(saved);
 	}
 

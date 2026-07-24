@@ -66,6 +66,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         	.antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
         	.antMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
         	.antMatchers("/api/v1/auth/**").permitAll()
+        	// Прокси комментариев (CommentsProxyController): контроль доступа целиком
+        	// на стороне сервиса comments.ttg.club (он проверяет тот же SSO-JWT).
+        	// Явное правило нужно ради DELETE — остальные методы уже открыты выше.
+        	.antMatchers("/api/v1/comments/**").permitAll()
         	// Трекер инициативы: анонимный доступ разрешён (создание анонимного трекера и работа
         	// по ключу X-Tracker-Key); контроль доступа — в сервисе (владелец по JWT либо ключ).
         	.antMatchers("/api/v2/tools/initiative/**").permitAll()

@@ -2,6 +2,9 @@ package club.dnd5.portal.dto.api.races;
 
 import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.CreatureType;
+import club.dnd5.portal.model.races.Race;
+import club.dnd5.portal.model.AbilityBonus;
+import club.dnd5.portal.model.races.Feature;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,4 +50,32 @@ public class RaceSaveApi {
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
+
+	public RaceSaveApi(Race race) {
+		this(race, race.getBonuses(), race.getFeatures());
+	}
+
+	public RaceSaveApi(Race race, List<AbilityBonus> raceAbilities, List<Feature> raceFeatures) {
+		name = race.getName();
+		altName = race.getAltName();
+		englishName = race.getEnglishName();
+		minAge = race.getMinAge();
+		maxAge = race.getMaxAge();
+		description = race.getDescription();
+		parentId = race.getParent() == null ? null : race.getParent().getId();
+		size = race.getSize();
+		type = race.getType();
+		darkvision = race.getDarkvision();
+		speed = race.getSpeed();
+		fly = race.getFly();
+		climb = race.getClimb();
+		swim = race.getSwim();
+		origin = race.getOrigin();
+		view = race.isView();
+		icon = race.getIcon();
+		page = race.getPage();
+		abilities = raceAbilities.stream().map(RaceAbilitySaveApi::new).collect(java.util.stream.Collectors.toList());
+		features = raceFeatures.stream().map(RaceFeatureSaveApi::new).collect(java.util.stream.Collectors.toList());
+		source = race.getBook() == null ? null : race.getBook().getSource();
+	}
 }

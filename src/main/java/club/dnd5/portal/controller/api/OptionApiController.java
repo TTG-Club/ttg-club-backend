@@ -148,9 +148,9 @@ public class OptionApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Option with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new OptionSaveApi(option));
 		applyOptionRequest(option, request);
 		Option saved = optionRepository.saveAndFlush(option);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return ResponseEntity.ok(new OptionDetailApi(saved));
 	}
 

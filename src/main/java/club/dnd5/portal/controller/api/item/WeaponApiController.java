@@ -150,9 +150,9 @@ public class WeaponApiController {
 			.ifPresent(existing -> {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Weapon with the same englishName already exists");
 			});
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new WeaponSaveApi(weapon));
 		applyWeaponRequest(weapon, request);
 		Weapon saved = weaponRepository.saveAndFlush(weapon);
-		auditService.record(ENTITY_TYPE, saved.getId(), RevisionOperation.UPDATE, request);
 		return new WeaponDetailApi(saved);
 	}
 
