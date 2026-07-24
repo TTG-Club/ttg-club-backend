@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -27,15 +28,25 @@ public class ExternalAuthClient {
     private static final String FRONTEND_ORIGIN_HEADER = "X-Frontend-Origin";
     private static final Pattern TOKEN_PATTERN = Pattern.compile("^[A-Za-z0-9._-]{1,2048}$");
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final String baseUrl;
     private final String frontendOrigin;
 
     public ExternalAuthClient(
             @Value("${auth-service.base-url}") String baseUrl,
-            @Value("${app.url:}") String frontendOrigin) {
+            @Value("${app.url:}") String frontendOrigin,
+            @Value("${auth-service.connect-timeout-ms:2000}") int connectTimeoutMs,
+            @Value("${auth-service.read-timeout-ms:4000}") int readTimeoutMs) {
         this.baseUrl = trimTrailingSlash(baseUrl);
         this.frontendOrigin = trimTrailingSlash(frontendOrigin);
+        this.restTemplate = buildRestTemplate(connectTimeoutMs, readTimeoutMs);
+    }
+
+    private static RestTemplate buildRestTemplate(int connectTimeoutMs, int readTimeoutMs) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(connectTimeoutMs);
+        factory.setReadTimeout(readTimeoutMs);
+        return new RestTemplate(factory);
     }
 
     public JWTAuthResponse login(LoginDto loginDto) {

@@ -32,7 +32,10 @@ public class UserApiController {
 				return ResponseEntity.ok(true);
 			}
 		}
-		return ResponseEntity.ok(false);
+		// 401 (а не 200 false), чтобы фронтовый refresh-интерсептор мог прозрачно продлить
+		// протухший access-токен. Иначе status-проверки молча разлогинивали пользователя,
+		// у которого ещё жив refresh-токен.
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	}
 
 	@GetMapping("/info")
