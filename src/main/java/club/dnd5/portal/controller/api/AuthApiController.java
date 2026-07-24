@@ -123,7 +123,10 @@ public class AuthApiController {
 		ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, value)
 				.httpOnly(true)
 				.secure(secure)
-				.sameSite("Strict")
+				// Lax, а не Strict: при переходе на сайт по внешней ссылке Strict не отдаёт куку
+				// на первую навигацию — пользователь видит «разлогин»-мигание. Lax это устраняет,
+				// оставаясь защитой от CSRF (кука не уходит на кросс-сайтовых POST/подзапросах).
+				.sameSite("Lax")
 				.path(path);
 		if (maxAge >= 0) {
 			builder.maxAge(maxAge);

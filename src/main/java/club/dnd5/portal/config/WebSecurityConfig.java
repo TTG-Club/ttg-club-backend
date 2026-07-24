@@ -5,6 +5,7 @@ import club.dnd5.portal.security.AuthServiceAuthenticationFilter;
 import club.dnd5.portal.security.ExternalAuthClient;
 import club.dnd5.portal.security.ExternalAuthUserSynchronizer;
 import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
+import club.dnd5.portal.security.TokenAuthenticationCache;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
@@ -42,9 +43,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	@Value("${allowed-origin-patterns}")
 	private String[] originPatterns;
 
+	// Как долго провалидированный токен считается свежим и не перепроверяется в SSO.
+	@Value("${auth-service.cache.fresh-ttl-ms:60000}")
+	private long tokenCacheFreshTtlMs;
+
+	// До какого возраста провалидированный токен можно использовать как fallback при недоступности SSO.
+	@Value("${auth-service.cache.stale-ttl-ms:600000}")
+	private long tokenCacheStaleTtlMs;
+
+	@Value("${auth-service.cache.max-entries:20000}")
+	private int tokenCacheMaxEntries;
+
+    @Bean
+    public TokenAuthenticationCache tokenAuthenticationCache() {
+        return new TokenAuthenticationCache(tokenCacheFreshTtlMs, tokenCacheStaleTtlMs, tokenCacheMaxEntries);
+    }
+
     @Bean
     public AuthServiceAuthenticationFilter authServiceAuthenticationFilter(){
-        return new AuthServiceAuthenticationFilter(externalAuthClient, userSynchronizer);
+        return new AuthServiceAuthenticationFilter(externalAuthClient, userSynchronizer, tokenAuthenticationCache());
 	}
 
 	@Override
