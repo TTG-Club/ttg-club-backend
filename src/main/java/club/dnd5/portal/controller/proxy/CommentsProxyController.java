@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  * Прокси публичного API сервиса комментариев (comments.ttg.club).
@@ -57,6 +58,19 @@ public class CommentsProxyController {
 
     private static final int CONNECT_TIMEOUT_MS = 5_000;
     private static final int READ_TIMEOUT_MS = 15_000;
+
+    // Allowlist пути форварда: префикс контроллера плюс сегменты из букв/цифр и
+    // `-._~`. Каждый сегмент обязан начинаться с буквы или цифры — это отсекает
+    // `..` (в том числе одиночную точку в начале сегмента) и любой скрытый обход
+    // каталога. Завершающий слэш допустим.
+    private static final Pattern SAFE_FORWARD_PATH =
+            Pattern.compile("/api/v1/comments(?:/[A-Za-z0-9][A-Za-z0-9._~-]*)*/?");
+
+    // Allowlist query: набор символов, легальных в query по RFC 3986 (pchar плюс
+    // `/?`), включая процент-кодирование. Пробелы, управляющие символы и всё, что
+    // способно повлиять на разбор URL, сюда не входят и отклоняются.
+    private static final Pattern SAFE_FORWARD_QUERY =
+            Pattern.compile("[A-Za-z0-9._~!$&'()*+,;=:@/?%-]*");
 
     private final RestTemplate restTemplate = buildRestTemplate();
     private final URI baseUri;
@@ -141,6 +155,18 @@ public class CommentsProxyController {
         // 401 (неизвестный путь требует авторизации) даже гостю.
         String requestUri = request.getRequestURI();
         String query = request.getQueryString();
+
+        // Валидация пользовательского ввода allowlist-ом ДО того, как он попадёт
+        // в исходящий URI: отсекаем символы, способные изменить authority
+        // (`:@`, обратный слэш, whitespace, управляющие) и обход каталога (`..`).
+        // Несовпадение — 400 (см. catch в forward). Это же обрывает поток
+        // «пользовательский ввод → URL» для статического анализа (SSRF).
+        if (!SAFE_FORWARD_PATH.matcher(requestUri).matches()) {
+            throw new IllegalArgumentException("Request path is not allowed");
+        }
+        if (query != null && !SAFE_FORWARD_QUERY.matcher(query).matches()) {
+            throw new IllegalArgumentException("Query string is not allowed");
+        }
 
         URI resolved = UriComponentsBuilder.fromUri(baseUri)
                 .replacePath(baseUri.getPath() + requestUri)
