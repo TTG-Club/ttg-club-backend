@@ -7,6 +7,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +18,21 @@ import java.sql.SQLException;
 
 @RestControllerAdvice(basePackages = "club.dnd5.portal.controller.api")
 public class ApiExceptionHandler {
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ApiErrorResponse> handleValidationException(
+		MethodArgumentNotValidException exception,
+		HttpServletRequest request
+	) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		String message = exception.getBindingResult().getFieldErrors().stream()
+			.findFirst()
+			.map(error -> error.getField() + ": " + error.getDefaultMessage())
+			.orElse("Request validation failed");
+		return ResponseEntity
+			.status(status)
+			.body(new ApiErrorResponse(status.value(), status.getReasonPhrase(), message, request.getRequestURI()));
+	}
+
 	@ExceptionHandler(ApiException.class)
 	public ResponseEntity<ApiErrorResponse> handleApiException(
 		ApiException exception,

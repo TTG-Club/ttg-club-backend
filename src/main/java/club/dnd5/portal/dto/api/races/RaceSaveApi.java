@@ -5,6 +5,7 @@ import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.races.Feature;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class RaceSaveApi {
 	private Integer minAge;
 	private Integer maxAge;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	private Integer parentId;
 	@NotNull

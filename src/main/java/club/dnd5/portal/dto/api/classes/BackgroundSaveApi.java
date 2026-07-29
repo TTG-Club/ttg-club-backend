@@ -4,6 +4,7 @@ import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.background.LifeStyle;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.Language;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,9 +27,12 @@ public class BackgroundSaveApi {
 	private String equipments;
 	private Integer startGold;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	private String skillName;
+	@ValidHtml
 	private String skillDescription;
+	@ValidHtml
 	private String personalization;
 	private String language;
 	private List<String> languages;

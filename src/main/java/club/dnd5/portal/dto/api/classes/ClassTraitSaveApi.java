@@ -2,6 +2,7 @@ package club.dnd5.portal.dto.api.classes;
 
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class ClassTraitSaveApi {
 	@Max(20)
 	private byte level;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	private boolean optional;
 	private String child;

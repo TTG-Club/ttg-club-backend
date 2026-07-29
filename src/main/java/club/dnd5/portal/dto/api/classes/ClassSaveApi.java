@@ -7,10 +7,12 @@ import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -26,6 +28,7 @@ public class ClassSaveApi {
 	private String englishName;
 	private String accusativeName;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	@Min(1)
 	@Max(20)
@@ -48,6 +51,7 @@ public class ClassSaveApi {
 	private boolean sidekick;
 	private String icon;
 	private Short page;
+	@Valid
 	private List<ClassTraitSaveApi> classTraits;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */

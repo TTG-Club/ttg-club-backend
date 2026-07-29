@@ -3,6 +3,7 @@ package club.dnd5.portal.dto.api.classes;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.trait.Trait;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class FeatSaveApi {
 	private Integer level;
 	private String requirement;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	private List<AbilityType> abilities;
 	private List<SkillType> skills;

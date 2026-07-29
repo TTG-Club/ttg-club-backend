@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.wiki;
 
 import club.dnd5.portal.model.rule.Rule;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class RuleSaveApi {
 	@NotBlank
 	private String type;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	private String source;
 	private Short page;

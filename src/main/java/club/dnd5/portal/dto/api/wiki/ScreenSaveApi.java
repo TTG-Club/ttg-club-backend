@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.wiki;
 
 import club.dnd5.portal.model.screen.Screen;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class ScreenSaveApi {
 	private String englishName;
 	private String altName;
 	private String category;
+	@ValidHtml
 	private String description;
 	private String icon;
 	private Integer order;

@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.bestiary.request;
 
 import club.dnd5.portal.dto.api.classes.NameApi;
+import club.dnd5.portal.validation.ValidHtml;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ public class DescriptionRequest  {
     @Schema(description = "название", required = true)
     private NameApi name;
     @Schema(description = "описание", required = true)
+    @ValidHtml
     private String description;
     @Schema(description = "используется markdown")
     private Boolean markdown;

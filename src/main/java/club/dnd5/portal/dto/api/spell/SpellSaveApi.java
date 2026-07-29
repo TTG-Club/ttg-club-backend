@@ -4,6 +4,7 @@ import club.dnd5.portal.model.TimeUnit;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.splells.TimeCast;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -54,8 +55,10 @@ public class SpellSaveApi {
 	private String duration;
 
 	@NotBlank
+	@ValidHtml
 	private String description;
 
+	@ValidHtml
 	private String upper;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */

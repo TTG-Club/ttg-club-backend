@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.races;
 
 import club.dnd5.portal.model.races.Feature;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class RaceFeatureSaveApi {
 	private String name;
 	private String englishName;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	private boolean feature;
 	private Integer replaceFeatureId;
