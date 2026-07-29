@@ -126,6 +126,7 @@ public class SpaController {
 		"/workshop/races/create",
 		"/workshop/races/{name}/edit",
 		"/workshop/rules/{name}/edit",
+		"/workshop/screens/{name}/edit",
 		"/workshop/spells",
 		"/workshop/spells/create",
 		"/workshop/spells/{name}/edit",

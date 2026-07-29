@@ -19,17 +19,27 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ScreenDetailApi extends ScreenApi {
+	private Integer id;
+	private String altName;
+	private String category;
     private String description;
     private ScreenDetailApi parent;
     private List<ScreenApi> chields;
 
     public ScreenDetailApi(Screen screen) {
+		id = screen.getId();
+		altName = screen.getAltName();
+		category = screen.getCategory();
         name = new NameApi(screen.getName(), screen.getEnglishName());
         url = String.format("/screens/%s", screen.getUrlName());
         order = screen.getOrdering();
+		setIcon(screen.getIcon());
+		setGroup(screen.getCategory());
+		if (Objects.nonNull(screen.getBook())) {
+			source = new SourceApi(screen.getBook());
+		}
 
         if (Objects.nonNull(screen.getParent())) {
-            source = new SourceApi(screen.getBook());
             description = screen.getDescription();
             parent = new ScreenDetailApi(screen.getParent());
             parent.setDescription(null);
