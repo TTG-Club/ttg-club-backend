@@ -4,10 +4,12 @@ import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -20,12 +22,12 @@ public class ArchetypeSaveApi {
 	@NotBlank private String name;
 	@NotBlank private String englishName;
 	private String genitiveName;
-	@NotBlank private String description;
+	@NotBlank @ValidHtml private String description;
 	@Min(1) @Max(20) private byte level;
 	private SpellcasterType spellcasterType;
 	private Option.OptionType optionType;
 	private Short page;
-	private List<ClassTraitSaveApi> traits;
+	@Valid private List<ClassTraitSaveApi> traits;
 
 	public ArchetypeSaveApi(Archetype archetype) {
 		this(archetype, archetype.getFeats());

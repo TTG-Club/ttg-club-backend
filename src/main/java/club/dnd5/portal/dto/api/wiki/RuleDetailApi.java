@@ -15,15 +15,19 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RuleDetailApi extends RuleApi {
+	private Integer id;
+	private String altName;
 	private String description;
 	private String type;
 	private SourceApi source;
 	
 	public RuleDetailApi(Rule rule) {
 		super(rule);
+		id = rule.getId();
+		altName = rule.getAltName();
 		url = null;
 		description = rule.getDescription();
 		type = rule.getType();
-		source = new SourceApi(rule.getBook());
+		source = new SourceApi(rule.getBook(), rule.getPage());
 	}
 }

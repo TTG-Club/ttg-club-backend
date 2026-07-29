@@ -3,6 +3,7 @@ package club.dnd5.portal.dto.api.item;
 import club.dnd5.portal.model.items.MagicThingType;
 import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.items.MagicItem;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,9 +25,12 @@ public class MagicItemSaveApi {
 	@NotNull
 	private MagicThingType type;
 	private Boolean customization;
+	@ValidHtml
 	private String custSpecial;
+	@ValidHtml
 	private String special;
 	@NotBlank
+	@ValidHtml
 	private String description;
 	private Boolean consumed;
 	private Integer charge;

@@ -5,6 +5,7 @@ import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.items.Currency;
 import club.dnd5.portal.model.items.WeaponType;
 import club.dnd5.portal.model.items.Weapon;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,7 +37,9 @@ public class WeaponSaveApi {
 	private Short maxDistance;
 	private List<Integer> properties;
 	private Byte ammo;
+	@ValidHtml
 	private String description;
+	@ValidHtml
 	private String special;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */

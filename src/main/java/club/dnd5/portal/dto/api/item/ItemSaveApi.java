@@ -3,6 +3,7 @@ package club.dnd5.portal.dto.api.item;
 import club.dnd5.portal.model.items.Currency;
 import club.dnd5.portal.model.items.EquipmentType;
 import club.dnd5.portal.model.items.Equipment;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class ItemSaveApi {
 	private Integer cost;
 	private Currency currency;
 	private Float weight;
+	@ValidHtml
 	private String description;
 	private List<EquipmentType> categories;
 

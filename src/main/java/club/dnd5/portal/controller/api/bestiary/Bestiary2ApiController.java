@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class Bestiary2ApiController {
     @Secured({"ADMIN"})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/bestiary")
-    public BeastDetailApi createBeast(@RequestBody BeastDetailRequest request) {
+    public BeastDetailApi createBeast(@Valid @RequestBody BeastDetailRequest request) {
         return bestiaryService.create(request);
     }
 
@@ -49,7 +50,7 @@ public class Bestiary2ApiController {
     @SecurityRequirement(name = "Bearer Authentication")
     @Secured({"ADMIN"})
     @PutMapping("/bestiary")
-    public BeastDetailApi updateBeast(@RequestBody BeastDetailRequest request) {
+    public BeastDetailApi updateBeast(@Valid @RequestBody BeastDetailRequest request) {
         return bestiaryService.update(request);
     }
 }

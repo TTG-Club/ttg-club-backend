@@ -2,6 +2,7 @@ package club.dnd5.portal.dto.api.classes;
 
 import club.dnd5.portal.model.classes.Option.OptionType;
 import club.dnd5.portal.model.classes.Option;
+import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,7 @@ public class OptionSaveApi {
 	private String prerequisite;
 	private Integer level;
 	@NotBlank
+	@ValidHtml
 	private String description;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
