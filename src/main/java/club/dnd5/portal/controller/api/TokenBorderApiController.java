@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +35,7 @@ public class TokenBorderApiController {
 	@Operation(summary = "Создание границы токена")
 	@ResponseStatus(HttpStatus.CREATED)
 	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured("ADMIN")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping
 	public TokenBorder createTokenBorder(@RequestBody TokenBorder tokenBorder) {
 		return tokenBorderService.createTokenBorder(tokenBorder);
@@ -44,7 +44,7 @@ public class TokenBorderApiController {
 	@Operation(summary = "Обновление границы токена")
 	@ResponseStatus(HttpStatus.OK)
 	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured("ADMIN")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping
 	public TokenBorder updateTokenBorder(@RequestBody TokenBorder tokenBorder) {
 		return tokenBorderService.updateTokenBorder(tokenBorder);
@@ -53,7 +53,7 @@ public class TokenBorderApiController {
 	@Operation(summary = "Удаление границы токена по id")
 	@ResponseStatus(HttpStatus.OK)
 	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured("ADMIN")
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public void deleteTokenBorder(@PathVariable Long id) {
 		tokenBorderService.deleteTokenBorderById(id);
@@ -62,7 +62,7 @@ public class TokenBorderApiController {
 	@Operation(summary = "Сохранения файла и получения url")
 	@ResponseStatus(HttpStatus.CREATED)
 	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured("ADMIN")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping(value = "/upload",consumes = {"multipart/form-data"} )
 	public String uploadTokenBorder(@RequestParam("file") MultipartFile multipartFile) {
 		return tokenBorderService.storeTokenBorder(multipartFile);

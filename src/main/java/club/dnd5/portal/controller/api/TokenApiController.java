@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,7 +79,7 @@ public class TokenApiController {
 	}
 
 	@Operation(summary = "Добавление токена")
-	@Secured({"ADMIN"})
+	@PreAuthorize("hasRole('ADMIN')")
 	@SecurityRequirement(name = "Bearer Authentication")
 	@ResponseStatus(HttpStatus.CREATED)
 	@Transactional
@@ -123,7 +123,7 @@ public class TokenApiController {
 
 	@Operation(summary = "Удаление токена")
 	@SecurityRequirement(name = "Bearer Authentication")
-	@Secured("ADMIN")
+	@PreAuthorize("hasRole('ADMIN')")
 	@Transactional
 	@ResponseStatus(HttpStatus.OK)
 	@DeleteMapping("{id}")
