@@ -183,7 +183,7 @@ public class ClassApiController {
 		HeroClass heroClass = classRepo.findByEnglishName(className.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
 		Archetype archetype = archetypeRepository.findByHeroClassIdAndEnglishNameIgnoreCase(heroClass.getId(), archetypeName.replace('_', ' '))
 			.orElseThrow(PageNotFoundException::new);
-		return new ArchetypeEditApi(archetype);
+		return new ArchetypeEditApi(archetype, archetypeTraitRepository.findAllByArchetypeId(archetype.getId()));
 	}
 
 	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
@@ -203,8 +203,7 @@ public class ClassApiController {
 		archetype.setOptionType(request.getOptionType()); archetype.setPage(request.getPage());
 		Archetype saved = archetypeRepository.saveAndFlush(archetype);
 		syncArchetypeTraits(saved, request);
-		saved.setFeats(archetypeTraitRepository.findAllByArchetypeId(saved.getId()));
-		return new ArchetypeEditApi(saved);
+		return new ArchetypeEditApi(saved, archetypeTraitRepository.findAllByArchetypeId(saved.getId()));
 	}
 
 	@Operation(summary = "История изменений архетипа")
