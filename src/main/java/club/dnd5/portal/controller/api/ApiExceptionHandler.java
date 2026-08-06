@@ -7,6 +7,8 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -63,6 +65,19 @@ public class ApiExceptionHandler {
 		return ResponseEntity
 			.status(status)
 			.body(new ApiErrorResponse(status.value(), status.getReasonPhrase(), getMostSpecificMessage(exception), request.getRequestURI()));
+	}
+
+	/**
+	 * Ошибки безопасности не должны попадать в общий обработчик ниже: иначе отказ доступа
+	 * превращается в 500, Spring Security его не видит, а фронт не получает 401 и не обновляет
+	 * протухший токен — пользователь выглядит разлогиненным при сохранении контента.
+	 *
+	 * <p>Пробрасываем исключение дальше: {@code ExceptionTranslationFilter} отдаст анониму 401
+	 * (фронт обновит токен и повторит запрос), а авторизованному без нужной роли — 403.
+	 */
+	@ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
+	public void rethrowSecurityException(RuntimeException exception) {
+		throw exception;
 	}
 
 	@ExceptionHandler(Exception.class)
