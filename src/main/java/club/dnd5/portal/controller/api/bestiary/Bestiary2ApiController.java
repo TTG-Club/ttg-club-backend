@@ -39,7 +39,7 @@ public class Bestiary2ApiController {
 
     @Operation(summary = "Добавление существа в бестиарий")
     @SecurityRequirement(name = "Bearer Authentication")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/bestiary")
     public BeastDetailApi createBeast(@Valid @RequestBody BeastDetailRequest request) {
@@ -48,7 +48,7 @@ public class Bestiary2ApiController {
 
     @Operation(summary = "Обновление существа из бестиарии")
     @SecurityRequirement(name = "Bearer Authentication")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
     @PutMapping("/bestiary")
     public BeastDetailApi updateBeast(@Valid @RequestBody BeastDetailRequest request) {
         return bestiaryService.update(request);
