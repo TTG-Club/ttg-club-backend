@@ -52,6 +52,7 @@ public class ClassDetailApi extends ClassApi {
 	private int enabledArhitypeLevel;
 	private Short page;
 	private Collection<ClassTraitApi> classTraits;
+	private Collection<FeatureLevelSaveApi> tableColumns;
 	private Collection<ArchetypeSpellLevelApi> archetypeSpells;
 
 	public ClassDetailApi(HeroClass heroClass, Collection<String> images, ClassRequestApi request) {
@@ -74,6 +75,9 @@ public class ClassDetailApi extends ClassApi {
 				.filter(trait -> !trait.isArchitype())
 				.map(ClassTraitApi::new)
 				.collect(Collectors.toList());
+		tableColumns = heroClass.getFeatureLevelDefenitions() == null
+			? Collections.emptyList()
+			: heroClass.getFeatureLevelDefenitions().stream().map(FeatureLevelSaveApi::new).collect(Collectors.toList());
 		tabs.add(new ClassTabAp("Навыки", String.format("/classes/fragment/%s", heroClass.getUrlName()), "traits", 0, true));
 		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/description", heroClass.getUrlName()), "description", 1, true));
 		if (heroClass.getSpellcasterType() != null && heroClass.getSpellcasterType() != SpellcasterType.NONE) {

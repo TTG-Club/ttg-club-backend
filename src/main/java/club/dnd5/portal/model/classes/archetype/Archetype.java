@@ -48,7 +48,7 @@ public class Archetype {
 	@JoinColumn(name = "archetype_id")
 	private List<SpellLevelDefinition> levelDefenitions;
 
-	@OneToMany()
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "archetype_id")
 	private List<FeatureLevelDefinition> featureLevelDefenitions;
 

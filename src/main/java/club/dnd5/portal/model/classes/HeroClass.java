@@ -38,7 +38,7 @@ public class HeroClass {
 	@JoinColumn(name = "hero_class_id")
 	private List<SpellLevelDefinition> levelDefenitions;
 
-	@OneToMany()
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "hero_class_id")
 	private List<FeatureLevelDefinition> featureLevelDefenitions;
 
