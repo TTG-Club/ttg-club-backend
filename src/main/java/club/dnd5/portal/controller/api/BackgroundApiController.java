@@ -16,6 +16,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.background.Background;
+import club.dnd5.portal.model.background.Personalization;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.splells.Spell;
@@ -204,6 +205,17 @@ public class BackgroundApiController {
 		background.setSkillName(trimToNull(request.getSkillName()));
 		background.setSkillDescription(trimToNull(request.getSkillDescription()));
 		background.setPersonalization(trimToNull(request.getPersonalization()));
+		if (request.getPersonalizationTables() != null) {
+			List<Personalization> personalizations = request.getPersonalizationTables().stream()
+				.flatMap(table -> table.toPersonalizations().stream())
+				.collect(Collectors.toList());
+			if (background.getPersonalizations() == null) {
+				background.setPersonalizations(personalizations);
+			} else {
+				background.getPersonalizations().clear();
+				background.getPersonalizations().addAll(personalizations);
+			}
+		}
 		background.setLanguage(trimToNull(request.getLanguage()));
 		background.setLifeStyle(request.getLifeStyle());
 		background.setLanguages(request.getLanguages() == null || request.getLanguages().isEmpty()

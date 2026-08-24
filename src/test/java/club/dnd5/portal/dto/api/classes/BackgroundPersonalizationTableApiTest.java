@@ -27,11 +27,28 @@ class BackgroundPersonalizationTableApiTest {
 		);
 
 		assertEquals(PersonalizationType.TRAIT.getName(), table.getName());
+		assertEquals(PersonalizationType.TRAIT, table.getType());
 		assertEquals("к2", table.getFormula());
 		assertEquals(PersonalizationType.TRAIT.getName(), table.getThead()[0]);
 		ArrayList<Collection<String>> rows = new ArrayList<>(table.getTbody());
 		assertEquals(Arrays.asList("1", "Первый результат"), rows.get(0));
 		assertEquals(Arrays.asList("2", "Второй результат"), rows.get(1));
+	}
+
+	@Test
+	void mapsPersonalizationsToEditableTables() {
+		Background background = new Background();
+		background.setPersonalizations(Arrays.asList(
+			personalization(PersonalizationType.TRAIT, " Первая черта "),
+			personalization(PersonalizationType.TRAIT, "Вторая черта")
+		));
+
+		BackgroundSaveApi saveApi = new BackgroundSaveApi(background);
+		BackgroundPersonalizationTableSaveApi table = saveApi.getPersonalizationTables().get(0);
+
+		assertEquals(PersonalizationType.TRAIT, table.getType());
+		assertEquals(Arrays.asList(" Первая черта ", "Вторая черта"), table.getValues());
+		assertEquals("Первая черта", table.toPersonalizations().get(0).getText());
 	}
 
 	@Test
