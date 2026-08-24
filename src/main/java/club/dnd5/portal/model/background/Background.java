@@ -56,7 +56,7 @@ public class Background {
 
 	private int startMoney;
 
-	@OneToMany
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "background_id")
 	private List<Personalization> personalizations;
 

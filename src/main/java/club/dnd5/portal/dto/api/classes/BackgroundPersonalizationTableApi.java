@@ -14,12 +14,14 @@ import java.util.List;
 @Getter
 @Setter
 public class BackgroundPersonalizationTableApi {
+	private PersonalizationType type;
 	private String name;
 	private String formula;
 	private String[] thead = new String[1];
 	private Collection<Collection<String>> tbody;
 
 	public BackgroundPersonalizationTableApi(PersonalizationType type, List<Personalization> values) {
+		this.type = type;
 		name = type.getName();
 		formula = String.format("к%d", values.size());
 		thead[0] = name;
