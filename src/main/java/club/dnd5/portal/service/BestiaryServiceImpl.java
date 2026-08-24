@@ -300,7 +300,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setSkills(replaceAll(beast.getSkills(), mapSkills(request.getSkills())));
         beast.setFeats(replaceAll(beast.getFeats(), mapFeats(request.getFeats())));
         beast.setActions(mapActions(request));
-        beast.setLanguages(mapLanguages(request.getLanguages()));
+        mapLanguages(beast, request);
         beast.setRaces(mapTags(request.getTags()));
         bookResolver.find(request.getSource()).ifPresent(beast::setBook);
     }
@@ -507,11 +507,26 @@ public class BestiaryServiceImpl implements BestiaryService {
         return action;
     }
 
-    private List<Language> mapLanguages(Collection<String> languages) {
-        if (languages == null || languages.isEmpty()) {
-            return new ArrayList<>();
+    private void mapLanguages(Creature beast, BeastDetailRequest request) {
+        List<String> requestedLanguages = nullToEmpty(request.getLanguages()).stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .distinct()
+                .collect(Collectors.toList());
+        List<Language> knownLanguages = requestedLanguages.isEmpty()
+                ? new ArrayList<>()
+                : languageRepository.findByNameIn(requestedLanguages);
+        Set<String> knownNames = knownLanguages.stream()
+                .map(Language::getName)
+                .collect(Collectors.toSet());
+        List<String> customLanguages = requestedLanguages.stream()
+                .filter(language -> !knownNames.contains(language))
+                .collect(Collectors.toList());
+        if (StringUtils.hasText(request.getLanguage())) {
+            customLanguages.add(0, request.getLanguage().trim());
         }
-        return languageRepository.findByNameIn(languages);
+        beast.setLanguages(knownLanguages);
+        beast.setLanguage(customLanguages.isEmpty() ? null : String.join(", ", customLanguages));
     }
 
     private List<CreatureRace> mapTags(Collection<String> tags) {

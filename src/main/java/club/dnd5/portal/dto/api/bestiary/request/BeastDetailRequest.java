@@ -67,6 +67,8 @@ public class BeastDetailRequest {
 	private SenseApi senses;
 	@Schema(description = "Языки")
 	private Collection<String> languages;
+	@Schema(description = "Языки свободным текстом")
+	private String language;
 	@Schema(description = "Уровень опасности", required = true)
 	private String challengeRating;
 	@Schema(description = "Особенности")

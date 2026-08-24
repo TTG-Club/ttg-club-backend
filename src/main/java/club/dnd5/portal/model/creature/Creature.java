@@ -132,6 +132,8 @@ public class Creature implements FoundryCommon {
 
 	@ManyToMany
 	private List<Language> languages;
+	@Column(columnDefinition = "TEXT")
+	private String language;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "creature_id")
