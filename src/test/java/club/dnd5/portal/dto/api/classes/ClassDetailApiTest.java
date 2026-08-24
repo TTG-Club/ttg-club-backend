@@ -7,6 +7,7 @@ import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
+import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.splells.Spell;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ClassDetailApiTest {
 	@Test
-	void exposesArchetypeSpellsGroupedByCharacterLevel() {
+	void exposesArchetypeSpellsWithExplicitLevelType() {
 		HeroClass heroClass = baseClass();
 		Archetype archetype = baseArchetype(heroClass);
+		archetype.setSpellLevelType(ArchetypeSpellLevelType.SPELL_LEVEL);
 		archetype.setSpells(Arrays.asList(
 			archetypeSpell(3, "Щит", "Shield", "всегда подготовлено"),
 			archetypeSpell(1, "Свет", "Light", null),
@@ -32,8 +34,11 @@ class ClassDetailApiTest {
 		));
 
 		ClassDetailApi details = new ClassDetailApi(archetype, Collections.emptyList(), new ClassRequestApi());
-		List<ClassDetailApi.ArchetypeSpellLevelApi> levels = new ArrayList<>(details.getArchetypeSpells());
+		ClassDetailApi.ArchetypeSpellTableApi table = details.getArchetypeSpellTable();
+		List<ClassDetailApi.ArchetypeSpellLevelApi> levels = new ArrayList<>(table.getLevels());
 
+		assertEquals(ArchetypeSpellLevelType.SPELL_LEVEL, table.getLevelType());
+		assertEquals("воина из базы", table.getClassNameGenitive());
 		assertEquals(Arrays.asList(1, 3), levels.stream()
 			.map(ClassDetailApi.ArchetypeSpellLevelApi::getLevel)
 			.collect(Collectors.toList()));
@@ -108,6 +113,7 @@ class ClassDetailApiTest {
 		heroClass.setId(1);
 		heroClass.setName("Воин");
 		heroClass.setEnglishName("Fighter");
+		heroClass.setAccusativeName("Воина из базы");
 		heroClass.setBook(book);
 		heroClass.setSpellcasterType(SpellcasterType.NONE);
 		heroClass.setAvailableSkills(Collections.emptyList());

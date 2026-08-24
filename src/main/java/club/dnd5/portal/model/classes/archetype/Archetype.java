@@ -60,6 +60,10 @@ public class Archetype {
 	@JoinColumn(name = "archetype_id")
 	private List<ArchetypeSpell> spells;
 
+	@Column(nullable = false, columnDefinition = "varchar(32) default 'CLASS_LEVEL'")
+	@Enumerated(EnumType.STRING)
+	private ArchetypeSpellLevelType spellLevelType = ArchetypeSpellLevelType.CLASS_LEVEL;
+
 	@Enumerated(EnumType.STRING)
 	private Option.OptionType optionType;
 

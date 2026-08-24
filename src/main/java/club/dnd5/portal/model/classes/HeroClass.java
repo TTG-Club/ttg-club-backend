@@ -113,6 +113,11 @@ public class HeroClass {
 	}
 
 	public String getGenitiveName() {
+		// Названия классов обозначают одушевлённых персонажей мужского рода,
+		// поэтому сохранённая винительная форма совпадает с родительной.
+		if (accusativeName != null && !accusativeName.trim().isEmpty()) {
+			return accusativeName.trim().toLowerCase();
+		}
 		switch (name) {
 		case "Чародей":
 			return "чародея";
