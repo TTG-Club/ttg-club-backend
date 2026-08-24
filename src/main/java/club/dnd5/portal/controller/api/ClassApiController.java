@@ -8,6 +8,7 @@ import club.dnd5.portal.dto.api.classes.ClassRequestApi;
 import club.dnd5.portal.dto.api.classes.ClassSaveApi;
 import club.dnd5.portal.dto.api.classes.ArchetypeEditApi;
 import club.dnd5.portal.dto.api.classes.ArchetypeSaveApi;
+import club.dnd5.portal.dto.api.classes.FeatureLevelSaveApi;
 import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.audit.RevisionOperation;
@@ -18,6 +19,7 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
+import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.image.ImageType;
@@ -120,11 +122,12 @@ public class ClassApiController {
 		HeroClass heroClass = new HeroClass();
 		heroClass.setBook(bookResolver.getCustomBook());
 		heroClass.setLevelDefenitions(Collections.emptyList());
-		heroClass.setFeatureLevelDefenitions(Collections.emptyList());
+		heroClass.setFeatureLevelDefenitions(new ArrayList<>());
 		heroClass.setSpells(Collections.emptyList());
 		heroClass.setTraits(Collections.emptyList());
 		heroClass.setArchetypes(Collections.emptyList());
 		applyClassRequest(heroClass, request);
+		syncFeatureLevelDefinitions(heroClass.getFeatureLevelDefenitions(), request.getTableColumns());
 		HeroClass saved = classRepo.saveAndFlush(heroClass);
 		syncClassTraits(saved, request);
 		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
@@ -145,6 +148,10 @@ public class ClassApiController {
 		auditService.record(ENTITY_TYPE_CLASS, id, RevisionOperation.UPDATE,
 			new ClassSaveApi(heroClass, heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(id)));
 		applyClassRequest(heroClass, request);
+		if (heroClass.getFeatureLevelDefenitions() == null) {
+			heroClass.setFeatureLevelDefenitions(new ArrayList<>());
+		}
+		syncFeatureLevelDefinitions(heroClass.getFeatureLevelDefenitions(), request.getTableColumns());
 		HeroClass saved = classRepo.saveAndFlush(heroClass);
 		syncClassTraits(saved, request);
 		saved.setTraits(heroClassTraitRepository.findAllByHeroClassIdAndArchitypeFalse(saved.getId()));
@@ -201,6 +208,10 @@ public class ClassApiController {
 		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(request.getDescription().trim());
 		archetype.setLevel(request.getLevel()); archetype.setSpellcasterType(request.getSpellcasterType());
 		archetype.setOptionType(request.getOptionType()); archetype.setPage(request.getPage());
+		if (archetype.getFeatureLevelDefenitions() == null) {
+			archetype.setFeatureLevelDefenitions(new ArrayList<>());
+		}
+		syncFeatureLevelDefinitions(archetype.getFeatureLevelDefenitions(), request.getTableColumns());
 		Archetype saved = archetypeRepository.saveAndFlush(archetype);
 		syncArchetypeTraits(saved, request);
 		return new ArchetypeEditApi(saved, archetypeTraitRepository.findAllByArchetypeId(saved.getId()));
@@ -303,6 +314,48 @@ public class ClassApiController {
 		heroClass.setIcon(trimToNull(request.getIcon()));
 		heroClass.setPage(request.getPage());
 		bookResolver.find(request.getSource()).ifPresent(heroClass::setBook);
+	}
+
+	private void syncFeatureLevelDefinitions(List<FeatureLevelDefinition> definitions, List<FeatureLevelSaveApi> requests) {
+		if (requests == null) {
+			return;
+		}
+		Map<Integer, FeatureLevelDefinition> existingById = definitions.stream()
+			.filter(definition -> definition.getId() != null)
+			.collect(Collectors.toMap(FeatureLevelDefinition::getId, definition -> definition));
+		List<FeatureLevelDefinition> updated = requests.stream()
+			.filter(request -> StringUtils.hasText(request.getName()))
+			.map(request -> {
+				FeatureLevelDefinition definition = request.getId() == null
+					? new FeatureLevelDefinition()
+					: existingById.getOrDefault(request.getId(), new FeatureLevelDefinition());
+				applyFeatureLevelDefinition(definition, request);
+				return definition;
+			})
+			.collect(Collectors.toList());
+		definitions.clear();
+		definitions.addAll(updated);
+	}
+
+	private void applyFeatureLevelDefinition(FeatureLevelDefinition definition, FeatureLevelSaveApi request) {
+		List<Byte> levels = request.getLevels();
+		definition.setName(request.getName().trim());
+		definition.setPrefix(trimToNull(request.getPrefix()));
+		definition.setSufix(trimToNull(request.getSuffix()));
+		definition.setL1(levelValue(levels, 0)); definition.setL2(levelValue(levels, 1));
+		definition.setL3(levelValue(levels, 2)); definition.setL4(levelValue(levels, 3));
+		definition.setL5(levelValue(levels, 4)); definition.setL6(levelValue(levels, 5));
+		definition.setL7(levelValue(levels, 6)); definition.setL8(levelValue(levels, 7));
+		definition.setL9(levelValue(levels, 8)); definition.setL10(levelValue(levels, 9));
+		definition.setL11(levelValue(levels, 10)); definition.setL12(levelValue(levels, 11));
+		definition.setL13(levelValue(levels, 12)); definition.setL14(levelValue(levels, 13));
+		definition.setL15(levelValue(levels, 14)); definition.setL16(levelValue(levels, 15));
+		definition.setL17(levelValue(levels, 16)); definition.setL18(levelValue(levels, 17));
+		definition.setL19(levelValue(levels, 18)); definition.setL20(levelValue(levels, 19));
+	}
+
+	private byte levelValue(List<Byte> levels, int index) {
+		return levels == null || levels.size() <= index || levels.get(index) == null ? 0 : levels.get(index);
 	}
 
 	private void syncClassTraits(HeroClass heroClass, ClassSaveApi request) {

@@ -21,12 +21,16 @@ public class ArchetypeEditApi {
 	private final Option.OptionType optionType;
 	private final Short page;
 	private final List<TraitApi> traits;
+	private final List<FeatureLevelSaveApi> tableColumns;
 
 	public ArchetypeEditApi(Archetype archetype, List<ArchetypeTrait> archetypeTraits) {
 		id = archetype.getId(); name = archetype.getName(); englishName = archetype.getEnglishName();
 		genitiveName = archetype.getGenitiveName(); description = archetype.getDescription(); level = archetype.getLevel();
 		spellcasterType = archetype.getSpellcasterType(); optionType = archetype.getOptionType(); page = archetype.getPage();
 		traits = archetypeTraits.stream().map(TraitApi::new).collect(Collectors.toList());
+		tableColumns = archetype.getFeatureLevelDefenitions() == null
+			? java.util.Collections.emptyList()
+			: archetype.getFeatureLevelDefenitions().stream().map(FeatureLevelSaveApi::new).collect(Collectors.toList());
 	}
 
 	@Getter

@@ -28,6 +28,7 @@ public class ArchetypeSaveApi {
 	private Option.OptionType optionType;
 	private Short page;
 	@Valid private List<ClassTraitSaveApi> traits;
+	@Valid private List<FeatureLevelSaveApi> tableColumns;
 
 	public ArchetypeSaveApi(Archetype archetype) {
 		this(archetype, archetype.getFeats());
@@ -43,5 +44,8 @@ public class ArchetypeSaveApi {
 		optionType = archetype.getOptionType();
 		page = archetype.getPage();
 		traits = archetypeTraits.stream().map(ClassTraitSaveApi::new).collect(java.util.stream.Collectors.toList());
+		tableColumns = archetype.getFeatureLevelDefenitions() == null
+			? java.util.Collections.emptyList()
+			: archetype.getFeatureLevelDefenitions().stream().map(FeatureLevelSaveApi::new).collect(java.util.stream.Collectors.toList());
 	}
 }

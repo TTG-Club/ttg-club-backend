@@ -53,6 +53,8 @@ public class ClassSaveApi {
 	private Short page;
 	@Valid
 	private List<ClassTraitSaveApi> classTraits;
+	@Valid
+	private List<FeatureLevelSaveApi> tableColumns;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
@@ -85,6 +87,9 @@ public class ClassSaveApi {
 		icon = heroClass.getIcon();
 		page = heroClass.getPage();
 		classTraits = traits.stream().map(ClassTraitSaveApi::new).collect(java.util.stream.Collectors.toList());
+		tableColumns = heroClass.getFeatureLevelDefenitions() == null
+			? java.util.Collections.emptyList()
+			: heroClass.getFeatureLevelDefenitions().stream().map(FeatureLevelSaveApi::new).collect(java.util.stream.Collectors.toList());
 		source = heroClass.getBook() == null ? null : heroClass.getBook().getSource();
 	}
 }
