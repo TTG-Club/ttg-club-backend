@@ -4,8 +4,10 @@ import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.SenseApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.model.AbilityType;
+import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.creature.SavingThrow;
+import club.dnd5.portal.repository.LanguageRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -17,6 +19,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class BestiaryServiceImplTest {
 
@@ -88,6 +92,37 @@ class BestiaryServiceImplTest {
         assertEquals(AbilityType.STRENGTH, savingThrows.get(0).getAbility());
         assertEquals(5, savingThrows.get(0).getBonus());
         assertEquals(AbilityType.DEXTERITY, savingThrows.get(1).getAbility());
+    }
+
+    @Test
+    void storesUnknownLanguagesAsText() {
+        LanguageRepository languageRepository = mock(LanguageRepository.class);
+        Language common = new Language();
+        common.setName("Общий");
+        when(languageRepository.findByNameIn(Arrays.asList("Общий", "Телепатия 60 фт.")))
+                .thenReturn(Collections.singletonList(common));
+        BestiaryServiceImpl serviceWithLanguages = new BestiaryServiceImpl(
+                null, null, null, null, languageRepository, null);
+        BeastDetailRequest request = new BeastDetailRequest();
+        request.setLanguages(Arrays.asList("Общий", "Телепатия 60 фт."));
+        Creature creature = new Creature();
+
+        ReflectionTestUtils.invokeMethod(serviceWithLanguages, "mapLanguages", creature, request);
+
+        assertEquals(Collections.singletonList(common), creature.getLanguages());
+        assertEquals("Телепатия 60 фт.", creature.getLanguage());
+    }
+
+    @Test
+    void storesExplicitLanguageTextWithoutDictionaryValues() {
+        BeastDetailRequest request = new BeastDetailRequest();
+        request.setLanguage("понимает Общий, но не говорит");
+        Creature creature = new Creature();
+
+        ReflectionTestUtils.invokeMethod(service, "mapLanguages", creature, request);
+
+        assertEquals(Collections.emptyList(), creature.getLanguages());
+        assertEquals("понимает Общий, но не говорит", creature.getLanguage());
     }
 
     private BeastDetailRequest requestWithSpeed(NameValueApi... speed) {

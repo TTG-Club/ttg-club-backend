@@ -6,6 +6,7 @@ import club.dnd5.portal.dto.api.classes.FeatureLevelSaveApi;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.archetype.Archetype;
+import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.classes.ArchetypeRepository;
@@ -108,6 +109,7 @@ class ClassApiControllerTest {
 		request.setEnglishName(archetype.getEnglishName());
 		request.setDescription(archetype.getDescription());
 		request.setLevel(archetype.getLevel());
+		request.setSpellLevelType(ArchetypeSpellLevelType.SPELL_LEVEL);
 		request.setTableColumns(Collections.singletonList(tableColumn));
 
 		when(archetypeRepository.findById(2)).thenReturn(Optional.of(archetype));
@@ -120,5 +122,7 @@ class ClassApiControllerTest {
 		assertThat(result.getTableColumns().get(0).getName()).isEqualTo("Sorcery points");
 		assertThat(archetype.getFeatureLevelDefenitions().get(0).getPrefix()).isEqualTo("+");
 		assertThat(archetype.getFeatureLevelDefenitions().get(0).getL20()).isEqualTo((byte) 20);
+		assertThat(archetype.getSpellLevelType()).isEqualTo(ArchetypeSpellLevelType.SPELL_LEVEL);
+		assertThat(result.getSpellLevelType()).isEqualTo(ArchetypeSpellLevelType.SPELL_LEVEL);
 	}
 }

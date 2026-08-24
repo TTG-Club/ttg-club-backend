@@ -21,6 +21,7 @@ import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.archetype.Archetype;
+import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
@@ -207,7 +208,11 @@ public class ClassApiController {
 		archetype.setName(request.getName().trim()); archetype.setEnglishName(request.getEnglishName().trim());
 		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(request.getDescription().trim());
 		archetype.setLevel(request.getLevel()); archetype.setSpellcasterType(request.getSpellcasterType());
-		archetype.setOptionType(request.getOptionType()); archetype.setPage(request.getPage());
+		archetype.setOptionType(request.getOptionType());
+		archetype.setSpellLevelType(request.getSpellLevelType() == null
+			? ArchetypeSpellLevelType.CLASS_LEVEL
+			: request.getSpellLevelType());
+		archetype.setPage(request.getPage());
 		if (archetype.getFeatureLevelDefenitions() == null) {
 			archetype.setFeatureLevelDefenitions(new ArrayList<>());
 		}

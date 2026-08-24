@@ -45,7 +45,7 @@ public class FTraits {
 		dv = new FDamage(creature, creature::getVulnerabilityDamages);
 		ci = new FCondition(creature);
 		senses = creature.getSense();
-		languages = new FLanguages(creature.getLanguages());
+		languages = new FLanguages(creature.getLanguages(), creature.getLanguage());
 		skills = new FSkills(creature.getSkills());
 	}
 }

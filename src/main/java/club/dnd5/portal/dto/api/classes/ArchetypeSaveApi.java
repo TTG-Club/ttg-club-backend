@@ -3,6 +3,7 @@ package club.dnd5.portal.dto.api.classes;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.archetype.Archetype;
+import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class ArchetypeSaveApi {
 	@Min(1) @Max(20) private byte level;
 	private SpellcasterType spellcasterType;
 	private Option.OptionType optionType;
+	private ArchetypeSpellLevelType spellLevelType = ArchetypeSpellLevelType.CLASS_LEVEL;
 	private Short page;
 	@Valid private List<ClassTraitSaveApi> traits;
 	@Valid private List<FeatureLevelSaveApi> tableColumns;
@@ -42,6 +44,9 @@ public class ArchetypeSaveApi {
 		level = archetype.getLevel();
 		spellcasterType = archetype.getSpellcasterType();
 		optionType = archetype.getOptionType();
+		spellLevelType = archetype.getSpellLevelType() == null
+			? ArchetypeSpellLevelType.CLASS_LEVEL
+			: archetype.getSpellLevelType();
 		page = archetype.getPage();
 		traits = archetypeTraits.stream().map(ClassTraitSaveApi::new).collect(java.util.stream.Collectors.toList());
 		tableColumns = archetype.getFeatureLevelDefenitions() == null

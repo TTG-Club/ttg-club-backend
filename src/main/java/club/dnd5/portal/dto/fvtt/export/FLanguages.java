@@ -23,7 +23,8 @@ import lombok.Setter;
 public class FLanguages {
 	private Set<String> value = new HashSet<>();
 	private String custom = "";
-	public FLanguages(List<Language> languages) {
+	public FLanguages(List<Language> languages, String customLanguage) {
+		custom = customLanguage == null ? "" : customLanguage;
 		if (languages == null) {
 			return;
 		}

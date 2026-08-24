@@ -65,6 +65,8 @@ public class BeastDetailApi extends BeastApi {
 	private SenseApi senses;
 	@Schema(description = "языки")
 	private Collection<String> languages;
+	@Schema(description = "языки свободным текстом")
+	private String language;
 
 	@Schema(description = "умения")
 	private Collection<NameValueApi> feats;
@@ -312,5 +314,6 @@ public class BeastDetailApi extends BeastApi {
 				.map(Language::getName)
 				.collect(Collectors.toList());
 		}
+		language = beast.getLanguage();
 	}
 }
