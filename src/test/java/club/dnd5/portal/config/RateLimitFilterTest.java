@@ -32,6 +32,29 @@ class RateLimitFilterTest {
 		assertEquals(429, rejectedResponse.getStatus());
 	}
 
+	@Test
+	void frontendStaticShouldSkipRateLimit() throws Exception {
+		RateLimitFilter filter = new RateLimitFilter(propertiesWithSingleToken());
+
+		for (String uri : new String[] {
+				"/js/app.Caw9Yrus.js",
+				"/css/app.DqDf6XsF.css",
+				"/fonts/OpenSans.woff2",
+				"/img/logo.webp"
+		}) {
+			MockHttpServletResponse staticResponse = execute(filter, "GET", uri);
+
+			assertEquals(200, staticResponse.getStatus());
+			assertNull(staticResponse.getHeader("X-RateLimit-Remaining"));
+		}
+
+		MockHttpServletResponse limitedResponse = execute(filter, "GET", "/api/spells/search");
+		MockHttpServletResponse rejectedResponse = execute(filter, "GET", "/spells");
+
+		assertEquals("0", limitedResponse.getHeader("X-RateLimit-Remaining"));
+		assertEquals(429, rejectedResponse.getStatus());
+	}
+
 	private static MockHttpServletResponse execute(
 			RateLimitFilter filter,
 			String method,

@@ -25,6 +25,8 @@ public class RateLimitFilter extends OncePerRequestFilter
 {
     private static final String ANONYMOUS_USER = "anonymousUser";
     private static final String ONLINE_HEARTBEAT_URI = "/api/online/heartbeat";
+    // Статика сборки фронта: одна загрузка страницы тянет ~30 таких файлов
+    private static final String[] STATIC_PREFIXES = {"/js/", "/css/", "/fonts/", "/img/"};
 
     private final RateLimitProperties properties;
 
@@ -93,6 +95,17 @@ public class RateLimitFilter extends OncePerRequestFilter
         if (ONLINE_HEARTBEAT_URI.equals(uri))
         {
             return true;
+        }
+
+        if (uri != null)
+        {
+            for (String prefix : STATIC_PREFIXES)
+            {
+                if (uri.startsWith(prefix))
+                {
+                    return true;
+                }
+            }
         }
 
         // не режем health/metrics, иначе Prometheus/healthcheck быстро сожрёт лимит
