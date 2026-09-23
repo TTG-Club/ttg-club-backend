@@ -79,6 +79,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         	.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         	.authorizeRequests()
+        	// Мастерская и запись в бестиарий — только модераторам и администраторам.
+        	// Правило на уровне URL срабатывает до разбора и валидации тела запроса:
+        	// иначе @PreAuthorize проверялся уже после @Valid, и аноним вместо 401
+        	// получал 400 с разбором своих данных. Должно стоять выше permitAll для POST/PATCH/PUT.
+        	.antMatchers("/api/v1/workshop/**").hasAnyRole("MODERATOR", "ADMIN")
+        	.antMatchers(HttpMethod.POST, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
+        	.antMatchers(HttpMethod.PUT, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
         	.antMatchers(HttpMethod.POST, "/api/online/**").permitAll()
         	.antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
         	.antMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
