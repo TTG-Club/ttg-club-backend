@@ -39,39 +39,53 @@ class ContentMutationAuthorizationTest {
 	@Test
 	@WithMockUser(roles = "USER")
 	void contentMutationsRejectRegularUser() {
-		assertContentMutationsDenied();
+		assertDenied(moderatorMutations());
+		assertDenied(adminOnlyMutations());
 	}
 
 	@Test
 	@WithMockUser(roles = "MODERATOR")
-	void adminOnlyContentMutationsRejectModerator() {
-		assertContentMutationsDenied();
+	void moderatorCanEditBestiaryButNotTokens() {
+		assertAllowed(moderatorMutations());
+		assertDenied(adminOnlyMutations());
 	}
 
 	@Test
 	@WithAnonymousUser
 	void contentMutationsRejectAnonymousUser() {
-		assertContentMutationsDenied();
-	}
-
-	private void assertContentMutationsDenied() {
-		for (Executable mutation : contentMutations()) {
-			assertThrows(AccessDeniedException.class, mutation);
-		}
+		assertDenied(moderatorMutations());
+		assertDenied(adminOnlyMutations());
 	}
 
 	@Test
 	@WithMockUser(roles = "ADMIN")
 	void contentMutationsAllowAdmin() {
-		for (Executable mutation : contentMutations()) {
+		assertAllowed(moderatorMutations());
+		assertAllowed(adminOnlyMutations());
+	}
+
+	private void assertDenied(Executable[] mutations) {
+		for (Executable mutation : mutations) {
+			assertThrows(AccessDeniedException.class, mutation);
+		}
+	}
+
+	private void assertAllowed(Executable[] mutations) {
+		for (Executable mutation : mutations) {
 			assertDoesNotThrow(mutation);
 		}
 	}
 
-	private Executable[] contentMutations() {
+	/** Бестиарий правят модераторы из мастерской (см. «fix: обновление существ»). */
+	private Executable[] moderatorMutations() {
 		return new Executable[] {
 			() -> bestiaryController.createBeast(null),
-			() -> bestiaryController.updateBeast(null),
+			() -> bestiaryController.updateBeast(null)
+		};
+	}
+
+	private Executable[] adminOnlyMutations() {
+		return new Executable[] {
 			() -> tokenController.addToken("Goblin", null, "goblin", "round", "token-url"),
 			() -> tokenController.deleteTokenById(1L),
 			() -> tokenBorderController.createTokenBorder(null),
