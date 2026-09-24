@@ -3,12 +3,16 @@ package club.dnd5.portal.controller.api.wiki;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.audit.RevisionInfoApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.dto.api.wiki.GodApi;
 import club.dnd5.portal.dto.api.wiki.GodDetailApi;
+import club.dnd5.portal.dto.api.wiki.GodEditApi;
 import club.dnd5.portal.dto.api.wiki.GodRequestApi;
+import club.dnd5.portal.dto.api.wiki.GodSaveApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.Alignment;
+import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.god.Domain;
@@ -19,6 +23,8 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.GodRepository;
 import club.dnd5.portal.repository.datatable.PantheonGodRepository;
+import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,13 +32,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,9 +54,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 public class GodApiController {
+	private static final String ENTITY_TYPE = "GOD";
+
 	private final GodRepository godRepository;
 	private final PantheonGodRepository pantheonRepository;
 	private final ImageRepository imageRepository;
+	private final BookResolver bookResolver;
+	private final AuditService auditService;
 
 	@PostMapping(value = "/api/v1/gods", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<GodApi> getGods(@RequestBody GodRequestApi request) {
@@ -98,6 +116,51 @@ public class GodApiController {
 		return godApi;
 	}
 
+	@GetMapping(value = "/api/v1/workshop/gods/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	public GodEditApi getGodForEdit(@PathVariable String englishName) {
+		God god = godRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		return new GodEditApi(god);
+	}
+
+	@PatchMapping(value = "/api/v1/workshop/gods/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	public GodEditApi updateGod(@PathVariable Integer id, @Valid @RequestBody GodSaveApi request) {
+		God god = godRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		godRepository.findByEnglishName(request.getEnglishName().trim())
+			.filter(existing -> !existing.getId().equals(id))
+			.ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "God with the same englishName already exists");
+			});
+		Pantheon pantheon = pantheonRepository.findById(request.getPantheonId()).orElseThrow(PageNotFoundException::new);
+		auditService.record(ENTITY_TYPE, id, RevisionOperation.UPDATE, new GodSaveApi(god));
+		applyGodRequest(god, request, pantheon);
+		return new GodEditApi(godRepository.saveAndFlush(god));
+	}
+
+	@GetMapping(value = "/api/v1/workshop/gods/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	public List<RevisionInfoApi> getGodRevisions(@PathVariable Integer id) {
+		godRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getRevisions(ENTITY_TYPE, id);
+	}
+
+	@GetMapping(value = "/api/v1/workshop/gods/{id}/revisions/{revision}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	public GodSaveApi getGodRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		godRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return auditService.getSnapshot(ENTITY_TYPE, id, revision, GodSaveApi.class);
+	}
+
+	@PostMapping(value = "/api/v1/workshop/gods/{id}/revisions/{revision}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	public GodEditApi restoreGodRevision(@PathVariable Integer id, @PathVariable Integer revision) {
+		GodSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE, id, revision, GodSaveApi.class);
+		return updateGod(id, snapshot);
+	}
+
 	@PostMapping("/api/v1/filters/gods")
 	public FilterApi getFilter() {
 		FilterApi filters = new FilterApi();
@@ -147,5 +210,27 @@ public class GodApiController {
 
 		filters.setOther(otherFilters);
 		return filters;
+	}
+
+	private void applyGodRequest(God god, GodSaveApi request, Pantheon pantheon) {
+		god.setName(request.getName().trim());
+		god.setEnglishName(request.getEnglishName().trim());
+		god.setAltName(trimToNull(request.getAltName()));
+		god.setCommitment(trimToNull(request.getCommitment()));
+		god.setSex(request.getSex());
+		god.setRank(request.getRank());
+		god.setAligment(request.getAlignment());
+		god.setDescription(trimToNull(request.getDescription()));
+		god.setAlternativeDescription(trimToNull(request.getAlternativeDescription()));
+		god.setSymbol(trimToNull(request.getSymbol()));
+		god.setNicknames(trimToNull(request.getNicknames()));
+		god.setDomains(new ArrayList<>(request.getDomains()));
+		god.setPantheon(pantheon);
+		god.setPage(request.getPage());
+		bookResolver.find(request.getSource()).ifPresent(god::setBook);
+	}
+
+	private String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
 	}
 }
