@@ -30,6 +30,7 @@ public class God {
 	private GodSex sex;
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "`rank`")
 	private Rank rank;
 
 	@Enumerated(EnumType.STRING)
@@ -68,8 +69,16 @@ public class God {
 		return HtmlConverter.toHtml(description);
 	}
 
+	public String getRawDescription() {
+		return description;
+	}
+
 	public String getRank() {
 		return rank.getName(sex);
+	}
+
+	public Rank getRankValue() {
+		return rank;
 	}
 
 	public String getUrlName() {
