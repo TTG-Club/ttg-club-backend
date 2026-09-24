@@ -30,6 +30,7 @@ public class God {
 	private GodSex sex;
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "`rank`")
 	private Rank rank;
 
 	@Enumerated(EnumType.STRING)
