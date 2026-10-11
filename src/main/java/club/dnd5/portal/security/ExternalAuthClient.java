@@ -81,6 +81,11 @@ public class ExternalAuthClient {
         body.put("username", signUpDto.getUsername());
         body.put("email", signUpDto.getEmail());
         body.put("password", signUpDto.getPassword());
+        // Без согласий и редакций документов auth-service регистрацию не принимает.
+        body.put("offerAccepted", signUpDto.getOfferAccepted());
+        body.put("offerVersion", signUpDto.getOfferVersion());
+        body.put("personalDataConsent", signUpDto.getPersonalDataConsent());
+        body.put("privacyPolicyVersion", signUpDto.getPrivacyPolicyVersion());
 
         ResponseEntity<Map> response = restTemplate.exchange(
                 url("/api/auth/register"),
