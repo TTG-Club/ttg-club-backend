@@ -410,10 +410,19 @@ public class TavernToolController {
 		}
 		List<GeneratedNameApi> result = new ArrayList<>();
 		Set<String> usedNames = new HashSet<>();
+		// Даже небольшой зал разбиваем на несколько пачек разных рас.
+		// Повторяем расы только после перебора пула, сохраняя выбор по весам местности.
+		List<RacePick> remainingRaces = new ArrayList<>(races);
+		int chunkSize = Math.min(6, Math.max(1, (count + 3) / 4));
 		// не больше 12 обращений: хватает на разнообразие рас без риска таймаута
 		for (int attempt = 0; attempt < 12 && result.size() < count; attempt++) {
-			Integer raceId = pickRaceByHabitat(races, habitat).id;
-			int chunk = Math.min(count - result.size(), 6);
+			if (remainingRaces.isEmpty()) {
+				remainingRaces.addAll(races);
+			}
+			RacePick race = pickRaceByHabitat(remainingRaces, habitat);
+			remainingRaces.remove(race);
+			Integer raceId = race.id;
+			int chunk = Math.min(count - result.size(), chunkSize);
 			try {
 				NameGenerationRequest request = new NameGenerationRequest();
 				request.setType(NameGenerationType.GROUP);
