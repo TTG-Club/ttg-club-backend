@@ -22,7 +22,7 @@ public class TypeDetailApi {
 	public TypeDetailApi(Creature beast) {
 		name = beast.getType().getCyrillicName();
 		if (beast.getRaceName() != null) {
-			tags = Arrays.asList(beast.getRaceName().split(","));
+			tags = Arrays.asList(beast.getRaceName().trim().split("\\s*,\\s*"));
 		}
 	}
 }
