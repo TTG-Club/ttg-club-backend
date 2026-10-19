@@ -10,10 +10,13 @@ import club.dnd5.portal.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Словари сайта в ключах VTTG: характеристики, навыки, размеры, типы существ и урона,
@@ -25,6 +28,22 @@ final class VttgDictionaries {
 		"artificer", "barbarian", "bard", "cleric", "druid", "fighter",
 		"monk", "paladin", "ranger", "rogue", "sorcerer", "warlock", "wizard"
 	));
+
+	/** Кириллица в латиницу для ключей, которые строятся из русских подписей. */
+	private static final Map<Character, String> TRANSLIT = new HashMap<>();
+
+	static {
+		String[][] pairs = {
+			{"а", "a"}, {"б", "b"}, {"в", "v"}, {"г", "g"}, {"д", "d"}, {"е", "e"}, {"ё", "e"},
+			{"ж", "zh"}, {"з", "z"}, {"и", "i"}, {"й", "y"}, {"к", "k"}, {"л", "l"}, {"м", "m"},
+			{"н", "n"}, {"о", "o"}, {"п", "p"}, {"р", "r"}, {"с", "s"}, {"т", "t"}, {"у", "u"},
+			{"ф", "f"}, {"х", "h"}, {"ц", "c"}, {"ч", "ch"}, {"ш", "sh"}, {"щ", "sch"}, {"ъ", ""},
+			{"ы", "y"}, {"ь", ""}, {"э", "e"}, {"ю", "yu"}, {"я", "ya"}
+		};
+		for (String[] pair : pairs) {
+			TRANSLIT.put(pair[0].charAt(0), pair[1]);
+		}
+	}
 
 	private VttgDictionaries() {
 	}
@@ -135,5 +154,66 @@ final class VttgDictionaries {
 	/** Слаг страницы сайта: так же, как его строит сам сайт. */
 	static String slug(String englishName) {
 		return VttgText.isBlank(englishName) ? null : StringUtil.getUrl(englishName.trim());
+	}
+
+	/**
+	 * Ключ из русской подписи: транслит в нижнем регистре через дефис. Подпись у умений
+	 * и колонок таблицы классов — единственное, что у них есть, кроме номера в базе.
+	 */
+	static String translit(String text) {
+		if (VttgText.isBlank(text)) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder();
+		for (char letter : text.trim().toLowerCase(Locale.ROOT).toCharArray()) {
+			String latin = TRANSLIT.get(letter);
+			result.append(latin == null ? String.valueOf(letter) : latin);
+		}
+		return result.toString().replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
+	}
+
+	/** Характеристика по названию в любом падеже: «Сила», «Силы», «Мудрости». */
+	static String abilityByName(String text) {
+		if (VttgText.isBlank(text)) {
+			return null;
+		}
+		String word = text.trim().toLowerCase(Locale.ROOT);
+		if (word.startsWith("сил")) {
+			return "strength";
+		}
+		if (word.startsWith("ловк")) {
+			return "dexterity";
+		}
+		if (word.startsWith("телослож")) {
+			return "constitution";
+		}
+		if (word.startsWith("интеллект")) {
+			return "intelligence";
+		}
+		if (word.startsWith("мудрост")) {
+			return "wisdom";
+		}
+		if (word.startsWith("харизм")) {
+			return "charisma";
+		}
+		return null;
+	}
+
+	/** Тип урона по слову описания: «колющего», «огнём», «некротической энергией». */
+	static String damageTypeByWord(String text) {
+		String word = text.toLowerCase(Locale.ROOT);
+		String[][] stems = {
+			{"колющ", "piercing"}, {"рубящ", "slashing"}, {"дробящ", "bludgeoning"}, {"огн", "fire"},
+			{"холод", "cold"}, {"электричеств", "lightning"}, {"молни", "lightning"}, {"яд", "poison"},
+			{"кислот", "acid"}, {"звук", "thunder"}, {"гром", "thunder"}, {"некротич", "necrotic"},
+			{"психич", "psychic"}, {"излучени", "radiant"}, {"силов", "force"}
+		};
+		for (String[] stem : stems) {
+			// Слово ищется с начала: «яд» внутри «рядом» ядом не считается
+			if (Pattern.compile("(?<![а-яё])" + stem[0]).matcher(word).find()) {
+				return stem[1];
+			}
+		}
+		return null;
 	}
 }

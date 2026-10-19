@@ -92,6 +92,24 @@ public class MarkdownUtil {
 		action.setDescription(description);
 	}
 
+	/**
+	 * Разметка действия или умения существа в html — без правки самой сущности.
+	 *
+	 * @param description текст из базы
+	 * @param beastName   название существа для {@code {@beast_name}}
+	 * @return html
+	 */
+	public static String toHtml(String description, String beastName) {
+		if (description == null) {
+			return null;
+		}
+		String result = description.replace("{@beast_name}", Objects.toString(beastName, ""));
+		for (Markdown markdown : markdowns) {
+			result = markdown.convert(result);
+		}
+		return result;
+	}
+
 	@Builder
 	public static class Markdown {
 		private String mark;
