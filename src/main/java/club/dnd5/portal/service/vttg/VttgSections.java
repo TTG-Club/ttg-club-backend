@@ -19,6 +19,8 @@ final class VttgSections {
 	static List<Map<String, Object>> tree() {
 		return Arrays.asList(
 			leaf(VttgSpellMapper.SECTION, "Заклинания", "tabler:sparkles", "spell", spellView()),
+			leaf(VttgCreatureMapper.SECTION, "Существа", "tabler:paw", "creature", creatureView()),
+			leaf(VttgClassMapper.SECTION, "Классы", "tabler:users-group", "class", null),
 			leaf(VttgRaceMapper.SECTION, "Расы", "tabler:users", "species", null),
 			leaf(VttgBackgroundMapper.SECTION, "Предыстории", "tabler:book", "background", null),
 			leaf(VttgFeatMapper.SECTION, "Черты", "tabler:star", "feat", null)
@@ -68,6 +70,21 @@ final class VttgSections {
 			enumFilter("level", "Круг", "level", "spellLevel", "badges"),
 			toggles,
 			enumFilter("class", "Класс", "classKeys", "spellClass", "list")
+		));
+		return view;
+	}
+
+	private static Map<String, Object> creatureView() {
+		Map<String, Object> groupBy = new LinkedHashMap<>();
+		groupBy.put("path", "system.challengeRating");
+		groupBy.put("format", "challengeRating");
+
+		Map<String, Object> view = new LinkedHashMap<>();
+		view.put("layout", "filtered");
+		view.put("groupBy", groupBy);
+		view.put("filters", Arrays.asList(
+			enumFilter("cr", "ПО", "system.challengeRating", "challengeRating", "badges"),
+			enumFilter("type", "Тип", "system.type", "creatureType", "list")
 		));
 		return view;
 	}

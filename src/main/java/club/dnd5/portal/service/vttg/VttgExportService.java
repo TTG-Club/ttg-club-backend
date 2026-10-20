@@ -5,8 +5,18 @@ import club.dnd5.portal.dto.api.vttg.VttgChangesResponse;
 import club.dnd5.portal.dto.api.vttg.VttgChangesStatus;
 import club.dnd5.portal.dto.api.vttg.VttgSource;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.classes.HeroClass;
+import club.dnd5.portal.model.classes.Option;
+import club.dnd5.portal.model.image.Image;
+import club.dnd5.portal.model.image.ImageType;
+import club.dnd5.portal.model.token.Token;
+import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.TokenRepository;
+import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.BackgroundRepository;
+import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.FeatRepository;
+import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,12 +33,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Выгрузка компендиума редакции 2014 для VTTG в формате ручек нового сайта
@@ -49,15 +62,24 @@ public class VttgExportService {
 	/** Курсор «с начала времён», которым VTTG просит полную выгрузку. */
 	static final Instant EPOCH = Instant.EPOCH;
 	static final Duration TTL = Duration.ofMinutes(10);
+	/** Тип токена существа, который сайт показывает картинкой. */
+	private static final String ROUND_TOKEN = "круглый";
 
 	private final RaceRepository raceRepository;
 	private final BackgroundRepository backgroundRepository;
 	private final FeatRepository featRepository;
 	private final SpellRepository spellRepository;
+	private final ClassRepository classRepository;
+	private final OptionRepository optionRepository;
+	private final BestiaryRepository bestiaryRepository;
+	private final TokenRepository tokenRepository;
+	private final ImageRepository imageRepository;
 	private final VttgRaceMapper raceMapper;
 	private final VttgBackgroundMapper backgroundMapper;
 	private final VttgFeatMapper featMapper;
 	private final VttgSpellMapper spellMapper;
+	private final VttgClassMapper classMapper;
+	private final VttgCreatureMapper creatureMapper;
 	private final ObjectMapper objectMapper;
 	private final PlatformTransactionManager transactionManager;
 
@@ -122,6 +144,18 @@ public class VttgExportService {
 		collect(upserts, books, "spells", spellRepository.findAll(), spellMapper::toVttg,
 			spell -> spell.getBook(), spell -> spell.getEnglishName());
 
+		Map<Option.OptionType, List<Option>> options = options();
+		List<HeroClass> classes = classRepository.findAll().stream()
+			.filter(heroClass -> !heroClass.isSidekick())
+			.collect(Collectors.toList());
+		collect(upserts, books, "classes", classes, heroClass -> classMapper.toVttg(heroClass, options),
+			heroClass -> heroClass.getBook(), heroClass -> heroClass.getEnglishName());
+
+		Map<Integer, String> images = creatureImages();
+		collect(upserts, books, "bestiary", bestiaryRepository.findAll(),
+			creature -> creatureMapper.toVttg(creature, images.get(creature.getId())),
+			creature -> creature.getBook(), creature -> creature.getEnglishName());
+
 		Map<String, Long> byType = new LinkedHashMap<>();
 		for (VttgChange change : upserts) {
 			byType.merge(change.getType(), 1L, Long::sum);
@@ -137,6 +171,36 @@ public class VttgExportService {
 				book.getSource()));
 		}
 		return new Snapshot(Instant.now(), upserts, sources, byType, fingerprint(upserts, sources));
+	}
+
+	/** Варианты умений классов по типу списка, в порядке названия. */
+	private Map<Option.OptionType, List<Option>> options() {
+		Map<Option.OptionType, List<Option>> result = new HashMap<>();
+		optionRepository.findAll().stream()
+			.filter(option -> option.getOptionTypes() != null)
+			.sorted(Comparator.comparing(Option::getName,
+				Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+			.forEach(option -> option.getOptionTypes().stream()
+				.filter(Objects::nonNull)
+				.distinct()
+				.forEach(type -> result.computeIfAbsent(type, key -> new ArrayList<>()).add(option)));
+		return result;
+	}
+
+	/** Картинка токена существа: круглый токен сайта, иначе первая иллюстрация. */
+	private Map<Integer, String> creatureImages() {
+		Map<Integer, String> result = new HashMap<>();
+		for (Token token : tokenRepository.findByType(ROUND_TOKEN)) {
+			if (token.getRefId() != null && !VttgText.isBlank(token.getUrl())) {
+				result.putIfAbsent(token.getRefId(), token.getUrl().trim());
+			}
+		}
+		for (Image image : imageRepository.findAllByType(ImageType.CREATURE)) {
+			if (image.getRefId() != null && !VttgText.isBlank(image.getUrl())) {
+				result.putIfAbsent(image.getRefId(), image.getUrl().trim());
+			}
+		}
+		return result;
 	}
 
 	/**

@@ -7,8 +7,13 @@ import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.TokenRepository;
+import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.BackgroundRepository;
+import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.FeatRepository;
+import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,12 +37,20 @@ class VttgExportServiceTest {
 	private final BackgroundRepository backgroundRepository = mock(BackgroundRepository.class);
 	private final FeatRepository featRepository = mock(FeatRepository.class);
 	private final SpellRepository spellRepository = mock(SpellRepository.class);
+	private final ClassRepository classRepository = mock(ClassRepository.class);
+	private final OptionRepository optionRepository = mock(OptionRepository.class);
+	private final BestiaryRepository bestiaryRepository = mock(BestiaryRepository.class);
+	private final TokenRepository tokenRepository = mock(TokenRepository.class);
+	private final ImageRepository imageRepository = mock(ImageRepository.class);
 	private VttgExportService service;
 
 	@BeforeEach
 	void setUp() {
+		VttgSpellMapper spellMapper = new VttgSpellMapper();
 		service = new VttgExportService(raceRepository, backgroundRepository, featRepository, spellRepository,
-			new VttgRaceMapper(), new VttgBackgroundMapper(), new VttgFeatMapper(), new VttgSpellMapper(),
+			classRepository, optionRepository, bestiaryRepository, tokenRepository, imageRepository,
+			new VttgRaceMapper(), new VttgBackgroundMapper(), new VttgFeatMapper(), spellMapper,
+			new VttgClassMapper(), new VttgCreatureMapper(spellMapper),
 			new ObjectMapper(), mock(PlatformTransactionManager.class));
 
 		Book phb = new Book("PHB");
@@ -78,7 +91,7 @@ class VttgExportServiceTest {
 				assertThat(source.getAbbreviation()).isEqualTo("PHB");
 			});
 		assertThat(response.getSections()).extracting(node -> node.get("section"))
-			.containsExactly("spells", "species", "backgrounds", "feats");
+			.containsExactly("spells", "creatures", "classes", "species", "backgrounds", "feats");
 		assertThat(response.getSchemaVersion()).isPositive();
 	}
 
