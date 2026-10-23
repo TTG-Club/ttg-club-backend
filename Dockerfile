@@ -6,8 +6,7 @@ WORKDIR /opt/app
 FROM base AS build
 
 COPY --link . .
-RUN FRONTEND_SHA=$(echo -n $(date +%s) | sha256sum | awk '{print $1}') && \
-    mvn -B clean install -DskipTests -Dfrontend.application.sha=${FRONTEND_SHA}
+RUN mvn -B clean install -DskipTests
 
 FROM eclipse-temurin:17-jre
 
