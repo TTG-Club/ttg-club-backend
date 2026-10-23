@@ -61,7 +61,7 @@ public class NewsBannerApiController {
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(page, size, order);
 
-		Page<NewsBanner> news = newsBannerRepository.findAll(specification, pageable);
+		Page<NewsBanner> news = newsBannerRepository.findAll(SpecificationUtil.orAll(specification), pageable);
 
 		return ResponseEntity
 			.status(HttpStatus.OK)

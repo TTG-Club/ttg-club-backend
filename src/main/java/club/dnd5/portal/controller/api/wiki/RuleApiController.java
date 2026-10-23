@@ -66,7 +66,7 @@ public class RuleApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return ruleRepository.findAll(specification, pageable).toList()
+		return ruleRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(RuleApi::new)
 			.collect(Collectors.toList());

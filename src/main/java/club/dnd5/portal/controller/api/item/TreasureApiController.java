@@ -73,7 +73,7 @@ public class TreasureApiController {
 			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return treasuryRepository.findAll(specification, pageable).toList()
+		return treasuryRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(ItemApi::new)
 			.collect(Collectors.toList());

@@ -92,7 +92,7 @@ public class BackgroundApiController {
 			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return backgroundRepository.findAll(specification, pageable).toList()
+		return backgroundRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(BackgroundApi::new)
 			.collect(Collectors.toList());

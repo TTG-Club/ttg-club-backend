@@ -104,7 +104,7 @@ public class FeatApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return featRepository.findAll(specification, pageable).toList()
+		return featRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(FeatApi::new)
 			.collect(Collectors.toList());

@@ -72,7 +72,7 @@ public class ScreenApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return screenRepository.findAll(specification, pageable).toList()
+		return screenRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(ScreenApi::new)
 			.collect(Collectors.toList());

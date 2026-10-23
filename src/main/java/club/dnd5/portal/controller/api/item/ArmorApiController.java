@@ -83,7 +83,7 @@ public class ArmorApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return armorRepository.findAll(specification, pageable)
+		return armorRepository.findAll(SpecificationUtil.orAll(specification), pageable)
 			.stream()
 			.map(ArmorApi::new)
 			.collect(Collectors.toList());

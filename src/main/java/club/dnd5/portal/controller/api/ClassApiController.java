@@ -83,13 +83,13 @@ public class ClassApiController {
 			}
 		}
 		if (request.getSearch() != null && request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
-			return classRepo.findAll(specification)
+			return classRepo.findAll(SpecificationUtil.orAll(specification))
 					.stream()
 					.map(classObject -> new ClassApi(classObject, request))
 					.filter(c -> !c.getArchetypes().isEmpty())
 					.collect(Collectors.toList());
 		}
-		return classRepo.findAll(specification)
+		return classRepo.findAll(SpecificationUtil.orAll(specification))
 				.stream()
 				.map(classObject -> new ClassApi(classObject, request))
 				.filter(classApi -> request.getFilter() == null || request.getFilter().getBooks()

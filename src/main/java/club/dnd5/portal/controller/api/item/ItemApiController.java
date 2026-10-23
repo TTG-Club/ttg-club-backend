@@ -98,7 +98,7 @@ public class ItemApiController {
 			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return itemRepository.findAll(specification, pageable).toList()
+		return itemRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(ItemApi::new)
 			.collect(Collectors.toList());
