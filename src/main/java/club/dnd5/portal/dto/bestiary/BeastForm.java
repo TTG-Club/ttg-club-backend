@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Alignment;

@@ -3,7 +3,7 @@ package club.dnd5.portal.model.classes;
 import club.dnd5.portal.model.book.Book;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "hero_class_traits")

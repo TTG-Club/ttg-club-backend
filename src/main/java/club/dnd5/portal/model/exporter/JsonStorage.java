@@ -6,7 +6,7 @@ import club.dnd5.portal.model.JsonType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity
@@ -18,7 +18,8 @@ public class JsonStorage implements Serializable {
 	@Id
 	private Integer refId;
 
-	@Id
+	// Не входит в ключ JsonStorageCompositeKey: Hibernate 7 требует, чтобы @Id совпадали с полями @IdClass.
+	@Column(nullable = false)
 	private String name;
 
 	@Id

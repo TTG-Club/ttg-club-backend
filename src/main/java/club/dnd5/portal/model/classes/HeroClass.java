@@ -12,7 +12,7 @@ import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;

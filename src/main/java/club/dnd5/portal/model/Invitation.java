@@ -3,7 +3,7 @@ package club.dnd5.portal.model;
 import club.dnd5.portal.model.user.UserParty;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity

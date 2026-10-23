@@ -1,4 +1,4 @@
-FROM maven:3-eclipse-temurin-8 AS base
+FROM maven:3-eclipse-temurin-25 AS base
 
 WORKDIR /opt/app
 
@@ -8,7 +8,7 @@ FROM base AS build
 COPY --link . .
 RUN mvn -B clean install -DskipTests
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:25-jre
 
 WORKDIR /opt/app
 

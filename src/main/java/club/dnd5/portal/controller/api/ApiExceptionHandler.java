@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.PersistenceException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.persistence.PersistenceException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 
 @RestControllerAdvice(basePackages = "club.dnd5.portal.controller.api")
@@ -51,7 +51,7 @@ public class ApiExceptionHandler {
 		ResponseStatusException exception,
 		HttpServletRequest request
 	) {
-		HttpStatus status = exception.getStatus();
+		HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
 		return ResponseEntity
 			.status(status)
 			.body(new ApiErrorResponse(status.value(), status.getReasonPhrase(), exception.getReason(), request.getRequestURI()));

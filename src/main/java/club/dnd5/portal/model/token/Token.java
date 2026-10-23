@@ -3,7 +3,7 @@ package club.dnd5.portal.model.token;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Getter
 @Setter

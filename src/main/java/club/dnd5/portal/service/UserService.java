@@ -4,7 +4,7 @@ import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.VerificationToken;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 
 @Service

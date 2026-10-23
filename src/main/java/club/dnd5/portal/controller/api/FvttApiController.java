@@ -8,8 +8,8 @@ import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.service.JsonStorageService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ public class FvttApiController {
 			String jsonData;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(spellsList);
-			} catch (JsonProcessingException e) {
+			} catch (JacksonException e) {
 				throw new RuntimeException(e);
 			}
 			byte[] jsonDataBytes = jsonData.getBytes(StandardCharsets.UTF_8);
@@ -82,7 +82,7 @@ public class FvttApiController {
 			String jsonData;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(bestiaryList);
-			} catch (JsonProcessingException e) {
+			} catch (JacksonException e) {
 				throw new RuntimeException(e);
 			}
 			byte[] jsonDataBytes = jsonData.getBytes(StandardCharsets.UTF_8);
