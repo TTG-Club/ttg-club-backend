@@ -10,7 +10,7 @@ import club.dnd5.portal.model.book.TypeBook;
 import java.util.Optional;
 
 @Repository
-public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecificationExecutor<Book> {
+public interface BookRepository extends JpaRepository<Book, String>, JpaSpecificationExecutor<Book> {
 	Optional<Book> findByEnglishName(String name);
 
 	Optional<Book> findBySource(String source);
