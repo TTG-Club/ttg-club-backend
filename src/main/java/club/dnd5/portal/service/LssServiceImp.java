@@ -8,11 +8,11 @@ import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.JsonStorageRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -40,13 +40,13 @@ public class LssServiceImp implements LssService {
 		String jsonData;
 		try {
 			jsonData = generateClassValueInJsonSpell(optionalSpell, jsonStorage.getJsonData());
-		} catch (JsonProcessingException exception) {
+		} catch (JacksonException exception) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Problem with the Json Processing");
 		}
 		return jsonData;
 	}
 
-	private String generateClassValueInJsonSpell(Optional<Spell> optionalSpell, String jsonData) throws JsonProcessingException {
+	private String generateClassValueInJsonSpell(Optional<Spell> optionalSpell, String jsonData) throws JacksonException {
 		List<String> classList = new ArrayList<>();
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode jsonNode = objectMapper.readTree(jsonData);
@@ -67,7 +67,7 @@ public class LssServiceImp implements LssService {
 		return objectMapper.writeValueAsString(jsonNode);
 	}
 
-	private void removeChildrenNodeWhichDontUsedForLssFormat(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
+	private void removeChildrenNodeWhichDontUsedForLssFormat(ObjectMapper objectMapper, JsonNode jsonNode) throws JacksonException {
 		ObjectNode object = (ObjectNode) jsonNode;
 		fieldsToRemove.forEach(object::remove);
 		objectMapper.writeValueAsString(object);

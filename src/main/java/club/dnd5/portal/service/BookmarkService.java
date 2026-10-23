@@ -2,7 +2,7 @@ package club.dnd5.portal.service;
 
 import java.util.Collection;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import club.dnd5.portal.dto.api.bookmark.BookmarkApi;
 import club.dnd5.portal.model.user.User;

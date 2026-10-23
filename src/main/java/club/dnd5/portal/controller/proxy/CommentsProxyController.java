@@ -20,8 +20,8 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -100,10 +100,7 @@ public class CommentsProxyController {
             headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token);
         }
 
-        HttpMethod method = HttpMethod.resolve(request.getMethod());
-        if (method == null) {
-            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-        }
+        HttpMethod method = HttpMethod.valueOf(request.getMethod());
 
         try {
             ResponseEntity<byte[]> upstream = restTemplate.exchange(

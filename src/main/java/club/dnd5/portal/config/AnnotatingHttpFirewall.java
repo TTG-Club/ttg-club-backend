@@ -3,8 +3,8 @@ package club.dnd5.portal.config;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.security.web.firewall.RequestRejectedException;

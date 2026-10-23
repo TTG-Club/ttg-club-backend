@@ -4,18 +4,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -33,9 +33,8 @@ import java.util.UUID;
 public class InitiativeTracker {
 
 	@Id
-	@GeneratedValue(generator = "initiative-tracker-uuid")
-	@GenericGenerator(name = "initiative-tracker-uuid", strategy = "org.hibernate.id.UUIDGenerator")
-	@Type(type = "uuid-char")
+	@UuidGenerator
+	@JdbcTypeCode(SqlTypes.CHAR)
 	@Column(length = 36, updatable = false, nullable = false)
 	private UUID id;
 
@@ -54,7 +53,7 @@ public class InitiativeTracker {
 	 * и передаёт в заголовке X-Tracker-Key. Для трекера с владельцем не используется —
 	 * доступ проверяется по логину из JWT.
 	 */
-	@Type(type = "uuid-char")
+	@JdbcTypeCode(SqlTypes.CHAR)
 	@Column(name = "access_key", length = 36, nullable = false)
 	private UUID accessKey;
 
@@ -78,7 +77,7 @@ public class InitiativeTracker {
 	/**
 	 * id участника, чей сейчас ход. NULL — бой не начат (или текущий участник был единственным и удалён).
 	 */
-	@Type(type = "uuid-char")
+	@JdbcTypeCode(SqlTypes.CHAR)
 	@Column(name = "current_participant_id", length = 36)
 	private UUID currentParticipantId;
 

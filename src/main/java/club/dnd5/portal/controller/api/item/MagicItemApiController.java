@@ -39,10 +39,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 

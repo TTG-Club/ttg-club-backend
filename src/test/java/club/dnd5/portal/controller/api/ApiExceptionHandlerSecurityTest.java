@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
@@ -82,7 +82,7 @@ class ApiExceptionHandlerSecurityTest {
 	}
 
 	@Configuration
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
+	@EnableMethodSecurity
 	static class TestConfig {
 		@Bean
 		SecuredTestController securedTestController() {

@@ -1,6 +1,7 @@
 package club.dnd5.portal.security;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,10 +12,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -92,8 +93,8 @@ public class AuthServiceAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private boolean isAuthRejection(HttpStatus status) {
-        return status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN;
+    private boolean isAuthRejection(HttpStatusCode status) {
+        return status.isSameCodeAs(HttpStatus.UNAUTHORIZED) || status.isSameCodeAs(HttpStatus.FORBIDDEN);
     }
 
     private void authenticate(HttpServletRequest request, ExternalAuthUser user) {
@@ -125,7 +126,7 @@ public class AuthServiceAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         if (request.getCookies() != null) {
-            for (javax.servlet.http.Cookie cookie : request.getCookies()) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
                 if ("dnd5_user_token".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
                     return cookie.getValue();
                 }

@@ -4,18 +4,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -33,13 +33,12 @@ import java.util.UUID;
 public class InitiativeParticipant {
 
 	@Id
-	@GeneratedValue(generator = "initiative-participant-uuid")
-	@GenericGenerator(name = "initiative-participant-uuid", strategy = "org.hibernate.id.UUIDGenerator")
-	@Type(type = "uuid-char")
+	@UuidGenerator
+	@JdbcTypeCode(SqlTypes.CHAR)
 	@Column(length = 36, updatable = false, nullable = false)
 	private UUID id;
 
-	@Type(type = "uuid-char")
+	@JdbcTypeCode(SqlTypes.CHAR)
 	@Column(name = "tracker_id", length = 36, nullable = false)
 	private UUID trackerId;
 
