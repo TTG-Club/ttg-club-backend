@@ -3,6 +3,8 @@ package club.dnd5.portal.controller.api;
 import club.dnd5.portal.dto.api.BookApi;
 import club.dnd5.portal.dto.api.BookRequestApi;
 import club.dnd5.portal.dto.api.RequestApi;
+import club.dnd5.portal.dto.api.book.BookEditApi;
+import club.dnd5.portal.dto.api.book.BookSaveApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
@@ -14,12 +16,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import jakarta.validation.Valid;
 
 import jakarta.persistence.criteria.Order;
 import java.util.List;
@@ -71,5 +82,37 @@ public class BookApiController {
 		BookApi bookApi = new BookApi(book);
 		bookApi.setDescription(book.getDescription());
 		return ResponseEntity.ok(bookApi);
+	}
+
+	@Operation(summary = "Источник для правки в мастерской")
+	@GetMapping(value = "/api/v1/workshop/books/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	public BookEditApi getBookForEdit(@PathVariable String englishName) {
+		Book book = bookRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
+		return new BookEditApi(book);
+	}
+
+	@Operation(summary = "Правка источника в мастерской")
+	@PatchMapping(value = "/api/v1/workshop/books/{source}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@Transactional
+	public BookEditApi updateBook(@PathVariable String source, @Valid @RequestBody BookSaveApi request) {
+		Book book = bookRepository.findById(source).orElseThrow(PageNotFoundException::new);
+		bookRepository.findByEnglishName(request.getEnglishName().trim())
+			.filter(existing -> !existing.getSource().equals(source))
+			.ifPresent(existing -> {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Book with the same englishName already exists");
+			});
+		book.setName(request.getName().trim());
+		book.setEnglishName(request.getEnglishName().trim());
+		book.setAltName(trimToNull(request.getAltName()));
+		book.setType(request.getType());
+		book.setYear(request.getYear());
+		book.setDescription(trimToNull(request.getDescription()));
+		return new BookEditApi(bookRepository.saveAndFlush(book));
+	}
+
+	private String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
 	}
 }
