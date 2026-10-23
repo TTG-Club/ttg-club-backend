@@ -109,7 +109,7 @@ public class RacesApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return raceRepository.findAll(specification, pageable)
+		return raceRepository.findAll(SpecificationUtil.orAll(specification), pageable)
 			.stream()
 			.map(race -> new RaceApi(race, Optional.of(request)
 				.map(RaceRequestApi::getFilter)

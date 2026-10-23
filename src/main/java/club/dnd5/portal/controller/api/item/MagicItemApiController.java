@@ -118,7 +118,7 @@ public class MagicItemApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return magicItemRepository.findAll(specification, pageable).toList()
+		return magicItemRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(MagicItemApi::new)
 			.collect(Collectors.toList());

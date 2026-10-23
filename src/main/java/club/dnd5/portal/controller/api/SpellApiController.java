@@ -216,7 +216,7 @@ public class SpellApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return spellRepository.findAll(specification, pageable).toList()
+		return spellRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(SpellApi::new)
 			.collect(Collectors.toList());

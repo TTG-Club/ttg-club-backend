@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.SpecificationUtil;
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
 import club.dnd5.portal.model.FoundryVersion;
@@ -108,7 +109,7 @@ public class FvttApiController {
 					cb.like(root.get("name"), likeSearch));
 			}
 		}
-		return new SpellsFvtt(spellRepository.findAll(specification)
+		return new SpellsFvtt(spellRepository.findAll(SpecificationUtil.orAll(specification))
 			.stream()
 			.map(SpellFvtt::new)
 			.collect(Collectors.toList())
@@ -121,7 +122,7 @@ public class FvttApiController {
 	@GetMapping(value = "/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSrdSpells() {
 		Specification<Spell> specification = (root, query, cb) -> cb.isNotNull(root.get("srd"));
-		return new SpellsFvtt(spellRepository.findAll(specification)
+		return new SpellsFvtt(spellRepository.findAll(SpecificationUtil.orAll(specification))
 			.stream()
 			.map(SpellFvtt::new)
 			.collect(Collectors.toList())

@@ -109,7 +109,7 @@ public class WeaponApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return weaponRepository.findAll(specification, pageable).toList()
+		return weaponRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(WeaponApi::new)
 			.collect(Collectors.toList());

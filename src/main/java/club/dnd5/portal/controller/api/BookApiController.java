@@ -58,7 +58,7 @@ public class BookApiController {
 			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return bookRepository.findAll(specification, pageable).toList()
+		return bookRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(BookApi::new)
 			.collect(Collectors.toList());

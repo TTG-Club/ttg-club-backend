@@ -55,9 +55,9 @@ public class TokenApiController {
 
 		Pageable pageable = PageAndSortUtil.getPageable(page, size, order);
 
-		List<Token> tokens = tokenRepository.findAll(specification, pageable).toList();
+		List<Token> tokens = tokenRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList();
 
-		long total = tokenRepository.count(specification);
+		long total = tokenRepository.count(SpecificationUtil.orAll(specification));
 
         return new PaginatedResponseApi<>(
 			tokens

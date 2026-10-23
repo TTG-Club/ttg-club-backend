@@ -64,7 +64,7 @@ public class YoutubeVideoApiController {
 
 		long count = getCount(activeStatus);
 
-		Collection<YoutubeVideo> videos = youtubeVideosRepository.findAll(specification, pageable).toList();
+		Collection<YoutubeVideo> videos = youtubeVideosRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList();
 
 		return ResponseEntity
 			.status(HttpStatus.OK)

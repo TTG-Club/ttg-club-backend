@@ -99,7 +99,7 @@ public class GodApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return godRepository.findAll(specification, pageable).toList()
+		return godRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(GodApi::new)
 			.collect(Collectors.toList());

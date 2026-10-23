@@ -190,7 +190,7 @@ public class BestiaryApiController {
 			specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return beastRepository.findAll(specification, pageable).toList()
+		return beastRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(BeastApi::new)
 			.collect(Collectors.toList());

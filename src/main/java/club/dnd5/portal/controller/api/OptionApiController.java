@@ -109,7 +109,7 @@ public class OptionApiController {
 			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return optionRepository.findAll(specification, pageable).toList()
+		return optionRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(OptionApi::new)
 			.collect(Collectors.toList());
