@@ -4,6 +4,7 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import jakarta.persistence.*;
 import java.util.Set;
@@ -30,6 +31,8 @@ public class Equipment {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
+	// Список снаряжения показывает категории: без пачек это запрос на каждую запись
+	@BatchSize(size = 100)
 	@ElementCollection(targetClass = EquipmentType.class)
 	@JoinTable(name = "equipments_types", joinColumns = @JoinColumn(name = "equipment_id"))
 	@Column(name = "type", nullable = false)
