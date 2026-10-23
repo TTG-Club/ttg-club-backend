@@ -61,7 +61,7 @@ jobs:
         cache: maven
 
     - name: Maven Install
-      run: mvn -B clean install -DskipTests -Dfrontend.application.sha=
+      run: mvn -B clean install -DskipTests
 
     #- run: |
     #   make bootstrap

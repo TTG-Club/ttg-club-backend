@@ -3,10 +3,6 @@ target/
 /src/main/resources/robot.txt
 .factorypath
 
-# Frontend Build
-/src/main/resources/static/
-/src/main/resources/templates/spa.html
-
 # IDE Settings
 .idea
 .vscode

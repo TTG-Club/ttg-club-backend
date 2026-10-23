@@ -25,7 +25,6 @@
 		<jquery.version>3.6.0</jquery.version>
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 
-        <frontend.application.sha>unknown</frontend.application.sha>
 	</properties>
 
 	<dependencies>
@@ -110,10 +109,6 @@
 						<systemProperty>
 							<name>spring.profiles.active</name>
 							<value>product</value>
-						</systemProperty>
-						<systemProperty>
-							<name>frontend.application.sha</name>
-							<value>check</value>
 						</systemProperty>
 					</systemProperties>
 					<excludes>
