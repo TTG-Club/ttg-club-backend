@@ -38,6 +38,8 @@ public class RaceDetailApi extends RaceApi {
 	private Integer parentId;
 	private Collection<RaceFeatureApi> features;
 	protected Collection<RaceSkillApi> skills;
+	/** Основная раса со ссылками на разновидности: для выбора разновидности на странице. */
+	private RaceApi baseRace;
 
 	public RaceDetailApi(Race race, Set<String> books) {
 		super(race, books);
@@ -89,6 +91,17 @@ public class RaceDetailApi extends RaceApi {
 				.collect(Collectors.toList());
 		}
 		fillSkill(race);
+	}
+
+	/**
+	 * Детальная страница расы или разновидности: дополняется основной расой
+	 * со ссылками на все её разновидности.
+	 */
+	public static RaceDetailApi withBaseRace(Race race, Set<String> books) {
+		RaceDetailApi api = new RaceDetailApi(race, books);
+		Race base = race.getParent() == null ? race : race.getParent();
+		api.setBaseRace(new RaceApi(base, books));
+		return api;
 	}
 
 	@Getter

@@ -125,7 +125,7 @@ public class RacesApiController {
 		@RequestBody(required = false) RaceRequestApi request) {
 		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
 			.orElseThrow(PageNotFoundException::new);
-		RaceDetailApi raceApi = new RaceDetailApi(race, Optional.ofNullable(request)
+		RaceDetailApi raceApi = RaceDetailApi.withBaseRace(race, Optional.ofNullable(request)
 			.map(RaceRequestApi::getFilter)
 			.map(RaceFilter::getBooks)
 			.orElse(Collections.emptySet()
@@ -144,7 +144,7 @@ public class RacesApiController {
 		@RequestBody(required = false) RaceRequestApi request) {
 		Race race = raceRepository.findBySubrace(englishRaceName.replace('_', ' '), englishSubraceName.replace('_', ' '))
 			.orElseThrow(PageNotFoundException::new);
-		RaceDetailApi raceApi = new RaceDetailApi(race, Optional.ofNullable(request).map(RaceRequestApi::getFilter).map(RaceFilter::getBooks).orElse(Collections.emptySet()));
+		RaceDetailApi raceApi = RaceDetailApi.withBaseRace(race, Optional.ofNullable(request).map(RaceRequestApi::getFilter).map(RaceFilter::getBooks).orElse(Collections.emptySet()));
 		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			raceApi.setImages(images);
