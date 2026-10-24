@@ -1,6 +1,8 @@
 package club.dnd5.portal.controller.api.item;
 
+import club.dnd5.portal.dto.api.item.ItemApi;
 import club.dnd5.portal.dto.api.item.ItemDetailApi;
+import club.dnd5.portal.dto.api.item.TypeApi;
 import club.dnd5.portal.dto.api.item.ItemSaveApi;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -83,6 +85,21 @@ class ItemApiControllerTest {
 		assertThat(snapshot.getValue().getCategories())
 			.containsExactly(EquipmentType.ADVENTURING_GEAR, EquipmentType.CONTAINER);
 		assertThat(item.getName()).isEqualTo("New name");
+	}
+
+	@Test
+	void shouldListCategoriesInCatalogOrder() {
+		Equipment item = existingItem();
+		item.setName("Мешок");
+		item.setEnglishName("Sack");
+		item.setTypes(new LinkedHashSet<>(Arrays.asList(EquipmentType.CONTAINER, EquipmentType.ADVENTURING_GEAR)));
+
+		ItemApi link = new ItemApi(item);
+
+		assertThat(link.getCategoryGroups()).extracting(TypeApi::getName)
+			.containsExactly("Снаряжение", "Контейнеры");
+		assertThat(link.getCategoryGroups()).extracting(TypeApi::getOrder)
+			.containsExactly(EquipmentType.ADVENTURING_GEAR.ordinal(), EquipmentType.CONTAINER.ordinal());
 	}
 
 	private ItemApiController controllerFor(Equipment item) {
