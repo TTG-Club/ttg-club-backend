@@ -39,11 +39,11 @@ public class ClassApi {
 		url = String.format("/classes/%s", heroClass.getUrlName());
 		source = new SourceApi(heroClass.getBook());
 		dice = String.format("к%d", heroClass.getDiceHp());
-		if (request.getSearch() != null && request.getSearch().getValue() != null
-				&& !request.getSearch().getValue().isEmpty()) {
+		String search = getSearch(request);
+		// Подходит сам класс — показываем все его архетипы, иначе только найденные
+		if (search != null && !matches(heroClass.getCapitalazeName(), heroClass.getEnglishName(), search)) {
 			archetypes = heroClass.getArchetypes().stream()
-					.filter(a -> a.getName().toUpperCase().contains((request.getSearch().getValue().toUpperCase())) || a
-							.getEnglishName().toUpperCase().contains((request.getSearch().getValue().toUpperCase())))
+					.filter(a -> matches(a.getName(), a.getEnglishName(), search))
 					.sorted(Comparator.comparing(Archetype::getBook))
 					.map(NamedListApi::new)
 					.collect(Collectors.toList());
@@ -80,5 +80,24 @@ public class ClassApi {
 		}
 		sidekick = heroClass.isSidekick();
 		image = String.format("https://img.ttg.club/classes/background/class-%s.webp", heroClass.getEnglishName().replace(' ', '-').toLowerCase());
+	}
+
+	/**
+	 * Строка поиска из запроса в верхнем регистре или {@code null}, если не ищут.
+	 */
+	public static String getSearch(ClassRequestApi request) {
+		if (request.getSearch() == null || request.getSearch().getValue() == null
+				|| request.getSearch().getValue().isBlank()) {
+			return null;
+		}
+		return request.getSearch().getValue().trim().toUpperCase();
+	}
+
+	/**
+	 * Совпадает ли русское или английское название с поиском.
+	 */
+	public static boolean matches(String name, String englishName, String search) {
+		return (name != null && name.toUpperCase().contains(search))
+				|| (englishName != null && englishName.toUpperCase().contains(search));
 	}
 }
