@@ -82,16 +82,13 @@ public class ClassApiController {
 						(root, query, cb) -> root.get("diceHp").in(request.getFilter().getHitdice()));
 			}
 		}
-		if (request.getSearch() != null && request.getSearch().getValue() != null && !request.getSearch().getValue().isEmpty()) {
-			return classRepo.findAll(SpecificationUtil.orAll(specification))
-					.stream()
-					.map(classObject -> new ClassApi(classObject, request))
-					.filter(c -> !c.getArchetypes().isEmpty())
-					.collect(Collectors.toList());
-		}
+		String search = ClassApi.getSearch(request);
 		return classRepo.findAll(SpecificationUtil.orAll(specification))
 				.stream()
 				.map(classObject -> new ClassApi(classObject, request))
+				// Поиск находит класс по его названию или по названию подкласса
+				.filter(classApi -> search == null || ClassApi.matches(classApi.getName().getRus(), classApi.getName().getEng(), search)
+						|| !classApi.getArchetypes().isEmpty())
 				.filter(classApi -> request.getFilter() == null || request.getFilter().getBooks()
 						.contains(classApi.getSource().getShortName()) || (classApi.isSidekick() && request.getFilter().getBooks().contains("TCE")))
 				.collect(Collectors.toList());
