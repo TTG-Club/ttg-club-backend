@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,6 @@ public interface BookRepository extends JpaRepository<Book, String>, JpaSpecific
 	Optional<Book> findBySource(String source);
 
 	Optional<Book> findFirstByType(TypeBook type);
+
+	List<Book> findAllByTypeOrderByYearAscSourceAsc(TypeBook type);
 }
