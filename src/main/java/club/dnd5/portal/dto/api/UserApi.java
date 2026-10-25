@@ -20,6 +20,8 @@ public class UserApi {
 	private String email;
 	private String displayName;
 	private List<String> roles;
+	// Источники, снятые в фильтре по умолчанию: фронт снимает их в фильтре источников разделов.
+	private List<String> excludedSources;
 
 	public UserApi(User user) {
 		username = user.getUsername();
@@ -27,5 +29,6 @@ public class UserApi {
 		email = user.getEmail();
 		displayName = user.getDisplayName();
 		roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toList());
+		excludedSources = user.getExcludedSources().stream().sorted().collect(Collectors.toList());
 	}
 }
