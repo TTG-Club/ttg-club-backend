@@ -12,6 +12,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.Dice;
@@ -57,6 +58,8 @@ public class WeaponApiController {
 	private BookResolver bookResolver;
 	@Autowired
 	private AuditService auditService;
+	@Autowired
+	private WorkshopPreview workshopPreview;
 
 	@Operation(summary = "Получение краткого списка оружия")
 	@PostMapping(value = "/api/v1/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -154,6 +157,21 @@ public class WeaponApiController {
 		applyWeaponRequest(weapon, request);
 		Weapon saved = weaponRepository.saveAndFlush(weapon);
 		return new WeaponDetailApi(saved);
+	}
+
+	@Operation(summary = "Предпросмотр оружия без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/weapons/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public WeaponDetailApi previewWeapon(@RequestParam(required = false) Integer id, @Valid @RequestBody WeaponSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createWeapon(request);
+				} else {
+					updateWeapon(id, request);
+				}
+			},
+			() -> getWeapon(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений оружия")

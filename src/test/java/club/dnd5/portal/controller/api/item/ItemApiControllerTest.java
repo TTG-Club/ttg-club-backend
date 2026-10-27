@@ -13,6 +13,7 @@ import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.repository.datatable.ItemRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -111,7 +112,7 @@ class ItemApiControllerTest {
 		when(itemRepository.findById(1)).thenReturn(Optional.of(item));
 		when(itemRepository.findByEnglishName(any())).thenReturn(Optional.empty());
 		when(itemRepository.saveAndFlush(any(Equipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
-		return new ItemApiController(itemRepository, mock(BookResolver.class), auditService);
+		return new ItemApiController(itemRepository, mock(BookResolver.class), auditService, mock(WorkshopPreview.class));
 	}
 
 	private Equipment existingItem() {

@@ -13,6 +13,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -49,6 +50,7 @@ public class ArmorApiController {
 	private final ArmorRepository armorRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@Operation(summary = "Получение краткого списка доспехов")
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -127,6 +129,21 @@ public class ArmorApiController {
 		applyArmorRequest(armor, request);
 		Armor saved = armorRepository.saveAndFlush(armor);
 		return new ArmorDetailApi(saved);
+	}
+
+	@Operation(summary = "Предпросмотр доспеха без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/armors/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArmorDetailApi previewArmor(@RequestParam(required = false) Integer id, @Valid @RequestBody ArmorSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createArmor(request);
+				} else {
+					updateArmor(id, request);
+				}
+			},
+			() -> getOption(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений доспеха")
