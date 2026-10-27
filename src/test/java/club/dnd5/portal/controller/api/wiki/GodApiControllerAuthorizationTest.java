@@ -12,6 +12,7 @@ import club.dnd5.portal.repository.datatable.GodRepository;
 import club.dnd5.portal.repository.datatable.PantheonGodRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,7 +118,8 @@ class GodApiControllerAuthorizationTest {
 				ImageRepository imageRepository,
 				BookResolver bookResolver,
 				AuditService auditService) {
-			return new GodApiController(godRepository, pantheonRepository, imageRepository, bookResolver, auditService);
+			return new GodApiController(godRepository, pantheonRepository, imageRepository, bookResolver, auditService,
+				mock(WorkshopPreview.class));
 		}
 
 		private static God existingGod() {

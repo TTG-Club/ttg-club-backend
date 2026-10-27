@@ -14,6 +14,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -45,6 +46,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -72,6 +74,7 @@ public class ClassApiController {
 	private final HeroClassTraitRepository heroClassTraitRepository;
 	private final ArchetypeTraitRepository archetypeTraitRepository;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -157,6 +160,21 @@ public class ClassApiController {
 		return ResponseEntity.ok(new ClassDetailApi(saved, images, new ClassRequestApi()));
 	}
 
+	@Operation(summary = "Предпросмотр класса без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/classes/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ClassDetailApi> previewClass(@RequestParam(required = false) Integer id, @Valid @RequestBody ClassSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createClass(request);
+				} else {
+					updateClass(id, request);
+				}
+			},
+			() -> getClassInfo(null, request.getEnglishName().trim()));
+	}
+
 	@Operation(summary = "История изменений класса")
 	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
 	@GetMapping(value = "/api/v1/workshop/classes/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -219,6 +237,17 @@ public class ClassApiController {
 		return new ArchetypeEditApi(saved, archetypeTraitRepository.findAllByArchetypeId(saved.getId()));
 	}
 
+	@Operation(summary = "Предпросмотр архетипа без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/classes/archetypes/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ClassDetailApi> previewArchetype(@RequestParam Integer id, @Valid @RequestBody ArchetypeSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				updateArchetype(id, request);
+			},
+			() -> getArchetypePreview(id));
+	}
+
 	@Operation(summary = "История изменений архетипа")
 	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
 	@GetMapping(value = "/api/v1/workshop/classes/archetypes/{id}/revisions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -242,6 +271,14 @@ public class ClassApiController {
 	public ArchetypeEditApi restoreArchetypeRevision(@PathVariable Integer id, @PathVariable Integer revision) {
 		ArchetypeSaveApi snapshot = auditService.getSnapshot(ENTITY_TYPE_ARCHETYPE, id, revision, ArchetypeSaveApi.class);
 		return updateArchetype(id, snapshot);
+	}
+
+	/**
+	 * Карточка архетипа, как на странице архетипа.
+	 */
+	private ResponseEntity<ClassDetailApi> getArchetypePreview(Integer id) {
+		Archetype archetype = archetypeRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		return getArchetypeInfo(null, archetype.getHeroClass().getEnglishName(), archetype.getEnglishName());
 	}
 
 	private void syncArchetypeTraits(Archetype archetype, ArchetypeSaveApi request) {

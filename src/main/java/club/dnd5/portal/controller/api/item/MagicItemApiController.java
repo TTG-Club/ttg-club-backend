@@ -12,6 +12,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.dto.fvtt.export.FCreature;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
@@ -56,6 +57,7 @@ public class MagicItemApiController {
 	private final ImageRepository imageRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -170,6 +172,21 @@ public class MagicItemApiController {
 		applyItemRequest(item, request);
 		MagicItem saved = magicItemRepository.saveAndFlush(item);
 		return new MagicItemDetailApi(saved);
+	}
+
+	@Operation(summary = "Предпросмотр магического предмета без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/items/magic/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public MagicItemDetailApi previewItem(@RequestParam(required = false) Integer id, @Valid @RequestBody MagicItemSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createItem(request);
+				} else {
+					updateItem(id, request);
+				}
+			},
+			() -> getItem(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений магического предмета")

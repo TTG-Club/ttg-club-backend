@@ -15,6 +15,7 @@ import club.dnd5.portal.model.screen.Screen;
 import club.dnd5.portal.repository.datatable.ScreenRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -52,6 +54,7 @@ public class ScreenApiController {
 	private final ScreenRepository screenRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@PostMapping(value = "/api/v1/screens", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ScreenApi> getScreens(@RequestBody ScreenRequestApi request) {
@@ -100,6 +103,17 @@ public class ScreenApiController {
 		applyScreenRequest(screen, request, parent);
 		Screen saved = screenRepository.saveAndFlush(screen);
 		return ResponseEntity.ok(new ScreenDetailApi(saved));
+	}
+
+	@Operation(summary = "Предпросмотр раздела ширмы без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/screens/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ScreenDetailApi> previewScreen(@RequestParam Integer id, @Valid @RequestBody ScreenSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				updateScreen(id, request);
+			},
+			() -> getScreen(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений раздела ширмы")

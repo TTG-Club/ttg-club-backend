@@ -6,6 +6,7 @@ import club.dnd5.portal.model.screen.Screen;
 import club.dnd5.portal.repository.datatable.ScreenRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -46,7 +47,7 @@ class ScreenApiControllerTest {
 		request.setOrder(20);
 		request.setParentId(2);
 
-		ScreenApiController controller = new ScreenApiController(screenRepository, bookResolver, auditService);
+		ScreenApiController controller = new ScreenApiController(screenRepository, bookResolver, auditService, mock(WorkshopPreview.class));
 		controller.updateScreen(1, request);
 
 		ArgumentCaptor<ScreenSaveApi> snapshot = ArgumentCaptor.forClass(ScreenSaveApi.class);

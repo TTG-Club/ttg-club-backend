@@ -13,6 +13,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.AbilityType;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -64,6 +66,7 @@ public class RacesApiController {
 	private final RaceAbilityBonusRepository raceAbilityBonusRepository;
 	private final RaceFeatureRepository raceFeatureRepository;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@PostMapping(value = "/api/v1/races", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RaceApi> getRaces(@RequestBody RaceRequestApi request) {
@@ -236,6 +239,21 @@ public class RacesApiController {
 			raceApi.setImages(images);
 		}
 		return ResponseEntity.ok(raceApi);
+	}
+
+	@Operation(summary = "Предпросмотр расы без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/races/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<RaceDetailApi> previewRace(@RequestParam(required = false) Integer id, @Valid @RequestBody RaceSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createRace(request);
+				} else {
+					updateRace(id, request);
+				}
+			},
+			() -> getRace(request.getEnglishName().trim(), null));
 	}
 
 	@Operation(summary = "История изменений расы")

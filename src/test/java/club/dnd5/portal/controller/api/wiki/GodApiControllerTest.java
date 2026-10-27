@@ -14,6 +14,7 @@ import club.dnd5.portal.repository.datatable.GodRepository;
 import club.dnd5.portal.repository.datatable.PantheonGodRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -62,7 +63,7 @@ class GodApiControllerTest {
 		request.setPage((short) 42);
 
 		GodApiController controller = new GodApiController(
-			godRepository, pantheonRepository, imageRepository, bookResolver, auditService);
+			godRepository, pantheonRepository, imageRepository, bookResolver, auditService, mock(WorkshopPreview.class));
 		controller.updateGod(1, request);
 
 		ArgumentCaptor<GodSaveApi> snapshot = ArgumentCaptor.forClass(GodSaveApi.class);

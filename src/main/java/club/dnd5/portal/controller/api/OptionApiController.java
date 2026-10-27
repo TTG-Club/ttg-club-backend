@@ -22,6 +22,7 @@ import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -61,6 +63,7 @@ public class OptionApiController {
 	private final ClassRepository classRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@PostMapping(value = "/api/v1/options", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<OptionApi> getOptions(@RequestBody OptionRequesApi request) {
@@ -152,6 +155,21 @@ public class OptionApiController {
 		applyOptionRequest(option, request);
 		Option saved = optionRepository.saveAndFlush(option);
 		return ResponseEntity.ok(new OptionDetailApi(saved));
+	}
+
+	@Operation(summary = "Предпросмотр особенности класса без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/options/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<OptionDetailApi> previewOption(@RequestParam(required = false) Integer id, @Valid @RequestBody OptionSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createOption(request);
+				} else {
+					updateOption(id, request);
+				}
+			},
+			() -> getOption(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений особенности класса")

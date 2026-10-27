@@ -15,6 +15,7 @@ import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -39,7 +40,8 @@ class ClassApiControllerTest {
 			mock(BookResolver.class),
 			mock(HeroClassTraitRepository.class),
 			archetypeTraitRepository,
-			mock(AuditService.class));
+			mock(AuditService.class),
+			mock(WorkshopPreview.class));
 
 		HeroClass heroClass = new HeroClass();
 		heroClass.setId(1);
@@ -79,7 +81,8 @@ class ClassApiControllerTest {
 			mock(BookResolver.class),
 			mock(HeroClassTraitRepository.class),
 			archetypeTraitRepository,
-			mock(AuditService.class));
+			mock(AuditService.class),
+			mock(WorkshopPreview.class));
 
 		HeroClass heroClass = new HeroClass();
 		heroClass.setId(1);
