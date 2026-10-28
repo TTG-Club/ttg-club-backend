@@ -1,10 +1,12 @@
 package club.dnd5.portal.service.vttg;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Entities;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.parser.Parser;
+import org.jsoup.parser.Tag;
+import org.jsoup.parser.TagSet;
 
 /**
  * Тексты записей для VTTG.
@@ -30,8 +32,7 @@ final class VttgText {
 		if (isBlank(source)) {
 			return "";
 		}
-		Document document = Jsoup.parseBodyFragment(source);
-		document.outputSettings().prettyPrint(false);
+		Document document = parse(source);
 		for (Element roller : document.select("dice-roller")) {
 			String text = roller.text().trim();
 			roller.replaceWith(new TextNode(text.isEmpty() ? roller.attr("formula") : text));
@@ -40,6 +41,21 @@ final class VttgText {
 			link.attr("href", SITE_URL + link.attr("href"));
 		}
 		return document.body().html().trim();
+	}
+
+	/**
+	 * Разбирает фрагмент HTML сайта.
+	 *
+	 * <p>По спецификации HTML {@code <dice-roller/>} не самозакрывающийся и забирает в себя
+	 * текст до конца абзаца, поэтому тегу явно разрешено закрываться слэшем.</p>
+	 */
+	private static Document parse(String source) {
+		TagSet tags = TagSet.Html();
+		tags.valueOf("dice-roller", Parser.NamespaceHtml).set(Tag.SelfClose);
+		Document document = Document.createShell("");
+		document.outputSettings().prettyPrint(false);
+		document.body().appendChildren(Parser.htmlParser().tagSet(tags).parseFragmentInput(source, document.body(), ""));
+		return document;
 	}
 
 	/**
