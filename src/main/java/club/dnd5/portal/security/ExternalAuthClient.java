@@ -13,6 +13,9 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
@@ -22,10 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Component
 public class ExternalAuthClient {
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String FRONTEND_ORIGIN_HEADER = "X-Frontend-Origin";
+    private static final String FORWARDED_FOR_HEADER = "X-Forwarded-For";
     private static final Pattern TOKEN_PATTERN = Pattern.compile("^[A-Za-z0-9._-]{1,2048}$");
 
     private final RestTemplate restTemplate;
@@ -131,7 +137,7 @@ public class ExternalAuthClient {
         restTemplate.exchange(
                 urlWithToken("/api/account/password/reset-token/validate", token),
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                emptyEntity(),
                 Void.class);
     }
 
@@ -139,7 +145,7 @@ public class ExternalAuthClient {
         restTemplate.exchange(
                 urlWithToken("/api/auth/verify-email", token),
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                emptyEntity(),
                 Void.class);
     }
 
@@ -192,7 +198,7 @@ public class ExternalAuthClient {
     }
 
     private HttpEntity<Map<String, Object>> jsonEntity(Map<String, Object> body, boolean includeFrontendOrigin) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = clientHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         if (includeFrontendOrigin && StringUtils.hasText(frontendOrigin)) {
@@ -202,17 +208,53 @@ public class ExternalAuthClient {
         return new HttpEntity<>(body, headers);
     }
 
+    private HttpEntity<Void> emptyEntity() {
+        return new HttpEntity<>(clientHeaders());
+    }
+
     private HttpEntity<Void> bearerEntity(String token) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = clientHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token);
         return new HttpEntity<>(headers);
     }
 
     private HttpEntity<Map<String, Object>> bearerEntity(String token, Map<String, Object> body) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = clientHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token);
         return new HttpEntity<>(body, headers);
+    }
+
+    /**
+     * Заголовки с IP пользователя, от имени которого идёт запрос.
+     *
+     * <p>auth-service считает лимит запросов по IP из {@code X-Forwarded-For}. Без этого
+     * заголовка все пользователи старого сайта приходят с IP бэкенда, делят один лимит
+     * и получают 429 при входе.
+     */
+    private HttpHeaders clientHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        String clientIp = currentClientIp();
+        if (StringUtils.hasText(clientIp)) {
+            headers.set(FORWARDED_FOR_HEADER, clientIp);
+        }
+        return headers;
+    }
+
+    static String currentClientIp() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        if (!(attributes instanceof ServletRequestAttributes servletAttributes)) {
+            return null;
+        }
+        return resolveClientIp(servletAttributes.getRequest());
+    }
+
+    static String resolveClientIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader(FORWARDED_FOR_HEADER);
+        if (StringUtils.hasText(forwardedFor)) {
+            return forwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     private String url(String path) {
