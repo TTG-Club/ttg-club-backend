@@ -16,7 +16,7 @@ import club.dnd5.portal.repository.datatable.FeatRepository;
 import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.PlatformTransactionManager;

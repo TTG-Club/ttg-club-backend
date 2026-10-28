@@ -19,8 +19,8 @@ import club.dnd5.portal.repository.datatable.FeatRepository;
 import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.repository.datatable.RaceRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -233,7 +233,7 @@ public class VttgExportService {
 		try {
 			String json = objectMapper.writeValueAsString(Arrays.asList(upserts, sources, VttgSections.tree()));
 			return json.hashCode() & Integer.MAX_VALUE;
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new IllegalStateException("Не удалось сериализовать выгрузку VTTG", e);
 		}
 	}
