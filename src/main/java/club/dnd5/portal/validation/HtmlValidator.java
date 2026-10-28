@@ -2,8 +2,8 @@ package club.dnd5.portal.validation;
 
 import org.jsoup.parser.Parser;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;

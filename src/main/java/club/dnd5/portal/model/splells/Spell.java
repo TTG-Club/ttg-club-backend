@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 @Getter
@@ -70,19 +70,19 @@ public class Spell implements FoundryCommon {
 	@ElementCollection(targetClass = DamageType.class)
 	@JoinTable(name = "spell_damage_type", joinColumns = @JoinColumn(name = "spell_id"))
 	@Column(name = "damage_type", nullable = false)
-	@Enumerated(javax.persistence.EnumType.STRING)
+	@Enumerated(jakarta.persistence.EnumType.STRING)
 	private List<DamageType> damageType;
 
 	@ElementCollection(targetClass = HealType.class)
 	@JoinTable(name = "spell_heal_type", joinColumns = @JoinColumn(name = "spell_id"))
 	@Column(name = "heal_type", nullable = false)
-	@Enumerated(javax.persistence.EnumType.STRING)
+	@Enumerated(jakarta.persistence.EnumType.STRING)
 	private List<HealType> healType;
 
 	@ElementCollection(targetClass = AbilityType.class)
 	@JoinTable(name = "spell_savingthrows", joinColumns = @JoinColumn(name = "spell_id"))
 	@Column(name = "ability", nullable = false)
-	@Enumerated(javax.persistence.EnumType.STRING)
+	@Enumerated(jakarta.persistence.EnumType.STRING)
 	private List<AbilityType> savingthrows;
 
 	@ManyToMany

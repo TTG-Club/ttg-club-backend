@@ -13,6 +13,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -34,9 +35,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.validation.Valid;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,7 @@ public class ArmorApiController {
 	private final ArmorRepository armorRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@Operation(summary = "Получение краткого списка доспехов")
 	@PostMapping(value = "/api/v1/armors", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -83,7 +85,7 @@ public class ArmorApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return armorRepository.findAll(specification, pageable)
+		return armorRepository.findAll(SpecificationUtil.orAll(specification), pageable)
 			.stream()
 			.map(ArmorApi::new)
 			.collect(Collectors.toList());
@@ -127,6 +129,21 @@ public class ArmorApiController {
 		applyArmorRequest(armor, request);
 		Armor saved = armorRepository.saveAndFlush(armor);
 		return new ArmorDetailApi(saved);
+	}
+
+	@Operation(summary = "Предпросмотр доспеха без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/armors/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ArmorDetailApi previewArmor(@RequestParam(required = false) Integer id, @Valid @RequestBody ArmorSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createArmor(request);
+				} else {
+					updateArmor(id, request);
+				}
+			},
+			() -> getOption(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений доспеха")

@@ -12,6 +12,13 @@ import java.util.Optional;
  * Получение спецификаций
  */
 public final class SpecificationUtil {
+	/**
+	 * Условия запроса или все записи, если условий нет: Spring Data JPA 4 не принимает null вместо спецификации.
+	 */
+	public static <T> Specification<T> orAll(Specification<T> specification) {
+		return specification == null ? Specification.unrestricted() : specification;
+	}
+
 	public static <T> Specification<T> getAndSpecification(Specification<T> specification, Specification<T> addSpecification) {
 		if (specification == null) {
 			return Specification.where(addSpecification);

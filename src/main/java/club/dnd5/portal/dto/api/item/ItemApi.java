@@ -14,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
@@ -28,6 +30,8 @@ public class ItemApi {
 	protected TypeApi type;
 	private Object price;
 	protected SourceApi source;
+	/** Категории снаряжения в порядке справочника: по ним список группируется. */
+	private List<TypeApi> categoryGroups;
 
 	public ItemApi(Equipment item) {
 		name = new NameApi(item.getName(), item.getEnglishName());
@@ -36,6 +40,12 @@ public class ItemApi {
 			homebrew = Boolean.TRUE;
 		}
 		source = new SourceApi(item.getBook());
+		if (item.getTypes() != null) {
+			categoryGroups = item.getTypes().stream()
+				.sorted(Comparator.naturalOrder())
+				.map(type -> new TypeApi(type.getCyrilicName(), type.ordinal()))
+				.toList();
+		}
 	}
 
 	public ItemApi(MagicItem item) {

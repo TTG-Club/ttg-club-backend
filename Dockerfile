@@ -1,4 +1,4 @@
-FROM maven:3-eclipse-temurin-8 AS base
+FROM maven:3-eclipse-temurin-25 AS base
 
 WORKDIR /opt/app
 
@@ -6,10 +6,9 @@ WORKDIR /opt/app
 FROM base AS build
 
 COPY --link . .
-RUN FRONTEND_SHA=$(echo -n $(date +%s) | sha256sum | awk '{print $1}') && \
-    mvn -B clean install -DskipTests -Dfrontend.application.sha=${FRONTEND_SHA}
+RUN mvn -B clean install -DskipTests
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:25-jre
 
 WORKDIR /opt/app
 

@@ -1,12 +1,12 @@
 package club.dnd5.portal.security;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -41,7 +41,7 @@ public class ExternalAuthTokenClaims {
                     text(claims, "username"),
                     text(claims, "email"),
                     roles(claims));
-        } catch (IllegalArgumentException | IOException exception) {
+        } catch (IllegalArgumentException | JacksonException exception) {
             return empty();
         }
     }

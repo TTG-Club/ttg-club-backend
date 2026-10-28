@@ -46,7 +46,7 @@ class BestiaryServiceImplTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> ReflectionTestUtils.invokeMethod(service, "mapSpeed", new Creature(), request));
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
 
     @Test
@@ -58,7 +58,7 @@ class BestiaryServiceImplTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> ReflectionTestUtils.invokeMethod(service, "mapSpeed", new Creature(), request));
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
 
     @Test

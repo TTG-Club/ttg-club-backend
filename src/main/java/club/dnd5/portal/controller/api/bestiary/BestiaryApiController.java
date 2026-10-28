@@ -34,8 +34,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -190,7 +190,7 @@ public class BestiaryApiController {
 			specification = SpecificationUtil.getAndSpecification(specification, addSpec);
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return beastRepository.findAll(specification, pageable).toList()
+		return beastRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(BeastApi::new)
 			.collect(Collectors.toList());

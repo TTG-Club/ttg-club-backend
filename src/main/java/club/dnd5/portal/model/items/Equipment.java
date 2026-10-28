@@ -4,8 +4,9 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Set;
 
 @Getter
@@ -30,10 +31,12 @@ public class Equipment {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
+	// Список снаряжения показывает категории: без пачек это запрос на каждую запись
+	@BatchSize(size = 100)
 	@ElementCollection(targetClass = EquipmentType.class)
 	@JoinTable(name = "equipments_types", joinColumns = @JoinColumn(name = "equipment_id"))
 	@Column(name = "type", nullable = false)
-	@Enumerated(javax.persistence.EnumType.STRING)
+	@Enumerated(jakarta.persistence.EnumType.STRING)
 	private Set<EquipmentType> types;
 
 	@ManyToOne

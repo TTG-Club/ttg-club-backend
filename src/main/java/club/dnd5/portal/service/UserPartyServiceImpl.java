@@ -125,7 +125,7 @@ public class UserPartyServiceImpl implements UserPartyService {
 
 		Pageable pageable = PageAndSortUtil.getPageable(request);
 		return convertToUserPartyApiList(
-			new ArrayList<>(userPartyRepository.findAll(specification, pageable).toList())
+			new ArrayList<>(userPartyRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList())
 		);
 	}
 

@@ -2,7 +2,7 @@ package club.dnd5.portal.model.token;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Data
 @Entity

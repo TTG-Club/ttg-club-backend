@@ -19,6 +19,7 @@ import club.dnd5.portal.model.items.EquipmentType;
 import club.dnd5.portal.repository.datatable.ItemRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,13 +37,14 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.validation.Valid;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,7 @@ public class ItemApiController {
 	private final ItemRepository itemRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@Operation( summary = "Получение краткого списка снаряжения")
 	@PostMapping(value = "/api/v1/items", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -98,7 +101,7 @@ public class ItemApiController {
 			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return itemRepository.findAll(specification, pageable).toList()
+		return itemRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(ItemApi::new)
 			.collect(Collectors.toList());
@@ -143,6 +146,21 @@ public class ItemApiController {
 		applyItemRequest(item, request);
 		Equipment saved = itemRepository.saveAndFlush(item);
 		return new ItemDetailApi(saved);
+	}
+
+	@Operation(summary = "Предпросмотр снаряжения без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/items/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ItemDetailApi previewItem(@RequestParam(required = false) Integer id, @Valid @RequestBody ItemSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createItem(request);
+				} else {
+					updateItem(id, request);
+				}
+			},
+			() -> getOption(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений снаряжения")

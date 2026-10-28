@@ -12,13 +12,14 @@ import club.dnd5.portal.repository.datatable.GodRepository;
 import club.dnd5.portal.repository.datatable.PantheonGodRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
@@ -76,7 +77,7 @@ class GodApiControllerAuthorizationTest {
 	}
 
 	@Configuration
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
+	@EnableMethodSecurity
 	static class TestConfig {
 		@Bean
 		GodRepository godRepository() {
@@ -117,7 +118,8 @@ class GodApiControllerAuthorizationTest {
 				ImageRepository imageRepository,
 				BookResolver bookResolver,
 				AuditService auditService) {
-			return new GodApiController(godRepository, pantheonRepository, imageRepository, bookResolver, auditService);
+			return new GodApiController(godRepository, pantheonRepository, imageRepository, bookResolver, auditService,
+				mock(WorkshopPreview.class));
 		}
 
 		private static God existingGod() {

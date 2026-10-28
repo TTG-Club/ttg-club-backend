@@ -1,6 +1,8 @@
 package club.dnd5.portal.controller.api.item;
 
+import club.dnd5.portal.dto.api.item.ItemApi;
 import club.dnd5.portal.dto.api.item.ItemDetailApi;
+import club.dnd5.portal.dto.api.item.TypeApi;
 import club.dnd5.portal.dto.api.item.ItemSaveApi;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -11,6 +13,7 @@ import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.repository.datatable.ItemRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -85,6 +88,21 @@ class ItemApiControllerTest {
 		assertThat(item.getName()).isEqualTo("New name");
 	}
 
+	@Test
+	void shouldListCategoriesInCatalogOrder() {
+		Equipment item = existingItem();
+		item.setName("Мешок");
+		item.setEnglishName("Sack");
+		item.setTypes(new LinkedHashSet<>(Arrays.asList(EquipmentType.CONTAINER, EquipmentType.ADVENTURING_GEAR)));
+
+		ItemApi link = new ItemApi(item);
+
+		assertThat(link.getCategoryGroups()).extracting(TypeApi::getName)
+			.containsExactly("Снаряжение", "Контейнеры");
+		assertThat(link.getCategoryGroups()).extracting(TypeApi::getOrder)
+			.containsExactly(EquipmentType.ADVENTURING_GEAR.ordinal(), EquipmentType.CONTAINER.ordinal());
+	}
+
 	private ItemApiController controllerFor(Equipment item) {
 		return controllerFor(item, mock(AuditService.class));
 	}
@@ -94,7 +112,7 @@ class ItemApiControllerTest {
 		when(itemRepository.findById(1)).thenReturn(Optional.of(item));
 		when(itemRepository.findByEnglishName(any())).thenReturn(Optional.empty());
 		when(itemRepository.saveAndFlush(any(Equipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
-		return new ItemApiController(itemRepository, mock(BookResolver.class), auditService);
+		return new ItemApiController(itemRepository, mock(BookResolver.class), auditService, mock(WorkshopPreview.class));
 	}
 
 	private Equipment existingItem() {

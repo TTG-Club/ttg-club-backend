@@ -14,17 +14,17 @@ import club.dnd5.portal.repository.JsonStorageRepository;
 import club.dnd5.portal.repository.TokenRepository;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import club.dnd5.portal.util.StringUtil;
 
-import javax.transaction.Transactional;
-import java.io.IOException;
+import jakarta.transaction.Transactional;
+import tools.jackson.core.JacksonException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -97,7 +97,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 				modifyImgSpell(jsonStorage.getRefId(), rootNode);
 			}
 			jsonStorage.setJsonData(mapper.writeValueAsString(rootNode));
-		} catch (IOException ioException) {
+		} catch (JacksonException ioException) {
 			log.error("Error load json", ioException);
 			return Optional.ofNullable(jsonStorage);
 		}
@@ -116,10 +116,10 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 		String description = entity.getDescription();
 		ObjectNode systemNode = (ObjectNode) rootNode.get("system");
 		if (systemNode != null) {
-			ObjectNode detailsNode = systemNode.with("details");
+			ObjectNode detailsNode = systemNode.withObjectProperty("details");
 			detailsNode.remove("biography");
 
-			ObjectNode biographyNode = detailsNode.with("biography");
+			ObjectNode biographyNode = detailsNode.withObjectProperty("biography");
 			biographyNode.put("value", description);
 			biographyNode.put("public", "");
 		}
@@ -166,7 +166,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
         Optional<Token> srcToken = tokenRepository.findByRefIdAndType(creatureId, srcType).stream().findFirst();
 		ObjectNode prototypeNode = (ObjectNode) rootNode.get("prototypeToken");
 		if (prototypeNode != null) {
-			ObjectNode textureNode = prototypeNode.with("texture");
+			ObjectNode textureNode = prototypeNode.withObjectProperty("texture");
 			if (srcToken.isPresent()) {
 				textureNode.put("src", srcToken.get().getUrl());
 			} else {

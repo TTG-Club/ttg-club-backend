@@ -7,6 +7,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @RequiredArgsConstructor
 public class NameApi {
 	@Schema(description = "имя по русски", required = true)

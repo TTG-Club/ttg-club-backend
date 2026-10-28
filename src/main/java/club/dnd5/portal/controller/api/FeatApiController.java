@@ -12,6 +12,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
@@ -34,9 +35,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.validation.Valid;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -52,6 +53,7 @@ public class FeatApiController {
 	private final FeatRepository featRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@Operation(summary = "Получение краткого списка черт")
 	@PostMapping(value = {"/api/v1/traits","/api/v1/feats"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -104,7 +106,7 @@ public class FeatApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return featRepository.findAll(specification, pageable).toList()
+		return featRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(FeatApi::new)
 			.collect(Collectors.toList());
@@ -149,6 +151,21 @@ public class FeatApiController {
 		applyFeatRequest(trait, request);
 		Trait saved = featRepository.saveAndFlush(trait);
 		return ResponseEntity.ok(new FeatDetailApi(saved));
+	}
+
+	@Operation(summary = "Предпросмотр черты без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/feats/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<FeatDetailApi> previewFeat(@RequestParam(required = false) Integer id, @Valid @RequestBody FeatSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createFeat(request);
+				} else {
+					updateFeat(id, request);
+				}
+			},
+			() -> getTrait(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений черты")

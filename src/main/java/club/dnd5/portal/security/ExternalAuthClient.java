@@ -221,7 +221,7 @@ public class ExternalAuthClient {
 
     private String urlWithToken(String path, String token) {
         validateToken(token);
-        return UriComponentsBuilder.fromHttpUrl(url(path))
+        return UriComponentsBuilder.fromUriString(url(path))
                 .queryParam("token", token)
                 .toUriString();
     }

@@ -13,6 +13,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.AbilityType;
@@ -42,13 +43,14 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,6 +66,7 @@ public class RacesApiController {
 	private final RaceAbilityBonusRepository raceAbilityBonusRepository;
 	private final RaceFeatureRepository raceFeatureRepository;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@PostMapping(value = "/api/v1/races", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RaceApi> getRaces(@RequestBody RaceRequestApi request) {
@@ -109,7 +112,7 @@ public class RacesApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return raceRepository.findAll(specification, pageable)
+		return raceRepository.findAll(SpecificationUtil.orAll(specification), pageable)
 			.stream()
 			.map(race -> new RaceApi(race, Optional.of(request)
 				.map(RaceRequestApi::getFilter)
@@ -122,10 +125,10 @@ public class RacesApiController {
 	@PostMapping(value = "/api/v1/races/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<RaceDetailApi> getRace(
 		@PathVariable String englishName,
-		@RequestBody RaceRequestApi request) {
+		@RequestBody(required = false) RaceRequestApi request) {
 		Race race = raceRepository.findByEnglishName(englishName.replace('_', ' '))
 			.orElseThrow(PageNotFoundException::new);
-		RaceDetailApi raceApi = new RaceDetailApi(race, Optional.of(request)
+		RaceDetailApi raceApi = RaceDetailApi.withBaseRace(race, Optional.ofNullable(request)
 			.map(RaceRequestApi::getFilter)
 			.map(RaceFilter::getBooks)
 			.orElse(Collections.emptySet()
@@ -141,10 +144,11 @@ public class RacesApiController {
 	public RaceDetailApi getSubrace(
 		@PathVariable String englishRaceName,
 		@PathVariable String englishSubraceName,
-		@RequestBody RaceRequestApi request) {
-		Optional<Race> race = raceRepository.findBySubrace(englishRaceName.replace('_', ' '), englishSubraceName.replace('_', ' '));
-		RaceDetailApi raceApi = new RaceDetailApi(race.get(), Optional.of(request).map(RaceRequestApi::getFilter).map(RaceFilter::getBooks).orElse(Collections.emptySet()));
-		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.get().getId());
+		@RequestBody(required = false) RaceRequestApi request) {
+		Race race = raceRepository.findBySubrace(englishRaceName.replace('_', ' '), englishSubraceName.replace('_', ' '))
+			.orElseThrow(PageNotFoundException::new);
+		RaceDetailApi raceApi = RaceDetailApi.withBaseRace(race, Optional.ofNullable(request).map(RaceRequestApi::getFilter).map(RaceFilter::getBooks).orElse(Collections.emptySet()));
+		Collection<String> images = imageRepository.findAllByTypeAndRefId(ImageType.RACE, race.getId());
 		if (!images.isEmpty()) {
 			raceApi.setImages(images);
 		}
@@ -235,6 +239,21 @@ public class RacesApiController {
 			raceApi.setImages(images);
 		}
 		return ResponseEntity.ok(raceApi);
+	}
+
+	@Operation(summary = "Предпросмотр расы без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/races/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<RaceDetailApi> previewRace(@RequestParam(required = false) Integer id, @Valid @RequestBody RaceSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createRace(request);
+				} else {
+					updateRace(id, request);
+				}
+			},
+			() -> getRace(request.getEnglishName().trim(), null));
 	}
 
 	@Operation(summary = "История изменений расы")

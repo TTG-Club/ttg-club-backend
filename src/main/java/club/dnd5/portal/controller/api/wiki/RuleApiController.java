@@ -15,6 +15,7 @@ import club.dnd5.portal.model.rule.Rule;
 import club.dnd5.portal.repository.datatable.RuleRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,10 +34,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +53,7 @@ public class RuleApiController {
 	private final RuleRepository ruleRepository;
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@PostMapping(value = "/api/v1/rules", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<RuleApi> getRules(@RequestBody RuleRequestApi request) {
@@ -66,7 +69,7 @@ public class RuleApiController {
 			}
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return ruleRepository.findAll(specification, pageable).toList()
+		return ruleRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(RuleApi::new)
 			.collect(Collectors.toList());
@@ -93,6 +96,17 @@ public class RuleApiController {
 		applyRuleRequest(rule, request);
 		Rule saved = ruleRepository.saveAndFlush(rule);
 		return ResponseEntity.ok(new RuleDetailApi(saved));
+	}
+
+	@Operation(summary = "Предпросмотр правила без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/rules/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<RuleDetailApi> previewRule(@RequestParam Integer id, @Valid @RequestBody RuleSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				updateRule(id, request);
+			},
+			() -> getRule(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений правила или термина")

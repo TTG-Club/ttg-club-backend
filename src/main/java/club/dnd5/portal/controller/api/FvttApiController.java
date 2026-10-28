@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.SpecificationUtil;
 import club.dnd5.portal.dto.api.spells.SpellFvtt;
 import club.dnd5.portal.dto.api.spells.SpellsFvtt;
 import club.dnd5.portal.model.FoundryVersion;
@@ -8,8 +9,8 @@ import club.dnd5.portal.model.exporter.JsonStorage;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.service.JsonStorageService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,7 @@ public class FvttApiController {
 			String jsonData;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(spellsList);
-			} catch (JsonProcessingException e) {
+			} catch (JacksonException e) {
 				throw new RuntimeException(e);
 			}
 			byte[] jsonDataBytes = jsonData.getBytes(StandardCharsets.UTF_8);
@@ -82,7 +83,7 @@ public class FvttApiController {
 			String jsonData;
 			try {
 				jsonData = new ObjectMapper().writeValueAsString(bestiaryList);
-			} catch (JsonProcessingException e) {
+			} catch (JacksonException e) {
 				throw new RuntimeException(e);
 			}
 			byte[] jsonDataBytes = jsonData.getBytes(StandardCharsets.UTF_8);
@@ -108,7 +109,7 @@ public class FvttApiController {
 					cb.like(root.get("name"), likeSearch));
 			}
 		}
-		return new SpellsFvtt(spellRepository.findAll(specification)
+		return new SpellsFvtt(spellRepository.findAll(SpecificationUtil.orAll(specification))
 			.stream()
 			.map(SpellFvtt::new)
 			.collect(Collectors.toList())
@@ -121,7 +122,7 @@ public class FvttApiController {
 	@GetMapping(value = "/srd/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public SpellsFvtt getSrdSpells() {
 		Specification<Spell> specification = (root, query, cb) -> cb.isNotNull(root.get("srd"));
-		return new SpellsFvtt(spellRepository.findAll(specification)
+		return new SpellsFvtt(spellRepository.findAll(SpecificationUtil.orAll(specification))
 			.stream()
 			.map(SpellFvtt::new)
 			.collect(Collectors.toList())

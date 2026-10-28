@@ -43,8 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -201,7 +201,7 @@ public class BestiaryServiceImpl implements BestiaryService {
             specification = SpecificationUtil.getAndSpecification(specification, addSpec);
         }
         Pageable pageable = PageAndSortUtil.getPageable(request);
-        return beastRepository.findAll(specification, pageable).toList()
+        return beastRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
                 .stream()
                 .map(BeastApi::new)
                 .collect(Collectors.toList());

@@ -12,6 +12,7 @@ import club.dnd5.portal.dto.api.spells.SearchRequest;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
@@ -38,10 +39,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
+import jakarta.validation.Valid;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,7 @@ public class BackgroundApiController {
 	private final BookResolver bookResolver;
 	private final LanguageRepository languageRepository;
 	private final AuditService auditService;
+	private final WorkshopPreview workshopPreview;
 
 	@Operation(summary = "Получения краткого списка предисторий")
 	@PostMapping(value = "/api/v1/backgrounds", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -92,7 +94,7 @@ public class BackgroundApiController {
 			});
 		}
 		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return backgroundRepository.findAll(specification, pageable).toList()
+		return backgroundRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(BackgroundApi::new)
 			.collect(Collectors.toList());
@@ -136,6 +138,21 @@ public class BackgroundApiController {
 		applyBackgroundRequest(background, request);
 		Background saved = backgroundRepository.saveAndFlush(background);
 		return ResponseEntity.ok(new BackgroundDetailApi(saved));
+	}
+
+	@Operation(summary = "Предпросмотр предыстории без сохранения")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@PostMapping(value = "/api/v1/workshop/backgrounds/preview", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<BackgroundDetailApi> previewBackground(@RequestParam(required = false) Integer id, @Valid @RequestBody BackgroundSaveApi request) {
+		return workshopPreview.render(
+			() -> {
+				if (id == null) {
+					createBackground(request);
+				} else {
+					updateBackground(id, request);
+				}
+			},
+			() -> getBackground(request.getEnglishName().trim()));
 	}
 
 	@Operation(summary = "История изменений предыстории")

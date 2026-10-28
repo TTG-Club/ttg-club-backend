@@ -7,18 +7,22 @@ import club.dnd5.portal.security.ExternalAuthUserSynchronizer;
 import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
 import club.dnd5.portal.security.TokenAuthenticationCache;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import jakarta.servlet.DispatcherType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -33,8 +37,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 	  scheme = "bearer"
 )
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
+@EnableMethodSecurity
+public class WebSecurityConfig implements WebMvcConfigurer {
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 	private final ExternalAuthClient externalAuthClient;
 	private final ExternalAuthUserSynchronizer userSynchronizer;
@@ -64,49 +68,53 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         return new AuthServiceAuthenticationFilter(externalAuthClient, userSynchronizer, tokenAuthenticationCache());
 	}
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.httpBasic().disable()
-		.cors()
-		.and()
-        	.csrf()
-        	.ignoringAntMatchers("/api/**", "/swagger-ui/**", "/swagger-resources/**", "/swagger-ui.html")
-        .and()
-        	.exceptionHandling()
-        	.authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-        	.sessionManagement()
-        	.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        	.authorizeRequests()
-        	// Мастерская и запись в бестиарий — только модераторам и администраторам.
-        	// Правило на уровне URL срабатывает до разбора и валидации тела запроса:
-        	// иначе @PreAuthorize проверялся уже после @Valid, и аноним вместо 401
-        	// получал 400 с разбором своих данных. Должно стоять выше permitAll для POST/PATCH/PUT.
-        	.antMatchers("/api/v1/workshop/**").hasAnyRole("MODERATOR", "ADMIN")
-        	.antMatchers(HttpMethod.POST, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
-        	.antMatchers(HttpMethod.PUT, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
-        	.antMatchers(HttpMethod.POST, "/api/online/**").permitAll()
-        	.antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
-        	.antMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
-        	.antMatchers("/api/v1/auth/**").permitAll()
-        	// Прокси комментариев (CommentsProxyController): контроль доступа целиком
-        	// на стороне сервиса comments.ttg.club (он проверяет тот же SSO-JWT).
-        	// Явное правило нужно ради DELETE — остальные методы уже открыты выше.
-        	.antMatchers("/api/v1/comments/**").permitAll()
-        	// Трекер инициативы: анонимный доступ разрешён (создание анонимного трекера и работа
-        	// по ключу X-Tracker-Key); контроль доступа — в сервисе (владелец по JWT либо ключ).
-        	.antMatchers("/api/v2/tools/initiative/**").permitAll()
-        	.antMatchers("/swagger-ui/**").permitAll()
-        	.antMatchers("/swagger-resources/**").permitAll()
-        	.antMatchers("/swagger-ui.html").permitAll()
-        	.antMatchers(HttpMethod.GET, "/**").permitAll()
-        	.antMatchers(HttpMethod.HEAD, "/**").permitAll()
-        	.antMatchers(HttpMethod.PUT, "/**").permitAll()
-        .anyRequest()
-        .authenticated();
-		http.headers().frameOptions().disable();
-        http.addFilterBefore(authServiceAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.httpBasic(AbstractHttpConfigurer::disable)
+			.cors(Customizer.withDefaults())
+			.csrf(csrf -> csrf
+				.ignoringRequestMatchers("/api/**", "/swagger-ui/**", "/swagger-resources/**", "/swagger-ui.html"))
+			.exceptionHandling(exceptions -> exceptions
+				.authenticationEntryPoint(authenticationEntryPoint))
+			.sessionManagement(session -> session
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.authorizeHttpRequests(requests -> requests
+				// Внутренние перенаправления на страницу ошибки не проверяем повторно:
+				// иначе вместо исходной ошибки клиент получит 401.
+				.dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
+				// Мастерская и запись в бестиарий — только модераторам и администраторам.
+				// Правило на уровне URL срабатывает до разбора и валидации тела запроса:
+				// иначе @PreAuthorize проверялся уже после @Valid, и аноним вместо 401
+				// получал 400 с разбором своих данных. Должно стоять выше permitAll для POST/PATCH/PUT.
+				.requestMatchers("/api/v1/workshop/**").hasAnyRole("MODERATOR", "ADMIN")
+				.requestMatchers(HttpMethod.POST, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
+				.requestMatchers(HttpMethod.POST, "/api/online/**").permitAll()
+				.requestMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
+				.requestMatchers("/api/v1/auth/**").permitAll()
+				// Прокси комментариев (CommentsProxyController): контроль доступа целиком
+				// на стороне сервиса comments.ttg.club (он проверяет тот же SSO-JWT).
+				// Явное правило нужно ради DELETE — остальные методы уже открыты выше.
+				.requestMatchers("/api/v1/comments/**").permitAll()
+				// Трекер инициативы: анонимный доступ разрешён (создание анонимного трекера и работа
+				// по ключу X-Tracker-Key); контроль доступа — в сервисе (владелец по JWT либо ключ).
+				.requestMatchers("/api/v2/tools/initiative/**").permitAll()
+				.requestMatchers("/swagger-ui/**").permitAll()
+				.requestMatchers("/swagger-resources/**").permitAll()
+				.requestMatchers("/swagger-ui.html").permitAll()
+				.requestMatchers(HttpMethod.GET, "/**").permitAll()
+				.requestMatchers(HttpMethod.HEAD, "/**").permitAll()
+				.requestMatchers(HttpMethod.PUT, "/**").permitAll()
+				.anyRequest().authenticated())
+			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+			.addFilterBefore(authServiceAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+		return http.build();
+	}
+
+	@Bean
+	public WebSecurityCustomizer httpFirewallCustomizer() {
+		return web -> web.httpFirewall(new AnnotatingHttpFirewall());
 	}
 
 	@Override
@@ -116,13 +124,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 			 .allowedOriginPatterns(originPatterns)
 			 .allowedMethods("*")
 			 .allowCredentials(true);
-	}
-
-	@Override
-	public final void configure(final WebSecurity web) throws Exception {
-		super.configure(web);
-//		web.ignoring().antMatchers("/resources/**");
-		web.httpFirewall(new AnnotatingHttpFirewall());
 	}
 
 	@Override

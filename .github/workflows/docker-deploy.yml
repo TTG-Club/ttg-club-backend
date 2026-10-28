@@ -13,22 +13,16 @@ permissions:
   contents: read
   packages: write
   id-token: write
-  deployments: write
-  actions: write
-  pages: write
 
 concurrency:
   group: deploy-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  build-front:
-    name: Frontend Build Workflow
-    uses: ./.github/workflows/build-frontend.yml
-
+  # Образ собирается только из бэкенда: фронт деплоится отдельно своим
+  # репозиторием.
   deploy:
     name: Build & Deploy
-    needs: build-front
     runs-on: ubuntu-latest
     if: ${{ github.ref_name == 'main' || github.ref_name == 'dev' }}
     steps:
@@ -36,10 +30,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build, Push and Deploy
-        uses: TTG-Club/shared-workflows/legacy@v1
+        uses: TTG-Club/shared-workflows/standard@v1
         with:
           application_id: ${{ github.ref_name == 'main' && secrets.DOKPLOY_APP_ID_PROD || secrets.DOKPLOY_APP_ID_DEV }}
-          artifact_name: front-app-${{ github.run_id }}
           registry_url: ${{ secrets.REGISTRY_URL }}
           registry_username: ${{ secrets.REGISTRY_USERNAME }}
           registry_password: ${{ secrets.REGISTRY_PASSWORD }}

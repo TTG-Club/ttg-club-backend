@@ -2,7 +2,7 @@ package club.dnd5.portal.model.creature;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "creature_feats")

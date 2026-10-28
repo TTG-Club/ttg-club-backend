@@ -6,10 +6,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import java.math.BigInteger;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -23,7 +22,7 @@ public class SearchRepository {
 		Query query = entityManager.createNativeQuery("SELECT COUNT(*) FROM full_text_search " +
 			"WHERE LOWER(name) LIKE :name OR LOWER(alt_name) LIKE :name OR LOWER(english_name) LIKE :name");
 		query.setParameter("name", "%" + searchText.trim().toLowerCase(Locale.ROOT) + "%");
-		return ((BigInteger) query.getSingleResult()).longValue();
+		return ((Number) query.getSingleResult()).longValue();
 	}
 
 	public List<SearchApi> search(String searchText, Integer page, Integer size) {

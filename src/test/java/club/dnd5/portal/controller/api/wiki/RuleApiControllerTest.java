@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api.wiki;
 
+import club.dnd5.portal.dto.api.wiki.RuleDetailApi;
 import club.dnd5.portal.dto.api.wiki.RuleSaveApi;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.model.book.Book;
@@ -8,10 +9,13 @@ import club.dnd5.portal.model.rule.Rule;
 import club.dnd5.portal.repository.datatable.RuleRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,7 +43,7 @@ class RuleApiControllerTest {
 		request.setDescription(" Новое описание ");
 		request.setPage((short) 42);
 
-		RuleApiController controller = new RuleApiController(ruleRepository, bookResolver, auditService);
+		RuleApiController controller = new RuleApiController(ruleRepository, bookResolver, auditService, mock(WorkshopPreview.class));
 		controller.updateRule(1, request);
 
 		ArgumentCaptor<RuleSaveApi> snapshot = ArgumentCaptor.forClass(RuleSaveApi.class);
@@ -53,6 +57,36 @@ class RuleApiControllerTest {
 		assertThat(rule.getType()).isEqualTo("Термин");
 		assertThat(rule.getDescription()).isEqualTo("Новое описание");
 		assertThat(rule.getPage()).isEqualTo((short) 42);
+	}
+
+	@Test
+	void shouldPreviewRuleThroughUpdateAndReturnCardByNewEnglishName() {
+		Rule rule = existingRule();
+		RuleRepository ruleRepository = mock(RuleRepository.class);
+		when(ruleRepository.findById(1)).thenReturn(Optional.of(rule));
+		when(ruleRepository.findByEnglishName(any())).thenReturn(Optional.empty());
+		when(ruleRepository.findByEnglishName("New rule")).thenReturn(Optional.of(rule));
+		when(ruleRepository.saveAndFlush(any(Rule.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		WorkshopPreview workshopPreview = mock(WorkshopPreview.class);
+		when(workshopPreview.render(any(), any())).thenAnswer(invocation -> {
+			invocation.<Runnable>getArgument(0).run();
+			return invocation.<Supplier<?>>getArgument(1).get();
+		});
+
+		RuleSaveApi request = new RuleSaveApi();
+		request.setName("Новое правило");
+		request.setEnglishName(" New rule ");
+		request.setType("Термин");
+		request.setDescription("Новое описание");
+
+		RuleApiController controller = new RuleApiController(
+			ruleRepository, mock(BookResolver.class), mock(AuditService.class), workshopPreview);
+		ResponseEntity<RuleDetailApi> response = controller.previewRule(1, request);
+
+		verify(ruleRepository).saveAndFlush(rule);
+		assertThat(response.getBody()).isNotNull();
+		assertThat(response.getBody().getType()).isEqualTo("Термин");
+		assertThat(response.getBody().getDescription()).isEqualTo("Новое описание");
 	}
 
 	private Rule existingRule() {
