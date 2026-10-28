@@ -12,4 +12,6 @@ public interface TokenRepository extends
 	JpaRepository<Token, Long>,
 	JpaSpecificationExecutor<Token> {
 	Collection<Token> findByRefIdAndType(Integer refId, String type);
+
+	Collection<Token> findByType(String type);
 }

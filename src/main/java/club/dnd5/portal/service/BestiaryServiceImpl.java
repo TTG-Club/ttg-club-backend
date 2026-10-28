@@ -259,6 +259,9 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setAltName(trimToNull(request.getName().getAlt()));
         beast.setSize(request.getSize());
         beast.setType(request.getType());
+        if (request.getTypeClarification() != null) {
+            beast.setRaceName(trimToNull(request.getTypeClarification()));
+        }
         beast.setAlignment(request.getAlignment());
         beast.setAC(request.getArmorClass());
         beast.setBonusAC(trimToNull(request.getArmorText()));

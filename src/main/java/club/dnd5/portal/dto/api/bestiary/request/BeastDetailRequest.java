@@ -35,6 +35,8 @@ public class BeastDetailRequest {
 	private CreatureSize size;
 	@Schema(description = "Тип существа", example = "ABERRATION", required = true)
 	private CreatureType type;
+	@Schema(description = "Уточнение типа существа свободным текстом, через запятую", example = "человек")
+	private String typeClarification;
 	@Schema(description = "мировоззрение", example = "LAWFUL_GOOD", required = true)
 	private Alignment alignment;
 	@Schema(description = "КД", example = "10", required = true)
