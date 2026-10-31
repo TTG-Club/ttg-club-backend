@@ -182,7 +182,7 @@ public class TavernToolController {
 		return tavernName;
 	}
 
-	@GetMapping("/tools/tavern/atmosphere/")
+	@GetMapping("/tools/tavern/atmosphere")
 	@ResponseBody
 	public String getAtmosphere() {
 		List<Atmosphere> atmospheres = atmosphereRepo.findAll();
