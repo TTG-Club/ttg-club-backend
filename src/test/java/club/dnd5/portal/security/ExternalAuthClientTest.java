@@ -1,6 +1,7 @@
 package club.dnd5.portal.security;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -10,6 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ExternalAuthClientTest {
+    /**
+     * Тесты с {@code @WebAppConfiguration} оставляют в потоке тестовый запрос
+     * (адрес 127.0.0.1): без сброса перед тестом результат зависел от порядка запуска.
+     */
+    @BeforeEach
+    void setUp() {
+        RequestContextHolder.resetRequestAttributes();
+    }
+
     @AfterEach
     void tearDown() {
         RequestContextHolder.resetRequestAttributes();

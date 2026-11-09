@@ -42,17 +42,31 @@ public class ExternalAuthUserSynchronizer {
         userRepository.save(user);
     }
 
+    /**
+     * Роли приходят из auth-service — он источник правды. Строки справочника
+     * {@code roles} заводятся по мере появления ролей: на пустой базе (новый
+     * стенд, восстановление) иначе ни одна роль не находилась, и даже
+     * администратор оставался без прав.
+     */
     private List<Role> resolveRoles(List<String> roleNames) {
         List<Role> roles = new ArrayList<>();
         if (roleNames != null) {
             for (String roleName : roleNames) {
-                roleRepository.findByName(stripRolePrefix(roleName)).ifPresent(roles::add);
+                String name = stripRolePrefix(roleName);
+                if (StringUtils.hasText(name)) {
+                    roles.add(findOrCreateRole(name.trim()));
+                }
             }
         }
         if (roles.isEmpty()) {
-            roleRepository.findByName("USER").ifPresent(roles::add);
+            roles.add(findOrCreateRole("USER"));
         }
         return roles;
+    }
+
+    private Role findOrCreateRole(String name) {
+        return roleRepository.findByName(name)
+                .orElseGet(() -> roleRepository.save(new Role(name)));
     }
 
     private String stripRolePrefix(String roleName) {
