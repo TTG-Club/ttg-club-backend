@@ -20,6 +20,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<springdoc.version>3.1.1</springdoc.version>
 		<jsoup.version>1.23.2</jsoup.version>
+		<aws-sdk.version>2.31.1</aws-sdk.version>
 	</properties>
 
 	<dependencies>
@@ -90,6 +91,12 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
+		</dependency>
+		<!-- S3-совместимое хранилище для загружаемых картинок (рамки токенов) -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>${aws-sdk.version}</version>
 		</dependency>
 	</dependencies>
 
