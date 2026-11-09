@@ -17,10 +17,12 @@ import club.dnd5.portal.repository.tavern.VisitorRepository;
 import club.dnd5.portal.service.NameGeneratorService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.filter.UrlHandlerFilter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.containsString;
@@ -41,7 +43,10 @@ class TavernAtmosphereControllerTest {
 		atmosphere.setVisitors(7);
 		when(atmosphereRepository.findAll()).thenReturn(Collections.singletonList(atmosphere));
 
+		// Как в приложении: Spring Boot пишет строковые ответы в UTF-8. Голый
+		// standaloneSetup берёт ISO-8859-1, и кириллица превращалась в «?».
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(createController(atmosphereRepository))
+			.setMessageConverters(new StringHttpMessageConverter(StandardCharsets.UTF_8))
 			.addFilters(UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build())
 			.build();
 
