@@ -1,33 +1,37 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.config.properties.S3Properties;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.exception.StorageException;
 import club.dnd5.portal.model.token.TokenBorder;
 import club.dnd5.portal.repository.TokenBorderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Рамки токенов. Файлы рамок лежат в S3 (бакет картинок, папка
+ * {@code app.s3.prefix}) и раздаются с {@code app.img.url}.
+ */
 @Service
 @RequiredArgsConstructor
 public class TokenBorderServiceImpl implements TokenBorderService {
 	private final TokenBorderRepository tokenBorderRepository;
-
-	@Value("${images.root}")
-	private String rootLocation;
+	private final ObjectProvider<S3Client> s3Client;
+	private final S3Properties s3Properties;
 
 	@Value("${images.token.borders}")
 	private String tokenBorders;
@@ -88,11 +92,11 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 		String url = tokenBorder.getUrl();
 		String fileName = extractFileNameFromUrl(url);
 
-		Path filePath = Paths.get(rootLocation + tokenBorders, fileName).normalize().toAbsolutePath();
-
 		try {
-			Files.deleteIfExists(filePath);
-		} catch (IOException e) {
+			requireS3Client().deleteObject(request -> request
+				.bucket(s3Properties.getBucket())
+				.key(objectKey(fileName)));
+		} catch (SdkException e) {
 			throw new StorageException("Failed to delete file", e);
 		}
 	}
@@ -116,27 +120,35 @@ public class TokenBorderServiceImpl implements TokenBorderService {
 			}
 
 			String fileName = Objects.requireNonNull(multipartFile.getOriginalFilename());
+			// sanitizeFileName убирает «/», «\» и «..», поэтому имя не выйдет за папку рамок.
 			String uniqueFileName = generateUniqueFileName(fileName);
 
-			Path path = Paths.get(rootLocation + tokenBorders);
-			Path destinationFile = path.resolve(Paths.get(uniqueFileName))
-				.normalize().toAbsolutePath();
-
-			Path destinationDirectory = destinationFile.getParent();
-
-			if (!destinationFile.getParent().equals(path.toAbsolutePath())) {
-				// This is a security check
-				throw new StorageException("Cannot store file outside current directory.");
-			}
-
 			try (InputStream inputStream = multipartFile.getInputStream()) {
-				Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				requireS3Client().putObject(
+					request -> request
+						.bucket(s3Properties.getBucket())
+						.key(objectKey(uniqueFileName))
+						.contentType(multipartFile.getContentType()),
+					RequestBody.fromInputStream(inputStream, multipartFile.getSize()));
 			}
 
 			return constructImageUrl(uniqueFileName);
-		} catch (IOException e) {
-			throw new PageNotFoundException();
+		} catch (IOException | SdkException e) {
+			throw new StorageException("Failed to store file", e);
 		}
+	}
+
+	private S3Client requireS3Client() {
+		S3Client client = s3Client.getIfAvailable();
+		if (client == null) {
+			throw new StorageException("S3 storage is not configured (app.s3.endpoint)");
+		}
+		return client;
+	}
+
+	/** Ключ в бакете повторяет путь из URL картинки: {@code <prefix>/tokens/borders/<file>}. */
+	private String objectKey(String fileName) {
+		return s3Properties.getPrefix() + tokenBorders + "/" + fileName;
 	}
 
 	private String constructImageUrl(String fileName) {

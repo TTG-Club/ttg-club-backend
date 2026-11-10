@@ -6,7 +6,7 @@ WORKDIR /opt/app
 FROM base AS build
 
 COPY --link . .
-RUN mvn -B clean install -DskipTests
+RUN mvn -B clean install
 
 FROM eclipse-temurin:25-jre
 

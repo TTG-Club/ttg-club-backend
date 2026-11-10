@@ -55,7 +55,7 @@ public class Race implements Serializable {
 	private List<Race> subRaces;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, columnDefinition = "varchar(255) default MEDIUM")
+	@Column(nullable = false, columnDefinition = "varchar(255) default 'MEDIUM'")
 	private CreatureSize size;
 
 	@Enumerated(EnumType.STRING)
