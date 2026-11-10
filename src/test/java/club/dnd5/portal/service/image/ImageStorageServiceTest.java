@@ -52,6 +52,29 @@ class ImageStorageServiceTest {
 	}
 
 	@Test
+	void fileSlugKeepsLatinDigitsAndSingleDashes() {
+		assertEquals("my-cool-dragon-2", ImageStorageService.fileSlug("  My  Cool__Dragon (2).PNG"));
+		assertEquals("image", ImageStorageService.fileSlug("Дракон.png"));
+		assertEquals("image", ImageStorageService.fileSlug(null));
+		assertEquals("a-b", ImageStorageService.fileSlug("---a---b---.webp"));
+	}
+
+	@Test
+	void fileSlugCutsToLimitWithoutTrailingDash() {
+		assertEquals("a".repeat(60), ImageStorageService.fileSlug("a".repeat(100) + ".png"));
+		assertEquals("a".repeat(59), ImageStorageService.fileSlug("a".repeat(59) + "-b.png"));
+		assertEquals("a".repeat(58) + "-b", ImageStorageService.fileSlug("a".repeat(58) + "-bc.png"));
+	}
+
+	@Test
+	void fileSlugIsFastOnLongDashRuns() {
+		String name = "a" + "-".repeat(200_000) + "!";
+		long start = System.nanoTime();
+		assertEquals("a", ImageStorageService.fileSlug(name));
+		assertTrue(System.nanoTime() - start < 1_000_000_000L);
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
 	void uploadsWebpIntoSectionFolder() throws IOException {
 		MockMultipartFile file = new MockMultipartFile("file", "Красный Дракон 01.png", "image/png", png(40, 20));

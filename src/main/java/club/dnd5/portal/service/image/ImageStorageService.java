@@ -235,12 +235,27 @@ public class ImageStorageService {
 		if (dot > 0) {
 			name = name.substring(0, dot);
 		}
-		String slug = name.toLowerCase(Locale.ROOT)
-			.replaceAll("[^a-z0-9]+", "-")
-			.replaceAll("^-+|-+$", "");
-		if (slug.length() > MAX_NAME_LENGTH) {
-			slug = slug.substring(0, MAX_NAME_LENGTH).replaceAll("-+$", "");
+		// Один проход без регулярок: на длинных именах из «-» регулярки
+		// с якорями работают за квадрат (CodeQL java/polynomial-redos).
+		StringBuilder slug = new StringBuilder();
+		boolean pendingDash = false;
+		for (char c : name.toLowerCase(Locale.ROOT).toCharArray()) {
+			if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+				if (pendingDash) {
+					if (slug.length() + 1 >= MAX_NAME_LENGTH) {
+						break;
+					}
+					slug.append('-');
+					pendingDash = false;
+				}
+				if (slug.length() >= MAX_NAME_LENGTH) {
+					break;
+				}
+				slug.append(c);
+			} else if (slug.length() > 0) {
+				pendingDash = true;
+			}
 		}
-		return slug.isEmpty() ? "image" : slug;
+		return slug.length() == 0 ? "image" : slug.toString();
 	}
 }
