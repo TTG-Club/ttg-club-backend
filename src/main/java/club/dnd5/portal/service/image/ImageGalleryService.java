@@ -116,11 +116,11 @@ public class ImageGalleryService {
 	@Transactional(readOnly = true)
 	public ImageCoverApi getCover(ImageType type, Integer id) {
 		return switch (type) {
-			case CLASS -> new ImageCoverApi(CoverImage.HOST + CoverImage.classPath(className(id)), true);
+			case CLASS -> new ImageCoverApi(ImageLinks.url(CoverImage.classPath(className(id))), true);
 			case RACE -> {
 				Race race = raceRepository.findById(id).orElseThrow(ImageGalleryService::notFound);
 				Race main = race.getParent() == null ? race : race.getParent();
-				yield new ImageCoverApi(CoverImage.HOST + CoverImage.racePath(main.getEnglishName()), race.getParent() == null);
+				yield new ImageCoverApi(ImageLinks.url(CoverImage.racePath(main.getEnglishName())), race.getParent() == null);
 			}
 			default -> throw noCover(type);
 		};

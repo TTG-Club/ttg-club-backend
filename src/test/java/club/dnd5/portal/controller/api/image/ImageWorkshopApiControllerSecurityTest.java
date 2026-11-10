@@ -56,7 +56,7 @@ class ImageWorkshopApiControllerSecurityTest {
 	private Executable[] calls() {
 		return new Executable[] {
 			() -> controller.upload(ImageType.CREATURE, null),
-			() -> controller.delete("https://img.ttg.club/creatures/a.webp"),
+			() -> controller.delete("/s3/5e14/creatures/a.webp"),
 			() -> controller.getGallery(ImageType.CREATURE, 1),
 			() -> controller.replaceGallery(ImageType.CREATURE, 1, new club.dnd5.portal.dto.api.image.ImageGalleryApi(List.of())),
 			() -> controller.addToGallery(ImageType.CREATURE, 1, null),

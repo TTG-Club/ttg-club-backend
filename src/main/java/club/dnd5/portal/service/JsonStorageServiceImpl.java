@@ -1,5 +1,6 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.service.image.ImageLinks;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.FoundryCommon;
 import club.dnd5.portal.model.FoundryVersion;
@@ -137,8 +138,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 	private void modifyImgSpell(Integer spellId, JsonNode rootNode) {
 		if (rootNode.get("img").asText().contains("laaru")) {
 			Spell spell = spellRepository.findById(spellId).get();
-            String magicSchool = "https://img.ttg.club/magic/";
-            String link = magicSchool + MagicSchool.getMagicSchool(spell.getSchool().getName()) + ".webp";
+            String link = ImageLinks.absoluteUrl("magic/" + MagicSchool.getMagicSchool(spell.getSchool().getName()) + ".webp");
 			((ObjectNode) rootNode).put("img", link);
 		}
 	}
@@ -155,7 +155,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
         String imgType = "круглый";
         Optional<Token> imgToken = tokenRepository.findByRefIdAndType(creatureId, imgType).stream().findFirst();
 		if (imgToken.isPresent()) {
-			((ObjectNode) rootNode).put("img", imgToken.get().getUrl());
+			((ObjectNode) rootNode).put("img", ImageLinks.absolute(imgToken.get().getUrl()));
 		} else {
 			Creature creature = bestiaryRepository.findById(creatureId).get();
 			imgFiveETools = StringUtil.capitalizeWords(String.format("https://5e.tools/img/%s/%s.png",
@@ -171,7 +171,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 				textureNode.put("src", srcToken.get().getUrl());
 			} else {
 				if (imgToken.isPresent()) {
-					textureNode.put("src", imgToken.get().getUrl());
+					textureNode.put("src", ImageLinks.absolute(imgToken.get().getUrl()));
 				} else {
 					textureNode.put("src", imgFiveETools);
 				}

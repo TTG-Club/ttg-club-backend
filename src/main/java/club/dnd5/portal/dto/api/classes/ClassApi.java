@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
 import club.dnd5.portal.model.image.CoverImage;
+import club.dnd5.portal.service.image.ImageLinks;
 import club.dnd5.portal.dto.api.GroupApi;
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.model.book.TypeBook;
@@ -80,7 +81,7 @@ public class ClassApi {
 				break;
 		}
 		sidekick = heroClass.isSidekick();
-		image = CoverImage.HOST + CoverImage.classPath(heroClass.getEnglishName());
+		image = ImageLinks.url(CoverImage.classPath(heroClass.getEnglishName()));
 	}
 
 	/**
