@@ -43,7 +43,7 @@ public class ImageWorkshopApiController {
 	private final ImageStorageService imageStorageService;
 	private final ImageGalleryService imageGalleryService;
 
-	@Operation(summary = "Загрузка картинки в папку раздела: WebP, адрес на img.ttg.club")
+	@Operation(summary = "Загрузка картинки в папку раздела: WebP, адрес /s3/5e14/...")
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ImageUploadApi upload(@RequestParam ImageType type, @RequestPart("file") MultipartFile file) {

@@ -7,14 +7,11 @@ import java.util.Locale;
  * названию — {@code classes/background/class-<name>.webp}.
  */
 public final class CoverImage {
-	/** Адрес, с которого раздаются обложки (как в карточках классов и рас). */
-	public static final String HOST = "https://img.ttg.club/";
-
 	private CoverImage() {
 	}
 
 	/**
-	 * Путь обложки класса от корня img.ttg.club.
+	 * Путь обложки класса от корня картинок сайта (см. {@code ImageLinks}).
 	 * @param englishName английское название класса
 	 */
 	public static String classPath(String englishName) {
@@ -22,7 +19,7 @@ public final class CoverImage {
 	}
 
 	/**
-	 * Путь обложки расы от корня img.ttg.club. У подрас своей обложки нет —
+	 * Путь обложки расы от корня картинок сайта. У подрас своей обложки нет —
 	 * берётся обложка основной расы.
 	 * @param englishName английское название основной расы
 	 */

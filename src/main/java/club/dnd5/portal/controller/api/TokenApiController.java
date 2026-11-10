@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.service.image.ImageLinks;
 import club.dnd5.portal.dto.api.PaginatedResponseApi;
 import club.dnd5.portal.dto.api.TokenApi;
 import club.dnd5.portal.exception.PageNotFoundException;
@@ -110,10 +111,10 @@ public class TokenApiController {
 			token.setType(type);
 		}
 		if (Objects.isNull(url)) {
-			token.setUrl("https://img.ttg.club/tokens/round/" + creature.getUrlName()
+			token.setUrl(ImageLinks.url("tokens/round/" + creature.getUrlName()
 				.replace("'", "-")
 				.replaceAll("[(),]+", "_")
-				+ ".webp");
+				+ ".webp"));
 		} else {
 			token.setUrl(url);
 		}

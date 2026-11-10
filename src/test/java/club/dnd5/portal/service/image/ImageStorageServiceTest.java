@@ -47,7 +47,7 @@ class ImageStorageServiceTest {
 		s3Properties.setPrefix("5e14");
 		imageProperties = new ImageProperties();
 		service = new ImageStorageService(provider, s3Properties, imageProperties);
-		ReflectionTestUtils.setField(service, "imageUrl", "https://img.ttg.club/");
+		ReflectionTestUtils.setField(service, "imageUrl", "/s3/5e14");
 		service.init();
 	}
 
@@ -81,14 +81,14 @@ class ImageStorageServiceTest {
 
 		String url = service.upload(ImageType.CREATURE, file);
 
-		assertTrue(url.matches("https://img\\.ttg\\.club/creatures/\\d+-01\\.webp"), url);
+		assertTrue(url.matches("/s3/5e14/creatures/\\d+-01\\.webp"), url);
 		ArgumentCaptor<Consumer<PutObjectRequest.Builder>> request = ArgumentCaptor.forClass(Consumer.class);
 		verify(s3Client).putObject(request.capture(), any(RequestBody.class));
 		PutObjectRequest.Builder builder = PutObjectRequest.builder();
 		request.getValue().accept(builder);
 		PutObjectRequest built = builder.build();
 		assertEquals("ttg", built.bucket());
-		assertEquals("5e14/" + url.substring("https://img.ttg.club/".length()), built.key());
+		assertEquals("5e14/" + url.substring("/s3/5e14/".length()), built.key());
 		assertEquals("image/webp", built.contentType());
 	}
 
@@ -132,9 +132,9 @@ class ImageStorageServiceTest {
 
 	@Test
 	void pathOfAcceptsOnlyOwnImages() {
-		assertEquals("gods/zeus.webp", service.pathOf("https://img.ttg.club/gods/zeus.webp?v=1"));
+		assertEquals("gods/zeus.webp", service.pathOf("/s3/5e14/gods/zeus.webp?v=1"));
 		assertNull(service.pathOf("https://i.imgur.com/zeus.webp"));
-		assertNull(service.pathOf("https://img.ttg.club/../secret"));
+		assertNull(service.pathOf("/s3/5e14/../secret"));
 		assertThrows(ApiException.class, () -> service.delete("https://i.imgur.com/zeus.webp"));
 	}
 

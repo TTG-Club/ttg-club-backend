@@ -29,7 +29,7 @@ import java.util.Locale;
  * <p>
  * Картинка проверяется (размер файла, тип), уменьшается до допустимых сторон и
  * перекодируется в WebP. Ключ объекта — {@code <app.s3.prefix>/<путь>}, а наружу
- * отдаётся адрес {@code <app.img.url>/<путь>}: img.ttg.club смотрит в бакет с этим префиксом.
+ * отдаётся адрес {@code <app.img.url>/<путь>} ({@code /s3/5e14/<путь>}, раздаёт {@code S3ImageController}).
  */
 @Service
 @RequiredArgsConstructor
@@ -65,7 +65,7 @@ public class ImageStorageService {
 
 	/**
 	 * Картинка по заданному пути: файл по этому пути перезаписывается.
-	 * @param path путь от корня img.ttg.club без ведущего «/»
+	 * @param path путь от корня картинок сайта без ведущего «/»
 	 * @param file загруженный файл
 	 * @param cacheControl заголовок Cache-Control объекта или {@code null}
 	 * @return публичный адрес картинки
@@ -76,7 +76,7 @@ public class ImageStorageService {
 	}
 
 	/**
-	 * Удаляет картинку по её публичному адресу. Удаляются только картинки с img.ttg.club.
+	 * Удаляет картинку по её публичному адресу. Удаляются только картинки сайта ({@code app.img.url}).
 	 * @param url публичный адрес картинки
 	 */
 	public void delete(String url) {
@@ -94,7 +94,7 @@ public class ImageStorageService {
 	}
 
 	/**
-	 * Путь картинки от корня img.ttg.club или {@code null}, если адрес чужой.
+	 * Путь картинки от корня картинок сайта или {@code null}, если адрес чужой.
 	 * @param url публичный адрес картинки
 	 */
 	public String pathOf(String url) {

@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.service.image.ImageLinks;
 import club.dnd5.portal.dto.api.MetaApi;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.InfoPage;
@@ -231,7 +232,7 @@ public class MetaApiController {
 		meta.setTitle(String.format("%s (%s)", spell.getName(), spell.getEnglishName()) + " | Заклинания D&D 5e");
 		meta.setDescription(String.format("%s %s, %s", (spell.getLevel() == 0 ? "Заговор" : spell.getLevel() + " уровень"), spell.getName(), spell.getSchool().getName()));
 		meta.setMenu("Заклинания");
-		meta.setImage(String.format("https://img.ttg.club/magic/%s.png", StringUtils.capitalize(spell.getSchool().name().toLowerCase())));
+		meta.setImage(ImageLinks.absoluteUrl(String.format("magic/%s.png", StringUtils.capitalize(spell.getSchool().name().toLowerCase()))));
 		meta.setKeywords(spell.getAltName() + " " + spell.getEnglishName());
 		return meta;
 	}

@@ -1,6 +1,7 @@
 package club.dnd5.portal.dto.api.races;
 
 import club.dnd5.portal.model.image.CoverImage;
+import club.dnd5.portal.service.image.ImageLinks;
 import club.dnd5.portal.dto.api.GroupApi;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.SourceApi;
@@ -43,9 +44,9 @@ public class RaceApi {
 			url = String.format("/races/%s/%s", race.getParent().getUrlName(), race.getUrlName());
 		}
 		type = new SourceTypeApi(race.getBook().getType().getName(), race.getBook().getType().ordinal());
-		image = CoverImage.HOST + CoverImage.racePath(race.getEnglishName());
+		image = ImageLinks.url(CoverImage.racePath(race.getEnglishName()));
 		if (race.getParent() != null) {
-			image = CoverImage.HOST + CoverImage.racePath(race.getParent().getEnglishName());
+			image = ImageLinks.url(CoverImage.racePath(race.getParent().getEnglishName()));
 		}
 		abilities = race.getAbilityValueBonuses()
 				.stream()

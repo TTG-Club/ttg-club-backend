@@ -7,9 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Настройки S3-совместимого хранилища для загружаемых картинок.
  * <p>
- * Картинки сайта раздаются с {@code app.img.url} (img.ttg.club), который
- * смотрит в бакет с префиксом {@link #prefix}: ключ объекта —
- * {@code <prefix>/<путь из URL>}.
+ * Картинки сайта лежат под {@link #prefix} и раздаются самим сайтом по
+ * {@code /s3/<prefix>/<путь>} (см. {@code S3ImageController}).
  */
 @Getter
 @Setter
