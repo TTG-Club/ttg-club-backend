@@ -1,5 +1,6 @@
 package club.dnd5.portal.config;
 
+import club.dnd5.portal.config.properties.ImageProperties;
 import club.dnd5.portal.config.properties.S3Properties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,7 +20,7 @@ import java.net.URI;
  * разработка) клиента нет, а загрузка картинок отвечает ошибкой.
  */
 @Configuration
-@EnableConfigurationProperties(S3Properties.class)
+@EnableConfigurationProperties({S3Properties.class, ImageProperties.class})
 public class S3Config
 {
     @Bean

@@ -21,6 +21,8 @@
 		<springdoc.version>3.1.1</springdoc.version>
 		<jsoup.version>1.23.2</jsoup.version>
 		<aws-sdk.version>2.31.1</aws-sdk.version>
+		<twelvemonkeys.version>3.13.0</twelvemonkeys.version>
+		<webp-imageio.version>0.10.2</webp-imageio.version>
 	</properties>
 
 	<dependencies>
@@ -92,11 +94,27 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
 		</dependency>
-		<!-- S3-совместимое хранилище для загружаемых картинок (рамки токенов) -->
+		<!-- S3-совместимое хранилище для загружаемых картинок (рамки токенов, картинки мастерской) -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3</artifactId>
 			<version>${aws-sdk.version}</version>
+		</dependency>
+		<!-- Чтение BMP и WebP-кодек: загруженные картинки хранятся в WebP, как на core-api -->
+		<dependency>
+			<groupId>com.twelvemonkeys.imageio</groupId>
+			<artifactId>imageio-core</artifactId>
+			<version>${twelvemonkeys.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.twelvemonkeys.imageio</groupId>
+			<artifactId>imageio-bmp</artifactId>
+			<version>${twelvemonkeys.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.usefulness</groupId>
+			<artifactId>webp-imageio</artifactId>
+			<version>${webp-imageio.version}</version>
 		</dependency>
 	</dependencies>
 
