@@ -52,7 +52,7 @@ class VttgCreatureMapperTest {
 				+ "<em>Попадание:</em> 5 (<dice-roller formula=\"1к6 + 2\">1к6 + 2</dice-roller>) рубящего урона.</p>");
 		goblin.setActions(Collections.singletonList(scimitar));
 
-		Map<String, Object> data = mapper.toVttg(goblin, "/img/goblin.webp");
+		Map<String, Object> data = mapper.toVttg(goblin, "/s3/5e14/creatures/goblin.webp");
 
 		assertThat(data).containsEntry("id", "goblin")
 			.containsEntry("type", "creature")
@@ -60,7 +60,7 @@ class VttgCreatureMapperTest {
 			.containsEntry("srcSection", "bestiary")
 			.containsEntry("header", "Маленький гуманоид (гоблиноид), нейтрально-злой")
 			.doesNotContainKey("spells");
-		assertThat(asMap(data.get("token"))).containsEntry("imageUrl", "https://ttg.club/img/goblin.webp")
+		assertThat(asMap(data.get("token"))).containsEntry("imageUrl", "https://5e14.ttg.club/s3/5e14/creatures/goblin.webp")
 			.containsEntry("scale", 1);
 		Map<String, Object> system = asMap(data.get("system"));
 		assertThat(system).containsEntry("size", "small")

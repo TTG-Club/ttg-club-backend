@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.vttg;
 
+import club.dnd5.portal.service.image.ImageLinks;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.CreatureSize;
@@ -122,7 +123,7 @@ public class VttgCreatureMapper {
 		Map<String, Object> token = new LinkedHashMap<>();
 		token.put("frameUrl", "assets/token-frames/0.png");
 		if (imageUrl != null) {
-			token.put("imageUrl", imageUrl.startsWith("/") ? VttgText.SITE_URL + imageUrl : imageUrl);
+			token.put("imageUrl", ImageLinks.absolute(imageUrl));
 		}
 		token.put("showName", true);
 		token.put("disposition", "hostile");
