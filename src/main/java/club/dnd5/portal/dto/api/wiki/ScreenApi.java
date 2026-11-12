@@ -22,6 +22,11 @@ public class ScreenApi {
 	protected SourceApi source;
 	private String icon;
 	private String group;
+	/**
+	 * Корневой раздел ({@code name}, {@code url}, {@code order}) — только у дочерних разделов.
+	 * В {@link ScreenDetailApi} переопределён своим, более подробным {@code parent}.
+	 */
+	private ScreenApi parent;
 
 	public ScreenApi(Screen screen) {
 		name = new NameApi(screen.getName(), screen.getEnglishName());
@@ -33,5 +38,16 @@ public class ScreenApi {
 		if (screen.getIcon() != null) {
 			icon = screen.getIcon();
 		}
+		if (screen.getParent() != null) {
+			parent = reference(screen.getParent());
+		}
+	}
+
+	private static ScreenApi reference(Screen screen) {
+		ScreenApi reference = new ScreenApi();
+		reference.name = new NameApi(screen.getName(), screen.getEnglishName());
+		reference.url = String.format("/screens/%s", screen.getUrlName());
+		reference.order = screen.getOrdering();
+		return reference;
 	}
 }
