@@ -16,7 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@JsonPropertyOrder({"id", "path", "title", "x", "y", "width", "height", "layer", "isMinimized"})
+@JsonPropertyOrder({"id", "path", "title", "x", "y", "width", "height", "layer", "isMinimized", "content"})
 @Schema(description = "Окно на холсте ширмы")
 public class DmScreenWindow {
 
@@ -24,7 +24,7 @@ public class DmScreenWindow {
 	private String id;
 
 	@JsonProperty("path")
-	@Schema(description = "Путь записи сайта, начинается с «/», до 256 символов")
+	@Schema(description = "Путь записи сайта, начинается с «/», или «note:…» у заметки; до 256 символов")
 	private String path;
 
 	@JsonProperty("title")
@@ -48,4 +48,12 @@ public class DmScreenWindow {
 
 	@JsonProperty("isMinimized")
 	private Boolean isMinimized;
+
+	/**
+	 * HTML заметки мастера: есть только у окон-заметок (путь «note:…»), у записей сайта — null.
+	 * Показывается только владельцу ширмы, фронт очищает разметку при показе.
+	 */
+	@JsonProperty("content")
+	@Schema(description = "HTML заметки, до 20000 символов; только у окон-заметок", nullable = true)
+	private String content;
 }

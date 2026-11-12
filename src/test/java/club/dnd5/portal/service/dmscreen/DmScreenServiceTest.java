@@ -239,6 +239,47 @@ class DmScreenServiceTest {
 	}
 
 	@Test
+	void storesNotesWithTheirText() {
+		signIn("ROLE_USER");
+		DmScreen screen = screen("Ширма", Collections.emptyList());
+		UUID id = screen.getId();
+		when(screenRepository.findByIdAndUserId(id, USER_ID)).thenReturn(Optional.of(screen));
+
+		DmScreenWindow note = with(window("n"), w -> {
+			w.setPath("note:n");
+			w.setTitle("Логово гоблинов");
+			w.setContent("<p>Вожак — <strong>21 хит</strong></p>");
+		});
+		service.replaceWindows(id, List.of(note, window("a")));
+
+		List<DmScreenWindow> stored = service.findById(id).getWindows();
+		assertThat(stored.get(0).getPath()).isEqualTo("note:n");
+		assertThat(stored.get(0).getContent()).isEqualTo("<p>Вожак — <strong>21 хит</strong></p>");
+		assertThat(stored.get(1).getContent()).isNull();
+	}
+
+	@Test
+	void rejectsInvalidNotes() {
+		signIn("ROLE_USER");
+		DmScreen screen = screen("Ширма", Collections.emptyList());
+		UUID id = screen.getId();
+		when(screenRepository.findByIdAndUserId(id, USER_ID)).thenReturn(Optional.of(screen));
+
+		assertBadRequest(() -> service.replaceWindows(id, List.of(with(window("a"), w -> w.setContent("текст")))));
+		assertBadRequest(() -> service.replaceWindows(id, List.of(with(window("n"), w -> {
+			w.setPath("note:n");
+			w.setContent("т".repeat(20001));
+		}))));
+		assertBadRequest(() -> service.replaceWindows(id, List.of(with(window("a"), w -> w.setPath("notes/n")))));
+
+		service.replaceWindows(id, List.of(with(window("n"), w -> {
+			w.setPath("note:n");
+			w.setContent("т".repeat(20000));
+		})));
+		assertThat(service.findById(id).getWindows()).hasSize(1);
+	}
+
+	@Test
 	void deleteRemovesOwnScreen() {
 		signIn("ROLE_USER");
 		DmScreen screen = screen("Ширма", Collections.emptyList());
@@ -272,7 +313,7 @@ class DmScreenServiceTest {
 	}
 
 	static DmScreenWindow window(String id) {
-		return new DmScreenWindow(id, "/bestiary/goblin", "Гоблин", 10.5, 20.0, 400.0, 300.0, 1, false);
+		return new DmScreenWindow(id, "/bestiary/goblin", "Гоблин", 10.5, 20.0, 400.0, 300.0, 1, false, null);
 	}
 
 	private static DmScreenWindow with(DmScreenWindow window, java.util.function.Consumer<DmScreenWindow> change) {
