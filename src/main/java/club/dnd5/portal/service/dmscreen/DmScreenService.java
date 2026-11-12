@@ -44,6 +44,9 @@ public class DmScreenService {
 	public static final int MAX_PATH_LENGTH = 256;
 	public static final int MAX_TITLE_LENGTH = 256;
 	public static final int MAX_WINDOW_ID_LENGTH = 64;
+	/** Начало пути окна-заметки: у заметки нет страницы на сайте. */
+	public static final String NOTE_PATH_PREFIX = "note:";
+	public static final int MAX_NOTE_LENGTH = 20000;
 
 	private static final Set<String> EXTENDED_LIMIT_AUTHORITIES = Set.of("ROLE_SUBSCRIBER", "ROLE_ADMIN");
 	private static final TypeReference<List<DmScreenWindow>> WINDOWS_TYPE = new TypeReference<>() {
@@ -182,8 +185,15 @@ public class DmScreenService {
 			throw badRequest(prefix + ".id: обязательная строка до " + MAX_WINDOW_ID_LENGTH + " символов");
 		}
 		String path = window.getPath();
-		if (path == null || !path.startsWith("/") || path.length() > MAX_PATH_LENGTH) {
-			throw badRequest(prefix + ".path: путь начинается с «/», не длиннее " + MAX_PATH_LENGTH + " символов");
+		boolean isNote = path != null && path.startsWith(NOTE_PATH_PREFIX);
+		if (path == null || !(path.startsWith("/") || isNote) || path.length() > MAX_PATH_LENGTH) {
+			throw badRequest(prefix + ".path: путь начинается с «/» или «" + NOTE_PATH_PREFIX + "», не длиннее "
+				+ MAX_PATH_LENGTH + " символов");
+		}
+		String content = window.getContent();
+		if (content != null && (!isNote || content.length() > MAX_NOTE_LENGTH)) {
+			throw badRequest(prefix + ".content: текст есть только у заметки, не длиннее " + MAX_NOTE_LENGTH
+				+ " символов");
 		}
 		if (window.getTitle() == null || window.getTitle().length() > MAX_TITLE_LENGTH) {
 			throw badRequest(prefix + ".title: обязательная строка до " + MAX_TITLE_LENGTH + " символов");
