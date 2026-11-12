@@ -18,4 +18,6 @@ import lombok.Setter;
 public class ScreenFilter {
 	@JsonProperty("book")
 	private List<String> books;
+	@JsonProperty("parent")
+	private List<Integer> parents;
 }

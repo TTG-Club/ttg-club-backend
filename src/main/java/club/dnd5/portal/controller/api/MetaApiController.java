@@ -351,9 +351,9 @@ public class MetaApiController {
 	@GetMapping(value = "/api/v1/meta/screens", produces = MediaType.APPLICATION_JSON_VALUE)
 	public MetaApi getScreensMeta() {
 		MetaApi meta = new MetaApi();
-		meta.setTitle("Ширма Мастера (Screens) D&D 5e");
-		meta.setDescription("Ширма Мастера Подземелий и Драконов по D&D 5 редакции");
-		meta.setMenu("Ширма");
+		meta.setTitle("Справочник Мастера (Screens) D&D 5e");
+		meta.setDescription("Справочник Мастера Подземелий и Драконов по D&D 5 редакции");
+		meta.setMenu("Справочник");
 		return meta;
 	}
 
@@ -362,10 +362,10 @@ public class MetaApiController {
 		Screen screen = screenRepository.findByEnglishName(englishName.replace('_', ' '))
 			.orElseThrow(PageNotFoundException::new);
 		MetaApi meta = new MetaApi();
-		meta.setTitle(String.format("%s (%s) | Ширма Мастера (Screens) D&D 5e", screen.getName(), screen.getEnglishName()));
-		meta.setDescription(String.format("%s (%s) Ширма Мастера Подземелий и Драконов по D&D 5 редакции",
+		meta.setTitle(String.format("%s (%s) | Справочник Мастера (Screens) D&D 5e", screen.getName(), screen.getEnglishName()));
+		meta.setDescription(String.format("%s (%s) Справочник Мастера Подземелий и Драконов по D&D 5 редакции",
 			screen.getName(), screen.getEnglishName()));
-		meta.setMenu("Ширма");
+		meta.setMenu("Справочник");
 		meta.setKeywords(screen.getAltName() + " " + screen.getEnglishName());
 		return meta;
 	}
