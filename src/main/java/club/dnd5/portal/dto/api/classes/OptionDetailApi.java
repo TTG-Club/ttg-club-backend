@@ -24,7 +24,7 @@ public class OptionDetailApi extends OptionApi {
 	private String altName;
 	private Integer level;
 	private String prerequisite;
-	private List<Option.OptionType> optionTypes;
+	private List<String> optionTypes;
 
 	public OptionDetailApi(Option option) {
 		super(option);
@@ -34,7 +34,7 @@ public class OptionDetailApi extends OptionApi {
 		altName = option.getAltName();
 		level = option.getLevel();
 		prerequisite = option.getPrerequisite();
-		optionTypes = option.getOptionTypes();
+		optionTypes = option.getOptionTypes() == null ? new java.util.ArrayList<>() : option.getOptionTypes().stream().map(club.dnd5.portal.model.classes.OptionTypeDefinition::getCode).collect(java.util.stream.Collectors.toList());
 
 		if (option.getLevel() != null)
 		{

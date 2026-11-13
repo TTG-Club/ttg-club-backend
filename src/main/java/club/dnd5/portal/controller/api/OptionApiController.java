@@ -15,13 +15,15 @@ import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.Option;
-import club.dnd5.portal.model.classes.Option.OptionType;
+import club.dnd5.portal.model.classes.OptionTypeDefinition;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.classes.ClassRepository;
+import club.dnd5.portal.repository.classes.OptionTypeDefinitionRepository;
 import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.OptionTypeResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
@@ -64,6 +66,8 @@ public class OptionApiController {
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
 	private final WorkshopPreview workshopPreview;
+	private final OptionTypeDefinitionRepository optionTypeDefinitionRepository;
+	private final OptionTypeResolver optionTypeResolver;
 
 	@PostMapping(value = "/api/v1/options", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<OptionApi> getOptions(@RequestBody OptionRequesApi request) {
@@ -81,9 +85,9 @@ public class OptionApiController {
 			}
 			if (!CollectionUtils.isEmpty(request.getFilter().getClassOption())) {
 				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<OptionType, Option> join = root.join("optionTypes", JoinType.LEFT);
+					Join<Option, OptionTypeDefinition> join = root.join("optionTypes", JoinType.LEFT);
 					query.distinct(true);
-					return join.in(request.getFilter().getClassOption());
+					return join.get("code").in(request.getFilter().getClassOption());
 				});
 			}
 			if (!CollectionUtils.isEmpty(request.getFilter().getLevels())) {
@@ -217,8 +221,8 @@ public class OptionApiController {
 
 		FilterApi classOptionFilter = new FilterApi("Классовые особености", "classOption");
 		classOptionFilter.setValues(
-				Arrays.stream(Option.OptionType.values())
-				 .map(ability -> new FilterValueApi(ability.getName(), ability.name()))
+				optionTypeDefinitionRepository.findAllOrdered().stream()
+				 .map(type -> new FilterValueApi(type.getName(), type.getCode()))
 				 .collect(Collectors.toList()));
 		otherFilters.add(classOptionFilter);
 
@@ -247,7 +251,7 @@ public class OptionApiController {
 		FilterValueApi customValue = new FilterValueApi();
 		customValue.setLabel(heroClass.getCapitalazeName());
 		customValue.setDefaultValue(Boolean.TRUE);
-		customValue.setKey(heroClass.getOptionType().name());
+		customValue.setKey(heroClass.getOptionType().getCode());
 		customFilter.setValues(Collections.singletonList(customValue));
 		customFilters.add(customFilter);
 		otherFilters.add(customFilter);
@@ -280,7 +284,7 @@ public class OptionApiController {
 		FilterValueApi customValue = new FilterValueApi();
 		customValue.setLabel(heroClass.getCapitalazeName());
 		customValue.setDefaultValue(Boolean.TRUE);
-		customValue.setKey(archetype.getOptionType().name());
+		customValue.setKey(archetype.getOptionType().getCode());
 		customFilter.setValues(Collections.singletonList(customValue));
 		customFilters.add(customFilter);
 		otherFilters.add(customFilter);
@@ -300,7 +304,7 @@ public class OptionApiController {
 		return levelsFilter;
 	}
 
-	private FilterApi getLevelsFilter(OptionType optionType) {
+	private FilterApi getLevelsFilter(OptionTypeDefinition optionType) {
 		FilterApi levelsFilter = new FilterApi("Требования к уровню", "levels");
 		List<String> levels =  optionRepository.findAllLevel(optionType);
 		levelsFilter.setValues(
@@ -331,7 +335,7 @@ public class OptionApiController {
 		String prerequisite = trimToNull(request.getPrerequisite());
 		option.setPrerequisite(prerequisite == null ? "Нет" : prerequisite);
 		option.setDescription(request.getDescription().trim());
-		option.setOptionTypes(new ArrayList<>(request.getOptionTypes()));
+		option.setOptionTypes(optionTypeResolver.resolveAll(request.getOptionTypes()));
 		bookResolver.find(request.getSource()).ifPresent(option::setBook);
 	}
 

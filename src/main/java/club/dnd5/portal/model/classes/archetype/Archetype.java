@@ -64,8 +64,10 @@ public class Archetype {
 	@Enumerated(EnumType.STRING)
 	private ArchetypeSpellLevelType spellLevelType = ArchetypeSpellLevelType.CLASS_LEVEL;
 
-	@Enumerated(EnumType.STRING)
-	private Option.OptionType optionType;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "option_type", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	@org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
+	private club.dnd5.portal.model.classes.OptionTypeDefinition optionType;
 
 	@ManyToOne
 	@JoinColumn(name = "source")

@@ -50,7 +50,11 @@ public class ScreenDetailApi extends ScreenApi {
 			}
             chields = screen.getChields()
                     .stream()
-                    .map(ScreenApi::new)
+                    .map(child -> {
+                        ScreenApi api = new ScreenApi(child);
+                        api.setParent(null);
+                        return api;
+                    })
                     .collect(Collectors.toList());
         }
     }

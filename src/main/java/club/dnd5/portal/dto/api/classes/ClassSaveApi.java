@@ -46,7 +46,7 @@ public class ClassSaveApi {
 	@Min(0)
 	private short skillAvailableCount;
 	private List<SkillType> availableSkills;
-	private Option.OptionType optionType;
+	private String optionType;
 	private Rest slotsReset;
 	private boolean sidekick;
 	private String icon;
@@ -81,7 +81,7 @@ public class ClassSaveApi {
 		enabledArhitypeLevel = (short) heroClass.getEnabledArhitypeLevel();
 		skillAvailableCount = heroClass.getSkillAvailableCount();
 		availableSkills = heroClass.getAvailableSkills();
-		optionType = heroClass.getOptionType();
+		optionType = heroClass.getOptionType() == null ? null : heroClass.getOptionType().getCode();
 		slotsReset = heroClass.getSlotsReset();
 		sidekick = heroClass.isSidekick();
 		icon = heroClass.getIcon();

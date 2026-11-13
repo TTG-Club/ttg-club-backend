@@ -1,6 +1,7 @@
 package club.dnd5.portal.service;
 
 import club.dnd5.portal.dto.online.OnlineHeartbeatRequest;
+import club.dnd5.portal.dto.online.OnlineUsageRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class OnlineService {
 	private static final String ONLINE_SERVICE_TOKEN_HEADER = "X-Online-Token";
 	private static final String HEARTBEAT_PATH = "/api/v1/online/heartbeat";
+	private static final String USAGE_PATH = "/api/v1/online/usage";
 
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final String apiUrl;
@@ -52,6 +54,23 @@ public class OnlineService {
 			Map.class);
 
 		return response.getBody();
+	}
+
+	public void usage(OnlineUsageRequest request) {
+		validateConfig();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("siteId", siteId);
+		body.put("feature", request.getFeature());
+		body.put("key", request.getKey());
+		body.put("type", request.getType());
+		body.put("activeSeconds", request.getActiveSeconds());
+
+		restTemplate.exchange(
+			apiUrl + USAGE_PATH,
+			HttpMethod.POST,
+			jsonEntity(body),
+			Void.class);
 	}
 
 	private HttpEntity<Map<String, Object>> jsonEntity(Map<String, Object> body) {

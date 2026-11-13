@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class RateLimitFilterTest {
 	private static final String HEARTBEAT_URI = "/api/online/heartbeat";
+	private static final String USAGE_URI = "/api/online/usage";
 
 	@Test
 	void heartbeatShouldSkipRateLimit() throws Exception {
@@ -27,6 +28,24 @@ class RateLimitFilterTest {
 		assertNull(firstHeartbeatResponse.getHeader("X-RateLimit-Remaining"));
 		assertEquals(200, secondHeartbeatResponse.getStatus());
 		assertNull(secondHeartbeatResponse.getHeader("X-RateLimit-Remaining"));
+		assertEquals(200, limitedResponse.getStatus());
+		assertEquals("0", limitedResponse.getHeader("X-RateLimit-Remaining"));
+		assertEquals(429, rejectedResponse.getStatus());
+	}
+
+	@Test
+	void usageShouldSkipRateLimit() throws Exception {
+		RateLimitFilter filter = new RateLimitFilter(propertiesWithSingleToken());
+
+		MockHttpServletResponse firstUsageResponse = execute(filter, "POST", USAGE_URI);
+		MockHttpServletResponse secondUsageResponse = execute(filter, "POST", USAGE_URI);
+		MockHttpServletResponse limitedResponse = execute(filter, "GET", "/api/spells/search");
+		MockHttpServletResponse rejectedResponse = execute(filter, "GET", "/api/spells/search");
+
+		assertEquals(200, firstUsageResponse.getStatus());
+		assertNull(firstUsageResponse.getHeader("X-RateLimit-Remaining"));
+		assertEquals(200, secondUsageResponse.getStatus());
+		assertNull(secondUsageResponse.getHeader("X-RateLimit-Remaining"));
 		assertEquals(200, limitedResponse.getStatus());
 		assertEquals("0", limitedResponse.getHeader("X-RateLimit-Remaining"));
 		assertEquals(429, rejectedResponse.getStatus());

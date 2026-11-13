@@ -89,6 +89,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 				.requestMatchers("/api/v1/workshop/**").hasAnyRole("MODERATOR", "ADMIN")
 				.requestMatchers(HttpMethod.POST, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
 				.requestMatchers(HttpMethod.PUT, "/api/v2/bestiary").hasAnyRole("MODERATOR", "ADMIN")
+				// Ширмы Мастера — личные данные пользователя: только авторизованным, иначе 401.
+				// Должно стоять выше permitAll для GET/POST/PATCH/PUT.
+				.requestMatchers("/api/v1/dm-screens/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/online/**").permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
 				.requestMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()
