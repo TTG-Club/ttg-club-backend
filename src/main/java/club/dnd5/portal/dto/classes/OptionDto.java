@@ -7,7 +7,7 @@ import club.dnd5.portal.util.StringUtil;
 
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.Option;
-import club.dnd5.portal.model.classes.Option.OptionType;
+import club.dnd5.portal.model.classes.OptionTypeDefinition;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,7 +35,7 @@ public class OptionDto {
 		englishName = option.getEnglishName();
 		optionTypes = option.getOptionTypes().stream().map(OptionTypeDto::new).collect(Collectors.toList());
 		type = option.getOptionTypes().stream()
-				.map(OptionType::getName)
+				.map(OptionTypeDefinition::getName)
 				.collect(Collectors.joining(", "));
 		if (option.getLevel() == null) {
 			prerequisite = option.getPrerequisite();
@@ -57,10 +57,10 @@ public class OptionDto {
 		private String className;
 		private String archetypeName;
 
-		public OptionTypeDto(OptionType option){
+		public OptionTypeDto(OptionTypeDefinition option){
 			name = option.getName();
 			className = option.getClassName();
-			archetypeName = option.getArhetypeName();
+			archetypeName = option.getArchetypeName();
 		}
 	}
 }

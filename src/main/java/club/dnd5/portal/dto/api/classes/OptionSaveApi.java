@@ -1,6 +1,5 @@
 package club.dnd5.portal.dto.api.classes;
 
-import club.dnd5.portal.model.classes.Option.OptionType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
@@ -21,7 +20,7 @@ public class OptionSaveApi {
 	private String englishName;
 	private String altName;
 	@NotEmpty
-	private List<OptionType> optionTypes;
+	private List<String> optionTypes;
 	private String prerequisite;
 	private Integer level;
 	@NotBlank
@@ -35,7 +34,7 @@ public class OptionSaveApi {
 		name = option.getName();
 		englishName = option.getEnglishName();
 		altName = option.getAltName();
-		optionTypes = option.getOptionTypes();
+		optionTypes = option.getOptionTypes() == null ? new java.util.ArrayList<>() : option.getOptionTypes().stream().map(club.dnd5.portal.model.classes.OptionTypeDefinition::getCode).collect(java.util.stream.Collectors.toList());
 		prerequisite = option.getPrerequisite();
 		level = option.getLevel();
 		description = option.getDescription();

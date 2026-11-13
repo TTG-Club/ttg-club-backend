@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import club.dnd5.portal.model.classes.HeroClass;
-import club.dnd5.portal.model.classes.Option.OptionType;
+import club.dnd5.portal.model.classes.OptionTypeDefinition;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.races.Race;
 import lombok.Getter;
@@ -42,10 +42,10 @@ public class ReferenceClassApi {
 		url = String.format("/races/%s", race.getUrlName());
 	}
 
-	public ReferenceClassApi(OptionType optionType) {
+	public ReferenceClassApi(OptionTypeDefinition optionType) {
 		name = optionType.getName();
-		if (optionType.getArhetypeName() != null) {
-			url = String.format("/classes/%s/%s", optionType.getClassName().replace(' ', '_'), optionType.getArhetypeName().replace(' ', '_'));
+		if (optionType.getArchetypeName() != null) {
+			url = String.format("/classes/%s/%s", optionType.getClassName().replace(' ', '_'), optionType.getArchetypeName().replace(' ', '_'));
 		} else {
 			url = String.format("/classes/%s", optionType.getClassName().replace(' ', '_'));
 		}

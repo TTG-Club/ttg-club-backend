@@ -26,7 +26,7 @@ public class ArchetypeSaveApi {
 	@NotBlank @ValidHtml private String description;
 	@Min(1) @Max(20) private byte level;
 	private SpellcasterType spellcasterType;
-	private Option.OptionType optionType;
+	private String optionType;
 	private ArchetypeSpellLevelType spellLevelType = ArchetypeSpellLevelType.CLASS_LEVEL;
 	private Short page;
 	@Valid private List<ClassTraitSaveApi> traits;
@@ -43,7 +43,7 @@ public class ArchetypeSaveApi {
 		description = archetype.getDescription();
 		level = archetype.getLevel();
 		spellcasterType = archetype.getSpellcasterType();
-		optionType = archetype.getOptionType();
+		optionType = archetype.getOptionType() == null ? null : archetype.getOptionType().getCode();
 		spellLevelType = archetype.getSpellLevelType() == null
 			? ArchetypeSpellLevelType.CLASS_LEVEL
 			: archetype.getSpellLevelType();

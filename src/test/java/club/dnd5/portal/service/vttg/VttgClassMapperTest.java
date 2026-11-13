@@ -63,8 +63,10 @@ class VttgClassMapperTest {
 		defense.setEnglishName("Defense");
 		defense.setDescription("<p>+1 к КД.</p>");
 		defense.setPrerequisite("Нет");
-		Map<Option.OptionType, List<Option>> options = new HashMap<>();
-		options.put(Option.OptionType.FIGHTING_STYLE, Collections.singletonList(defense));
+		club.dnd5.portal.model.classes.OptionTypeDefinition fightingStyle = new club.dnd5.portal.model.classes.OptionTypeDefinition("FIGHTING_STYLE", "Боевые стили: Воин", "Fighter", null, false);
+		fightingStyle.setFeatureStem("боевой стиль");
+		Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options = new HashMap<>();
+		options.put(fightingStyle, Collections.singletonList(defense));
 
 		Map<String, Object> data = mapper.toVttg(fighter, options);
 
