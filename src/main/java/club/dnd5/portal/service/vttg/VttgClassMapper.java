@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -52,8 +53,6 @@ public class VttgClassMapper {
 
 	/** Колонки-ресурсы по подписи и их восстановление. */
 	private static final Map<String, String> RESOURCES = new HashMap<>();
-	/** Умение, у которого лежит список вариантов, — по корню его названия. */
-	private static final Map<Option.OptionType, String> OPTION_FEATURES = new HashMap<>();
 
 	static {
 		RESOURCES.put("ярость", "long");
@@ -62,28 +61,16 @@ public class VttgClassMapper {
 		RESOURCES.put("очки ци", "short");
 		RESOURCES.put("очки чародейства", "long");
 
-		OPTION_FEATURES.put(Option.OptionType.FIGHTING_STYLE, "боевой стиль");
-		OPTION_FEATURES.put(Option.OptionType.FIGHTING_STYLE_RANGER, "боевой стиль");
-		OPTION_FEATURES.put(Option.OptionType.FIGHTING_STYLE_PALADIN, "боевой стиль");
-		OPTION_FEATURES.put(Option.OptionType.FIGHTING_STYLE_BARD, "боевой стиль");
-		OPTION_FEATURES.put(Option.OptionType.METAMAGIC, "метамаги");
-		OPTION_FEATURES.put(Option.OptionType.ELDRITCH_INVOCATION, "воззвани");
-		OPTION_FEATURES.put(Option.OptionType.BONE, "договор");
-		OPTION_FEATURES.put(Option.OptionType.MANEUVER, "превосходств");
-		OPTION_FEATURES.put(Option.OptionType.ARCANE_SHOT, "выстрел");
-		OPTION_FEATURES.put(Option.OptionType.RUNE, "рун");
-		OPTION_FEATURES.put(Option.OptionType.ELEMENTAL_DISCIPLINE, "стихи");
-		OPTION_FEATURES.put(Option.OptionType.ARTIFICER_INFUSION, "инфузи");
 	}
 
 	/**
 	 * @param heroClass класс сайта
 	 * @param options   варианты умений по типу списка
 	 */
-	public Map<String, Object> toVttg(HeroClass heroClass, Map<Option.OptionType, List<Option>> options) {
+	public Map<String, Object> toVttg(HeroClass heroClass, Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options) {
 		String key = heroClass.getUrlName();
 		List<Map<String, Object>> features = classFeatures(heroClass);
-		attachOptions(features, optionTypes(heroClass.getEnglishName(), null), options);
+		attachOptions(features, optionTypes(heroClass.getEnglishName(), null, options.keySet()), options);
 		List<Map<String, Object>> subclasses = subclasses(heroClass, options);
 		Table table = table(heroClass.getFeatureLevelDefenitions(), slotDefinitions(heroClass));
 
@@ -218,24 +205,25 @@ public class VttgClassMapper {
 	// ── Варианты умений ──────────────────────────────────────────
 
 	/** Типы списков вариантов класса ({@code archetype == null}) или его архетипа. */
-	private static List<Option.OptionType> optionTypes(String className, String archetypeName) {
+	private static List<club.dnd5.portal.model.classes.OptionTypeDefinition> optionTypes(String className, String archetypeName, Collection<club.dnd5.portal.model.classes.OptionTypeDefinition> types) {
 		if (VttgText.isBlank(className)) {
 			return Collections.emptyList();
 		}
 		String archetype = archetypeName == null ? null : archetypeName.trim().replace(' ', '_');
-		return Arrays.stream(Option.OptionType.values())
+		return types.stream()
 			.filter(type -> className.trim().equalsIgnoreCase(type.getClassName()))
 			.filter(type -> archetype == null
-				? type.getArhetypeName() == null
-				: type.getArhetypeName() != null && archetype.contains(type.getArhetypeName()))
+				? type.getArchetypeName() == null
+				: type.getArchetypeName() != null && archetype.contains(type.getArchetypeName()))
+			.sorted(Comparator.comparing(type -> type.getOrdering() == null ? Integer.MAX_VALUE : type.getOrdering()))
 			.collect(Collectors.toList());
 	}
 
 	/** Список вариантов ложится в первое умение, чьё название с ним совпадает. */
-	private void attachOptions(List<Map<String, Object>> features, List<Option.OptionType> types,
-							   Map<Option.OptionType, List<Option>> options) {
-		for (Option.OptionType type : types) {
-			String stem = OPTION_FEATURES.get(type);
+	private void attachOptions(List<Map<String, Object>> features, List<club.dnd5.portal.model.classes.OptionTypeDefinition> types,
+							   Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options) {
+		for (club.dnd5.portal.model.classes.OptionTypeDefinition type : types) {
+			String stem = VttgText.isBlank(type.getFeatureStem()) ? null : type.getFeatureStem().trim().toLowerCase(Locale.ROOT);
 			List<Option> list = options.getOrDefault(type, Collections.emptyList());
 			if (stem == null || list.isEmpty()) {
 				continue;
@@ -277,7 +265,7 @@ public class VttgClassMapper {
 	 * Архетипы в порядке названия. Ключ — слаг страницы архетипа; два выпуска одного
 	 * архетипа (UA и книга) разводятся источником, как и на новом сайте.
 	 */
-	private List<Map<String, Object>> subclasses(HeroClass heroClass, Map<Option.OptionType, List<Option>> options) {
+	private List<Map<String, Object>> subclasses(HeroClass heroClass, Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options) {
 		if (heroClass.getArchetypes() == null) {
 			return Collections.emptyList();
 		}
@@ -303,9 +291,9 @@ public class VttgClassMapper {
 	}
 
 	private Map<String, Object> subclass(HeroClass heroClass, Archetype archetype, String key,
-										 Map<Option.OptionType, List<Option>> options) {
+										 Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options) {
 		List<Map<String, Object>> features = subclassFeatures(archetype, key);
-		attachOptions(features, optionTypes(heroClass.getEnglishName(), archetype.getEnglishName()), options);
+		attachOptions(features, optionTypes(heroClass.getEnglishName(), archetype.getEnglishName(), options.keySet()), options);
 		attachSpells(features, archetype);
 		int unlockLevel = archetype.getLevel() > 0 ? archetype.getLevel() : subclassLevel(heroClass);
 

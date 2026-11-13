@@ -3,7 +3,7 @@ package club.dnd5.portal.repository.datatable;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.classes.Option;
-import club.dnd5.portal.model.classes.Option.OptionType;
+import club.dnd5.portal.model.classes.OptionTypeDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -22,13 +22,13 @@ public interface OptionRepository extends JpaRepository<Option, Integer>, JpaSpe
 	Collection<String> findAlldPrerequisite();
 
 	@Query("SELECT o.prerequisite FROM Option o JOIN o.optionTypes t WHERE o.prerequisite IS NOT NULL AND t =:type GROUP BY o.prerequisite ORDER BY o.prerequisite")
-	Collection<String> findAlldPrerequisite(@Param("type") OptionType type);
+	Collection<String> findAlldPrerequisite(@Param("type") OptionTypeDefinition type);
 
 	@Query("SELECT c.book FROM Option c GROUP BY c.book HAVING c.book.type = :type ORDER BY c.book.year")
 	List<Book> findBook(@Param("type") TypeBook type);
 
 	@Query("SELECT o.level FROM Option o JOIN o.optionTypes t WHERE o.prerequisite IS NOT NULL AND t =:type GROUP BY o.level ORDER BY o.level")
-	List<String> findAllLevel(@Param("type") OptionType type);
+	List<String> findAllLevel(@Param("type") OptionTypeDefinition type);
 
 	@Query("SELECT o.level FROM Option o GROUP BY o.level ORDER BY o.level")
 	List<String> findAllLevels();

@@ -19,7 +19,7 @@ public class ArchetypeEditApi {
 	private final String description;
 	private final byte level;
 	private final SpellcasterType spellcasterType;
-	private final Option.OptionType optionType;
+	private final String optionType;
 	private final ArchetypeSpellLevelType spellLevelType;
 	private final Short page;
 	private final List<TraitApi> traits;
@@ -28,7 +28,7 @@ public class ArchetypeEditApi {
 	public ArchetypeEditApi(Archetype archetype, List<ArchetypeTrait> archetypeTraits) {
 		id = archetype.getId(); name = archetype.getName(); englishName = archetype.getEnglishName();
 		genitiveName = archetype.getGenitiveName(); description = archetype.getDescription(); level = archetype.getLevel();
-		spellcasterType = archetype.getSpellcasterType(); optionType = archetype.getOptionType();
+		spellcasterType = archetype.getSpellcasterType(); optionType = archetype.getOptionType() == null ? null : archetype.getOptionType().getCode();
 		spellLevelType = archetype.getSpellLevelType() == null
 			? ArchetypeSpellLevelType.CLASS_LEVEL
 			: archetype.getSpellLevelType();

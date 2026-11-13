@@ -5,7 +5,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import club.dnd5.portal.model.classes.Option.OptionType;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -21,7 +20,7 @@ import lombok.Setter;
 public class OptionFilter {
 	private List<String> levels;
 	private List<String> prerequsite;
-	private List<OptionType> classOption;
+	private List<String> classOption;
 	
 	@JsonProperty("book")
 	private List<String> books;

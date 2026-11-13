@@ -48,7 +48,7 @@ public class ClassDetailApi extends ClassApi {
 	private SpellcasterType spellcasterType;
 	private Collection<AbilityType> primaryAbilities;
 	private Collection<SkillType> availableSkillsRaw;
-	private Option.OptionType optionType;
+	private String optionType;
 	private Rest slotsReset;
 	private int enabledArhitypeLevel;
 	private Short page;
@@ -65,7 +65,7 @@ public class ClassDetailApi extends ClassApi {
 		spellcasterType = heroClass.getSpellcasterType();
 		primaryAbilities = heroClass.getPrimaryAbilities() == null ? Collections.emptyList() : heroClass.getPrimaryAbilities();
 		availableSkillsRaw = heroClass.getAvailableSkills() == null ? Collections.emptyList() : heroClass.getAvailableSkills();
-		optionType = heroClass.getOptionType();
+		optionType = heroClass.getOptionType() == null ? null : heroClass.getOptionType().getCode();
 		slotsReset = heroClass.getSlotsReset();
 		enabledArhitypeLevel = heroClass.getEnabledArhitypeLevel();
 		page = heroClass.getPage();

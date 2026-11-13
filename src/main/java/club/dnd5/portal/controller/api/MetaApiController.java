@@ -8,7 +8,7 @@ import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.Option;
-import club.dnd5.portal.model.classes.Option.OptionType;
+import club.dnd5.portal.model.classes.OptionTypeDefinition;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.god.God;
@@ -209,7 +209,7 @@ public class MetaApiController {
 		meta.setTitle(String.format("%s (%s)", option.getName(), option.getEnglishName()) + " | Особенности классов D&D 5e");
 		meta.setDescription(
 				String.format("Описание особенности %s - %s",
-						option.getOptionTypes().stream().map(OptionType::getDisplayName).collect(Collectors.joining()),
+						option.getOptionTypes().stream().map(OptionTypeDefinition::getDisplayName).collect(Collectors.joining()),
 						option.getName()));
 		meta.setMenu("Особенности классов");
 		meta.setKeywords(option.getAltName() + " " + option.getEnglishName());

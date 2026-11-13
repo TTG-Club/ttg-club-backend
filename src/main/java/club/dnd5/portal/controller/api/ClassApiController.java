@@ -14,6 +14,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.OptionTypeResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
@@ -75,6 +76,7 @@ public class ClassApiController {
 	private final ArchetypeTraitRepository archetypeTraitRepository;
 	private final AuditService auditService;
 	private final WorkshopPreview workshopPreview;
+	private final OptionTypeResolver optionTypeResolver;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -223,7 +225,7 @@ public class ClassApiController {
 		archetype.setName(request.getName().trim()); archetype.setEnglishName(request.getEnglishName().trim());
 		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(request.getDescription().trim());
 		archetype.setLevel(request.getLevel()); archetype.setSpellcasterType(request.getSpellcasterType());
-		archetype.setOptionType(request.getOptionType());
+		archetype.setOptionType(optionTypeResolver.resolve(request.getOptionType()));
 		archetype.setSpellLevelType(request.getSpellLevelType() == null
 			? ArchetypeSpellLevelType.CLASS_LEVEL
 			: request.getSpellLevelType());
@@ -347,7 +349,7 @@ public class ClassApiController {
 		heroClass.setEnabledArhitypeLevel(request.getEnabledArhitypeLevel());
 		heroClass.setSkillAvailableCount(request.getSkillAvailableCount());
 		heroClass.setAvailableSkills(request.getAvailableSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getAvailableSkills()));
-		heroClass.setOptionType(request.getOptionType());
+		heroClass.setOptionType(optionTypeResolver.resolve(request.getOptionType()));
 		heroClass.setSlotsReset(request.getSlotsReset());
 		heroClass.setSidekick(request.isSidekick());
 		heroClass.setIcon(trimToNull(request.getIcon()));

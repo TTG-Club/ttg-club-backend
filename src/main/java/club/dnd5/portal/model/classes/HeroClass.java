@@ -89,8 +89,10 @@ public class HeroClass {
 	@Enumerated(EnumType.STRING)
 	private List<SkillType> availableSkills;
 
-	@Enumerated(EnumType.STRING)
-	private Option.OptionType optionType;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "option_type", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	@org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
+	private OptionTypeDefinition optionType;
 
 	@Enumerated(EnumType.STRING)
 	private Rest slotsReset;

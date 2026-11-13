@@ -144,7 +144,7 @@ public class VttgExportService {
 		collect(upserts, books, "spells", spellRepository.findAll(), spellMapper::toVttg,
 			spell -> spell.getBook(), spell -> spell.getEnglishName());
 
-		Map<Option.OptionType, List<Option>> options = options();
+		Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options = options();
 		List<HeroClass> classes = classRepository.findAll().stream()
 			.filter(heroClass -> !heroClass.isSidekick())
 			.collect(Collectors.toList());
@@ -174,8 +174,8 @@ public class VttgExportService {
 	}
 
 	/** Варианты умений классов по типу списка, в порядке названия. */
-	private Map<Option.OptionType, List<Option>> options() {
-		Map<Option.OptionType, List<Option>> result = new HashMap<>();
+	private Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options() {
+		Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> result = new HashMap<>();
 		optionRepository.findAll().stream()
 			.filter(option -> option.getOptionTypes() != null)
 			.sorted(Comparator.comparing(Option::getName,
