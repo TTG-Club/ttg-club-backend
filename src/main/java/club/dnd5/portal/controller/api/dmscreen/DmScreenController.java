@@ -44,7 +44,7 @@ public class DmScreenController {
 		return screenService.findMine();
 	}
 
-	@Operation(summary = "Создание ширмы: у пользователя не больше 2 ширм; сверх лимита 403")
+	@Operation(summary = "Создание ширмы: у пользователя одна ширма; вторая — 403")
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
 	public DmScreenResponse create(@RequestBody @Valid final DmScreenCreateRequest request) {

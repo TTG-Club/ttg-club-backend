@@ -27,15 +27,15 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Ширмы Мастера: несколько именованных раскладок окон на пользователя.
- * У каждого пользователя не больше {@value SCREEN_LIMIT} ширм, от подписки и роли лимит не зависит.
+ * Ширмы Мастера: именованные раскладки окон пользователя. На время испытаний у пользователя {@value SCREEN_LIMIT} ширма, от подписки и роли лимит не
+ * зависит. Несколько ширм вернутся, когда инструмент будет доведён.
  * Чужая и несуществующая ширма неразличимы — обе 404.
  */
 @RequiredArgsConstructor
 @Service
 public class DmScreenService {
 
-	public static final int SCREEN_LIMIT = 2;
+	public static final int SCREEN_LIMIT = 1;
 	public static final int MAX_NAME_LENGTH = 64;
 	public static final int MAX_WINDOWS = 100;
 	public static final int MAX_PATH_LENGTH = 256;
@@ -80,7 +80,7 @@ public class DmScreenService {
 		int limit = currentLimit();
 		if (screenRepository.countByUserId(user.getId()) >= limit) {
 			throw new ApiException(HttpStatus.FORBIDDEN,
-					"Достигнут лимит ширм: " + limit + ". Удалите одну из существующих");
+					"Ширма уже есть: пока можно вести только одну");
 		}
 
 		DmScreen screen = new DmScreen();
