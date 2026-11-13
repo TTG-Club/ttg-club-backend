@@ -61,27 +61,27 @@ class DmScreenServiceTest {
 	}
 
 	@Test
-	void freeUserHasLimitOfOne() {
+	void userHasLimitOfTwo() {
 		signIn("ROLE_USER");
 		when(screenRepository.findAllByUserIdOrderByUpdatedAtDesc(USER_ID)).thenReturn(Collections.emptyList());
 
 		DmScreenListResponse list = service.findMine();
 
-		assertThat(list.getLimit()).isEqualTo(1);
+		assertThat(list.getLimit()).isEqualTo(2);
 		assertThat(list.getUsed()).isZero();
 		assertThat(list.getItems()).isEmpty();
 	}
 
 	@Test
-	void subscriberAndAdminHaveLimitOfThirty() {
+	void limitDoesNotDependOnRole() {
 		signIn("ROLE_USER", "ROLE_SUBSCRIBER");
-		assertThat(service.currentLimit()).isEqualTo(30);
+		assertThat(service.currentLimit()).isEqualTo(2);
 
 		signIn("ROLE_ADMIN");
-		assertThat(service.currentLimit()).isEqualTo(30);
+		assertThat(service.currentLimit()).isEqualTo(2);
 
 		signIn("ROLE_MODERATOR");
-		assertThat(service.currentLimit()).isEqualTo(1);
+		assertThat(service.currentLimit()).isEqualTo(2);
 	}
 
 	@Test
@@ -111,44 +111,47 @@ class DmScreenServiceTest {
 	}
 
 	@Test
-	void freeUserGetsForbiddenOverLimit() {
+	void userGetsForbiddenOverLimit() {
 		signIn("ROLE_USER");
 		when(screenRepository.countByUserId(USER_ID)).thenReturn(1L);
+		service.create("Вторая", null);
 
-		assertThatThrownBy(() -> service.create("Вторая", null))
+		when(screenRepository.countByUserId(USER_ID)).thenReturn(2L);
+		assertThatThrownBy(() -> service.create("Третья", null))
 				.isInstanceOfSatisfying(ApiException.class, e -> {
 					assertThat(e.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
-					assertThat(e.getMessage()).contains("подписк");
+					assertThat(e.getMessage()).contains("лимит");
 				});
+		verify(screenRepository).save(any());
+	}
+
+	@Test
+	void subscriberGetsForbiddenOverLimitToo() {
+		signIn("ROLE_SUBSCRIBER");
+		when(screenRepository.countByUserId(USER_ID)).thenReturn(2L);
+
+		assertThatThrownBy(() -> service.create("Третья", null))
+				.isInstanceOfSatisfying(ApiException.class,
+						e -> assertThat(e.getStatus()).isEqualTo(HttpStatus.FORBIDDEN));
 		verify(screenRepository, never()).save(any());
 	}
 
 	@Test
-	void subscriberGetsForbiddenOverThirty() {
-		signIn("ROLE_SUBSCRIBER");
-		when(screenRepository.countByUserId(USER_ID)).thenReturn(29L);
-		service.create("Тридцатая", null);
-
-		when(screenRepository.countByUserId(USER_ID)).thenReturn(30L);
-		assertThatThrownBy(() -> service.create("Тридцать первая", null))
-				.isInstanceOfSatisfying(ApiException.class,
-						e -> assertThat(e.getStatus()).isEqualTo(HttpStatus.FORBIDDEN));
-	}
-
-	@Test
-	void screensOverLimitStayAvailableAfterSubscriptionEnds() {
+	void screensOverLimitStayAvailable() {
 		signIn("ROLE_USER");
 		DmScreen first = screen("Первая", List.of(window("a"), window("b")));
 		DmScreen second = screen("Вторая", Collections.emptyList());
-		when(screenRepository.findAllByUserIdOrderByUpdatedAtDesc(USER_ID)).thenReturn(List.of(first, second));
+		DmScreen third = screen("Третья", Collections.emptyList());
+		when(screenRepository.findAllByUserIdOrderByUpdatedAtDesc(USER_ID))
+				.thenReturn(List.of(first, second, third));
 		when(screenRepository.findByIdAndUserId(second.getId(), USER_ID)).thenReturn(Optional.of(second));
 
 		DmScreenListResponse list = service.findMine();
 
-		assertThat(list.getUsed()).isEqualTo(2);
-		assertThat(list.getLimit()).isEqualTo(1);
-		assertThat(list.getItems()).extracting("name").containsExactly("Первая", "Вторая");
-		assertThat(list.getItems()).extracting("windowCount").containsExactly(2, 0);
+		assertThat(list.getUsed()).isEqualTo(3);
+		assertThat(list.getLimit()).isEqualTo(2);
+		assertThat(list.getItems()).extracting("name").containsExactly("Первая", "Вторая", "Третья");
+		assertThat(list.getItems()).extracting("windowCount").containsExactly(2, 0, 0);
 		assertThat(list.getItems().get(0).getId()).isEqualTo(first.getId().toString());
 		assertThat(service.findById(second.getId()).getName()).isEqualTo("Вторая");
 	}

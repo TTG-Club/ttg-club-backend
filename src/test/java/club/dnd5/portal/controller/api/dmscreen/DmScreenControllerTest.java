@@ -122,7 +122,7 @@ class DmScreenControllerTest {
 		mockMvc.perform(get(URL))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.used").value(1))
-				.andExpect(jsonPath("$.limit").value(1))
+				.andExpect(jsonPath("$.limit").value(2))
 				.andExpect(jsonPath("$.items", hasSize(1)))
 				.andExpect(jsonPath("$.items[0].id").value(screen.getId().toString()))
 				.andExpect(jsonPath("$.items[0].name").value("Подземелье"))
@@ -132,8 +132,8 @@ class DmScreenControllerTest {
 
 	@Test
 	@WithMockUser(username = "magistr", roles = "SUBSCRIBER")
-	void subscriberLimitIsThirty() throws Exception {
-		mockMvc.perform(get(URL)).andExpect(jsonPath("$.limit").value(30));
+	void subscriberLimitIsTheSame() throws Exception {
+		mockMvc.perform(get(URL)).andExpect(jsonPath("$.limit").value(2));
 	}
 
 	@Test
@@ -169,7 +169,7 @@ class DmScreenControllerTest {
 				.andExpect(jsonPath("$.name").value("Новая"))
 				.andExpect(jsonPath("$.windows[0].isMinimized").value(true));
 
-		when(screenRepository.countByUserId(7L)).thenReturn(1L);
+		when(screenRepository.countByUserId(7L)).thenReturn(2L);
 		mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Вторая\"}"))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.message").isNotEmpty());

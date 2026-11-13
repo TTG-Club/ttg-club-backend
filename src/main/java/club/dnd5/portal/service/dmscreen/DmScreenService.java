@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,20 +24,18 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
  * Ширмы Мастера: несколько именованных раскладок окон на пользователя.
- * Без подписки — {@value FREE_LIMIT} ширма, с подпиской (SUBSCRIBER) или у администратора —
- * {@value SUBSCRIBER_LIMIT}. Чужая и несуществующая ширма неразличимы — обе 404.
+ * У каждого пользователя не больше {@value SCREEN_LIMIT} ширм, от подписки и роли лимит не зависит.
+ * Чужая и несуществующая ширма неразличимы — обе 404.
  */
 @RequiredArgsConstructor
 @Service
 public class DmScreenService {
 
-	public static final int FREE_LIMIT = 1;
-	public static final int SUBSCRIBER_LIMIT = 30;
+	public static final int SCREEN_LIMIT = 2;
 	public static final int MAX_NAME_LENGTH = 64;
 	public static final int MAX_WINDOWS = 100;
 	public static final int MAX_PATH_LENGTH = 256;
@@ -48,7 +45,6 @@ public class DmScreenService {
 	public static final String NOTE_PATH_PREFIX = "note:";
 	public static final int MAX_NOTE_LENGTH = 20000;
 
-	private static final Set<String> EXTENDED_LIMIT_AUTHORITIES = Set.of("ROLE_SUBSCRIBER", "ROLE_ADMIN");
 	private static final TypeReference<List<DmScreenWindow>> WINDOWS_TYPE = new TypeReference<>() {
 	};
 
@@ -71,7 +67,7 @@ public class DmScreenService {
 	}
 
 	/**
-	 * Создаёт ширму. Если ширм уже не меньше лимита (в т.ч. больше — после окончания подписки),
+	 * Создаёт ширму. Если ширм уже не меньше лимита (в т.ч. больше — созданных при прежнем лимите),
 	 * существующие остаются доступны, но новую создать нельзя.
 	 */
 	@Transactional
@@ -83,10 +79,8 @@ public class DmScreenService {
 
 		int limit = currentLimit();
 		if (screenRepository.countByUserId(user.getId()) >= limit) {
-			throw new ApiException(HttpStatus.FORBIDDEN, limit == FREE_LIMIT
-					? "Без подписки доступна только одна ширма. Оформите подписку, чтобы вести до "
-							+ SUBSCRIBER_LIMIT + " ширм"
-					: "Достигнут лимит ширм: " + limit + ". Удалите одну из существующих");
+			throw new ApiException(HttpStatus.FORBIDDEN,
+					"Достигнут лимит ширм: " + limit + ". Удалите одну из существующих");
 		}
 
 		DmScreen screen = new DmScreen();
@@ -126,16 +120,9 @@ public class DmScreenService {
 		screenRepository.delete(getOwned(id));
 	}
 
-	/** Лимит ширм по ролям текущей аутентификации. */
+	/** Лимит ширм: один для всех пользователей. */
 	public int currentLimit() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null) {
-			return FREE_LIMIT;
-		}
-		boolean extended = authentication.getAuthorities().stream()
-				.map(GrantedAuthority::getAuthority)
-				.anyMatch(EXTENDED_LIMIT_AUTHORITIES::contains);
-		return extended ? SUBSCRIBER_LIMIT : FREE_LIMIT;
+		return SCREEN_LIMIT;
 	}
 
 	private DmScreen getOwned(UUID id) {
