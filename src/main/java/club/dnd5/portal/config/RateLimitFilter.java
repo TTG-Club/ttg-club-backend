@@ -25,6 +25,8 @@ public class RateLimitFilter extends OncePerRequestFilter
 {
     private static final String ANONYMOUS_USER = "anonymousUser";
     private static final String ONLINE_HEARTBEAT_URI = "/api/online/heartbeat";
+    // Отметки о времени работы с инструментами: приходят раз в минуту от каждого посетителя
+    private static final String ONLINE_USAGE_URI = "/api/online/usage";
     // Статика сборки фронта: одна загрузка страницы тянет ~30 таких файлов
     private static final String[] STATIC_PREFIXES = {"/js/", "/css/", "/fonts/", "/img/"};
 
@@ -92,7 +94,7 @@ public class RateLimitFilter extends OncePerRequestFilter
         }
 
         String uri = request.getRequestURI();
-        if (ONLINE_HEARTBEAT_URI.equals(uri))
+        if (ONLINE_HEARTBEAT_URI.equals(uri) || ONLINE_USAGE_URI.equals(uri))
         {
             return true;
         }
