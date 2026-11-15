@@ -139,6 +139,24 @@ class ImageStorageServiceTest {
 	}
 
 	@Test
+	void uploadUrlIgnoresLegacyImageHost() throws IOException {
+		ReflectionTestUtils.setField(service, "imageUrl", "https://img.ttg.club");
+
+		String url = service.uploadTo("books/covers/mm.webp",
+			new MockMultipartFile("file", "mm.png", "image/png", png(16, 16)), null);
+
+		assertEquals("/s3/5e14/books/covers/mm.webp", url);
+	}
+
+	@Test
+	void pathOfAcceptsLegacyImageHost() {
+		ReflectionTestUtils.setField(service, "imageUrl", "https://img.ttg.club");
+
+		assertEquals("books/covers/mm.webp", service.pathOf("https://img.ttg.club/books/covers/mm.webp?v=1"));
+		assertEquals("books/covers/mm.webp", service.pathOf("/s3/5e14/books/covers/mm.webp?v=2"));
+	}
+
+	@Test
 	void fileSlugKeepsLatinOnly() {
 		assertEquals("ancient-red-dragon", ImageStorageService.fileSlug("Ancient Red_Dragon.JPG"));
 		assertEquals("image", ImageStorageService.fileSlug("Дракон.png"));
