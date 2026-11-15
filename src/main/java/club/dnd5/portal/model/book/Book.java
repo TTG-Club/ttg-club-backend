@@ -33,6 +33,9 @@ public class Book implements Serializable, Comparable<Book>{
 
 	private Integer year;
 
+	/** Адрес обложки ({@code /s3/5e14/books/covers/...}) или {@code null}, если её нет. */
+	private String cover;
+
 	public Book(String source) {
 		this.source = source;
 	}
