@@ -10,6 +10,8 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HtmlValidator implements ConstraintValidator<ValidHtml, Object> {
 	private static final int MAX_PARSE_ERRORS = 100;
@@ -17,6 +19,9 @@ public class HtmlValidator implements ConstraintValidator<ValidHtml, Object> {
 		"area", "base", "br", "col", "embed", "hr", "img", "input", "link",
 		"meta", "param", "source", "track", "wbr"
 	));
+	private static final Pattern SELF_CLOSING_TAG = Pattern.compile(
+		"<([A-Za-z][A-Za-z0-9:_-]*)((?:[^<>\"'/]|\"[^\"]*\"|'[^']*')*)/>"
+	);
 	private static final Set<String> OPTIONAL_END_ELEMENTS = new HashSet<>(Arrays.asList(
 		"html", "head", "body", "li", "dt", "dd", "p", "rt", "rp", "optgroup",
 		"option", "colgroup", "thead", "tbody", "tfoot", "tr", "td", "th"
@@ -35,8 +40,27 @@ public class HtmlValidator implements ConstraintValidator<ValidHtml, Object> {
 
 		Parser parser = Parser.htmlParser();
 		parser.setTrackErrors(MAX_PARSE_ERRORS);
-		parser.parseInput(html, "");
+		parser.parseInput(expandSelfClosingTags(html), "");
 		return parser.getErrors().isEmpty() && hasBalancedRequiredTags(html);
+	}
+
+	/**
+	 * В контенте легитимно встречаются самозакрывающиеся теги
+	 * (например, {@code <dice-roller formula="3к6 + 5"/>}). jsoup считает их
+	 * незакрытыми, поэтому перед разбором разворачиваем их в пару открывающий/закрывающий.
+	 */
+	private String expandSelfClosingTags(String html) {
+		Matcher matcher = SELF_CLOSING_TAG.matcher(html);
+		StringBuilder result = new StringBuilder(html.length());
+		while (matcher.find()) {
+			String name = matcher.group(1);
+			String replacement = VOID_ELEMENTS.contains(name.toLowerCase(Locale.ROOT))
+				? matcher.group()
+				: "<" + name + matcher.group(2) + "></" + name + ">";
+			matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+		}
+		matcher.appendTail(result);
+		return result.toString();
 	}
 
 	private boolean hasBalancedRequiredTags(String html) {
