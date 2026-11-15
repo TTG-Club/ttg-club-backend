@@ -1,6 +1,7 @@
 package club.dnd5.portal.controller.api.image;
 
 import club.dnd5.portal.model.image.ImageType;
+import club.dnd5.portal.service.image.BookCoverService;
 import club.dnd5.portal.service.image.ImageGalleryService;
 import club.dnd5.portal.service.image.ImageStorageService;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,9 @@ class ImageWorkshopApiControllerSecurityTest {
 			() -> controller.replaceGallery(ImageType.CREATURE, 1, new club.dnd5.portal.dto.api.image.ImageGalleryApi(List.of())),
 			() -> controller.addToGallery(ImageType.CREATURE, 1, null),
 			() -> controller.getCover(ImageType.CLASS, 1),
-			() -> controller.uploadCover(ImageType.CLASS, 1, null)
+			() -> controller.uploadCover(ImageType.CLASS, 1, null),
+			() -> controller.uploadBookCover("PHB", null),
+			() -> controller.deleteBookCover("PHB")
 		};
 	}
 
@@ -70,7 +73,8 @@ class ImageWorkshopApiControllerSecurityTest {
 	static class TestConfig {
 		@Bean
 		ImageWorkshopApiController controller() {
-			return new ImageWorkshopApiController(mock(ImageStorageService.class), mock(ImageGalleryService.class));
+			return new ImageWorkshopApiController(mock(ImageStorageService.class), mock(ImageGalleryService.class),
+				mock(BookCoverService.class));
 		}
 	}
 }

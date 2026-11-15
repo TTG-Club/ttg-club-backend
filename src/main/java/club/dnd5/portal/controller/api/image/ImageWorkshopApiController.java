@@ -4,6 +4,7 @@ import club.dnd5.portal.dto.api.image.ImageCoverApi;
 import club.dnd5.portal.dto.api.image.ImageGalleryApi;
 import club.dnd5.portal.dto.api.image.ImageUploadApi;
 import club.dnd5.portal.model.image.ImageType;
+import club.dnd5.portal.service.image.BookCoverService;
 import club.dnd5.portal.service.image.ImageGalleryService;
 import club.dnd5.portal.service.image.ImageStorageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Картинки мастерской: общая загрузка в S3 (как {@code /api/v2/image} на core-api),
- * галереи записей и обложки классов и рас.
+ * галереи записей и обложки классов, рас и источников.
  * <p>
  * {@code type} — раздел записи: CLASS, SUBCLASS, RACE, CREATURE, GOD, ITEM, MAGIC_ITEM, WEAPON, ARMOR.
  */
@@ -42,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageWorkshopApiController {
 	private final ImageStorageService imageStorageService;
 	private final ImageGalleryService imageGalleryService;
+	private final BookCoverService bookCoverService;
 
 	@Operation(summary = "Загрузка картинки в папку раздела: WebP, адрес /s3/5e14/...")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -105,5 +107,21 @@ public class ImageWorkshopApiController {
 		@RequestPart("file") MultipartFile file
 	) {
 		return imageGalleryService.uploadCover(type, id, file);
+	}
+
+	@Operation(summary = "Загрузка обложки источника (файл перезаписывается)")
+	@PostMapping(
+		value = "/books/{source}/cover",
+		consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+		produces = MediaType.APPLICATION_JSON_VALUE
+	)
+	public ImageCoverApi uploadBookCover(@PathVariable String source, @RequestPart("file") MultipartFile file) {
+		return bookCoverService.upload(source, file);
+	}
+
+	@Operation(summary = "Удаление обложки источника")
+	@DeleteMapping("/books/{source}/cover")
+	public void deleteBookCover(@PathVariable String source) {
+		bookCoverService.delete(source);
 	}
 }
