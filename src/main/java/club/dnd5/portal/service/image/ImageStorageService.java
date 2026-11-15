@@ -38,6 +38,8 @@ public class ImageStorageService {
 	/** Стороны, больше которых картинку даже не декодируем: защита от «бомб» распаковки. */
 	private static final int MAX_DECODED_SIDE = 12_000;
 	private static final int MAX_NAME_LENGTH = 60;
+	/** Корень раздачи картинок из бакета ({@code S3ImageController}). */
+	private static final String S3_ROOT = "/s3/";
 
 	private final ObjectProvider<S3Client> s3Client;
 	private final S3Properties s3Properties;
@@ -76,13 +78,13 @@ public class ImageStorageService {
 	}
 
 	/**
-	 * Удаляет картинку по её публичному адресу. Удаляются только картинки сайта ({@code app.img.url}).
+	 * Удаляет картинку по её публичному адресу. Удаляются только картинки нашего хранилища.
 	 * @param url публичный адрес картинки
 	 */
 	public void delete(String url) {
 		String path = pathOf(url);
 		if (path == null) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "Картинка лежит не на " + baseUrl());
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Картинка лежит не в хранилище сайта: " + storageBase());
 		}
 		try {
 			requireS3Client().deleteObject(request -> request
@@ -95,14 +97,21 @@ public class ImageStorageService {
 
 	/**
 	 * Путь картинки от корня картинок сайта или {@code null}, если адрес чужой.
+	 * Понимает и адрес хранилища ({@code /s3/5e14/...}), и адрес от {@code app.img.url}:
+	 * так сохраняли загрузки, пока адрес строился от него.
 	 * @param url публичный адрес картинки
 	 */
 	public String pathOf(String url) {
-		String base = baseUrl() + "/";
-		if (url == null || !url.startsWith(base)) {
+		if (url == null) {
 			return null;
 		}
-		String path = url.substring(base.length());
+		String path = stripBase(url, storageBase());
+		if (path == null) {
+			path = stripBase(url, baseUrl() + "/");
+		}
+		if (path == null) {
+			return null;
+		}
 		int query = path.indexOf('?');
 		if (query >= 0) {
 			path = path.substring(0, query);
@@ -220,8 +229,23 @@ public class ImageStorageService {
 		return prefix == null || prefix.isBlank() ? path : prefix + "/" + path;
 	}
 
+	/**
+	 * Адрес загруженной картинки. Загрузки всегда лежат в нашем бакете и отдаются
+	 * {@code S3ImageController} по {@code /s3/<ключ>}, поэтому адрес не зависит от
+	 * {@code app.img.url}: на стенде он может указывать на старое хранилище
+	 * (img.ttg.club), где новых файлов нет.
+	 */
 	private String publicUrl(String path) {
-		return baseUrl() + "/" + path;
+		return S3_ROOT + objectKey(path);
+	}
+
+	/** Начало адресов картинок хранилища: {@code /s3/5e14/}. */
+	private String storageBase() {
+		return publicUrl("");
+	}
+
+	private static String stripBase(String url, String base) {
+		return url.startsWith(base) ? url.substring(base.length()) : null;
 	}
 
 	private String baseUrl() {
