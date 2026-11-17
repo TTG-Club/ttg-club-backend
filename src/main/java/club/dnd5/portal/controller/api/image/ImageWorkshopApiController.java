@@ -2,9 +2,11 @@ package club.dnd5.portal.controller.api.image;
 
 import club.dnd5.portal.dto.api.image.ImageCoverApi;
 import club.dnd5.portal.dto.api.image.ImageGalleryApi;
+import club.dnd5.portal.dto.api.image.ImageTokenApi;
 import club.dnd5.portal.dto.api.image.ImageUploadApi;
 import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.service.image.BookCoverService;
+import club.dnd5.portal.service.image.CreatureTokenService;
 import club.dnd5.portal.service.image.ImageGalleryService;
 import club.dnd5.portal.service.image.ImageStorageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Картинки мастерской: общая загрузка в S3 (как {@code /api/v2/image} на core-api),
- * галереи записей и обложки классов, рас и источников.
+ * галереи записей, обложки классов, рас и источников, токены существ.
  * <p>
  * {@code type} — раздел записи: CLASS, SUBCLASS, RACE, CREATURE, GOD, ITEM, MAGIC_ITEM, WEAPON, ARMOR.
  */
@@ -44,6 +46,7 @@ public class ImageWorkshopApiController {
 	private final ImageStorageService imageStorageService;
 	private final ImageGalleryService imageGalleryService;
 	private final BookCoverService bookCoverService;
+	private final CreatureTokenService creatureTokenService;
 
 	@Operation(summary = "Загрузка картинки в папку раздела: WebP, адрес /s3/5e14/...")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -123,5 +126,27 @@ public class ImageWorkshopApiController {
 	@DeleteMapping("/books/{source}/cover")
 	public void deleteBookCover(@PathVariable String source) {
 		bookCoverService.delete(source);
+	}
+
+	@Operation(summary = "Круглый токен существа: url = null, если токена нет")
+	@GetMapping(value = "/creatures/{id}/token", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ImageTokenApi getCreatureToken(@PathVariable Integer id) {
+		return creatureTokenService.get(id);
+	}
+
+	@Operation(summary = "Загрузка круглого токена существа (файл перезаписывается)")
+	@PostMapping(
+		value = "/creatures/{id}/token",
+		consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+		produces = MediaType.APPLICATION_JSON_VALUE
+	)
+	public ImageTokenApi uploadCreatureToken(@PathVariable Integer id, @RequestPart("file") MultipartFile file) {
+		return creatureTokenService.upload(id, file);
+	}
+
+	@Operation(summary = "Удаление круглого токена существа")
+	@DeleteMapping("/creatures/{id}/token")
+	public void deleteCreatureToken(@PathVariable Integer id) {
+		creatureTokenService.delete(id);
 	}
 }

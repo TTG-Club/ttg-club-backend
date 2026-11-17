@@ -19,6 +19,7 @@ import club.dnd5.portal.model.image.ImageType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.TokenRepository;
+import club.dnd5.portal.service.image.CreatureTokenService;
 import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
@@ -67,9 +68,7 @@ public class BestiaryApiController {
 			.orElseThrow(PageNotFoundException::new);
 		BeastDetailApi beastApi = new BeastDetailApi(beast);
 		Collection<String> images = new ArrayList<>();
-		tokenRepository.findByRefIdAndType(beast.getId(), "круглый")
-			.stream()
-			.findFirst()
+		tokenRepository.findFirstByRefIdAndTypeOrderByIdAsc(beast.getId(), CreatureTokenService.ROUND_TYPE)
 			.ifPresent(token -> images.add(token.getUrl()));
 		images.addAll(imageRepository.findAllByTypeAndRefId(ImageType.CREATURE, beast.getId()));
 		if (!images.isEmpty()) {
