@@ -39,8 +39,9 @@ EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
 -- =====================================================================================
--- 1. Таблицы, которых нет в сущностях (строк на 2026-11-18):
---    verification_token 718 — токены старой регистрации, авторизация давно через SSO;
+-- 1. Таблицы, которых нет в сущностях (строк на 2026-11-18).
+--    verification_token здесь НЕТ: это сущность club.dnd5.portal.repository.VerificationToken
+--    (лежит вне пакета model, первая инвентаризация её пропустила), таблица используется.
 --    skills 1365 + creatures_skills 1388, bonus_saving_throws 938 — старые версии
 --      навыков и спасбросков существ (сейчас creature_skills / creature_saving_throws);
 --    places 117, background_personalization_feature 139, backgrounds_equipments 59,
@@ -49,7 +50,6 @@ DEALLOCATE PREPARE stmt;
 -- =====================================================================================
 SET @old_fk_checks = @@FOREIGN_KEY_CHECKS;
 SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS `verification_token`;
 DROP TABLE IF EXISTS `places`;
 DROP TABLE IF EXISTS `skills`;
 DROP TABLE IF EXISTS `creatures_skills`;
@@ -146,7 +146,7 @@ DEALLOCATE PREPARE stmt;
 -- =====================================================================================
 SELECT table_name, column_name FROM information_schema.columns
 WHERE table_schema = DATABASE() AND (
-    table_name IN ('verification_token', 'places', 'skills', 'creatures_skills', 'bonus_saving_throws',
+    table_name IN ('places', 'skills', 'creatures_skills', 'bonus_saving_throws',
                    'background_personalization_feature', 'backgrounds_equipments',
                    'creatures_immunity_states', 'site_references', 'archetypes_spells')
     OR (table_name = 'classes' AND column_name IN ('bone_hits', 'skills'))
