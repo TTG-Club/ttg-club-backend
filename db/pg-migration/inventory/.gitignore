@@ -1,0 +1,5 @@
+out/
+out-*/
+checks.sql
+report.md
+report-*.md

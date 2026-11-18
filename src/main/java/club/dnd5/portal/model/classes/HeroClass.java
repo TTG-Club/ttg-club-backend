@@ -53,7 +53,11 @@ public class HeroClass {
 	@Column(columnDefinition = "TEXT")
 	private String equipment;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	/**
+	 * Обратная сторона Spell.heroClass (таблица spells_hero_class). Раньше связь была
+	 * независимой и жила в отдельной classes_spells, куда ничего не записывалось.
+	 */
+	@ManyToMany(mappedBy = "heroClass", fetch = FetchType.LAZY)
 	@OrderBy("level")
 	private List<Spell> spells;
 
