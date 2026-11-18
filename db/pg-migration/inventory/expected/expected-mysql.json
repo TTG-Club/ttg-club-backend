@@ -1548,6 +1548,18 @@
    ],
    "constraints": []
   },
+  "verification_token": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "expiry_date": "date",
+    "token": "varchar(255)",
+    "user_id": "bigint not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
   "weapon_properties": {
    "columns": {
     "id": "integer not null auto_increment",
@@ -2369,6 +2381,13 @@
    "name": "FK7lqtkm6yahlhb7r0fiih47tja",
    "cols": "user_party_id",
    "ref": "user_party",
+   "refcols": "id"
+  },
+  {
+   "table": "verification_token",
+   "name": "FK3asw9wnv76uxu3kr1ekq4i1ld",
+   "cols": "user_id",
+   "ref": "users",
    "refcols": "id"
   },
   {
