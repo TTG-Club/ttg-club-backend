@@ -35,7 +35,7 @@ python -I compare.py out expected\expected-mysql.json report.md
 | файл | что делает |
 |---|---|
 | `SchemaGen.java` | строит DDL из сущностей без подключения к БД, со стратегиями именования Spring Boot 4 |
-| `expected/expected-{mysql,pg}.sql` | ожидаемая схема (121 таблица, 115 FK) для MySQL и PostgreSQL; PG-версия — заготовка для начального changelog Liquibase |
+| `expected/expected-{mysql,pg}.sql` | ожидаемая схема (121 таблица) для MySQL и PostgreSQL; PG-версия — заготовка для начального changelog Liquibase |
 | `parse_ddl.py` | DDL → JSON (таблицы, колонки, PK, FK) |
 | `meta.sql` | версия, sql_mode, collation, таблицы, колонки, FK, индексы, представления, триггеры, процедуры |
 | `gen_checks.py` | генерирует `checks.sql`: точное число строк, висячие FK, дубли в join-таблицах, дубли без учёта регистра, пробелы, нулевые даты, ORDINAL вне диапазона, NUL в тексте, валидность JSON |

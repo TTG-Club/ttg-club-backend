@@ -26,7 +26,8 @@ public class SchemaGen {
     try (var walk = Files.walk(classes)) {
       for (Path p : (Iterable<Path>) walk.filter(x -> x.toString().endsWith(".class"))::iterator) {
         String cn = classes.relativize(p).toString().replace('\\', '/').replace('/', '.').replaceAll("\\.class$", "");
-        if (!cn.startsWith("club.dnd5.portal.model")) continue;
+        // Весь пакет приложения: сущности есть и вне model (например, repository.VerificationToken).
+        if (!cn.startsWith("club.dnd5.portal.")) continue;
         Class<?> c;
         try { c = Class.forName(cn, false, SchemaGen.class.getClassLoader()); } catch (Throwable t) { continue; }
         if (c.isAnnotationPresent(Entity.class) || c.isAnnotationPresent(Embeddable.class) || c.isAnnotationPresent(MappedSuperclass.class)) {

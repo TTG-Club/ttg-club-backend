@@ -1115,6 +1115,14 @@
         primary key (id)
     ) engine=InnoDB;
 
+    create table verification_token (
+        id bigint not null auto_increment,
+        expiry_date date,
+        token varchar(255),
+        user_id bigint not null,
+        primary key (id)
+    ) engine=InnoDB;
+
     create table weapon_properties (
         id integer not null auto_increment,
         description TEXT,
@@ -1257,6 +1265,9 @@
 
     alter table treasures 
        add constraint UKi1w3ud5c4prps96rytynjw98a unique (english_name);
+
+    alter table verification_token 
+       add constraint UKq6jibbenp7o9v6tq178xg88hg unique (user_id);
 
     alter table archetype_spell 
        add constraint FK391hqgq1claarkwloogefqpdw 
@@ -1792,6 +1803,11 @@
        add constraint FK7lqtkm6yahlhb7r0fiih47tja 
        foreign key (user_party_id) 
        references user_party (id);
+
+    alter table verification_token 
+       add constraint FK3asw9wnv76uxu3kr1ekq4i1ld 
+       foreign key (user_id) 
+       references users (id);
 
     alter table weapon_properties 
        add constraint FKc4rvlgrnunclnv8urismu07a 
