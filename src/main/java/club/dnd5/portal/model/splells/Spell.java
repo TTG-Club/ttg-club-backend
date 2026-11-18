@@ -85,7 +85,12 @@ public class Spell implements FoundryCommon {
 	@Enumerated(jakarta.persistence.EnumType.STRING)
 	private List<AbilityType> savingthrows;
 
+	// Имена колонок заданы явно: у двусторонней связи (HeroClass.spells — mappedBy)
+	// Hibernate по умолчанию назвал бы колонку spells_id вместо существующей spell_id.
 	@ManyToMany
+	@JoinTable(name = "spells_hero_class",
+		joinColumns = @JoinColumn(name = "spell_id"),
+		inverseJoinColumns = @JoinColumn(name = "hero_class_id"))
 	private List<HeroClass> heroClass;
 
 	@ManyToOne
