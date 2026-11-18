@@ -48,6 +48,7 @@ public class Weapon {
 	private Short maxDistance;
 
 	@ManyToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	List<WeaponProperty> properties;
 
 	private Byte ammo;

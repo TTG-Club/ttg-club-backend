@@ -30,7 +30,7 @@ public class JsonStorage implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private FoundryVersion versionFoundry;
 
-	@Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+	@Column(nullable = false, columnDefinition = "text")
 	private String jsonData;
 }
 

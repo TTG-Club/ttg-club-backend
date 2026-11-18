@@ -20,7 +20,8 @@ public interface SpellRepository extends JpaRepository<Spell, Integer>, JpaSpeci
 
 	List<Spell> findByLevelAndBook_type(byte level, TypeBook type);
 
-	@Query("SELECT DISTINCT r FROM Race r JOIN r.spells s WHERE s.id=:spellId")
+	// Порядок как в MySQL: выборка шла по индексу race_spells(spells_id), то есть по race_id.
+	@Query("SELECT DISTINCT r FROM Race r JOIN r.spells s WHERE s.id=:spellId ORDER BY r.id")
 	List<Race> findAllRaceBySpell(@Param("spellId") int spellId);
 
 	@Query("SELECT s.book FROM Spell s GROUP BY s.book HAVING s.book.type = :type ORDER BY s.book.year")

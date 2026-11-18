@@ -39,12 +39,14 @@ public class Race implements Serializable {
 
 	@OneToMany
 	@JoinColumn(name = "race_id", insertable = false, updatable = false)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	List<Feature> features;
 
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
 	@OneToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	List<Language> languages;
 
 	@ManyToOne(cascade = { CascadeType.ALL })
@@ -52,6 +54,7 @@ public class Race implements Serializable {
 	private Race parent;
 
 	@OneToMany(mappedBy = "parent", orphanRemoval = true)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Race> subRaces;
 
 	@Enumerated(EnumType.STRING)
@@ -70,9 +73,11 @@ public class Race implements Serializable {
 	private Integer swim;
 
 	@OneToMany(mappedBy = "race")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<RaceName> names;
 
 	@OneToMany(mappedBy = "race", fetch = FetchType.LAZY)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<RaceNickname> nicknames;
 	private boolean view = true;
 
@@ -83,10 +88,12 @@ public class Race implements Serializable {
 
 	@OneToMany
 	@JoinColumn(name = "race_id", insertable = false, updatable = false)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<AbilityBonus> bonuses;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "race_spells", joinColumns = @JoinColumn(name = "race_id"))
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Spell> spells;
 
 	private String icon;

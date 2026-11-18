@@ -32,6 +32,7 @@ public class Menu {
 	private Menu parent;
 
 	@OneToMany(mappedBy = "parent", orphanRemoval = false, cascade = CascadeType.REMOVE)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Menu> children;
 
 	@JoinColumn(name = "on_index")

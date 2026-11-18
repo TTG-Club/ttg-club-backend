@@ -56,7 +56,7 @@
         charge integer,
         consumed boolean not null,
         cost integer,
-        curse TINYINT,
+        curse boolean,
         cust_special varchar(255),
         customization boolean,
         description TEXT,
@@ -72,17 +72,23 @@
 
     create table artifactes_armors (
         magic_item_id integer not null,
-        armors_id integer not null unique
+        armors_id integer not null unique,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (magic_item_id, sort_order)
     );
 
     create table artifactes_cust_classes (
         magic_item_id integer not null,
-        cust_classes_id integer not null unique
+        cust_classes_id integer not null unique,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (magic_item_id, sort_order)
     );
 
     create table artifactes_weapons (
         magic_item_id integer not null,
-        weapons_id integer not null unique
+        weapons_id integer not null unique,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (magic_item_id, sort_order)
     );
 
     create table background_personalizations (
@@ -95,7 +101,9 @@
 
     create table background_skill_type (
         background_id integer not null,
-        skills varchar(255) not null check ((skills in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION')))
+        skills varchar(255) not null check ((skills in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (background_id, sort_order)
     );
 
     create table backgrounds (
@@ -104,7 +112,7 @@
         description TEXT,
         english_name varchar(255),
         equipments_text TEXT,
-        language varchar(255),
+        "language" varchar(255),
         life_style varchar(255) check ((life_style in ('ANYTHING','BEGGARLY','POOR','MODEST','COMFORTABLE','RICH','ARISTOCRATIC'))),
         name varchar(255),
         other_skills TEXT,
@@ -120,7 +128,9 @@
 
     create table backgrounds_languages (
         background_id integer not null,
-        languages_id integer not null
+        languages_id integer not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (background_id, sort_order)
     );
 
     create table bookmarks (
@@ -142,18 +152,22 @@
         english_name varchar(255),
         name varchar(255),
         type varchar(255) check ((type in ('OFFICAL','MODULE','SETTING','TEST','THIRD_PARTY','CUSTOM'))),
-        year integer,
+        "year" integer,
         primary key (source)
     );
 
     create table class_available_skills (
         class_id integer not null,
-        skill varchar(255) not null check ((skill in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION')))
+        skill varchar(255) not null check ((skill in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (class_id, sort_order)
     );
 
     create table class_primary_abilities (
         class_id integer not null,
-        ability varchar(255) not null check ((ability in ('STRENGTH','DEXTERITY','CONSTITUTION','INTELLIGENCE','WISDOM','CHARISMA','CHOICE','ONE','CHOICE_UNIQUE','CHOICE_DOUBLE')))
+        ability varchar(255) not null check ((ability in ('STRENGTH','DEXTERITY','CONSTITUTION','INTELLIGENCE','WISDOM','CHARISMA','CHOICE','ONE','CHOICE_UNIQUE','CHOICE_DOUBLE'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (class_id, sort_order)
     );
 
     create table classes (
@@ -235,7 +249,9 @@
 
     create table creature_armor_types (
         creature_id integer not null,
-        armor_types varchar(255) check ((armor_types in ('NATURAL','LEATHER','HIDE','CHAINMAIL','RING_MAIL','SCRAPPY','SCALED','RIVETED_LEATHER','CHAIN_MAIL','BREASTPLATE','HALF_PLATE','PLATE','PLATE_HALF','CUIRASS','BONECRAFT','MAGE_ARMOR','SHIELD','SCRAPS','SPLINT','PADDED_ARMOR','CHAIN_SHIRT','SCALE_MAIL','STUDDED_LEATHER')))
+        armor_types varchar(255) check ((armor_types in ('NATURAL','LEATHER','HIDE','CHAINMAIL','RING_MAIL','SCRAPPY','SCALED','RIVETED_LEATHER','CHAIN_MAIL','BREASTPLATE','HALF_PLATE','PLATE','PLATE_HALF','CUIRASS','BONECRAFT','MAGE_ARMOR','SHIELD','SCRAPS','SPLINT','PADDED_ARMOR','CHAIN_SHIRT','SCALE_MAIL','STUDDED_LEATHER'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creature_feats (
@@ -250,17 +266,23 @@
 
     create table creature_habitates (
         creature_id integer not null,
-        habitates varchar(255) check ((habitates in ('ARCTIC','COAST','WATERS','GRASSLAND','UNDERGROUND','CITY','VILLAGE','RUINS','DUNGEON','FOREST','HILL','MOUNTAIN','SWAMP','DESERT','TROPICS')))
+        habitates varchar(255) check ((habitates in ('ARCTIC','COAST','WATERS','GRASSLAND','UNDERGROUND','CITY','VILLAGE','RUINS','DUNGEON','FOREST','HILL','MOUNTAIN','SWAMP','DESERT','TROPICS'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creature_immunity_states (
         creature_id integer not null,
-        immunity_states smallint check ((immunity_states between 0 and 16))
+        immunity_states smallint check ((immunity_states between 0 and 16)),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creature_immunity_damages (
         creature_id integer not null,
-        immunity_damages smallint check ((immunity_damages between 0 and 24))
+        immunity_damages smallint check ((immunity_damages between 0 and 24)),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creature_races (
@@ -272,7 +294,9 @@
 
     create table creature_resistance_damages (
         creature_id integer not null,
-        resistance_damages smallint check ((resistance_damages between 0 and 24))
+        resistance_damages smallint check ((resistance_damages between 0 and 24)),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creature_saving_throws (
@@ -323,7 +347,9 @@
 
     create table creature_vulnerability_damages (
         creature_id integer not null,
-        vulnerability_damages smallint check ((vulnerability_damages between 0 and 24))
+        vulnerability_damages smallint check ((vulnerability_damages between 0 and 24)),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creatures (
@@ -352,7 +378,7 @@
         fly_speed smallint,
         hover smallint,
         intellect smallint not null,
-        language TEXT,
+        "language" TEXT,
         legendary TEXT,
         name varchar(255) not null,
         page smallint,
@@ -379,17 +405,23 @@
 
     create table creatures_actions (
         creature_id integer not null,
-        actions_id integer not null
+        actions_id integer not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creatures_languages (
         creature_id integer not null,
-        languages_id integer not null
+        languages_id integer not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table creatures_races (
         creature_id integer not null,
-        races_id integer not null
+        races_id integer not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (creature_id, sort_order)
     );
 
     create table dm_screens (
@@ -397,7 +429,7 @@
         created_at timestamp(6) with time zone,
         name varchar(64) not null,
         updated_at timestamp(6) with time zone not null,
-        windows MEDIUMTEXT not null,
+        windows text not null,
         user_id bigint not null,
         primary key (id)
     );
@@ -424,7 +456,9 @@
 
     create table god_domains (
         god_id integer not null,
-        domains varchar(255) check ((domains in ('ARCANA','DEATH','FORGE','GRAVE','KNOWLEDGE','LIFE','LIGHT','NATURE','NONE','ORDER','TEMPEST','TRICKERY','WAR','STORM','DECEPTION','REPOSE','UNDEFINE')))
+        domains varchar(255) check ((domains in ('ARCANA','DEATH','FORGE','GRAVE','KNOWLEDGE','LIFE','LIGHT','NATURE','NONE','ORDER','TEMPEST','TRICKERY','WAR','STORM','DECEPTION','REPOSE','UNDEFINE'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (god_id, sort_order)
     );
 
     create table god_pantheons (
@@ -467,7 +501,9 @@
 
     create table hero_class_feats_spells (
         archetype_trait_id integer not null,
-        spells_id integer not null unique
+        spells_id integer not null unique,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (archetype_trait_id, sort_order)
     );
 
     create table hero_class_traits (
@@ -557,7 +593,7 @@
         ref_id integer not null,
         type_json varchar(255) not null check ((type_json in ('SPELL','CREATURE'))),
         version_foundry varchar(255) not null check ((version_foundry in ('V10','V11'))),
-        json_data MEDIUMTEXT not null,
+        json_data text not null,
         name varchar(255) not null,
         primary key (ref_id, type_json, version_foundry)
     );
@@ -595,22 +631,22 @@
 
     create table magic_things_random (
         id integer generated by default as identity,
-        end integer not null,
+        "end" integer not null,
         name_table varchar(255),
-        start integer not null,
+        "start" integer not null,
         magic_thing_id integer,
         primary key (id)
     );
 
     create table menu (
         id smallint generated by default as identity,
-        external boolean not null,
+        "external" boolean not null,
         icon varchar(255),
         index_order integer,
         name varchar(255) not null,
         on_index boolean not null,
         only_dev boolean not null,
-        order integer not null,
+        "order" integer not null,
         url varchar(255),
         parent_id smallint,
         primary key (id)
@@ -648,7 +684,9 @@
 
     create table option_types (
         option_id integer not null,
-        option_type varchar(64) not null
+        option_type varchar(64) not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (option_id, sort_order)
     );
 
     create table options (
@@ -669,7 +707,7 @@
         description varchar(255),
         img varchar(255) not null,
         name varchar(255) not null,
-        order integer not null,
+        "order" integer not null,
         url varchar(255) not null,
         primary key (id)
     );
@@ -684,7 +722,9 @@
 
     create table race_feature_skill_type (
         feature_id integer not null,
-        skills varchar(255) not null check ((skills in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION')))
+        skills varchar(255) not null check ((skills in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (feature_id, sort_order)
     );
 
     create table race_features (
@@ -700,7 +740,9 @@
 
     create table race_features_lanuages (
         feature_id integer not null,
-        lanuages_id integer not null
+        lanuages_id integer not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (feature_id, sort_order)
     );
 
     create table race_names (
@@ -721,7 +763,9 @@
 
     create table race_spells (
         race_id integer not null,
-        spells_id integer not null unique
+        spells_id integer not null unique,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (race_id, sort_order)
     );
 
     create table races (
@@ -750,7 +794,9 @@
 
     create table races_languages (
         race_id integer not null,
-        languages_id integer not null unique
+        languages_id integer not null unique,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (race_id, sort_order)
     );
 
     create table random_encounter_tables (
@@ -767,9 +813,9 @@
     create table random_encounters (
         id integer generated by default as identity,
         description TEXT,
-        end integer not null,
+        "end" integer not null,
         level integer not null,
-        start integer not null,
+        "start" integer not null,
         type varchar(255) check ((type in ('ARCTIC','COAST','WATERS','GRASSLAND','UNDERGROUND','CITY','VILLAGE','RUINS','DUNGEON','FOREST','HILL','MOUNTAIN','SWAMP','DESERT','TROPICS'))),
         source varchar(255),
         encounter_id integer,
@@ -783,7 +829,7 @@
         entity_type varchar(64) not null,
         operation varchar(16) not null check ((operation in ('CREATE','UPDATE','DELETE'))),
         revision integer not null,
-        snapshot LONGTEXT,
+        snapshot text,
         user_id bigint,
         username varchar(255),
         primary key (id)
@@ -829,17 +875,23 @@
 
     create table spell_damage_type (
         spell_id integer not null,
-        damage_type varchar(255) not null check ((damage_type in ('FAIR','COLD','LIGHTNING','POISON','ACID','SOUND','NECTOTIC','PSYCHIC','BLUDGEONING','PIERCING','SLASHING','PHYSICAL','NO_NOSILVER','NO_DAMAGE','RADIANT','NO_ADMANTIT','PHYSICAL_MAGIC','PIERCING_GOOD','MAGIC','DARK','FORCE','METAL_WEAPON','VORPAL_SWORD','NECROTIC','THUNDER')))
+        damage_type varchar(255) not null check ((damage_type in ('FAIR','COLD','LIGHTNING','POISON','ACID','SOUND','NECTOTIC','PSYCHIC','BLUDGEONING','PIERCING','SLASHING','PHYSICAL','NO_NOSILVER','NO_DAMAGE','RADIANT','NO_ADMANTIT','PHYSICAL_MAGIC','PIERCING_GOOD','MAGIC','DARK','FORCE','METAL_WEAPON','VORPAL_SWORD','NECROTIC','THUNDER'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (spell_id, sort_order)
     );
 
     create table spell_heal_type (
         spell_id integer not null,
-        heal_type varchar(255) not null check ((heal_type in ('HP','THP')))
+        heal_type varchar(255) not null check ((heal_type in ('HP','THP'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (spell_id, sort_order)
     );
 
     create table spell_savingthrows (
         spell_id integer not null,
-        ability varchar(255) not null check ((ability in ('STRENGTH','DEXTERITY','CONSTITUTION','INTELLIGENCE','WISDOM','CHARISMA','CHOICE','ONE','CHOICE_UNIQUE','CHOICE_DOUBLE')))
+        ability varchar(255) not null check ((ability in ('STRENGTH','DEXTERITY','CONSTITUTION','INTELLIGENCE','WISDOM','CHARISMA','CHOICE','ONE','CHOICE_UNIQUE','CHOICE_DOUBLE'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (spell_id, sort_order)
     );
 
     create table spell_source (
@@ -877,7 +929,9 @@
 
     create table spells_hero_class (
         spell_id integer not null,
-        hero_class_id integer not null
+        hero_class_id integer not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (spell_id, sort_order)
     );
 
     create table spells_times (
@@ -992,7 +1046,9 @@
 
     create table taverna_visitor_habitates (
         visitor_id integer not null,
-        habitat_types varchar(255) not null check ((habitat_types in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION')))
+        habitat_types varchar(255) not null check ((habitat_types in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (visitor_id, sort_order)
     );
 
     create table taverna_visitors (
@@ -1028,19 +1084,23 @@
         name varchar(255),
         rest varchar(255) check ((rest in ('SHORT','LONG','FULL'))),
         type varchar(255) check ((type in ('Number','Counter','Roll'))),
-        value varchar(255),
+        "value" varchar(255),
         level_def_id integer,
         primary key (id)
     );
 
     create table trait_abilities (
         trait_id integer not null,
-        ability varchar(255) not null check ((ability in ('STRENGTH','DEXTERITY','CONSTITUTION','INTELLIGENCE','WISDOM','CHARISMA','CHOICE','ONE','CHOICE_UNIQUE','CHOICE_DOUBLE')))
+        ability varchar(255) not null check ((ability in ('STRENGTH','DEXTERITY','CONSTITUTION','INTELLIGENCE','WISDOM','CHARISMA','CHOICE','ONE','CHOICE_UNIQUE','CHOICE_DOUBLE'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (trait_id, sort_order)
     );
 
     create table trait_skills (
         trait_id integer not null,
-        skill varchar(255) not null check ((skill in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION')))
+        skill varchar(255) not null check ((skill in ('ATHLETICS','ACROBATICS','SLEIGHT_OF_HAND','STEALTH','ARCANA','HISTORY','INVESTIGATION','NATURE','RELIGION','ANIMAL_HANDLING','INSIGHT','MEDICINE','PERCEPTION','SURVIVAL','DECEPTION','INTIMIDATION','PERFORMANCE','PERSUASION'))),
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (trait_id, sort_order)
     );
 
     create table traits (
@@ -1075,7 +1135,9 @@
 
     create table user_membership (
         user_party_id bigint not null,
-        user_id bigint not null
+        user_id bigint not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (user_party_id, sort_order)
     );
 
     create table user_party (
@@ -1090,7 +1152,9 @@
 
     create table user_role (
         user_id bigint not null,
-        role_id bigint not null
+        role_id bigint not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (user_id, sort_order)
     );
 
     create table user_sources (
@@ -1103,7 +1167,9 @@
 
     create table user_wait_list (
         user_party_id bigint not null,
-        user_id bigint not null
+        user_id bigint not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (user_party_id, sort_order)
     );
 
     create table users (
@@ -1159,7 +1225,9 @@
 
     create table weapons_properties (
         weapon_id integer not null,
-        properties_id integer not null
+        properties_id integer not null,
+        sort_order integer not null check ((sort_order>=0)),
+        primary key (weapon_id, sort_order)
     );
 
     create table wild_magics (
@@ -1189,7 +1257,7 @@
        on initiative_tracker (owner_username);
 
     create index fn_index 
-       on random_encounters (start, end, level, type);
+       on random_encounters ("start", "end", level, type);
 
     create index idx_revision_entity 
        on revision_history (entity_type, entity_id, revision);

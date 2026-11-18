@@ -46,18 +46,22 @@ public class Archetype {
 
 	@OneToMany()
 	@JoinColumn(name = "archetype_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<SpellLevelDefinition> levelDefenitions;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "archetype_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<FeatureLevelDefinition> featureLevelDefenitions;
 
 	@OneToMany
 	@JoinColumn(name = "archetype_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<ArchetypeTrait> feats;
 
 	@OneToMany
 	@JoinColumn(name = "archetype_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<ArchetypeSpell> spells;
 
 	@Column(nullable = false, columnDefinition = "varchar(32) default 'CLASS_LEVEL'")

@@ -46,6 +46,7 @@ public class Spell implements FoundryCommon {
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "spell_id", nullable = false)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<TimeCast> times;
 
 	private String distance;
@@ -71,18 +72,21 @@ public class Spell implements FoundryCommon {
 	@JoinTable(name = "spell_damage_type", joinColumns = @JoinColumn(name = "spell_id"))
 	@Column(name = "damage_type", nullable = false)
 	@Enumerated(jakarta.persistence.EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<DamageType> damageType;
 
 	@ElementCollection(targetClass = HealType.class)
 	@JoinTable(name = "spell_heal_type", joinColumns = @JoinColumn(name = "spell_id"))
 	@Column(name = "heal_type", nullable = false)
 	@Enumerated(jakarta.persistence.EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<HealType> healType;
 
 	@ElementCollection(targetClass = AbilityType.class)
 	@JoinTable(name = "spell_savingthrows", joinColumns = @JoinColumn(name = "spell_id"))
 	@Column(name = "ability", nullable = false)
 	@Enumerated(jakarta.persistence.EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<AbilityType> savingthrows;
 
 	// Имена колонок заданы явно: у двусторонней связи (HeroClass.spells — mappedBy)
@@ -91,6 +95,7 @@ public class Spell implements FoundryCommon {
 	@JoinTable(name = "spells_hero_class",
 		joinColumns = @JoinColumn(name = "spell_id"),
 		inverseJoinColumns = @JoinColumn(name = "hero_class_id"))
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<HeroClass> heroClass;
 
 	@ManyToOne

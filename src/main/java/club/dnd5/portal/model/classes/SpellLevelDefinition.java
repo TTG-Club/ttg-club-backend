@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.classes;
 
+import jakarta.persistence.OrderBy;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -38,6 +39,7 @@ public class SpellLevelDefinition {
 	
 	@OneToMany
 	@JoinColumn(name = "level_def_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Tracker> trackers;
 	
 	@ManyToOne(targetEntity = HeroClass.class)

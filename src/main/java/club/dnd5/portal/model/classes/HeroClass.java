@@ -36,10 +36,12 @@ public class HeroClass {
 
 	@OneToMany()
 	@JoinColumn(name = "hero_class_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<SpellLevelDefinition> levelDefenitions;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "hero_class_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<FeatureLevelDefinition> featureLevelDefenitions;
 
 	private byte diceHp;
@@ -73,16 +75,19 @@ public class HeroClass {
 	@JoinTable(name = "class_primary_abilities", joinColumns = @JoinColumn(name = "class_id"))
 	@Column(name = "ability", nullable = false)
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<AbilityType> primaryAbilities;
 
 	@OneToMany()
 	@JoinColumn(name = "hero_class_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<HeroClassTrait> traits;
 
 	private int enabledArhitypeLevel;
 
 	@OneToMany()
 	@JoinColumn(name = "class_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Archetype> archetypes;
 
 	private short skillAvailableCount;
@@ -91,6 +96,7 @@ public class HeroClass {
 	@JoinTable(name = "class_available_skills", joinColumns = @JoinColumn(name = "class_id"))
 	@Column(name = "skill", nullable = false)
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<SkillType> availableSkills;
 
 	@ManyToOne(fetch = FetchType.EAGER)

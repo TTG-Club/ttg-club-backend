@@ -41,7 +41,6 @@ public class MagicItem {
 	private boolean consumed;
 	private Integer charge;
 
-	@Column(columnDefinition = "TINYINT")
 	private Boolean curse;
 
 	@Column
@@ -50,18 +49,22 @@ public class MagicItem {
 
 	@OneToMany
 	@JoinTable(name = "artifactes_cust_classes")
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<HeroClass> custClasses;
 
 	@OneToMany
 	@JoinTable(name = "artifactes_weapons")
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Weapon> weapons;
 
 	@OneToMany
 	@JoinTable(name = "artifactes_armors")
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Armor> armors;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "magic_thing_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<MagicThingTable> tables;
 
 	@ManyToOne

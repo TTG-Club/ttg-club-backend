@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.races;
 
+import jakarta.persistence.OrderColumn;
 import java.util.List;
 
 import jakarta.persistence.CollectionTable;
@@ -39,12 +40,14 @@ public class Feature {
 	private boolean feature;
 	
 	@ManyToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Language> lanuages;
 	
 	@ElementCollection(targetClass = SkillType.class)
 	@CollectionTable(name = "race_feature_skill_type")
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<SkillType> skills;
 
 	private Integer replaceFeatureId;

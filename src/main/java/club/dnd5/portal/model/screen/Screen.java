@@ -29,6 +29,7 @@ public class Screen {
 	private Screen parent;
 
 	@OneToMany(mappedBy = "parent", orphanRemoval = true)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Screen> chields;
 
 	@Column(columnDefinition = "TEXT")

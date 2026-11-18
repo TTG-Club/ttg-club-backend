@@ -28,6 +28,7 @@ public class ArchetypeTrait {
 	private Archetype archetype;
 
 	@OneToMany(fetch = FetchType.LAZY)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Spell> spells;
 
 	@ManyToOne

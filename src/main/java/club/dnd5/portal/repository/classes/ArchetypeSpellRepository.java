@@ -10,6 +10,7 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
 
 public interface ArchetypeSpellRepository extends JpaRepository<ArchetypeSpell, Integer>{
-	@Query("SELECT DISTINCT a FROM Archetype a JOIN a.spells s WHERE s.spell.id = :spellId")
+	// Порядок как в MySQL: по строке archetype_spell (выборка шла по индексу spell_id).
+	@Query("SELECT a FROM Archetype a JOIN a.spells s WHERE s.spell.id = :spellId GROUP BY a ORDER BY MIN(s.id)")
 	List<Archetype> findAllBySpell(@Param("spellId") int spellId);
 }

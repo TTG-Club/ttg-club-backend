@@ -48,6 +48,7 @@ public class Creature implements FoundryCommon {
 
 	@ElementCollection
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<ArmorType> armorTypes;
 
 	private short averageHp;
@@ -91,18 +92,22 @@ public class Creature implements FoundryCommon {
 	@ElementCollection
     @CollectionTable(name = "creature_immunity_states", joinColumns = @JoinColumn(name = "creature_id"))
 	@Enumerated(EnumType.ORDINAL)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Condition> immunityStates;
 
 	@ElementCollection
 	@Enumerated(EnumType.ORDINAL)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<DamageType> immunityDamages;
 
 	@ElementCollection
 	@Enumerated(EnumType.ORDINAL)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<DamageType> resistanceDamages;
 
 	@ElementCollection
 	@Enumerated(EnumType.ORDINAL)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<DamageType> vulnerabilityDamages;
 
 	private Integer darkvision;
@@ -123,27 +128,33 @@ public class Creature implements FoundryCommon {
 	// спаброски
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "creature_id", nullable = false)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<SavingThrow> savingThrows;
 
 	// навыки
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "creature_id", nullable = false)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Skill> skills;
 
 	@ManyToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Language> languages;
 	@Column(columnDefinition = "TEXT")
 	private String language;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "creature_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<CreatureFeat> feats;
 
 	@ManyToMany(cascade = CascadeType.ALL)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Action> actions;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creature_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<CreatureSpell> spells;
 
 
@@ -157,14 +168,17 @@ public class Creature implements FoundryCommon {
 	private String reaction;
 
 	@ManyToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<CreatureRace> races;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creature_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Spellcater> spellcasters;
 
 	@ElementCollection
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<HabitatType> habitates;
 
 	@OneToOne
