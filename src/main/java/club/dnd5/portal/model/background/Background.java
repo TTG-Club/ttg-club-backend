@@ -36,6 +36,7 @@ public class Background {
 	@CollectionTable(name = "background_skill_type")
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<SkillType> skills;
 
 	@Column(columnDefinition = "TEXT")
@@ -52,12 +53,14 @@ public class Background {
 	private String language;
 
 	@ManyToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Language> languages;
 
 	private int startMoney;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "background_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Personalization> personalizations;
 
 	@Column(columnDefinition = "TEXT")

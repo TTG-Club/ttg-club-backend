@@ -23,5 +23,6 @@ public class NameOwner {
 	private NameOwner parent;
 
 	@OneToMany(mappedBy = "parent", orphanRemoval = true)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<NameOwner> children;
 }

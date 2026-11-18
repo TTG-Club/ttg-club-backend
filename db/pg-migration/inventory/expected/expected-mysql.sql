@@ -56,7 +56,7 @@
         charge integer,
         consumed bit not null,
         cost integer,
-        curse TINYINT,
+        curse bit,
         cust_special varchar(255),
         customization bit,
         description TEXT,
@@ -72,17 +72,26 @@
 
     create table artifactes_armors (
         magic_item_id integer not null,
-        armors_id integer not null
+        armors_id integer not null,
+        sort_order integer not null,
+        primary key (magic_item_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table artifactes_cust_classes (
         magic_item_id integer not null,
-        cust_classes_id integer not null
+        cust_classes_id integer not null,
+        sort_order integer not null,
+        primary key (magic_item_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table artifactes_weapons (
         magic_item_id integer not null,
-        weapons_id integer not null
+        weapons_id integer not null,
+        sort_order integer not null,
+        primary key (magic_item_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table background_personalizations (
@@ -95,7 +104,10 @@
 
     create table background_skill_type (
         background_id integer not null,
-        skills enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null
+        skills enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null,
+        sort_order integer not null,
+        primary key (background_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table backgrounds (
@@ -104,7 +116,7 @@
         description TEXT,
         english_name varchar(255),
         equipments_text TEXT,
-        language varchar(255),
+        `language` varchar(255),
         life_style enum ('ANYTHING','ARISTOCRATIC','BEGGARLY','COMFORTABLE','MODEST','POOR','RICH'),
         name varchar(255),
         other_skills TEXT,
@@ -120,7 +132,10 @@
 
     create table backgrounds_languages (
         background_id integer not null,
-        languages_id integer not null
+        languages_id integer not null,
+        sort_order integer not null,
+        primary key (background_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table bookmarks (
@@ -142,18 +157,24 @@
         english_name varchar(255),
         name varchar(255),
         type enum ('CUSTOM','MODULE','OFFICAL','SETTING','TEST','THIRD_PARTY'),
-        year integer,
+        `year` integer,
         primary key (source)
     ) engine=InnoDB;
 
     create table class_available_skills (
         class_id integer not null,
-        skill enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null
+        skill enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null,
+        sort_order integer not null,
+        primary key (class_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table class_primary_abilities (
         class_id integer not null,
-        ability enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null
+        ability enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null,
+        sort_order integer not null,
+        primary key (class_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table classes (
@@ -235,7 +256,10 @@
 
     create table creature_armor_types (
         creature_id integer not null,
-        armor_types enum ('BONECRAFT','BREASTPLATE','CHAINMAIL','CHAIN_MAIL','CHAIN_SHIRT','CUIRASS','HALF_PLATE','HIDE','LEATHER','MAGE_ARMOR','NATURAL','PADDED_ARMOR','PLATE','PLATE_HALF','RING_MAIL','RIVETED_LEATHER','SCALED','SCALE_MAIL','SCRAPPY','SCRAPS','SHIELD','SPLINT','STUDDED_LEATHER')
+        armor_types enum ('BONECRAFT','BREASTPLATE','CHAINMAIL','CHAIN_MAIL','CHAIN_SHIRT','CUIRASS','HALF_PLATE','HIDE','LEATHER','MAGE_ARMOR','NATURAL','PADDED_ARMOR','PLATE','PLATE_HALF','RING_MAIL','RIVETED_LEATHER','SCALED','SCALE_MAIL','SCRAPPY','SCRAPS','SHIELD','SPLINT','STUDDED_LEATHER'),
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creature_feats (
@@ -250,17 +274,26 @@
 
     create table creature_habitates (
         creature_id integer not null,
-        habitates enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')
+        habitates enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS'),
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creature_immunity_states (
         creature_id integer not null,
-        immunity_states tinyint
+        immunity_states tinyint,
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creature_immunity_damages (
         creature_id integer not null,
-        immunity_damages tinyint
+        immunity_damages tinyint,
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creature_races (
@@ -272,7 +305,10 @@
 
     create table creature_resistance_damages (
         creature_id integer not null,
-        resistance_damages tinyint
+        resistance_damages tinyint,
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creature_saving_throws (
@@ -323,7 +359,10 @@
 
     create table creature_vulnerability_damages (
         creature_id integer not null,
-        vulnerability_damages tinyint
+        vulnerability_damages tinyint,
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creatures (
@@ -352,7 +391,7 @@
         fly_speed smallint,
         hover smallint,
         intellect tinyint not null,
-        language TEXT,
+        `language` TEXT,
         legendary TEXT,
         name varchar(255) not null,
         page smallint,
@@ -379,17 +418,26 @@
 
     create table creatures_actions (
         creature_id integer not null,
-        actions_id integer not null
+        actions_id integer not null,
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creatures_languages (
         creature_id integer not null,
-        languages_id integer not null
+        languages_id integer not null,
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table creatures_races (
         creature_id integer not null,
-        races_id integer not null
+        races_id integer not null,
+        sort_order integer not null,
+        primary key (creature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table dm_screens (
@@ -397,7 +445,7 @@
         created_at datetime(6),
         name varchar(64) not null,
         updated_at datetime(6) not null,
-        windows MEDIUMTEXT not null,
+        windows text not null,
         user_id bigint not null,
         primary key (id)
     ) engine=InnoDB;
@@ -424,7 +472,10 @@
 
     create table god_domains (
         god_id integer not null,
-        domains enum ('ARCANA','DEATH','DECEPTION','FORGE','GRAVE','KNOWLEDGE','LIFE','LIGHT','NATURE','NONE','ORDER','REPOSE','STORM','TEMPEST','TRICKERY','UNDEFINE','WAR')
+        domains enum ('ARCANA','DEATH','DECEPTION','FORGE','GRAVE','KNOWLEDGE','LIFE','LIGHT','NATURE','NONE','ORDER','REPOSE','STORM','TEMPEST','TRICKERY','UNDEFINE','WAR'),
+        sort_order integer not null,
+        primary key (god_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table god_pantheons (
@@ -467,7 +518,10 @@
 
     create table hero_class_feats_spells (
         archetype_trait_id integer not null,
-        spells_id integer not null
+        spells_id integer not null,
+        sort_order integer not null,
+        primary key (archetype_trait_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table hero_class_traits (
@@ -556,7 +610,7 @@
         ref_id integer not null,
         type_json enum ('CREATURE','SPELL') not null,
         version_foundry enum ('V10','V11') not null,
-        json_data MEDIUMTEXT not null,
+        json_data text not null,
         name varchar(255) not null,
         primary key (ref_id, type_json, version_foundry)
     ) engine=InnoDB;
@@ -594,22 +648,22 @@
 
     create table magic_things_random (
         id integer not null auto_increment,
-        end integer not null,
+        `end` integer not null,
         name_table varchar(255),
-        start integer not null,
+        `start` integer not null,
         magic_thing_id integer,
         primary key (id)
     ) engine=InnoDB;
 
     create table menu (
         id smallint not null auto_increment,
-        external bit not null,
+        `external` bit not null,
         icon varchar(255),
         index_order integer,
         name varchar(255) not null,
         on_index bit not null,
         only_dev bit not null,
-        order integer not null,
+        `order` integer not null,
         url varchar(255),
         parent_id smallint,
         primary key (id)
@@ -647,7 +701,10 @@
 
     create table option_types (
         option_id integer not null,
-        option_type varchar(64) not null
+        option_type varchar(64) not null,
+        sort_order integer not null,
+        primary key (option_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table options (
@@ -668,7 +725,7 @@
         description varchar(255),
         img varchar(255) not null,
         name varchar(255) not null,
-        order integer not null,
+        `order` integer not null,
         url varchar(255) not null,
         primary key (id)
     ) engine=InnoDB;
@@ -683,7 +740,10 @@
 
     create table race_feature_skill_type (
         feature_id integer not null,
-        skills enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null
+        skills enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null,
+        sort_order integer not null,
+        primary key (feature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table race_features (
@@ -699,7 +759,10 @@
 
     create table race_features_lanuages (
         feature_id integer not null,
-        lanuages_id integer not null
+        lanuages_id integer not null,
+        sort_order integer not null,
+        primary key (feature_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table race_names (
@@ -720,7 +783,10 @@
 
     create table race_spells (
         race_id integer not null,
-        spells_id integer not null
+        spells_id integer not null,
+        sort_order integer not null,
+        primary key (race_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table races (
@@ -749,7 +815,10 @@
 
     create table races_languages (
         race_id integer not null,
-        languages_id integer not null
+        languages_id integer not null,
+        sort_order integer not null,
+        primary key (race_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table random_encounter_tables (
@@ -766,9 +835,9 @@
     create table random_encounters (
         id integer not null auto_increment,
         description TEXT,
-        end integer not null,
+        `end` integer not null,
         level integer not null,
-        start integer not null,
+        `start` integer not null,
         type enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS'),
         source varchar(255),
         encounter_id integer,
@@ -782,7 +851,7 @@
         entity_type varchar(64) not null,
         operation enum ('CREATE','DELETE','UPDATE') not null,
         revision integer not null,
-        snapshot LONGTEXT,
+        snapshot text,
         user_id bigint,
         username varchar(255),
         primary key (id)
@@ -828,17 +897,26 @@
 
     create table spell_damage_type (
         spell_id integer not null,
-        damage_type enum ('ACID','BLUDGEONING','COLD','DARK','FAIR','FORCE','LIGHTNING','MAGIC','METAL_WEAPON','NECROTIC','NECTOTIC','NO_ADMANTIT','NO_DAMAGE','NO_NOSILVER','PHYSICAL','PHYSICAL_MAGIC','PIERCING','PIERCING_GOOD','POISON','PSYCHIC','RADIANT','SLASHING','SOUND','THUNDER','VORPAL_SWORD') not null
+        damage_type enum ('ACID','BLUDGEONING','COLD','DARK','FAIR','FORCE','LIGHTNING','MAGIC','METAL_WEAPON','NECROTIC','NECTOTIC','NO_ADMANTIT','NO_DAMAGE','NO_NOSILVER','PHYSICAL','PHYSICAL_MAGIC','PIERCING','PIERCING_GOOD','POISON','PSYCHIC','RADIANT','SLASHING','SOUND','THUNDER','VORPAL_SWORD') not null,
+        sort_order integer not null,
+        primary key (spell_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table spell_heal_type (
         spell_id integer not null,
-        heal_type enum ('HP','THP') not null
+        heal_type enum ('HP','THP') not null,
+        sort_order integer not null,
+        primary key (spell_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table spell_savingthrows (
         spell_id integer not null,
-        ability enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null
+        ability enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null,
+        sort_order integer not null,
+        primary key (spell_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table spell_source (
@@ -876,7 +954,10 @@
 
     create table spells_hero_class (
         spell_id integer not null,
-        hero_class_id integer not null
+        hero_class_id integer not null,
+        sort_order integer not null,
+        primary key (spell_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table spells_times (
@@ -991,7 +1072,10 @@
 
     create table taverna_visitor_habitates (
         visitor_id integer not null,
-        habitat_types enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null
+        habitat_types enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null,
+        sort_order integer not null,
+        primary key (visitor_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table taverna_visitors (
@@ -1025,19 +1109,25 @@
         name varchar(255),
         rest enum ('FULL','LONG','SHORT'),
         type enum ('Counter','Number','Roll'),
-        value varchar(255),
+        `value` varchar(255),
         level_def_id integer,
         primary key (id)
     ) engine=InnoDB;
 
     create table trait_abilities (
         trait_id integer not null,
-        ability enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null
+        ability enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null,
+        sort_order integer not null,
+        primary key (trait_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table trait_skills (
         trait_id integer not null,
-        skill enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null
+        skill enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null,
+        sort_order integer not null,
+        primary key (trait_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table traits (
@@ -1072,7 +1162,10 @@
 
     create table user_membership (
         user_party_id bigint not null,
-        user_id bigint not null
+        user_id bigint not null,
+        sort_order integer not null,
+        primary key (user_party_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table user_party (
@@ -1087,7 +1180,10 @@
 
     create table user_role (
         user_id bigint not null,
-        role_id bigint not null
+        role_id bigint not null,
+        sort_order integer not null,
+        primary key (user_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table user_sources (
@@ -1100,7 +1196,10 @@
 
     create table user_wait_list (
         user_party_id bigint not null,
-        user_id bigint not null
+        user_id bigint not null,
+        sort_order integer not null,
+        primary key (user_party_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table users (
@@ -1156,7 +1255,10 @@
 
     create table weapons_properties (
         weapon_id integer not null,
-        properties_id integer not null
+        properties_id integer not null,
+        sort_order integer not null,
+        primary key (weapon_id, sort_order),
+        check ((sort_order>=0))
     ) engine=InnoDB;
 
     create table wild_magics (
@@ -1234,7 +1336,7 @@
        add constraint UK7eua5yw9r1cri1pgm00cb6nye unique (languages_id);
 
     create index fn_index 
-       on random_encounters (start, end, level, type);
+       on random_encounters (`start`, `end`, level, type);
 
     create index idx_revision_entity 
        on revision_history (entity_type, entity_id, revision);

@@ -28,6 +28,7 @@ public class Option {
 		inverseJoinColumns = @JoinColumn(name = "option_type"),
 		foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
 		inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<OptionTypeDefinition> optionTypes;
 
 	private String prerequisite;

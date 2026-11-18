@@ -20,6 +20,7 @@ public class SchemaGen {
     settings.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl");
     settings.put("hibernate.implicit_naming_strategy", "org.springframework.boot.hibernate.SpringImplicitNamingStrategy");
     settings.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
+    settings.put("hibernate.auto_quote_keyword", "true"); // как в application.properties
     var registry = new StandardServiceRegistryBuilder().applySettings(settings).build();
     var sources = new MetadataSources(registry);
     int n = 0;
@@ -45,6 +46,20 @@ public class SchemaGen {
     cfg.put("hibernate.hbm2ddl.delimiter", ";");
     cfg.put("hibernate.format_sql", "true");
     SchemaManagementToolCoordinator.process(md, registry, cfg, action -> {});
+    // Таблицы коллекций (join-таблицы @ManyToMany / @OneToMany с @JoinTable, таблицы @ElementCollection):
+    // порядок строк в них задаёт порядок элементов списка, см. db/pg-migration/baseline.
+    if (a.length > 3) {
+      var sb = new StringBuilder("[\n");
+      for (var c : md.getCollectionBindings()) {
+        if (c.isOneToMany()) continue; // строки лежат в таблице целевой сущности
+        if (sb.length() > 2) sb.append(",\n");
+        var keyCols = new StringJoiner("\", \"", "[\"", "\"]");
+        c.getKey().getColumns().forEach(col -> keyCols.add(col.getName()));
+        sb.append(String.format("  {\"table\": \"%s\", \"role\": \"%s\", \"inverse\": %s, \"key\": %s}",
+            c.getCollectionTable().getName(), c.getRole(), c.isInverse(), keyCols));
+      }
+      Files.writeString(Path.of(a[3]), sb.append("\n]\n").toString());
+    }
     System.out.println("done");
   }
 }

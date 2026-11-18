@@ -15,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
 import club.dnd5.portal.model.SkillType;
@@ -42,5 +43,6 @@ public class Visitor {
 	@CollectionTable(name = "taverna_visitor_habitates")
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	List<HabitatType> habitatTypes;
 }

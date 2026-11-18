@@ -61,6 +61,11 @@ DROP TABLE IF EXISTS `site_references`;
 DROP TABLE IF EXISTS `archetypes_spells`;
 SET FOREIGN_KEY_CHECKS = @old_fk_checks;
 
+-- Токены подтверждения для удалённых пользователей (на 2026-11-18 — 1 строка, user_id 4853).
+-- В MySQL FK на users нет, в PostgreSQL будет.
+DELETE FROM verification_token WHERE user_id IS NOT NULL
+    AND NOT EXISTS (SELECT 1 FROM users u WHERE u.id = verification_token.user_id);
+
 -- =====================================================================================
 -- 2. Колонки с данными, которых нет в сущностях.
 --    НЕ трогаем колонки, которые читает представление full_text_search (глобальный

@@ -47,6 +47,7 @@ public class God {
 	@ElementCollection(targetClass=Domain.class)
     @CollectionTable(name="god_domains")
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Domain> domains;
 
 	@ManyToOne

@@ -1,0 +1,46 @@
+{
+ "collation": 340,
+ "widened": [
+  "classes.icon: varchar(255) -> text (MySQL longtext)",
+  "classes.tools: varchar(255) -> text (MySQL text)",
+  "partners.description: varchar(255) -> text (MySQL longtext)",
+  "races.icon: varchar(255) -> text (MySQL longtext)",
+  "screens.icon: varchar(255) -> text (MySQL longtext)",
+  "taverna_drinks.name: varchar(255) -> text (MySQL text)"
+ ],
+ "nullable": [
+  "creature_skills.creature_id",
+  "creatures.average_hp",
+  "hero_class_traits.architype",
+  "menu.on_index",
+  "menu.only_dev",
+  "race_bonuses.race_id",
+  "races.size",
+  "random_encounters.level",
+  "roles.name",
+  "screens.ordering"
+ ],
+ "unique_dropped": [
+  "archetype_spell.spell_id",
+  "artifactes_armors.armors_id",
+  "artifactes_cust_classes.cust_classes_id",
+  "artifactes_weapons.weapons_id",
+  "creature_spells.spell_id",
+  "creatures.lair_id",
+  "invitation.user_party_id",
+  "race_names.name",
+  "race_spells.spells_id",
+  "races.english_name",
+  "roles.name",
+  "treasures.english_name",
+  "verification_token.user_id"
+ ],
+ "extra_cols": [
+  "classes.alt_name",
+  "archetypes.alt_name",
+  "hero_class_traits.alt_name",
+  "hero_class_traits.english_name",
+  "hero_class_feats.alt_name",
+  "hero_class_feats.english_name"
+ ]
+}

@@ -41,8 +41,7 @@ public class RevisionHistory {
 	private RevisionOperation operation;
 
 	/** Снимок состояния сущности в JSON. */
-	@Lob
-	@Column(columnDefinition = "LONGTEXT")
+	@Column(columnDefinition = "text")
 	private String snapshot;
 
 	private Long userId;

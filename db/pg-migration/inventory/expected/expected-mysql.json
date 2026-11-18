@@ -74,7 +74,7 @@
     "charge": "integer",
     "consumed": "bit not null",
     "cost": "integer",
-    "curse": "TINYINT",
+    "curse": "bit",
     "cust_special": "varchar(255)",
     "customization": "bit",
     "description": "TEXT",
@@ -94,26 +94,44 @@
   "artifactes_armors": {
    "columns": {
     "magic_item_id": "integer not null",
-    "armors_id": "integer not null"
+    "armors_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "magic_item_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "artifactes_cust_classes": {
    "columns": {
     "magic_item_id": "integer not null",
-    "cust_classes_id": "integer not null"
+    "cust_classes_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "magic_item_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "artifactes_weapons": {
    "columns": {
     "magic_item_id": "integer not null",
-    "weapons_id": "integer not null"
+    "weapons_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "magic_item_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "background_personalizations": {
    "columns": {
@@ -130,10 +148,16 @@
   "background_skill_type": {
    "columns": {
     "background_id": "integer not null",
-    "skills": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null"
+    "skills": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "background_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "backgrounds": {
    "columns": {
@@ -162,10 +186,16 @@
   "backgrounds_languages": {
    "columns": {
     "background_id": "integer not null",
-    "languages_id": "integer not null"
+    "languages_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "background_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "bookmarks": {
    "columns": {
@@ -201,18 +231,30 @@
   "class_available_skills": {
    "columns": {
     "class_id": "integer not null",
-    "skill": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null"
+    "skill": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "class_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "class_primary_abilities": {
    "columns": {
     "class_id": "integer not null",
-    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null"
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "class_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "classes": {
    "columns": {
@@ -310,10 +352,16 @@
   "creature_armor_types": {
    "columns": {
     "creature_id": "integer not null",
-    "armor_types": "enum ('BONECRAFT','BREASTPLATE','CHAINMAIL','CHAIN_MAIL','CHAIN_SHIRT','CUIRASS','HALF_PLATE','HIDE','LEATHER','MAGE_ARMOR','NATURAL','PADDED_ARMOR','PLATE','PLATE_HALF','RING_MAIL','RIVETED_LEATHER','SCALED','SCALE_MAIL','SCRAPPY','SCRAPS','SHIELD','SPLINT','STUDDED_LEATHER')"
+    "armor_types": "enum ('BONECRAFT','BREASTPLATE','CHAINMAIL','CHAIN_MAIL','CHAIN_SHIRT','CUIRASS','HALF_PLATE','HIDE','LEATHER','MAGE_ARMOR','NATURAL','PADDED_ARMOR','PLATE','PLATE_HALF','RING_MAIL','RIVETED_LEATHER','SCALED','SCALE_MAIL','SCRAPPY','SCRAPS','SHIELD','SPLINT','STUDDED_LEATHER')",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creature_feats": {
    "columns": {
@@ -332,26 +380,44 @@
   "creature_habitates": {
    "columns": {
     "creature_id": "integer not null",
-    "habitates": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')"
+    "habitates": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creature_immunity_states": {
    "columns": {
     "creature_id": "integer not null",
-    "immunity_states": "tinyint"
+    "immunity_states": "tinyint",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creature_immunity_damages": {
    "columns": {
     "creature_id": "integer not null",
-    "immunity_damages": "tinyint"
+    "immunity_damages": "tinyint",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creature_races": {
    "columns": {
@@ -367,10 +433,16 @@
   "creature_resistance_damages": {
    "columns": {
     "creature_id": "integer not null",
-    "resistance_damages": "tinyint"
+    "resistance_damages": "tinyint",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creature_saving_throws": {
    "columns": {
@@ -437,10 +509,16 @@
   "creature_vulnerability_damages": {
    "columns": {
     "creature_id": "integer not null",
-    "vulnerability_damages": "tinyint"
+    "vulnerability_damages": "tinyint",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creatures": {
    "columns": {
@@ -500,26 +578,44 @@
   "creatures_actions": {
    "columns": {
     "creature_id": "integer not null",
-    "actions_id": "integer not null"
+    "actions_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creatures_languages": {
    "columns": {
     "creature_id": "integer not null",
-    "languages_id": "integer not null"
+    "languages_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "creatures_races": {
    "columns": {
     "creature_id": "integer not null",
-    "races_id": "integer not null"
+    "races_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "dm_screens": {
    "columns": {
@@ -527,7 +623,7 @@
     "created_at": "datetime(6)",
     "name": "varchar(64) not null",
     "updated_at": "datetime(6) not null",
-    "windows": "MEDIUMTEXT not null",
+    "windows": "text not null",
     "user_id": "bigint not null"
    },
    "pk": [
@@ -567,10 +663,16 @@
   "god_domains": {
    "columns": {
     "god_id": "integer not null",
-    "domains": "enum ('ARCANA','DEATH','DECEPTION','FORGE','GRAVE','KNOWLEDGE','LIFE','LIGHT','NATURE','NONE','ORDER','REPOSE','STORM','TEMPEST','TRICKERY','UNDEFINE','WAR')"
+    "domains": "enum ('ARCANA','DEATH','DECEPTION','FORGE','GRAVE','KNOWLEDGE','LIFE','LIGHT','NATURE','NONE','ORDER','REPOSE','STORM','TEMPEST','TRICKERY','UNDEFINE','WAR')",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "god_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "god_pantheons": {
    "columns": {
@@ -625,10 +727,16 @@
   "hero_class_feats_spells": {
    "columns": {
     "archetype_trait_id": "integer not null",
-    "spells_id": "integer not null"
+    "spells_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "archetype_trait_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "hero_class_traits": {
    "columns": {
@@ -746,7 +854,7 @@
     "ref_id": "integer not null",
     "type_json": "enum ('CREATURE','SPELL') not null",
     "version_foundry": "enum ('V10','V11') not null",
-    "json_data": "MEDIUMTEXT not null",
+    "json_data": "text not null",
     "name": "varchar(255) not null"
    },
    "pk": [
@@ -875,10 +983,16 @@
   "option_types": {
    "columns": {
     "option_id": "integer not null",
-    "option_type": "varchar(64) not null"
+    "option_type": "varchar(64) not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "option_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "options": {
    "columns": {
@@ -926,10 +1040,16 @@
   "race_feature_skill_type": {
    "columns": {
     "feature_id": "integer not null",
-    "skills": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null"
+    "skills": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "feature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "race_features": {
    "columns": {
@@ -949,10 +1069,16 @@
   "race_features_lanuages": {
    "columns": {
     "feature_id": "integer not null",
-    "lanuages_id": "integer not null"
+    "lanuages_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "feature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "race_names": {
    "columns": {
@@ -981,10 +1107,16 @@
   "race_spells": {
    "columns": {
     "race_id": "integer not null",
-    "spells_id": "integer not null"
+    "spells_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "race_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "races": {
    "columns": {
@@ -1017,10 +1149,16 @@
   "races_languages": {
    "columns": {
     "race_id": "integer not null",
-    "languages_id": "integer not null"
+    "languages_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "race_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "random_encounter_tables": {
    "columns": {
@@ -1061,7 +1199,7 @@
     "entity_type": "varchar(64) not null",
     "operation": "enum ('CREATE','DELETE','UPDATE') not null",
     "revision": "integer not null",
-    "snapshot": "LONGTEXT",
+    "snapshot": "text",
     "user_id": "bigint",
     "username": "varchar(255)"
    },
@@ -1127,26 +1265,44 @@
   "spell_damage_type": {
    "columns": {
     "spell_id": "integer not null",
-    "damage_type": "enum ('ACID','BLUDGEONING','COLD','DARK','FAIR','FORCE','LIGHTNING','MAGIC','METAL_WEAPON','NECROTIC','NECTOTIC','NO_ADMANTIT','NO_DAMAGE','NO_NOSILVER','PHYSICAL','PHYSICAL_MAGIC','PIERCING','PIERCING_GOOD','POISON','PSYCHIC','RADIANT','SLASHING','SOUND','THUNDER','VORPAL_SWORD') not null"
+    "damage_type": "enum ('ACID','BLUDGEONING','COLD','DARK','FAIR','FORCE','LIGHTNING','MAGIC','METAL_WEAPON','NECROTIC','NECTOTIC','NO_ADMANTIT','NO_DAMAGE','NO_NOSILVER','PHYSICAL','PHYSICAL_MAGIC','PIERCING','PIERCING_GOOD','POISON','PSYCHIC','RADIANT','SLASHING','SOUND','THUNDER','VORPAL_SWORD') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "spell_heal_type": {
    "columns": {
     "spell_id": "integer not null",
-    "heal_type": "enum ('HP','THP') not null"
+    "heal_type": "enum ('HP','THP') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "spell_savingthrows": {
    "columns": {
     "spell_id": "integer not null",
-    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null"
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "spell_source": {
    "columns": {
@@ -1192,10 +1348,16 @@
   "spells_hero_class": {
    "columns": {
     "spell_id": "integer not null",
-    "hero_class_id": "integer not null"
+    "hero_class_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "spells_times": {
    "columns": {
@@ -1366,10 +1528,16 @@
   "taverna_visitor_habitates": {
    "columns": {
     "visitor_id": "integer not null",
-    "habitat_types": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null"
+    "habitat_types": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "visitor_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "taverna_visitors": {
    "columns": {
@@ -1426,18 +1594,30 @@
   "trait_abilities": {
    "columns": {
     "trait_id": "integer not null",
-    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null"
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "trait_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "trait_skills": {
    "columns": {
     "trait_id": "integer not null",
-    "skill": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null"
+    "skill": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "trait_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "traits": {
    "columns": {
@@ -1485,10 +1665,16 @@
   "user_membership": {
    "columns": {
     "user_party_id": "bigint not null",
-    "user_id": "bigint not null"
+    "user_id": "bigint not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "user_party_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "user_party": {
    "columns": {
@@ -1507,10 +1693,16 @@
   "user_role": {
    "columns": {
     "user_id": "bigint not null",
-    "role_id": "bigint not null"
+    "role_id": "bigint not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "user_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "user_sources": {
    "columns": {
@@ -1527,10 +1719,16 @@
   "user_wait_list": {
    "columns": {
     "user_party_id": "bigint not null",
-    "user_id": "bigint not null"
+    "user_id": "bigint not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "user_party_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "users": {
    "columns": {
@@ -1602,10 +1800,16 @@
   "weapons_properties": {
    "columns": {
     "weapon_id": "integer not null",
-    "properties_id": "integer not null"
+    "properties_id": "integer not null",
+    "sort_order": "integer not null"
    },
-   "pk": [],
-   "constraints": []
+   "pk": [
+    "weapon_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
   },
   "wild_magics": {
    "columns": {

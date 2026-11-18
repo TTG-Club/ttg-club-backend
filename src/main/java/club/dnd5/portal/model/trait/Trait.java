@@ -34,12 +34,14 @@ public class Trait {
 	@JoinTable(name = "trait_abilities", joinColumns = @JoinColumn(name = "trait_id"))
 	@Column(name = "ability", nullable = false)
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<AbilityType> abilities;
 
 	@ElementCollection(targetClass = SkillType.class)
 	@JoinTable(name = "trait_skills", joinColumns = @JoinColumn(name = "trait_id"))
 	@Column(name = "skill", nullable = false)
 	@Enumerated(EnumType.STRING)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<SkillType> skills;
 
 	@ManyToOne
