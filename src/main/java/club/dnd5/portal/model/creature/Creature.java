@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,10 +48,9 @@ public class Creature implements FoundryCommon {
 	private byte AC;
 	private String bonusAC;
 
-	@ElementCollection
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<ArmorType> armorTypes;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<ArmorType> armorTypes = new ArrayList<>();
 
 	private short averageHp;
 	private Short countDiceHp;
@@ -89,26 +90,21 @@ public class Creature implements FoundryCommon {
 	@Column(nullable = false)
 	private byte charisma = 10;
 
-	@ElementCollection
-    @CollectionTable(name = "creature_immunity_states", joinColumns = @JoinColumn(name = "creature_id"))
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<Condition> immunityStates;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Condition> immunityStates = new ArrayList<>();
 
-	@ElementCollection
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<DamageType> immunityDamages;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> immunityDamages = new ArrayList<>();
 
-	@ElementCollection
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<DamageType> resistanceDamages;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> resistanceDamages = new ArrayList<>();
 
-	@ElementCollection
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<DamageType> vulnerabilityDamages;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> vulnerabilityDamages = new ArrayList<>();
 
 	private Integer darkvision;
 	private Integer trysight;
@@ -176,10 +172,9 @@ public class Creature implements FoundryCommon {
 	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Spellcater> spellcasters;
 
-	@ElementCollection
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<HabitatType> habitates;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<HabitatType> habitates = new ArrayList<>();
 
 	@OneToOne
 	@JoinColumn(name = "lair_id")
@@ -199,6 +194,13 @@ public class Creature implements FoundryCommon {
 	@PreUpdate
 	private void syncExpWithChallengeRating() {
 		this.exp = ChallengeRating.getExp(challengeRating);
+		// jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL
+		armorTypes = armorTypes == null ? new ArrayList<>() : armorTypes;
+		immunityStates = immunityStates == null ? new ArrayList<>() : immunityStates;
+		immunityDamages = immunityDamages == null ? new ArrayList<>() : immunityDamages;
+		resistanceDamages = resistanceDamages == null ? new ArrayList<>() : resistanceDamages;
+		vulnerabilityDamages = vulnerabilityDamages == null ? new ArrayList<>() : vulnerabilityDamages;
+		habitates = habitates == null ? new ArrayList<>() : habitates;
 	}
 
 	public String getSizeName() {

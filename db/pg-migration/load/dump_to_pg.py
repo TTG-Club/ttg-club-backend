@@ -173,12 +173,10 @@ def copy_escape(v):
 # по владельцу: составной ключ (владелец, значение...) -> по значению, иначе по id строки,
 # иначе в порядке вставки. Сущности теперь хранят порядок явно (@OrderColumn sort_order),
 # и загрузчик заполняет его так, чтобы сайт показывал списки как раньше.
-coll_json = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'inventory', 'expected',
-                         'collection-tables.json')
-import json  # noqa: E402
-
-order_key = {c['table']: c['key'] for c in json.load(open(coll_json, encoding='utf-8')) if not c['inverse']}
-order_key = {t: k for t, k in order_key.items() if t in tables and any(c['name'] == 'sort_order' for c in tables[t]['cols'])}
+# Ключ владельца берём из самого baseline: первичный ключ таблицы коллекции — (владелец..., sort_order).
+# Так загрузчик не зависит от текущего маппинга сущностей, который уходит вперёд от baseline.
+order_key = {tn: [c for c in t['pk'] if c != 'sort_order'] for tn, t in tables.items()
+             if 'sort_order' in t['pk'] and any(c['name'] == 'sort_order' for c in t['cols'])}
 
 
 def mysql_sort_cols(tn, key_cols):
