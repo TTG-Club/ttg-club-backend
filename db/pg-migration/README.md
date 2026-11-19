@@ -118,3 +118,8 @@ python -I db/pg-migration/baseline/gen_baseline.py db/pg-migration/inventory/exp
 | сущность | в jsonb | changeset |
 |---|---|---|
 | `Creature` | `armorTypes`, `immunityStates`, `immunityDamages`, `resistanceDamages`, `vulnerabilityDamages`, `habitates` | `0007`, `0008` |
+| `Creature` | `savingThrows`, `skills`, `feats`, `spellcasters` (объекты без `id`, сериализуются по полям) | `0009`, `0010` |
+
+Остаются связями (не `jsonb`): то, что разделяется между записями или имеет свою страницу —
+языки, теги (`CreatureRace`), книга, логово. Действия существ пока тоже связь: в старых данных
+одно действие разделяют до 19 существ (`sharedUsageCount` в API).

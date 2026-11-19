@@ -122,16 +122,14 @@ public class Creature implements FoundryCommon {
 	private String proficiencyBonus;
 
 	// спаброски
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "creature_id", nullable = false)
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<SavingThrow> savingThrows;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SavingThrow> savingThrows = new ArrayList<>();
 
 	// навыки
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "creature_id", nullable = false)
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<Skill> skills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Skill> skills = new ArrayList<>();
 
 	@ManyToMany
 	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
@@ -139,10 +137,9 @@ public class Creature implements FoundryCommon {
 	@Column(columnDefinition = "TEXT")
 	private String language;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "creature_id")
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<CreatureFeat> feats;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<CreatureFeat> feats = new ArrayList<>();
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
@@ -167,10 +164,9 @@ public class Creature implements FoundryCommon {
 	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<CreatureRace> races;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "creature_id")
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<Spellcater> spellcasters;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Spellcater> spellcasters = new ArrayList<>();
 
 	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
 	@Column(columnDefinition = "jsonb", nullable = false)
@@ -201,6 +197,10 @@ public class Creature implements FoundryCommon {
 		resistanceDamages = resistanceDamages == null ? new ArrayList<>() : resistanceDamages;
 		vulnerabilityDamages = vulnerabilityDamages == null ? new ArrayList<>() : vulnerabilityDamages;
 		habitates = habitates == null ? new ArrayList<>() : habitates;
+		savingThrows = savingThrows == null ? new ArrayList<>() : savingThrows;
+		skills = skills == null ? new ArrayList<>() : skills;
+		feats = feats == null ? new ArrayList<>() : feats;
+		spellcasters = spellcasters == null ? new ArrayList<>() : spellcasters;
 	}
 
 	public String getSizeName() {

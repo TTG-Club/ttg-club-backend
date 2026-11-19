@@ -27,6 +27,12 @@ public class JsonbPredicates {
 		return any;
 	}
 
+	/** В jsonb-массиве объектов есть элемент, у которого поле {@code field} подходит под LIKE-шаблон. */
+	public static Predicate anyFieldLike(Expression<?> jsonbArray, String field, String likePattern) {
+		return Expressions.booleanTemplate(JsonbFunctionContributor.JSONB_ANY_FIELD_LIKE + "({0}, {1}, {2})",
+			jsonbArray, Expressions.constant(field), Expressions.constant(likePattern));
+	}
+
 	/** Колонка содержит значение. */
 	public static Predicate contains(Expression<?> jsonbArray, Enum<?> value) {
 		return Expressions.booleanTemplate(JsonbFunctionContributor.JSONB_CONTAINS + "({0}, {1})",

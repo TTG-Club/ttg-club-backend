@@ -141,7 +141,7 @@ public class CreaturePredicateBuilder {
 			switch (feature) {
 				case "lair" -> any.or(C.lair.isNotNull());
 				case "legendary" -> any.or(C.actions.any().actionType.eq(ActionType.LEGENDARY));
-				default -> any.or(C.feats.any().name.like("%" + feature + "%"));
+				default -> any.or(JsonbPredicates.anyFieldLike(C.feats, "name", "%" + feature + "%"));
 			}
 		}
 		where.and(any);

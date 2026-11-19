@@ -1,34 +1,24 @@
 package club.dnd5.portal.model.creature;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-import org.springframework.util.StringUtils;
-
 import club.dnd5.portal.model.SkillType;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.util.StringUtils;
 
+/**
+ * Навык существа — элемент jsonb-массива {@code creatures.skills}.
+ * В JSON пишутся только поля (вычисляемые геттеры — нет).
+ */
 @Getter
 @Setter
 @NoArgsConstructor
-
-@Entity
-@Table(name = "creature_skills")
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE,
+	isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class Skill {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	
-	@Enumerated(EnumType.STRING)
 	private SkillType type;
-
 	private byte bonus;
 	private String additionalBonus;
 
