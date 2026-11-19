@@ -38,7 +38,7 @@ public class ItemSaveApi {
 		currency = item.getCurrency();
 		weight = item.getWeight();
 		description = item.getDescription();
-		categories = item.getTypes() == null ? null : new java.util.ArrayList<>(item.getTypes());
+		categories = item.getTypes() == null ? null : item.getTypes().stream().sorted().collect(java.util.stream.Collectors.toList());
 		source = item.getBook() == null ? null : item.getBook().getSource();
 	}
 }

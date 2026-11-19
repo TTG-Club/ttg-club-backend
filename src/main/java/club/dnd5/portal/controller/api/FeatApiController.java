@@ -71,11 +71,8 @@ public class FeatApiController {
 				});
 			}
 			if (!request.getFilter().getAbilities().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<AbilityType, Trait> join = root.join("abilities", JoinType.LEFT);
-					query.distinct(true);
-					return cb.and(join.in(request.getFilter().getAbilities().stream().map(AbilityType::valueOf).collect(Collectors.toList())));
-				});
+				specification = SpecificationUtil.getAndSpecification(specification, SpecificationUtil.jsonbContainsAny("abilities",
+					request.getFilter().getAbilities().stream().map(AbilityType::valueOf).collect(Collectors.toList())));
 			}
 			if (request.getFilter().getRequirements() != null && !request.getFilter().getRequirements().isEmpty()) {
 				if (request.getFilter().getRequirements().contains("level")) {
@@ -105,7 +102,7 @@ public class FeatApiController {
 				}
 			}
 		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
+		Pageable pageable = PageAndSortUtil.getPageable(request, "id");
 		return featRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(FeatApi::new)

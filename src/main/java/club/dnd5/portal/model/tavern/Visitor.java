@@ -1,5 +1,8 @@
 package club.dnd5.portal.model.tavern;
 
+import java.util.ArrayList;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -39,10 +42,14 @@ public class Visitor {
 	@JoinColumn(name = "visitor_id")
 	private List<VisitorChance> chance;
 	
-	@ElementCollection(targetClass = SkillType.class)
-	@CollectionTable(name = "taverna_visitor_habitates")
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	List<HabitatType> habitatTypes;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<HabitatType> habitatTypes = new ArrayList<>();
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullJsonListsToEmpty() {
+		habitatTypes = habitatTypes == null ? new ArrayList<>() : habitatTypes;
+	}
 }

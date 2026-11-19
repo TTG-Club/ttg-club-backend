@@ -1,10 +1,12 @@
 package club.dnd5.portal.model.items;
 
+import java.util.HashSet;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.BatchSize;
 
 import jakarta.persistence.*;
 import java.util.Set;
@@ -31,13 +33,10 @@ public class Equipment {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	// Список снаряжения показывает категории: без пачек это запрос на каждую запись
-	@BatchSize(size = 100)
-	@ElementCollection(targetClass = EquipmentType.class)
-	@JoinTable(name = "equipments_types", joinColumns = @JoinColumn(name = "equipment_id"))
-	@Column(name = "type", nullable = false)
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	private Set<EquipmentType> types;
+	// категории — в самой строке (jsonb), отдельных запросов на запись больше нет
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private Set<EquipmentType> types = new HashSet<>();
 
 	@ManyToOne
 	@JoinColumn(name = "source")
@@ -66,5 +65,12 @@ public class Equipment {
 
 	public String getUrlName(){
 		return StringUtil.getUrl(englishName);
+	}
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullJsonListsToEmpty() {
+		types = types == null ? new HashSet<>() : types;
 	}
 }

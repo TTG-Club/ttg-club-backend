@@ -43,7 +43,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Order;
 import jakarta.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,28 +78,12 @@ public class ItemApiController {
 				});
 			}
 			if (!request.getFilter().getCategories().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<EquipmentType, Equipment> types = root.join("types", JoinType.LEFT);
-					query.distinct(true);
-					return types.in(request.getFilter().getCategories()
-						.stream()
-						.map(EquipmentType::valueOf)
-						.collect(Collectors.toList()));
-				});
+				specification = SpecificationUtil.getAndSpecification(specification, SpecificationUtil.jsonbContainsAny("types",
+					request.getFilter().getCategories().stream().map(EquipmentType::valueOf).collect(Collectors.toList())));
 			}
 		}
-		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-					.map(
-						order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-					)
-					.collect(Collectors.toList());
-				query.orderBy(orders);
-				return cb.and();
-			});
-		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
+		// пользовательская сортировка и последний ключ id — в pageable (без ORDER BY порядок строк в PostgreSQL не гарантирован)
+		Pageable pageable = PageAndSortUtil.getPageableWithOrders(request, "id");
 		return itemRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(ItemApi::new)

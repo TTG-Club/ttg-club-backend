@@ -38,10 +38,13 @@ public class ItemDetailApi extends ItemApi {
 			description = item.getDescription();
 		}
 		Set<EquipmentType> types = item.getTypes() == null ? Collections.emptySet() : item.getTypes();
+		// Set без порядка: категории — в порядке объявления enum, как в списке (ItemApi)
 		categories = types.stream()
+				.sorted()
 				.map(EquipmentType::getCyrilicName)
 				.collect(Collectors.toList());
 		categoriesRaw = types.stream()
+				.sorted()
 				.map(EquipmentType::name)
 				.collect(Collectors.toList());
 		altName = item.getAltName();

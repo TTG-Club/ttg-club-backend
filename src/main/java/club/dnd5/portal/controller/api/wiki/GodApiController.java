@@ -84,11 +84,8 @@ public class GodApiController {
 						(root, query, cb) -> root.get("aligment").in(request.getFilter().getAlignment().stream().map(Alignment::valueOf).collect(Collectors.toList())));
 			}
 			if (!request.getFilter().getDomain().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Domain, God> join = root.join("domains", JoinType.LEFT);
-					query.distinct(true);
-					return join.in(request.getFilter().getDomain().parallelStream().map(Domain::valueOf).collect(Collectors.toList()));
-				});
+				specification = SpecificationUtil.getAndSpecification(specification, SpecificationUtil.jsonbContainsAny("domains",
+					request.getFilter().getDomain().stream().map(Domain::valueOf).collect(Collectors.toList())));
 			}
 			if (!request.getFilter().getRank().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
@@ -101,7 +98,7 @@ public class GodApiController {
 				});
 			}
 		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
+		Pageable pageable = PageAndSortUtil.getPageable(request, "id");
 		return godRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(GodApi::new)
