@@ -4,7 +4,7 @@
 |---|---|---|
 | 0 | инвентаризация схемы и данных, очистка MySQL | [inventory/](inventory/README.md), `db/2026-11-18-pg-prep-*.sql` |
 | 1 | перенос 1:1: схема в Liquibase, данные из дампа, `ddl-auto=validate` | этот файл, [baseline/](baseline/), [load/](load/) |
-| 2 | вложенные коллекции → `jsonb` вместо join-таблиц | позже |
+| 2 | вложенные коллекции → `jsonb` вместо join-таблиц, фильтры на QueryDSL | [ниже](#этап-2-jsonb-и-querydsl), `changes/0006`+ |
 
 ## Этап 1: как устроено
 
@@ -13,8 +13,9 @@
 Начальные файлы `0001`–`0005` сгенерированы [baseline/gen_baseline.py](baseline/gen_baseline.py)
 из DDL Hibernate с поправками по реальной MySQL:
 
-- **регистронезависимое сравнение строк**, как `_ci` в MySQL — недетерминированная
-  ICU-collation `ci` на строковых колонках. Без неё ломаются все детальные страницы:
+- **сравнение строк без учёта регистра и диакритики**, как `_ci` в MySQL (`Goblin` = `goblin`,
+  `ё` = `е`; `й` остаётся отдельной буквой) — недетерминированная ICU-collation `ci`
+  (`und-u-ks-level1`) на строковых колонках. Без неё ломаются все детальные страницы:
   URL `goblin` ищется как `englishName = 'goblin'`, а в базе `Goblin`. Требует
   **PostgreSQL 18+** (на 18 с такой collation работает `LIKE`);
 - ширина колонок и `NULL` — как в MySQL, где маппинг строже базы;
@@ -63,8 +64,10 @@ MySQL при сортировке по возрастанию (книги без
    `session_replication_role` (суперпользователь или
    `GRANT SET ON PARAMETER session_replication_role TO ...`).
 3. Свежий дамп MySQL: `mysqldump --single-transaction --skip-triggers <база> > dump.sql`.
-4. Создать схему: запустить приложение на пустой базе (Liquibase применит changelog;
-   `validate` должен пройти) и остановить его.
+4. Создать схему **до метки `data-load`** (схема 1:1 с MySQL, в неё пишет загрузчик):
+   ```
+   java -cp <classpath приложения> db/pg-migration/load/LiquibaseUpdate.java data-load
+   ```
 5. Сгенерировать и загрузить данные:
    ```
    python -I db/pg-migration/load/dump_to_pg.py dump.sql src/main/resources/db/changelog/changes data.sql
@@ -72,12 +75,17 @@ MySQL при сортировке по возрастанию (книги без
    ```
    Без `psql` — `java -cp <classpath с драйвером PG> db/pg-migration/load/LoadPg.java data.sql`
    (подключение из `SPRING_DATASOURCE_*`).
-6. Запустить приложение на PostgreSQL и сверить API с MySQL-версией.
+6. Запустить приложение: Liquibase применит changeset'ы после метки (этап 2 — перенос
+   данных в `jsonb`), `validate` должен пройти. Сверить API с MySQL-версией.
+
+**Не запускать приложение на пустой базе до загрузки данных**: оно применит все changeset'ы,
+включая удаление таблиц коллекций, и загружать будет некуда.
 
 ## Как пересобрать baseline
 
-Нужно, если меняется маппинг **до** первого применения changelog на проде. После — только
-новые файлы в `changes/`.
+**С этапа 2 baseline (`0001`–`0005`) заморожен**: маппинг ушёл вперёд (коллекции существ —
+в `jsonb`), и генерация из сущностей дала бы схему, в которую загрузчик не сможет писать.
+Менять схему — только новыми файлами в `changes/`. Скрипты ниже — для истории.
 
 ```
 mvn -o compile dependency:build-classpath -Dmdep.outputFile=db/pg-migration/inventory/out/cp.txt
@@ -89,3 +97,29 @@ python -I db/pg-migration/inventory/from_dump.py <дамп> ... out      # ме�
 python -I db/pg-migration/baseline/gen_baseline.py db/pg-migration/inventory/expected/expected-pg.sql \
        db/pg-migration/inventory/out <дамп> src/main/resources/db/changelog
 ```
+
+## Этап 2: jsonb и QueryDSL
+
+Вложенные коллекции, которые не живут отдельно от владельца, переезжают из join-таблиц в
+`jsonb`-колонки владельца. Порядок для каждой сущности — expand → migrate → contract:
+
+1. changeset добавляет `jsonb`-колонку и переносит в неё данные из старой таблицы
+   в порядке `sort_order`; значения, хранившиеся числом (`EnumType.ORDINAL`), переводятся
+   в имена констант enum; для фильтруемых колонок — GIN-индекс `jsonb_path_ops`;
+2. маппинг: `@JdbcTypeCode(SqlTypes.JSON)` на том же поле (`List<Enum>`), DTO и API не меняются;
+3. отдельный changeset удаляет старую таблицу (rollback восстанавливает её из `jsonb`).
+
+**Фильтры** — QueryDSL (форк OpenFeign 7.x, как на core-api), `QuerydslPredicateExecutor`
+у репозитория, построитель условий на сущность (`service/bestiary/CreaturePredicateBuilder`).
+Условия по `jsonb` — функция `jsonb_contains` (`config/jpa/JsonbFunctionContributor`,
+оператор `@>`, значение — параметром запроса, работает по GIN); по связям — `any()`
+(EXISTS-подзапрос) вместо `JOIN … DISTINCT`.
+
+| сущность | в jsonb | changeset |
+|---|---|---|
+| `Creature` | `armorTypes`, `immunityStates`, `immunityDamages`, `resistanceDamages`, `vulnerabilityDamages`, `habitates` | `0007`, `0008` |
+| `Creature` | `savingThrows`, `skills`, `feats`, `spellcasters` (объекты без `id`, сериализуются по полям) | `0009`, `0010` |
+
+Остаются связями (не `jsonb`): то, что разделяется между записями или имеет свою страницу —
+языки, теги (`CreatureRace`), книга, логово. Действия существ пока тоже связь: в старых данных
+одно действие разделяют до 19 существ (`sharedUsageCount` в API).

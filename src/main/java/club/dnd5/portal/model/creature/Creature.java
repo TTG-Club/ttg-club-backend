@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,10 +48,9 @@ public class Creature implements FoundryCommon {
 	private byte AC;
 	private String bonusAC;
 
-	@ElementCollection
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<ArmorType> armorTypes;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<ArmorType> armorTypes = new ArrayList<>();
 
 	private short averageHp;
 	private Short countDiceHp;
@@ -89,26 +90,21 @@ public class Creature implements FoundryCommon {
 	@Column(nullable = false)
 	private byte charisma = 10;
 
-	@ElementCollection
-    @CollectionTable(name = "creature_immunity_states", joinColumns = @JoinColumn(name = "creature_id"))
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<Condition> immunityStates;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Condition> immunityStates = new ArrayList<>();
 
-	@ElementCollection
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<DamageType> immunityDamages;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> immunityDamages = new ArrayList<>();
 
-	@ElementCollection
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<DamageType> resistanceDamages;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> resistanceDamages = new ArrayList<>();
 
-	@ElementCollection
-	@Enumerated(EnumType.ORDINAL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<DamageType> vulnerabilityDamages;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> vulnerabilityDamages = new ArrayList<>();
 
 	private Integer darkvision;
 	private Integer trysight;
@@ -126,16 +122,14 @@ public class Creature implements FoundryCommon {
 	private String proficiencyBonus;
 
 	// спаброски
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "creature_id", nullable = false)
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<SavingThrow> savingThrows;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SavingThrow> savingThrows = new ArrayList<>();
 
 	// навыки
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "creature_id", nullable = false)
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<Skill> skills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Skill> skills = new ArrayList<>();
 
 	@ManyToMany
 	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
@@ -143,10 +137,9 @@ public class Creature implements FoundryCommon {
 	@Column(columnDefinition = "TEXT")
 	private String language;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "creature_id")
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<CreatureFeat> feats;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<CreatureFeat> feats = new ArrayList<>();
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
@@ -171,15 +164,13 @@ public class Creature implements FoundryCommon {
 	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<CreatureRace> races;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "creature_id")
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<Spellcater> spellcasters;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0009
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Spellcater> spellcasters = new ArrayList<>();
 
-	@ElementCollection
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<HabitatType> habitates;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив имён, см. db/changelog 0007
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<HabitatType> habitates = new ArrayList<>();
 
 	@OneToOne
 	@JoinColumn(name = "lair_id")
@@ -199,6 +190,17 @@ public class Creature implements FoundryCommon {
 	@PreUpdate
 	private void syncExpWithChallengeRating() {
 		this.exp = ChallengeRating.getExp(challengeRating);
+		// jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL
+		armorTypes = armorTypes == null ? new ArrayList<>() : armorTypes;
+		immunityStates = immunityStates == null ? new ArrayList<>() : immunityStates;
+		immunityDamages = immunityDamages == null ? new ArrayList<>() : immunityDamages;
+		resistanceDamages = resistanceDamages == null ? new ArrayList<>() : resistanceDamages;
+		vulnerabilityDamages = vulnerabilityDamages == null ? new ArrayList<>() : vulnerabilityDamages;
+		habitates = habitates == null ? new ArrayList<>() : habitates;
+		savingThrows = savingThrows == null ? new ArrayList<>() : savingThrows;
+		skills = skills == null ? new ArrayList<>() : skills;
+		feats = feats == null ? new ArrayList<>() : feats;
+		spellcasters = spellcasters == null ? new ArrayList<>() : spellcasters;
 	}
 
 	public String getSizeName() {

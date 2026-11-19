@@ -1,0 +1,11 @@
+# Точка загрузки данных при переезде с MySQL: схема до этой метки совпадает со схемой MySQL
+# (перенос 1:1), и db/pg-migration/load/dump_to_pg.py пишет данные именно в неё.
+# Порядок: liquibase update-to-tag data-load -> загрузка данных -> старт приложения
+# (оно применит changeset'ы после метки и переложит данные в jsonb). См. db/pg-migration/README.md.
+databaseChangeLog:
+  - changeSet:
+      id: 0006-tag-data-load
+      author: pg-migration
+      changes:
+        - tagDatabase:
+            tag: data-load
