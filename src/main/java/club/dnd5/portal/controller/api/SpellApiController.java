@@ -31,6 +31,7 @@ import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.datatable.SpellRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.service.spell.SpellPredicateBuilder;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -84,142 +85,9 @@ public class SpellApiController {
 	@Operation(summary = "Получение краткого списка заклинаний")
 	@PostMapping(value = "/api/v1/spells", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<SpellApi> getSpells(@RequestBody SpellRequestApi request) {
-		Specification<Spell> specification = null;
-		Optional<RequestApi> optionalRequest = Optional.of(request);
-		if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
-			specification = SpecificationUtil.getSearch(request);
-		}
-		if (request.getFilter() != null) {
-			if (!request.getFilter().getLevels().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> root.get("level").in(request.getFilter().getLevels()));
-			}
-			if (!request.getFilter().getMyclass().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<HeroClass, Spell> join = root.join("heroClass", JoinType.LEFT);
-					query.distinct(true);
-					return cb.and(join.get("id").in(request.getFilter().getMyclass()));
-				});
-			}
-			if (request.getFilter().getSchools() != null && !request.getFilter().getSchools().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(
-					specification, (root, query, cb) -> root.get("school").in(request.getFilter().getSchools().stream().map(MagicSchool::valueOf).collect(Collectors.toList())));
-			}
-			if (!CollectionUtils.isEmpty(request.getFilter().getDamageTypes())) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<DamageType, Spell> join = root.join("damageType", JoinType.LEFT);
-					query.distinct(true);
-					return join.in(request.getFilter().getDamageTypes()
-						.stream()
-						.map(DamageType::valueOf)
-						.collect(Collectors.toList()));
-				});
-			}
-			if (!CollectionUtils.isEmpty(request.getFilter().getHealTypes())) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<HealType, Spell> join = root.join("healType", JoinType.LEFT);
-					query.distinct(true);
-					return join.in(request.getFilter().getHealTypes()
-							.stream()
-							.map(HealType::valueOf)
-							.collect(Collectors.toList()));
-				});
-			}
-			if (!CollectionUtils.isEmpty(request.getFilter().getSavingThrows())) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<AbilityType, Spell> join = root.join("savingthrows", JoinType.LEFT);
-					query.distinct(true);
-					return join.in(request.getFilter().getSavingThrows()
-							.stream()
-							.map(AbilityType::valueOf)
-							.collect(Collectors.toList()));
-				});
-			}
-			if (request.getFilter().getRitual() != null && !request.getFilter().getRitual().isEmpty()) {
-				if (request.getFilter().getRitual().contains("yes")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("ritual"), true));
-				}
-				if (request.getFilter().getRitual().contains("no")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("ritual"), false));
-				}
-			}
-			if (request.getFilter().getConcentration() != null && !request.getFilter().getConcentration().isEmpty()) {
-				if (request.getFilter().getConcentration().contains("yes")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("concentration"), true));
-				}
-				if (request.getFilter().getConcentration().contains("no")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("concentration"), false));
-				}
-			}
-			if (request.getFilter().getComponents() != null && !request.getFilter().getComponents().isEmpty()) {
-				if (request.getFilter().getComponents().contains("1")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("verbalComponent"), true));
-				}
-				if (request.getFilter().getComponents().contains("2")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("somaticComponent"), true));
-				}
-				if (request.getFilter().getComponents().contains("3")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.isNotNull(root.get("additionalMaterialComponent")));
-				}
-				if (request.getFilter().getComponents().contains("4")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("consumable"), true));
-				}
-				if (request.getFilter().getComponents().contains("5")) {
-					specification = SpecificationUtil.getAndSpecification(specification,
-						(root, query, cb) -> cb.equal(root.get("consumable"), false));
-				}
-			}
-			if (request.getFilter().getTimecast() != null && !request.getFilter().getTimecast().isEmpty()) {
-				List<Specification<Spell>> timecastSpecifications = new ArrayList<>();
-				for (String timecast : request.getFilter().getTimecast()) {
-					String[] parts = timecast.split("\\s");
-					int time = Integer.parseInt(parts[0]);
-					TimeUnit unit = TimeUnit.valueOf(parts[1]);
-					Specification<Spell> timecastSpecification = (root, query, cb) -> {
-						Join<TimeCast, Spell> join = root.join("times", JoinType.INNER);
-						query.distinct(true);
-						return cb.and(
-							cb.equal(join.get("number"), time),
-							cb.equal(join.get("unit"), unit)
-						);
-					};
-					timecastSpecifications.add(timecastSpecification);
-				}
-				Specification<Spell> combinedSpecification = SpecificationUtil.combineWithOr(timecastSpecifications);
-				specification = SpecificationUtil.getAndSpecification(specification, combinedSpecification);
-			}
-			if (request.getFilter().getDistance() != null && !request.getFilter().getDistance().isEmpty()) {
-				Specification<Spell> addSpec = null;
-				for (String distance : request.getFilter().getDistance()) {
-					addSpec = SpecificationUtil.getOrSpecification(addSpec,
-						(root, query, cb) -> cb.equal(root.get("distance"), distance));
-				}
-				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
-			}
-			if (request.getFilter().getDuration() != null && !request.getFilter().getDuration().isEmpty()) {
-				Specification<Spell> addSpec = null;
-				for (String duration : request.getFilter().getDuration()) {
-					addSpec = SpecificationUtil.getOrSpecification(addSpec,
-						(root, query, cb) -> cb.like(root.get("duration"), "%" + duration + "%"));
-				}
-				specification = SpecificationUtil.getAndSpecification(specification, addSpec);
-			}
-			if (!request.getFilter().getBooks().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Book, Spell> join = root.join("book", JoinType.INNER);
-					return join.get("source").in(request.getFilter().getBooks());
-				});
-			}
-		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
-		return spellRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
+		// Фильтры — в SpellPredicateBuilder (QueryDSL, jsonb).
+		Pageable pageable = PageAndSortUtil.getPageable(request, "id");
+		return spellRepository.findAll(SpellPredicateBuilder.build(request), pageable).toList()
 			.stream()
 			.map(SpellApi::new)
 			.collect(Collectors.toList());

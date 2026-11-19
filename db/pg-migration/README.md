@@ -121,6 +121,7 @@ python -I db/pg-migration/baseline/gen_baseline.py db/pg-migration/inventory/exp
 | `Creature` | `armorTypes`, `immunityStates`, `immunityDamages`, `resistanceDamages`, `vulnerabilityDamages`, `habitates` | `0007`, `0008` |
 | `Creature` | `savingThrows`, `skills`, `feats`, `spellcasters` (объекты без `id`, сериализуются по полям) | `0009`, `0010` |
 | `Creature` | `actions` — у каждого существа своя копия (раньше до 19 существ делили одно действие, но мастерская при сохранении всё равно создавала новое); `sharedUsageCount` в API больше не заполняется | `0011`, `0012` |
+| `Spell` | `times` (время сотворения), `damageType`, `healType`, `savingthrows`; связь с классами (`spells_hero_class`) остаётся таблицей — на неё опираются страницы классов | `0013`, `0014` |
 
 Остаются связями (не `jsonb`): то, что разделяется между записями или имеет свою страницу —
 языки, теги (`CreatureRace`), книга, логово.
