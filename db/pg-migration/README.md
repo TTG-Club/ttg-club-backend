@@ -122,9 +122,14 @@ python -I db/pg-migration/baseline/gen_baseline.py db/pg-migration/inventory/exp
 | `Creature` | `savingThrows`, `skills`, `feats`, `spellcasters` (объекты без `id`, сериализуются по полям) | `0009`, `0010` |
 | `Creature` | `actions` — у каждого существа своя копия (раньше до 19 существ делили одно действие, но мастерская при сохранении всё равно создавала новое); `sharedUsageCount` в API больше не заполняется | `0011`, `0012` |
 | `Spell` | `times` (время сотворения), `damageType`, `healType`, `savingthrows`; связь с классами (`spells_hero_class`) остаётся таблицей — на неё опираются страницы классов | `0013`, `0014` |
+| `HeroClass` | `primaryAbilities`, `availableSkills`; `levelDefenitions` — ячейки заклинаний по уровням с вложенными счётчиками (`trackers`), объекты без `id` | `0015`, `0016` |
+| `Archetype` | `levelDefenitions` (как у класса) | `0015`, `0016` |
+| `Feature` (особенность расы) | `skills` | `0015`, `0016` |
 
 Остаются связями (не `jsonb`): то, что разделяется между записями или имеет свою страницу —
-языки, теги (`CreatureRace`), книга, логово.
+языки, теги (`CreatureRace`), книга, логово; а также то, что мастерская правит по `id`:
+колонки таблицы класса (`FeatureLevelDefinition`), умения классов и архетипов, особенности,
+имена и бонусы рас, подрасы.
 
 ## Этап 3: тексты в формате core-api
 

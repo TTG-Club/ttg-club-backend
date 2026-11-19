@@ -35,6 +35,7 @@ import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -88,7 +89,8 @@ public class ClassApiController {
 			}
 		}
 		String search = ClassApi.getSearch(request);
-		return classRepo.findAll(SpecificationUtil.orAll(specification))
+		// порядок по id, как отдавал MySQL (в PostgreSQL порядок строк без ORDER BY не гарантирован)
+		return classRepo.findAll(SpecificationUtil.orAll(specification), Sort.by("id"))
 				.stream()
 				.map(classObject -> new ClassApi(classObject, request))
 				// Поиск находит класс по его названию или по названию подкласса

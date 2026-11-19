@@ -13,8 +13,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,10 +37,9 @@ public class HeroClass {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	@OneToMany()
-	@JoinColumn(name = "hero_class_id")
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<SpellLevelDefinition> levelDefenitions;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(name = "level_definitions", columnDefinition = "jsonb", nullable = false)
+	private List<SpellLevelDefinition> levelDefenitions = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "hero_class_id")
@@ -71,12 +73,9 @@ public class HeroClass {
 	@Enumerated(EnumType.STRING)
 	private SpellcasterType spellcasterType = SpellcasterType.NONE;
 
-	@ElementCollection(targetClass = AbilityType.class)
-	@JoinTable(name = "class_primary_abilities", joinColumns = @JoinColumn(name = "class_id"))
-	@Column(name = "ability", nullable = false)
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<AbilityType> primaryAbilities;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<AbilityType> primaryAbilities = new ArrayList<>();
 
 	@OneToMany()
 	@JoinColumn(name = "hero_class_id")
@@ -92,12 +91,9 @@ public class HeroClass {
 
 	private short skillAvailableCount;
 
-	@ElementCollection(targetClass = SkillType.class)
-	@JoinTable(name = "class_available_skills", joinColumns = @JoinColumn(name = "class_id"))
-	@Column(name = "skill", nullable = false)
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<SkillType> availableSkills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SkillType> availableSkills = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "option_type", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -199,5 +195,14 @@ public class HeroClass {
                 .flatMap(a -> a.getFeats().stream())
                 .filter(t-> t.getLevel() == level)
                 .collect(Collectors.toList());
+	}
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullJsonListsToEmpty() {
+		levelDefenitions = levelDefenitions == null ? new ArrayList<>() : levelDefenitions;
+		primaryAbilities = primaryAbilities == null ? new ArrayList<>() : primaryAbilities;
+		availableSkills = availableSkills == null ? new ArrayList<>() : availableSkills;
 	}
 }
