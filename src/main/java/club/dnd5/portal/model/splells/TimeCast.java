@@ -1,35 +1,24 @@
 package club.dnd5.portal.model.splells;
 
 import club.dnd5.portal.model.TimeUnit;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
+/**
+ * Время сотворения заклинания — элемент jsonb-массива {@code spells.times}.
+ * В JSON пишутся только поля (вычисляемый {@link #getName()} — нет).
+ */
 @Getter
 @Setter
-
-@Entity
 @NoArgsConstructor
-@Table(name ="spells_times")
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE,
+	isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class TimeCast {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-
 	private int number;
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
 	private TimeUnit unit;
-	@Column(name = "`condition`")
 	private String condition;
 
 	public String getName() {

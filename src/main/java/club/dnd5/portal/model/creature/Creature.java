@@ -141,9 +141,9 @@ public class Creature implements FoundryCommon {
 	@Column(columnDefinition = "jsonb", nullable = false)
 	private List<CreatureFeat> feats = new ArrayList<>();
 
-	@ManyToMany(cascade = CascadeType.ALL)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<Action> actions;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, у каждого существа своя копия, см. db/changelog 0011
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Action> actions = new ArrayList<>();
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creature_id")
@@ -201,6 +201,7 @@ public class Creature implements FoundryCommon {
 		skills = skills == null ? new ArrayList<>() : skills;
 		feats = feats == null ? new ArrayList<>() : feats;
 		spellcasters = spellcasters == null ? new ArrayList<>() : spellcasters;
+		actions = actions == null ? new ArrayList<>() : actions;
 	}
 
 	public String getSizeName() {

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +16,8 @@ import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.splells.Spell;
 
 @Repository
-public interface SpellRepository extends JpaRepository<Spell, Integer>, JpaSpecificationExecutor<Spell> {
+public interface SpellRepository extends JpaRepository<Spell, Integer>, JpaSpecificationExecutor<Spell>,
+	QuerydslPredicateExecutor<Spell> {
 	Optional<Spell> findByEnglishName(String name);
 
 	List<Spell> findByLevelAndBook_type(byte level, TypeBook type);

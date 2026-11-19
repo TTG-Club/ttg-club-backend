@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -44,10 +47,9 @@ public class Spell implements FoundryCommon {
 
 	private int timeCast;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "spell_id", nullable = false)
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<TimeCast> times;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<TimeCast> times = new ArrayList<>();
 
 	private String distance;
 
@@ -68,26 +70,17 @@ public class Spell implements FoundryCommon {
 	private String duration;
 	private Boolean concentration;
 
-	@ElementCollection(targetClass = DamageType.class)
-	@JoinTable(name = "spell_damage_type", joinColumns = @JoinColumn(name = "spell_id"))
-	@Column(name = "damage_type", nullable = false)
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<DamageType> damageType;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> damageType = new ArrayList<>();
 
-	@ElementCollection(targetClass = HealType.class)
-	@JoinTable(name = "spell_heal_type", joinColumns = @JoinColumn(name = "spell_id"))
-	@Column(name = "heal_type", nullable = false)
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<HealType> healType;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<HealType> healType = new ArrayList<>();
 
-	@ElementCollection(targetClass = AbilityType.class)
-	@JoinTable(name = "spell_savingthrows", joinColumns = @JoinColumn(name = "spell_id"))
-	@Column(name = "ability", nullable = false)
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<AbilityType> savingthrows;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<AbilityType> savingthrows = new ArrayList<>();
 
 	// Имена колонок заданы явно: у двусторонней связи (HeroClass.spells — mappedBy)
 	// Hibernate по умолчанию назвал бы колонку spells_id вместо существующей spell_id.
@@ -104,6 +97,16 @@ public class Spell implements FoundryCommon {
 
 	private Short page;
 	private Boolean srd;
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullCollectionsToEmpty() {
+		times = times == null ? new ArrayList<>() : times;
+		damageType = damageType == null ? new ArrayList<>() : damageType;
+		healType = healType == null ? new ArrayList<>() : healType;
+		savingthrows = savingthrows == null ? new ArrayList<>() : savingthrows;
+	}
 
 	public String getComponents() {
 		return (verbalComponent ? "В" : "") + (somaticComponent ? "C" : "") + (additionalMaterialComponent != null ? "М" : "");
