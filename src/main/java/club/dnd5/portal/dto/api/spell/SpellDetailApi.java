@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.spell;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.splells.TimeCast;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -42,11 +43,11 @@ public class SpellDetailApi extends SpellApi {
 		range = spell.getDistance();
 		duration = spell.getDuration();
 		time = spell.getTimes().stream().map(TimeCast::getName).collect(Collectors.joining(" или "));
-		description = spell.getDescription();
+		description = Markup.toHtml(spell.getDescription());
 		components.setM(spell.getAdditionalMaterialComponent());
 		classes = spell.getHeroClass().stream().map(ReferenceClassApi::new).collect(Collectors.toList());
 		if (spell.getUpperLevel() != null) {
-			upper = spell.getUpperLevel();
+			upper = Markup.toHtml(spell.getUpperLevel());
 		}
 		source.setPage(spell.getPage());
 	}

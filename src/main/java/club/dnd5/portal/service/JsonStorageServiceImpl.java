@@ -114,7 +114,7 @@ public class JsonStorageServiceImpl implements JsonStorageService {
 	}
 
 	private void modifyBiography(FoundryCommon entity, JsonNode rootNode) {
-		String description = entity.getDescription();
+		String description = entity.getDescriptionHtml();
 		ObjectNode systemNode = (ObjectNode) rootNode.get("system");
 		if (systemNode != null) {
 			ObjectNode detailsNode = systemNode.withObjectProperty("details");

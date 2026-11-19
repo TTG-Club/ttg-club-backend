@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.spells;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.splells.Spell;
@@ -82,9 +83,10 @@ public class SpellFvtt implements Serializable {
 			.stream()
 			.map(Timecast::new)
 			.collect(Collectors.toList());
+		String descriptionHtml = java.util.Objects.toString(Markup.toHtml(spell.getDescription()), "");
 		this.entries = new ArrayList<>(2);
 		this.entries.addAll(Arrays
-			.stream(spell.getDescription().replace("<p>", "").split("</p>"))
+			.stream(descriptionHtml.replace("<p>", "").split("</p>"))
 			.map(t->t.replace("\\\"", ""))
 			.map(t->t.replace("href=\"", "href=\"https://ttg.club"))
 			.filter(t -> !t.isEmpty())
@@ -95,9 +97,9 @@ public class SpellFvtt implements Serializable {
 			meta.setRitual(true);
 		}
 		if (spell.getUpperLevel() != null) {
-			this.entriesHigherLevel = new EntriesHigherLevel(spell.getUpperLevel());
+			this.entriesHigherLevel = new EntriesHigherLevel(Markup.toHtml(spell.getUpperLevel()));
 		}
-	    Matcher matcher = Pattern.compile("(<span class=\"saving_throw\">\\W+</span>)+").matcher(spell.getDescription());
+	    Matcher matcher = Pattern.compile("(<span class=\"saving_throw\">\\W+</span>)+").matcher(descriptionHtml);
 	    if(matcher.matches()) {
 	    	this.savingThrow = new ArrayList<>(matcher.groupCount());
 	    	while (matcher.find()) {
