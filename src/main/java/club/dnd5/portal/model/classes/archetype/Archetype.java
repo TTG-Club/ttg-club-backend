@@ -10,9 +10,12 @@ import club.dnd5.portal.model.classes.SpellLevelDefinition;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.*;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,10 +47,9 @@ public class Archetype {
 	@Enumerated(EnumType.STRING)
 	private SpellcasterType spellcasterType;
 
-	@OneToMany()
-	@JoinColumn(name = "archetype_id")
-	@OrderBy("id") // порядок вставки, как в MySQL
-	private List<SpellLevelDefinition> levelDefenitions;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(name = "level_definitions", columnDefinition = "jsonb", nullable = false)
+	private List<SpellLevelDefinition> levelDefenitions = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "archetype_id")
@@ -102,5 +104,12 @@ public class Archetype {
 
 	public String getUrlName() {
 		return StringUtil.getUrl(englishName);
+	}
+
+	/** jsonb-колонка NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullJsonListsToEmpty() {
+		levelDefenitions = levelDefenitions == null ? new ArrayList<>() : levelDefenitions;
 	}
 }

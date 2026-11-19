@@ -111,7 +111,7 @@ public class RacesApiController {
 						specification, (root, query, cb) -> cb.isNotNull(root.get("climb")));
 			}
 		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
+		Pageable pageable = PageAndSortUtil.getPageable(request, "id");
 		return raceRepository.findAll(SpecificationUtil.orAll(specification), pageable)
 			.stream()
 			.map(race -> new RaceApi(race, Optional.of(request)

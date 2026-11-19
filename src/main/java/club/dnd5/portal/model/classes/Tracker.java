@@ -1,34 +1,25 @@
 package club.dnd5.portal.model.classes;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
 import club.dnd5.portal.model.Rest;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Счётчик ресурса на уровне класса — элемент вложенного массива {@code trackers}
+ * в {@link SpellLevelDefinition}.
+ */
 @Getter
 @Setter
-
-@Entity
-@Table(name = "trackers")
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE,
+	isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class Tracker {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
 	private String name;
 	private String value;
-
-	@Enumerated(EnumType.STRING)
 	private Type type;
-	@Enumerated(EnumType.STRING)
 	private Rest rest;
-	
+
 	enum Type {
 		Number,
 		Counter,

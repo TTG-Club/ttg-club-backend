@@ -23,6 +23,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -145,7 +146,7 @@ public class VttgExportService {
 			spell -> spell.getBook(), spell -> spell.getEnglishName());
 
 		Map<club.dnd5.portal.model.classes.OptionTypeDefinition, List<Option>> options = options();
-		List<HeroClass> classes = classRepository.findAll().stream()
+		List<HeroClass> classes = classRepository.findAll(Sort.by("id")).stream()
 			.filter(heroClass -> !heroClass.isSidekick())
 			.collect(Collectors.toList());
 		collect(upserts, books, "classes", classes, heroClass -> classMapper.toVttg(heroClass, options),
