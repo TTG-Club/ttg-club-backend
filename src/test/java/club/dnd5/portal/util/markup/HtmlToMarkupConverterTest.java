@@ -2,9 +2,11 @@ package club.dnd5.portal.util.markup;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 class HtmlToMarkupConverterTest {
 
@@ -64,6 +66,16 @@ class HtmlToMarkupConverterTest {
 		assertThat(HtmlToMarkupConverter.convert("<p>спасбросок <span class=\"saving_throw\">Харизмы</span></p>", report))
 			.containsExactly("спасбросок Харизмы");
 		assertThat(report.getCounts()).containsEntry("span:saving_throw", 1);
+	}
+
+	@Test
+	void hostileInputIsLinear() {
+		// строки из предупреждения CodeQL (polynomial ReDoS): «<A-» и много пробелов, много {@br}/пробелов по краям
+		String spaces = " ".repeat(200_000);
+		assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+			convert("<p><A-" + spaces + "x</p>");
+			convert("<p>" + "<br> ".repeat(50_000) + "x" + spaces + "</p>");
+		});
 	}
 
 	@Test

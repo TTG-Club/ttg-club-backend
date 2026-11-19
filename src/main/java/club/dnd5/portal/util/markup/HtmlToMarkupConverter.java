@@ -30,6 +30,8 @@ public final class HtmlToMarkupConverter {
 	/** Пустая ячейка таблицы: {@code {@td}} без текста парсер не принимает. */
 	static final String CELL_PLACEHOLDER = "​";
 	private static final String BR = "{@br}";
+	/** Неразрывный пробел (&amp;nbsp;). */
+	private static final char NBSP = (char) 0xA0;
 
 	/** Раздел старого сайта → маркер-ссылка core-api (url — часть адреса после раздела). */
 	private static final Map<String, String> SECTION_MARKERS = Map.of(
@@ -56,12 +58,14 @@ public final class HtmlToMarkupConverter {
 	private static final Set<String> SPAN_SEMANTIC_CLASSES = Set.of(
 		"saving_throw", "advantage", "disadvantage", "dice_text");
 
-	/** Самозакрывающийся пользовательский тег (с дефисом в имени): {@code <dice-roller formula="…"/>}. */
-	private static final Pattern SELF_CLOSING_CUSTOM = Pattern.compile("<([a-zA-Z][\\w]*-[\\w-]*)((?:\\s[^<>]*?)?)\\s*/>");
+	/**
+	 * Самозакрывающийся пользовательский тег (с дефисом в имени): {@code <dice-roller formula="…"/>}.
+	 * Без пересекающихся квантификаторов (имя делится дефисами, атрибуты начинаются с пробела) —
+	 * время разбора линейно и на враждебном вводе из мастерской (ReDoS).
+	 */
+	private static final Pattern SELF_CLOSING_CUSTOM = Pattern.compile("<([a-zA-Z]\\w*(?:-\\w+)+)((?:\\s[^<>]*)?)/>");
 	private static final Pattern DOUBLE_SPACE = Pattern.compile(" {2,}");
 	private static final Pattern WHITESPACE = Pattern.compile("[ \\t\\n\\r\\f]+");
-	private static final Pattern LEADING_BRS = Pattern.compile("^(?:\\s| |\\{@br\\})+");
-	private static final Pattern TRAILING_BRS = Pattern.compile("(?:\\s| |\\{@br\\})+$");
 	private static final Pattern MANY_BRS = Pattern.compile("(?:\\{@br\\}\\s*){3,}");
 	private static final Pattern TEXT_ALIGN = Pattern.compile("text-align\\s*:\\s*(left|center|right)",
 		Pattern.CASE_INSENSITIVE);
@@ -552,9 +556,33 @@ public final class HtmlToMarkupConverter {
 		}
 	}
 
+	/** Убрать пробелы, неразрывные пробелы и {@code {@br}} по краям (без регулярных выражений — линейно). */
 	private static String cleanBrs(String value) {
-		String result = LEADING_BRS.matcher(value).replaceAll("");
-		return TRAILING_BRS.matcher(result).replaceAll("");
+		int start = 0;
+		int end = value.length();
+		while (true) {
+			if (start < end && isSpace(value.charAt(start))) {
+				start++;
+			} else if (value.startsWith(BR, start) && start + BR.length() <= end) {
+				start += BR.length();
+			} else {
+				break;
+			}
+		}
+		while (true) {
+			if (end > start && isSpace(value.charAt(end - 1))) {
+				end--;
+			} else if (end - BR.length() >= start && value.startsWith(BR, end - BR.length())) {
+				end -= BR.length();
+			} else {
+				break;
+			}
+		}
+		return value.substring(start, end);
+	}
+
+	private static boolean isSpace(char c) {
+		return Character.isWhitespace(c) || c == NBSP;
 	}
 
 	private static boolean isBlank(String value) {
