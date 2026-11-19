@@ -1,0 +1,29 @@
+# Этап 3, заклинания (expand): описание и «На больших уровнях» — из HTML в разметку core-api.
+# Новые jsonb-колонки (массив строк-блоков, см. util/markup/HtmlToMarkupConverter) заполняются
+# конвертером на Java; старые HTML-колонки удаляет 0020.
+databaseChangeLog:
+  - changeSet:
+      id: 0019-spells-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE spells ADD COLUMN description_markup jsonb,
+              ADD COLUMN upper_level_markup jsonb
+      rollback:
+        - sql:
+            sql: ALTER TABLE spells DROP COLUMN description_markup, DROP COLUMN upper_level_markup
+  - changeSet:
+      id: 0019-spells-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: spells
+            columns: description>description_markup, upper_level>upper_level_markup
+        - sql:
+            sql: UPDATE spells SET description_markup = '[]'::jsonb WHERE description_markup IS NULL
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

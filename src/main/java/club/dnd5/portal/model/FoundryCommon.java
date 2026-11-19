@@ -4,7 +4,8 @@ import lombok.Getter;
 
 
 public interface FoundryCommon {
-	String getDescription();
+	/** Описание HTML-ом (биография в экспорте Foundry). */
+	String getDescriptionHtml();
 
 	String getName();
 

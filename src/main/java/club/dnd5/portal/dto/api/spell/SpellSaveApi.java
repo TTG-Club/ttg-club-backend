@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.spell;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.TimeUnit;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
@@ -84,8 +85,8 @@ public class SpellSaveApi {
 		}
 		range = spell.getDistance();
 		duration = spell.getDuration();
-		description = spell.getDescription();
-		upper = spell.getUpperLevel();
+		description = Markup.toHtml(spell.getDescription());
+		upper = Markup.toHtml(spell.getUpperLevel());
 		source = spell.getBook() == null ? null : spell.getBook().getSource();
 	}
 }

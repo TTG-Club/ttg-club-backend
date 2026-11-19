@@ -58,7 +58,8 @@ public final class HtmlToMarkupConverter {
 
 	/** Самозакрывающийся пользовательский тег (с дефисом в имени): {@code <dice-roller formula="…"/>}. */
 	private static final Pattern SELF_CLOSING_CUSTOM = Pattern.compile("<([a-zA-Z][\\w]*-[\\w-]*)((?:\\s[^<>]*?)?)\\s*/>");
-	private static final Pattern WHITESPACE =Pattern.compile("[ \\t\\n\\r\\f]+");
+	private static final Pattern DOUBLE_SPACE = Pattern.compile(" {2,}");
+	private static final Pattern WHITESPACE = Pattern.compile("[ \\t\\n\\r\\f]+");
 	private static final Pattern LEADING_BRS = Pattern.compile("^(?:\\s| |\\{@br\\})+");
 	private static final Pattern TRAILING_BRS = Pattern.compile("(?:\\s| |\\{@br\\})+$");
 	private static final Pattern MANY_BRS = Pattern.compile("(?:\\{@br\\}\\s*){3,}");
@@ -89,7 +90,8 @@ public final class HtmlToMarkupConverter {
 		String closed = SELF_CLOSING_CUSTOM.matcher(html).replaceAll("<$1$2></$1>");
 		converter.blockLevel(Jsoup.parseBodyFragment(closed).body());
 		converter.flush(null);
-		return converter.blocks;
+		// пробелы на стыке текстовых узлов («нельзя</b> » + « создавать») — один пробел
+		return converter.blocks.stream().map(b -> DOUBLE_SPACE.matcher(b).replaceAll(" ")).toList();
 	}
 
 	// ---------------------------------------------------------------- блочный уровень
@@ -470,7 +472,11 @@ public final class HtmlToMarkupConverter {
 
 	private String roll(Element el) {
 		String formula = el.hasAttr("formula") ? el.attr("formula").trim() : el.text().trim();
-		String shown = cleanBrs(inlineChildren(el, true)).trim();
+		// подпись — атрибут text: только простой текст (вложенные теги внутри броска не сохраняются)
+		String shown = sanitize(WHITESPACE.matcher(el.text()).replaceAll(" ")).trim();
+		if (!el.children().isEmpty()) {
+			report.note("dice:nested-tags", el.outerHtml());
+		}
 		for (Attribute attribute : el.attributes()) {
 			String key = attribute.getKey();
 			if (!key.equals("formula") && !key.equals("label")) {

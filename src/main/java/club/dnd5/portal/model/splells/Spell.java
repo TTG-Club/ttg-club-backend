@@ -53,11 +53,15 @@ public class Spell implements FoundryCommon {
 
 	private String distance;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (см. util/markup/Markup, db/changelog 0019). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
-	@Column(columnDefinition = "TEXT")
-	private String upperLevel;
+	/** «На больших уровнях» — разметка core-api; {@code null}, если нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> upperLevel;
 
 	private boolean verbalComponent;
 	private boolean somaticComponent;
@@ -106,6 +110,7 @@ public class Spell implements FoundryCommon {
 		damageType = damageType == null ? new ArrayList<>() : damageType;
 		healType = healType == null ? new ArrayList<>() : healType;
 		savingthrows = savingthrows == null ? new ArrayList<>() : savingthrows;
+		description = description == null ? new ArrayList<>() : description;
 	}
 
 	public String getComponents() {
@@ -114,5 +119,10 @@ public class Spell implements FoundryCommon {
 
 	public String getUrlName() {
 		return StringUtil.getUrl(englishName);
+	}
+
+	@Override
+	public String getDescriptionHtml() {
+		return club.dnd5.portal.util.markup.Markup.toHtml(description);
 	}
 }

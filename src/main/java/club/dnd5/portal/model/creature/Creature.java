@@ -314,4 +314,9 @@ public class Creature implements FoundryCommon {
 		}
 		return proficiencyBonus;
 	}
+
+	@Override
+	public String getDescriptionHtml() {
+		return description;
+	}
 }

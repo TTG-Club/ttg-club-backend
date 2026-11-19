@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
@@ -214,8 +215,9 @@ public class SpellApiController {
 		spell.setAdditionalMaterialComponent(trimToNull(request.getMaterialComponent()));
 		spell.setDistance(request.getRange().trim());
 		spell.setDuration(request.getDuration().trim());
-		spell.setDescription(request.getDescription().trim());
-		spell.setUpperLevel(trimToNull(request.getUpper()));
+		// из редактора мастерской приходит HTML — в базе разметка core-api
+		spell.setDescription(Markup.fromHtml(request.getDescription().trim()));
+		spell.setUpperLevel(Markup.emptyToNull(Markup.fromHtml(trimToNull(request.getUpper()))));
 		spell.setSrd(Boolean.FALSE);
 		if (spell.getDamageType() == null) {
 			spell.setDamageType(new ArrayList<>());
