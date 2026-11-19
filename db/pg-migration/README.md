@@ -125,6 +125,12 @@ python -I db/pg-migration/baseline/gen_baseline.py db/pg-migration/inventory/exp
 | `HeroClass` | `primaryAbilities`, `availableSkills`; `levelDefenitions` — ячейки заклинаний по уровням с вложенными счётчиками (`trackers`), объекты без `id` | `0015`, `0016` |
 | `Archetype` | `levelDefenitions` (как у класса) | `0015`, `0016` |
 | `Feature` (особенность расы) | `skills` | `0015`, `0016` |
+| `Background`, `God`, `Equipment`, `Trait`, `Visitor` (таверна) | `skills`; `domains`; `types`; `abilities`, `skills`; `habitatTypes`. Фильтры предысторий, богов, снаряжения и черт — `SpecificationUtil.jsonbContainsAny` (та же функция `jsonb_contains` из Criteria API) | `0017`, `0018` |
+
+После переноса строки владельцев переписаны UPDATE-ом, и физический порядок строк в PostgreSQL
+меняется: поэтому у списков, которые сортировались только частично (или не сортировались),
+последний ключ — `id` (`PageAndSortUtil.getPageable(request, "id")` / `getPageableWithOrders`,
+`Sort.by("id")`). Категории снаряжения (`Set`) отдаются в порядке объявления enum.
 
 Остаются связями (не `jsonb`): то, что разделяется между записями или имеет свою страницу —
 языки, теги (`CreatureRace`), книга, логово; а также то, что мастерская правит по `id`:

@@ -1,5 +1,8 @@
 package club.dnd5.portal.model.trait;
 
+import java.util.ArrayList;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.book.Book;
@@ -30,19 +33,13 @@ public class Trait {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	@ElementCollection(targetClass = AbilityType.class)
-	@JoinTable(name = "trait_abilities", joinColumns = @JoinColumn(name = "trait_id"))
-	@Column(name = "ability", nullable = false)
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<AbilityType> abilities;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<AbilityType> abilities = new ArrayList<>();
 
-	@ElementCollection(targetClass = SkillType.class)
-	@JoinTable(name = "trait_skills", joinColumns = @JoinColumn(name = "trait_id"))
-	@Column(name = "skill", nullable = false)
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<SkillType> skills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SkillType> skills = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "source")
@@ -53,5 +50,13 @@ public class Trait {
 	}
 	public String getCapitalazeName() {
 		return StringUtils.capitalize(name.toLowerCase());
+	}
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullJsonListsToEmpty() {
+		abilities = abilities == null ? new ArrayList<>() : abilities;
+		skills = skills == null ? new ArrayList<>() : skills;
 	}
 }

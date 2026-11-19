@@ -1,5 +1,8 @@
 package club.dnd5.portal.model.god;
 
+import java.util.ArrayList;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.HtmlConverter;
@@ -44,11 +47,9 @@ public class God {
 	private String symbol;
 	private String nicknames;
 
-	@ElementCollection(targetClass=Domain.class)
-    @CollectionTable(name="god_domains")
-	@Enumerated(EnumType.STRING)
-	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
-	private List<Domain> domains;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<Domain> domains = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "pantheon_id")
@@ -84,5 +85,12 @@ public class God {
 
 	public String getUrlName() {
 		return StringUtil.getUrl(englishName);
+	}
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullJsonListsToEmpty() {
+		domains = domains == null ? new ArrayList<>() : domains;
 	}
 }

@@ -1,9 +1,11 @@
 package club.dnd5.portal.util;
 
+import club.dnd5.portal.config.jpa.JsonbFunctionContributor;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.spells.SearchRequest;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -89,4 +91,15 @@ public final class SpecificationUtil {
 		return combinedSpecification;
 	}
 
+	/**
+	 * Запись, у которой jsonb-массив имён enum в поле {@code field} содержит хотя бы одно из значений
+	 * (замена прежнего {@code JOIN … IN (…)} с DISTINCT). Каждое значение — оператор {@code @>}
+	 * ({@link JsonbFunctionContributor#JSONB_CONTAINS}), работает по GIN-индексу.
+	 */
+	public static <T> Specification<T> jsonbContainsAny(String field, Collection<? extends Enum<?>> values) {
+		return (root, query, cb) -> cb.or(values.stream()
+			.map(value -> cb.isTrue(cb.function(JsonbFunctionContributor.JSONB_CONTAINS, Boolean.class,
+				root.get(field), cb.literal("[\"" + value.name() + "\"]"))))
+			.toArray(jakarta.persistence.criteria.Predicate[]::new));
+	}
 }
