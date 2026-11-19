@@ -153,3 +153,31 @@ python -I db/pg-migration/baseline/gen_baseline.py db/pg-migration/inventory/exp
 3. Changeset на сущность: перевод текстов; бэкенд отдаёт разметку, `MarkdownUtil` и флаг
    `markdown` у действий и умений уходят.
 4. Мастерская — редактор разметки вместо HTML.
+
+### Конвертер (шаг 1)
+
+`util/markup/HtmlToMarkupConverter` (jsoup) переводит описание в **массив строк-блоков** — штатная
+форма хранения core-api (её же даёт `MarkupDescriptionDeserializer` для обычного текста; рендер
+core-app разбирает каждую строку парсером, в том числе блочные `{@table}`/`{@list}`). Спецификация
+разметки — `core-app/docs/markup-formatting-guide.md`. Тексты существ с флагом `markdown` сначала
+проходят `MarkdownUtil.toHtml` (имя существа, `{@atk}`, `{@hit}`, `{@damage}`…).
+
+| HTML старого сайта | разметка |
+|---|---|
+| `<p>`; `<p class="text-center">` / `text-align` | абзац-строка; `{@p … \| align:center}` |
+| `<strong>`/`<b>`, `<em>`/`<i>`, `<u>`, `<s>`, `<sup>`, `<sub>`, `<br>` | `{@b}`, `{@i}`, `{@u}`, `{@s}`, `{@sup}`, `{@sub}`, `{@br}` |
+| `<a href="/spells/x">` (и `bestiary`, `classes`, `races`, `traits`, `backgrounds`, `items`, `items/magic`) | `{@spell текст \| url:x}`, `{@creature}`, `{@class}`, `{@species}`, `{@feat}`, `{@background}`, `{@item}`, `{@magicItem}` |
+| прочие внутренние ссылки (`/screens`, `/rules`, `/gods`…); внешние | `{@link текст \| url:/screens/x}`; `{@link … \| url:https://… \| target:_blank}` |
+| `<detail-tooltip>` | снимается (подсказку даёт ссылка) |
+| `<dice-roller formula="F">T</dice-roller>` | `{@roll F}` или `{@roll F \| text:T}` |
+| `h1`–`h3` / `h4` / `h5` / `h6` | `{@h … \| level:1` / `2` / `3` / `4}` |
+| `ul`/`ol`, `table`, `blockquote`, `hr` | `{@list {@li}…}`, `{@table {@tr {@th}}{@tr {@td}}}`, `{@quote}`, `{@separator}` |
+
+Внутри маркера нет экранирования: `{ }` выбрасываются, `|` → `/`. Теряется (и попадает в отчёт
+`MarkupReport`): подсветка `span.saving_throw` / `advantage` / `disadvantage` / `dice_text`
+(~9 тыс., текст остаётся), всплывающие подсказки сносок эрраты (`<a href="#" title>`, 264),
+`colspan`/`rowspan` (31; colspan добивается пустыми ячейками), стили и ширины ячеек, картинки и
+`iframe` (12), `details` (28; раскрываются).
+
+Прогон по базе из дампа прода: ~25 тыс. текстов, 50 556 блоков, ошибок нет; все блоки разобраны
+парсером core-app без нераспознанных маркеров.
