@@ -52,13 +52,17 @@ public class MarkdownUtil {
 	);
 
 	/**
-	 * Зменяет markdown на html в действиях существ
-	 * @param feat действие
-	 * @param beast существо
+	 * Описание умения существа для ответа API: markdown переводится в html, если умение размечено.
+	 * Сущность не меняется — иначе внутри транзакции (создание и правка в мастерской) html
+	 * записался бы в базу вместо исходного markdown.
+	 *
+	 * @param feat  умение
+	 * @param beast существо (для {@code {@beast_name}})
+	 * @return описание для ответа
 	 */
-	public static void convert(CreatureFeat feat, Creature beast) {
-		if (!feat.isMarkdown()) {
-			return;
+	public static String html(CreatureFeat feat, Creature beast) {
+		if (!feat.isMarkdown() || feat.getDescription() == null) {
+			return feat.getDescription();
 		}
 		String description = feat.getDescription();
 		if (!java.util.Objects.equals(beast.getRaceId(), 102)) {
@@ -72,24 +76,22 @@ public class MarkdownUtil {
 		for (Markdown markdown: markdowns) {
 			description = markdown.convert(description);
 		}
-		feat.setDescription(description);
+		return description;
 	}
 
 	/**
-	 * Зменяет markdown на html в действиях существ
+	 * Описание действия существа для ответа API: markdown переводится в html, если действие размечено.
+	 * Сущность не меняется (см. {@link #html(CreatureFeat, Creature)}).
+	 *
 	 * @param action действие
-	 * @param beast существо
+	 * @param beast  существо (для {@code {@beast_name}})
+	 * @return описание для ответа
 	 */
-	public static void convert(final Action action, final Creature beast) {
-		if (!action.isMarkdown()) {
-			return;
+	public static String html(final Action action, final Creature beast) {
+		if (!action.isMarkdown() || action.getDescription() == null) {
+			return action.getDescription();
 		}
-		String description = action.getDescription();
-		description = description.replace("{@beast_name}", beast.getName());
-		for (Markdown markdown: markdowns) {
-			description = markdown.convert(description);
- 		}
-		action.setDescription(description);
+		return toHtml(action.getDescription(), beast.getName());
 	}
 
 	/**
