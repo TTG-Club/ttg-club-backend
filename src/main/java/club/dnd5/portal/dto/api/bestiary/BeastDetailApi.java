@@ -202,11 +202,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!beast.getFeats().isEmpty()) {
 			feats = beast.getFeats()
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(feat -> NameValueApi.builder()
 					.name(feat.getName())
 					.englishName(feat.getEnglishName())
-					.value(feat.getDescription())
+					.value(MarkdownUtil.html(feat, beast))
 					.markdown(feat.isMarkdown())
 					.build())
 				.collect(Collectors.toList());
@@ -215,12 +214,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!actionsBeast.isEmpty()) {
 			actions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
-				.peek(action -> MarkdownUtil.convert(action, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(action.getDescription())
+					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
 					.build())
 				.collect(Collectors.toList());
@@ -230,11 +227,10 @@ public class BeastDetailApi extends BeastApi {
 			reaction = beast.getReaction();
 			reactions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(action.getDescription())
+					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
 					.build())
 				.collect(Collectors.toList());
@@ -243,11 +239,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!actionsBeast.isEmpty()) {
 			bonusActions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(action.getDescription())
+					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
 					.build())
 				.collect(Collectors.toList());
@@ -257,11 +252,10 @@ public class BeastDetailApi extends BeastApi {
 			legendary = new LegendaryApi();
 			legendary.setList(actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(action.getDescription())
+					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
 					.build())
 				.collect(Collectors.toList()));
@@ -273,11 +267,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!actionsBeast.isEmpty()) {
 			mysticalActions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(action.getDescription())
+					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
 					.build())
 				.collect(Collectors.toList());
