@@ -73,7 +73,7 @@ public class BestiaryServiceImpl implements BestiaryService {
     public BeastDetailApi findOne(String englishName) {
         Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
                 .orElseThrow(PageNotFoundException::new);
-        BeastDetailApi beastApi = new BeastDetailApi(beast, beastRepository::countByActionId);
+        BeastDetailApi beastApi = new BeastDetailApi(beast);
         Collection<String> images = new ArrayList<>();
         tokenRepository.findByRefIdAndType(beast.getId(), "круглый")
                 .stream()

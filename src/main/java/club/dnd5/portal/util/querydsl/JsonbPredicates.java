@@ -33,6 +33,12 @@ public class JsonbPredicates {
 			jsonbArray, Expressions.constant(field), Expressions.constant(likePattern));
 	}
 
+	/** Колонка содержит переданный JSON (например, {@code [{"actionType":"LEGENDARY"}]} — есть такой элемент). */
+	public static Predicate containsJson(Expression<?> jsonb, String json) {
+		return Expressions.booleanTemplate(JsonbFunctionContributor.JSONB_CONTAINS + "({0}, {1})",
+			jsonb, Expressions.constant(json));
+	}
+
 	/** Колонка содержит значение. */
 	public static Predicate contains(Expression<?> jsonbArray, Enum<?> value) {
 		return Expressions.booleanTemplate(JsonbFunctionContributor.JSONB_CONTAINS + "({0}, {1})",

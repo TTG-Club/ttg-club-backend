@@ -94,10 +94,6 @@ public class BeastDetailApi extends BeastApi {
 	private LairApi lair;
 
 	public BeastDetailApi(Creature beast) {
-		this(beast, actionId -> null);
-	}
-
-	public BeastDetailApi(Creature beast, Function<Integer, Long> actionUsageCounter) {
 		super(beast);
 		id = beast.getId();
 		size = new SizeApi(beast.getSizeName(), beast.getSize().name().toLowerCase(), beast.getSize().getCell());
@@ -223,7 +219,6 @@ public class BeastDetailApi extends BeastApi {
 					.englishName(action.getEnglishName())
 					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -237,7 +232,6 @@ public class BeastDetailApi extends BeastApi {
 					.englishName(action.getEnglishName())
 					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -250,7 +244,6 @@ public class BeastDetailApi extends BeastApi {
 					.englishName(action.getEnglishName())
 					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -264,7 +257,6 @@ public class BeastDetailApi extends BeastApi {
 					.englishName(action.getEnglishName())
 					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList()));
 			if (beast.getLegendary() != null) {
@@ -280,7 +272,6 @@ public class BeastDetailApi extends BeastApi {
 					.englishName(action.getEnglishName())
 					.value(MarkdownUtil.html(action, beast))
 					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}
