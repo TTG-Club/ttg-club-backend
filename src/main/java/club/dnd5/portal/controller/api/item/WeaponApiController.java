@@ -24,6 +24,7 @@ import club.dnd5.portal.repository.datatable.WeaponPropertyDatatableRepository;
 import club.dnd5.portal.repository.datatable.WeaponRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -260,8 +261,8 @@ public class WeaponApiController {
 			? new ArrayList<>()
 			: propertyRepository.findAllById(request.getProperties()));
 		weapon.setAmmo(request.getAmmo());
-		weapon.setDescription(trimToNull(request.getDescription()));
-		weapon.setSpecial(trimToNull(request.getSpecial()));
+		weapon.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
+		weapon.setSpecial(Markup.emptyToNull(Markup.trimBlocks(request.getSpecial())));
 		bookResolver.find(request.getSource()).ifPresent(weapon::setBook);
 	}
 

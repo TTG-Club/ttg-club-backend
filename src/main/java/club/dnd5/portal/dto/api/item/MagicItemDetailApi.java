@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -22,7 +23,8 @@ import java.util.stream.Collectors;
 @Setter
 public class MagicItemDetailApi extends MagicItemApi {
 	private Integer id;
-	private String description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
 	private Boolean customization;
 	private Collection<UrlApi> detailType;
 	private Collection<String> detailCustamization;

@@ -22,6 +22,7 @@ import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -212,7 +213,7 @@ public class ItemApiController {
 		// getTextCost() падает без валюты, поэтому у цены всегда есть единица измерения
 		item.setCurrency(request.getCurrency() == null ? Currency.MM : request.getCurrency());
 		item.setWeight(request.getWeight());
-		item.setDescription(trimToNull(request.getDescription()));
+		item.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
 		replaceTypes(item, request.getCategories());
 		bookResolver.find(request.getSource()).ifPresent(item::setBook);
 	}

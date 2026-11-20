@@ -22,6 +22,7 @@ import club.dnd5.portal.model.items.ArmorCategory;
 import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -230,7 +231,7 @@ public class ArmorApiController {
 		armor.setForceRequirements(request.getForceRequirements());
 		armor.setStelsHindrance(Boolean.TRUE.equals(request.getStealthHindrance()));
 		armor.setType(request.getType());
-		armor.setDescription(trimToNull(request.getDescription()));
+		armor.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
 		bookResolver.find(request.getSource()).ifPresent(armor::setBook);
 	}
 

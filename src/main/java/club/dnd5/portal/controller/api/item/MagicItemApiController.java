@@ -26,6 +26,7 @@ import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -223,7 +224,7 @@ public class MagicItemApiController {
 		item.setCustomization(Boolean.TRUE.equals(request.getCustomization()));
 		item.setCustSpecial(trimToNull(request.getCustSpecial()));
 		item.setSpecial(trimToNull(request.getSpecial()));
-		item.setDescription(request.getDescription().trim());
+		item.setDescription(Markup.trimBlocks(request.getDescription()));
 		item.setConsumed(Boolean.TRUE.equals(request.getConsumed()));
 		item.setCharge(request.getCharge());
 		item.setCurse(Boolean.TRUE.equals(request.getCurse()));

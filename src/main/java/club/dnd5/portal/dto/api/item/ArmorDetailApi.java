@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -18,7 +19,8 @@ public class ArmorDetailApi extends ArmorApi {
 	private Integer cost;
 	private String typeRaw;
 	private Float weight;
-	private String description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
 	private Boolean disadvantage;
 	private Integer requirement;
 	private String duration;
