@@ -1,0 +1,61 @@
+# Этап 3, источники (contract): HTML-колонка удаляется, jsonb-разметка занимает её имя.
+# От описания зависит view глобального поиска — он пересоздаётся (версия 11 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+# Откат возвращает пустым описаниям NULL, а не пустую строку: старый код одинаково считает их пустыми.
+databaseChangeLog:
+  - changeSet:
+      id: 0038-books-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v10.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0038-books-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонку из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: books
+            idColumn: source
+            direction: toHtml
+            columns: description_markup>description
+  - changeSet:
+      id: 0038-books-drop-html-column
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE books DROP COLUMN description
+      rollback:
+        - sql:
+            sql: ALTER TABLE books ADD COLUMN description text COLLATE ci
+  - changeSet:
+      id: 0038-books-rename-markup-column
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE books RENAME COLUMN description_markup TO description
+      rollback:
+        - sql:
+            sql: ALTER TABLE books RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0038-books-search-view-v11
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v11.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

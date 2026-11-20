@@ -4,7 +4,7 @@ import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.LegendaryApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.dto.api.bestiary.request.DescriptionRequest;
-import club.dnd5.portal.dto.api.book.BookSaveApi;
+import club.dnd5.portal.dto.api.item.MagicItemSaveApi;
 import club.dnd5.portal.dto.api.classes.ClassSaveApi;
 import club.dnd5.portal.dto.api.classes.ClassTraitSaveApi;
 import org.junit.jupiter.api.AfterAll;
@@ -22,9 +22,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link ValidHtml} остался у полей, которые ещё хранят HTML (описание книги, уточнения магического
- * предмета, значение легендарного действия из старых клиентов); описания разделов на разметке
- * core-api проверяются как непустые блоки.
+ * {@link ValidHtml} остался у полей, которые ещё хранят HTML (особое свойство и уточнения магического
+ * предмета, значение легендарного действия из старых клиентов); описания всех разделов — разметка
+ * core-api, они проверяются как непустые блоки.
  */
 class HtmlValidatorTest {
 	private static ValidatorFactory validatorFactory;
@@ -41,10 +41,10 @@ class HtmlValidatorTest {
 		validatorFactory.close();
 	}
 
-	private static BookSaveApi book(String description) {
-		BookSaveApi book = new BookSaveApi();
-		book.setDescription(description);
-		return book;
+	private static MagicItemSaveApi item(String special) {
+		MagicItemSaveApi item = new MagicItemSaveApi();
+		item.setSpecial(special);
+		return item;
 	}
 
 	private static List<String> paths(Object request) {
@@ -55,37 +55,37 @@ class HtmlValidatorTest {
 
 	@Test
 	void acceptsValidHtmlFragment() {
-		assertThat(paths(book("<p class=\"lead\">Текст <strong>описания</strong><br></p>")))
-			.doesNotContain("description");
+		assertThat(paths(item("<p class=\"lead\">Текст <strong>описания</strong><br></p>")))
+			.doesNotContain("special");
 	}
 
 	@Test
 	void rejectsMismatchedAndUnclosedTags() {
-		Set<ConstraintViolation<BookSaveApi>> violations = validator.validate(book("<p><strong>Некорректное описание</p>"));
+		Set<ConstraintViolation<MagicItemSaveApi>> violations = validator.validate(item("<p><strong>Некорректное описание</p>"));
 
 		assertThat(violations)
 			.anySatisfy(violation -> {
-				assertThat(violation.getPropertyPath().toString()).isEqualTo("description");
+				assertThat(violation.getPropertyPath().toString()).isEqualTo("special");
 				assertThat(violation.getMessage()).isEqualTo("Некорректный HTML");
 			});
 	}
 
 	@Test
 	void acceptsSelfClosingCustomElements() {
-		assertThat(paths(book("<p><em>Попадание:</em>&nbsp;15&nbsp;(<dice-roller formula=\"3к6 + 5\"/>) урона излучением.</p>")))
-			.doesNotContain("description");
+		assertThat(paths(item("<p><em>Попадание:</em>&nbsp;15&nbsp;(<dice-roller formula=\"3к6 + 5\"/>) урона излучением.</p>")))
+			.doesNotContain("special");
 	}
 
 	@Test
 	void acceptsRealOldFrontendMarkup() {
-		assertThat(paths(book("<p>Колдовство (<dice-roller formula=\"к20 + 9\">+9</dice-roller>):</p><div class=\"spell-list\">"
+		assertThat(paths(item("<p>Колдовство (<dice-roller formula=\"к20 + 9\">+9</dice-roller>):</p><div class=\"spell-list\">"
 			+ "<p>Заговоры: <em><detail-tooltip type=\"spell\"><a href=\"/spells/Guidance\">указание</a></detail-tooltip>,&nbsp;</em></p></div>")))
-			.doesNotContain("description");
+			.doesNotContain("special");
 	}
 
 	@Test
 	void stillRejectsUnclosedCustomElement() {
-		assertThat(paths(book("<p><dice-roller formula=\"1d6\">1к6</p>"))).contains("description");
+		assertThat(paths(item("<p><dice-roller formula=\"1d6\">1к6</p>"))).contains("special");
 	}
 
 	@Test
