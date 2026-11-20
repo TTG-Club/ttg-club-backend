@@ -1,0 +1,27 @@
+# Этап 3, черты (expand): описание — из HTML в разметку core-api.
+# Новая jsonb-колонка (массив строк-блоков, см. util/markup/HtmlToMarkupConverter) заполняется
+# конвертером на Java; старую HTML-колонку удаляет 0022.
+databaseChangeLog:
+  - changeSet:
+      id: 0021-traits-markup-column
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE traits ADD COLUMN description_markup jsonb
+      rollback:
+        - sql:
+            sql: ALTER TABLE traits DROP COLUMN description_markup
+  - changeSet:
+      id: 0021-traits-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: traits
+            columns: description>description_markup
+        - sql:
+            sql: UPDATE traits SET description_markup = '[]'::jsonb WHERE description_markup IS NULL
+      # колонку удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

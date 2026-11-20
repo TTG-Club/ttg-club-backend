@@ -20,7 +20,8 @@ import java.util.Collections;
 @Setter
 public class FeatDetailApi extends FeatApi {
 	private Integer id;
-	private String description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
 	private List<String> abilities;
 	private List<String> skills;
 	private List<ReferenceClassApi> classes;

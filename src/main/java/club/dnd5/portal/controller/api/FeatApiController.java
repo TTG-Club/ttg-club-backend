@@ -20,6 +20,7 @@ import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.datatable.FeatRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -237,7 +238,7 @@ public class FeatApiController {
 		trait.setLevel(request.getLevel());
 		String requirement = trimToNull(request.getRequirement());
 		trait.setRequirement(requirement == null ? "Нет" : requirement);
-		trait.setDescription(request.getDescription().trim());
+		trait.setDescription(Markup.trimBlocks(request.getDescription()));
 		trait.setAbilities(request.getAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getAbilities()));
 		trait.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
 		bookResolver.find(request.getSource()).ifPresent(trait::setBook);
