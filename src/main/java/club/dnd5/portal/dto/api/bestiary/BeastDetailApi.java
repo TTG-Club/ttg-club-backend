@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.bestiary;
 
+import java.util.List;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.UrlApi;
@@ -7,7 +8,6 @@ import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.creature.*;
-import club.dnd5.portal.util.MarkdownUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -75,7 +75,8 @@ public class BeastDetailApi extends BeastApi {
 	@Schema(description = "реакции")
 	private Collection<NameValueApi> reactions;
 	@Schema(description = "свободный текст к реакциям")
-	private String reaction;
+	/** Блоки разметки core-api. */
+	private List<String> reaction;
 	@Schema(description = "бонусный действия")
 	private Collection<NameValueApi> bonusActions;
 	@Schema(description = "легендарный действия")
@@ -83,7 +84,8 @@ public class BeastDetailApi extends BeastApi {
 	@Schema(description = "мистические действия")
 	private Collection<NameValueApi> mysticalActions;
 	@Schema(description = "текстовое описание")
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	@Schema(description = "тэги")
 	private Collection<TagApi> tags;
 	@Schema(description = "места обитания")
@@ -205,8 +207,7 @@ public class BeastDetailApi extends BeastApi {
 				.map(feat -> NameValueApi.builder()
 					.name(feat.getName())
 					.englishName(feat.getEnglishName())
-					.value(MarkdownUtil.html(feat, beast))
-					.markdown(feat.isMarkdown())
+					.value(feat.getDescription())
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -217,8 +218,7 @@ public class BeastDetailApi extends BeastApi {
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(MarkdownUtil.html(action, beast))
-					.markdown(action.isMarkdown())
+					.value(action.getDescription())
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -230,8 +230,7 @@ public class BeastDetailApi extends BeastApi {
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(MarkdownUtil.html(action, beast))
-					.markdown(action.isMarkdown())
+					.value(action.getDescription())
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -242,8 +241,7 @@ public class BeastDetailApi extends BeastApi {
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(MarkdownUtil.html(action, beast))
-					.markdown(action.isMarkdown())
+					.value(action.getDescription())
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -255,8 +253,7 @@ public class BeastDetailApi extends BeastApi {
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(MarkdownUtil.html(action, beast))
-					.markdown(action.isMarkdown())
+					.value(action.getDescription())
 					.build())
 				.collect(Collectors.toList()));
 			if (beast.getLegendary() != null) {
@@ -270,8 +267,7 @@ public class BeastDetailApi extends BeastApi {
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
-					.value(MarkdownUtil.html(action, beast))
-					.markdown(action.isMarkdown())
+					.value(action.getDescription())
 					.build())
 				.collect(Collectors.toList());
 		}

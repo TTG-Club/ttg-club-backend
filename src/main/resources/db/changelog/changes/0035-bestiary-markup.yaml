@@ -1,0 +1,73 @@
+# Этап 3, бестиарий (expand): описание существа, вступления к легендарным действиям и реакциям,
+# тексты логова (lairs) — из HTML в разметку core-api: новые jsonb-колонки заполняет конвертер на Java,
+# старые колонки удаляет 0036. Все они необязательны (NULL — текста нет).
+# Описания умений (creatures.feats) и действий (creatures.actions) лежат внутри jsonb-массивов и
+# переводятся на месте (CreatureMarkupChange). Шаблоны с флагом markdown ({@atk mw}, {@hit 4},
+# {@beast_name}…) разворачиваются так же, как их показывал API, флаг уходит (решение 2026-11-20).
+databaseChangeLog:
+  - changeSet:
+      id: 0035-bestiary-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE creatures ADD COLUMN description_markup jsonb, ADD COLUMN legendary_markup jsonb,
+              ADD COLUMN reaction_markup jsonb;
+              ALTER TABLE lairs ADD COLUMN description_markup jsonb, ADD COLUMN action_markup jsonb,
+              ADD COLUMN effect_markup jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE creatures DROP COLUMN description_markup, DROP COLUMN legendary_markup,
+              DROP COLUMN reaction_markup;
+              ALTER TABLE lairs DROP COLUMN description_markup, DROP COLUMN action_markup,
+              DROP COLUMN effect_markup
+  - changeSet:
+      id: 0035-bestiary-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: creatures
+            columns: description>description_markup, legendary>legendary_markup, reaction>reaction_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: lairs
+            idColumn: lair_id
+            columns: description>description_markup, action>action_markup, effect>effect_markup
+        - sql:
+            sql: >-
+              UPDATE creatures SET description_markup = NULL WHERE description_markup = '[]'::jsonb;
+              UPDATE creatures SET legendary_markup = NULL WHERE legendary_markup = '[]'::jsonb;
+              UPDATE creatures SET reaction_markup = NULL WHERE reaction_markup = '[]'::jsonb;
+              UPDATE lairs SET description_markup = NULL WHERE description_markup = '[]'::jsonb;
+              UPDATE lairs SET action_markup = NULL WHERE action_markup = '[]'::jsonb;
+              UPDATE lairs SET effect_markup = NULL WHERE effect_markup = '[]'::jsonb
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1
+  - changeSet:
+      id: 0035-bestiary-feats-markup
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.CreatureMarkupChange
+            column: feats
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.CreatureMarkupChange
+            column: feats
+            direction: toHtml
+  - changeSet:
+      id: 0035-bestiary-actions-markup
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.CreatureMarkupChange
+            column: actions
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.CreatureMarkupChange
+            column: actions
+            direction: toHtml

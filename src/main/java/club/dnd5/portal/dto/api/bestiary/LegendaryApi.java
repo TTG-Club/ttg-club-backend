@@ -1,5 +1,8 @@
 package club.dnd5.portal.dto.api.bestiary;
 
+import java.util.List;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.validation.ValidHtml;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +31,7 @@ public class LegendaryApi {
 	@Schema(description = "количество возможных легендарных действий")
 	private int count;
 	@Schema(description = "свободное текстовое описание легендарных действий")
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<String> description;
 }

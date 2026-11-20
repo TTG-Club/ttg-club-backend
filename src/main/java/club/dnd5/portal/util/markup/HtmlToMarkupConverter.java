@@ -497,7 +497,10 @@ public final class HtmlToMarkupConverter {
 			return shown;
 		}
 		boolean showFormula = shown.isEmpty() || shown.replace(" ", "").equalsIgnoreCase(formula.replace(" ", ""));
-		return "{@roll " + formula + (showFormula ? "" : " | text:" + attrValue(shown)) + "}";
+		// подпись броска («Атака», «Урон») — расширение спецификации core-api, решение 2026-11-20
+		String label = sanitize(el.attr("label")).trim();
+		return "{@roll " + formula + (showFormula ? "" : " | text:" + attrValue(shown))
+			+ (label.isEmpty() ? "" : " | label:" + attrValue(label)) + "}";
 	}
 
 	// ---------------------------------------------------------------- текст

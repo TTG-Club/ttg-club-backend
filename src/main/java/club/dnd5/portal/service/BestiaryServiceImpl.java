@@ -1,5 +1,8 @@
 package club.dnd5.portal.service;
 
+import java.util.Collection;
+import java.util.Objects;
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.BeastApi;
@@ -136,9 +139,10 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setChallengeRating(trimToNull(request.getChallengeRating()));
         beast.setExp(ChallengeRating.getExp(beast.getChallengeRating()));
         beast.setRaceId(request.isNpc() ? 102 : 0);
-        beast.setDescription(trimToNull(request.getDescription()));
-        beast.setReaction(trimToNull(request.getReaction()));
-        beast.setLegendary(request.getLegendary() == null ? null : trimToNull(request.getLegendary().getDescription()));
+        beast.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
+        beast.setReaction(Markup.emptyToNull(Markup.trimBlocks(request.getReaction())));
+        beast.setLegendary(request.getLegendary() == null ? null
+                : Markup.emptyToNull(Markup.trimBlocks(request.getLegendary().getDescription())));
 
         if (request.getAbility() != null) {
             beast.setStrength((byte) request.getAbility().getStr());
@@ -329,8 +333,7 @@ public class BestiaryServiceImpl implements BestiaryService {
                     CreatureFeat feat = new CreatureFeat();
                     feat.setName(item.getName().getRus().trim());
                     feat.setEnglishName(trimToNull(item.getName().getEng()));
-                    feat.setDescription(trimToNull(item.getDescription()));
-                    feat.setMarkdown(item.getMarkdown() == null || item.getMarkdown());
+                    feat.setDescription(blocksOrEmpty(item.getDescription()));
                     return feat;
                 })
                 .collect(Collectors.toList());
@@ -351,25 +354,41 @@ public class BestiaryServiceImpl implements BestiaryService {
     private List<Action> mapActions(Collection<DescriptionRequest> request, ActionType type) {
         return nullToEmpty(request).stream()
                 .filter(item -> item.getName() != null && StringUtils.hasText(item.getName().getRus()))
-                .map(item -> createAction(item.getName().getRus(), item.getName().getEng(), item.getDescription(), item.getMarkdown(), type))
+                .map(item -> createAction(item.getName().getRus(), item.getName().getEng(), item.getDescription(), type))
                 .collect(Collectors.toList());
     }
 
     private List<Action> mapNameValueActions(Collection<NameValueApi> request, ActionType type) {
         return nullToEmpty(request).stream()
                 .filter(item -> StringUtils.hasText(item.getName()))
-                .map(item -> createAction(item.getName(), null, item.getValue() == null ? null : item.getValue().toString(), true, type))
+                .map(item -> createAction(item.getName(), null, valueBlocks(item.getValue()), type))
                 .collect(Collectors.toList());
     }
 
-    private Action createAction(String name, String englishName, String description, Boolean markdown, ActionType type) {
+    private Action createAction(String name, String englishName, List<String> description, ActionType type) {
         Action action = new Action();
         action.setName(name.trim());
         action.setEnglishName(trimToNull(englishName));
-        action.setDescription(StringUtils.hasText(description) ? description.trim() : "");
+        action.setDescription(blocksOrEmpty(description));
         action.setActionType(type);
-        action.setMarkdown(markdown == null || markdown);
         return action;
+    }
+
+    /** Блоки без пустых; описания действия и умения хранятся всегда, пустое — {@code []}. */
+    private static List<String> blocksOrEmpty(List<String> blocks) {
+        List<String> trimmed = Markup.trimBlocks(blocks);
+        return trimmed == null ? new ArrayList<>() : trimmed;
+    }
+
+    /**
+     * Описание легендарного действия из {@link NameValueApi#getValue()}: массив блоков разметки или
+     * HTML-строка (её переводит конвертер).
+     */
+    private static List<String> valueBlocks(Object value) {
+        if (value instanceof Collection<?> items) {
+            return items.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.toList());
+        }
+        return value == null ? null : Markup.fromHtml(value.toString());
     }
 
     private void mapLanguages(Creature beast, BeastDetailRequest request) {

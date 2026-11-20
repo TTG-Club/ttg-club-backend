@@ -1,5 +1,9 @@
 package club.dnd5.portal.dto.api.bestiary.request;
 
+import jakarta.validation.constraints.NotBlank;
+import java.util.List;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.*;
 import club.dnd5.portal.dto.api.classes.NameApi;
@@ -82,8 +86,9 @@ public class BeastDetailRequest {
 	@Schema(description = "Реакции")
 	@Valid
 	private Collection<DescriptionRequest> reactions;
-	@ValidHtml
-	private String reaction;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> reaction;
 	@Schema(description = "Бонусные действия")
 	@Valid
 	private Collection<DescriptionRequest> bonusActions;
@@ -94,8 +99,9 @@ public class BeastDetailRequest {
 	@Valid
 	private Collection<DescriptionRequest> mysticalActions;
 	@Schema(description = "Текстовое описание")
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	@Schema(description = "Тэги", example = "Дроу")
 	private Collection<String> tags;
 	@Schema(description = "Среда обитания")

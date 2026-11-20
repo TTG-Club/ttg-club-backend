@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.creature;
 
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import lombok.Getter;
@@ -17,10 +18,7 @@ import lombok.Setter;
 public class Action {
 	private String name;
 	private String englishName;
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0035). */
+	private List<String> description;
 	private ActionType actionType;
-	/**
-	 * Если действие содержит markdown
-	 */
-	private boolean markdown;
 }

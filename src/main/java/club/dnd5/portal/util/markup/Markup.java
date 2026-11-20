@@ -25,6 +25,15 @@ public final class Markup {
 		return MarkupHtmlRenderer.render(blocks);
 	}
 
+	/**
+	 * HTML из блоков для кода, который разбирает HTML (экспорт в Foundry, VTTG); без блоков — пустая
+	 * строка, а не {@code null}.
+	 */
+	public static String htmlOrEmpty(List<String> blocks) {
+		String html = toHtml(blocks);
+		return html == null ? "" : html;
+	}
+
 	/** Блоки без пробелов по краям и без пустых; {@code null} остаётся {@code null}. */
 	public static List<String> trimBlocks(List<String> blocks) {
 		if (blocks == null) {

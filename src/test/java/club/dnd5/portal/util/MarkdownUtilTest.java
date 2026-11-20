@@ -1,36 +1,20 @@
 package club.dnd5.portal.util;
 
-import club.dnd5.portal.model.creature.Action;
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.creature.CreatureFeat;
+import club.dnd5.portal.util.markup.Markup;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Разметка описаний существа в html для ответа API не должна менять саму сущность:
- * иначе при создании и правке в мастерской (внутри транзакции) html записывался в базу
- * вместо исходного markdown.
+ * Шаблоны действий и умений существ разворачиваются миграцией 0035 так же, как раньше их показывал
+ * API, и дальше переводятся в разметку core-api с подписью броска.
  */
 class MarkdownUtilTest {
 	private static final String SOURCE = "<p>{@atk mw} {@hit 4} к попаданию. {@h} 5 ({@damage 1к6 + 2}) урона. {@beast_name} рычит.</p>";
 
-	private static Creature goblin() {
-		Creature creature = new Creature();
-		creature.setName("Гоблин");
-		return creature;
-	}
-
 	@Test
-	void actionHtmlDoesNotChangeEntity() {
-		Action action = new Action();
-		action.setMarkdown(true);
-		action.setDescription(SOURCE);
-
-		String html = MarkdownUtil.html(action, goblin());
-
-		assertThat(action.getDescription()).isEqualTo(SOURCE);
-		assertThat(html)
+	void actionTemplateToHtml() {
+		assertThat(MarkdownUtil.toHtml(SOURCE, "Гоблин"))
 			.contains("<em>Рукопашная атака оружием:</em>")
 			.contains("<dice-roller label=\"Атака\" formula=\"к20 + 4\">+4</dice-roller>")
 			.contains("<dice-roller label=\"Урон\" formula=\"1к6 + 2\"/>")
@@ -39,23 +23,18 @@ class MarkdownUtilTest {
 	}
 
 	@Test
-	void featHtmlDoesNotChangeEntity() {
-		CreatureFeat feat = new CreatureFeat();
-		feat.setMarkdown(true);
-		feat.setDescription(SOURCE);
-
-		String html = MarkdownUtil.html(feat, goblin());
-
-		assertThat(feat.getDescription()).isEqualTo(SOURCE);
-		// внутри предложения имя существа — со строчной буквы, после точки — как есть
-		assertThat(html).contains(". Гоблин рычит").doesNotContain("{@");
+	void featTemplateKeepsCaseRules() {
+		// у существ, кроме НПС, имя внутри предложения — со строчной буквы, после точки — как есть
+		assertThat(MarkdownUtil.featHtml("<p>Если {@beast_name} падает. {@beast_name} встаёт.</p>", "Гоблин", 0))
+			.isEqualTo("<p>Если гоблин падает. Гоблин встаёт.</p>");
+		assertThat(MarkdownUtil.featHtml("<p>Если {@beast_name} падает.</p>", "Ксандр", 102))
+			.isEqualTo("<p>Если Ксандр падает.</p>");
 	}
 
 	@Test
-	void notMarkdownReturnedAsIs() {
-		Action action = new Action();
-		action.setDescription(SOURCE);
-
-		assertThat(MarkdownUtil.html(action, goblin())).isEqualTo(SOURCE);
+	void expandedTemplateBecomesMarkupWithRollLabels() {
+		assertThat(Markup.fromHtml(MarkdownUtil.toHtml(SOURCE, "Гоблин")))
+			.containsExactly("{@i Рукопашная атака оружием:} {@roll к20 + 4 | text:+4 | label:Атака} к попаданию. "
+				+ "{@i Попадание:} 5 ({@roll 1к6 + 2 | label:Урон}) урона. Гоблин рычит.");
 	}
 }

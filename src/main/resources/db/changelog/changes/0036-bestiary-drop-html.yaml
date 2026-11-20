@@ -1,0 +1,83 @@
+# Этап 3, бестиарий (contract): HTML-колонки удаляются, jsonb-разметка занимает их имена.
+# От описания существа зависит view глобального поиска — он пересоздаётся (версия 10 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+databaseChangeLog:
+  - changeSet:
+      id: 0036-bestiary-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v9.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0036-bestiary-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: creatures
+            direction: toHtml
+            columns: description_markup>description, legendary_markup>legendary, reaction_markup>reaction
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: lairs
+            idColumn: lair_id
+            direction: toHtml
+            columns: description_markup>description, action_markup>action, effect_markup>effect
+  - changeSet:
+      id: 0036-bestiary-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE creatures DROP COLUMN description, DROP COLUMN legendary, DROP COLUMN reaction;
+              ALTER TABLE lairs DROP COLUMN description, DROP COLUMN action, DROP COLUMN effect
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE creatures ADD COLUMN description text COLLATE ci, ADD COLUMN legendary text COLLATE ci,
+              ADD COLUMN reaction text COLLATE ci;
+              ALTER TABLE lairs ADD COLUMN description text COLLATE ci, ADD COLUMN action text COLLATE ci,
+              ADD COLUMN effect text COLLATE ci
+  - changeSet:
+      id: 0036-bestiary-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE creatures RENAME COLUMN description_markup TO description;
+              ALTER TABLE creatures RENAME COLUMN legendary_markup TO legendary;
+              ALTER TABLE creatures RENAME COLUMN reaction_markup TO reaction;
+              ALTER TABLE lairs RENAME COLUMN description_markup TO description;
+              ALTER TABLE lairs RENAME COLUMN action_markup TO action;
+              ALTER TABLE lairs RENAME COLUMN effect_markup TO effect
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE lairs RENAME COLUMN effect TO effect_markup;
+              ALTER TABLE lairs RENAME COLUMN action TO action_markup;
+              ALTER TABLE lairs RENAME COLUMN description TO description_markup;
+              ALTER TABLE creatures RENAME COLUMN reaction TO reaction_markup;
+              ALTER TABLE creatures RENAME COLUMN legendary TO legendary_markup;
+              ALTER TABLE creatures RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0036-bestiary-search-view-v10
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v10.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search
