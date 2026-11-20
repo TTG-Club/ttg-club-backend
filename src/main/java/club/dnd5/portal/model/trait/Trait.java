@@ -30,8 +30,10 @@ public class Trait {
 	private Integer level;
 	private String requirement;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0021/0022). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
 	@Column(columnDefinition = "jsonb", nullable = false)
@@ -58,5 +60,6 @@ public class Trait {
 	private void nullJsonListsToEmpty() {
 		abilities = abilities == null ? new ArrayList<>() : abilities;
 		skills = skills == null ? new ArrayList<>() : skills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }
