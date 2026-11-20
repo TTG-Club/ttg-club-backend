@@ -1,19 +1,22 @@
 package club.dnd5.portal.dto.api.spell;
 
-import club.dnd5.portal.util.markup.Markup;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.model.TimeUnit;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.splells.TimeCast;
-import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -55,12 +58,14 @@ public class SpellSaveApi {
 	@NotBlank
 	private String duration;
 
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 
-	@ValidHtml
-	private String upper;
+	/** Блоки разметки «На больших уровнях»; пусто — нет. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> upper;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
@@ -85,8 +90,8 @@ public class SpellSaveApi {
 		}
 		range = spell.getDistance();
 		duration = spell.getDuration();
-		description = Markup.toHtml(spell.getDescription());
-		upper = Markup.toHtml(spell.getUpperLevel());
+		description = spell.getDescription();
+		upper = spell.getUpperLevel();
 		source = spell.getBook() == null ? null : spell.getBook().getSource();
 	}
 }

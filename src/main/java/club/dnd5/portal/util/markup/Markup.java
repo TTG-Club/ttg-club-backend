@@ -1,11 +1,12 @@
 package club.dnd5.portal.util.markup;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Описания в формате core-api: хранятся массивом строк-блоков разметки (jsonb), старому фронтенду
- * отдаются HTML-ом через мост {@link MarkupHtmlRenderer}, из редактора мастерской приходят HTML-ом
- * и переводятся {@link HtmlToMarkupConverter}.
+ * Описания в формате core-api: хранятся массивом строк-блоков разметки (jsonb) и так же отдаются API,
+ * а HTML (экспорт VTTG/FVTT, поиск, старые ревизии) получается и переводится мостом
+ * {@link MarkupHtmlRenderer} / {@link HtmlToMarkupConverter}.
  */
 public final class Markup {
 	private Markup() {
@@ -22,6 +23,14 @@ public final class Markup {
 	/** Блоки разметки → HTML старого фронтенда; пустое описание — {@code null}. */
 	public static String toHtml(List<String> blocks) {
 		return MarkupHtmlRenderer.render(blocks);
+	}
+
+	/** Блоки без пробелов по краям и без пустых; {@code null} остаётся {@code null}. */
+	public static List<String> trimBlocks(List<String> blocks) {
+		if (blocks == null) {
+			return null;
+		}
+		return blocks.stream().map(String::trim).filter(block -> !block.isEmpty()).collect(Collectors.toList());
 	}
 
 	/** {@code null}, если блоков нет (для необязательных описаний вроде «На больших уровнях»). */

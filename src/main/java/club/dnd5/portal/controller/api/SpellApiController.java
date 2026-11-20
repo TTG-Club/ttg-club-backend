@@ -215,9 +215,9 @@ public class SpellApiController {
 		spell.setAdditionalMaterialComponent(trimToNull(request.getMaterialComponent()));
 		spell.setDistance(request.getRange().trim());
 		spell.setDuration(request.getDuration().trim());
-		// из редактора мастерской приходит HTML — в базе разметка core-api
-		spell.setDescription(Markup.fromHtml(request.getDescription().trim()));
-		spell.setUpperLevel(Markup.emptyToNull(Markup.fromHtml(trimToNull(request.getUpper()))));
+		// редактор мастерской присылает разметку core-api — как она хранится в базе
+		spell.setDescription(Markup.trimBlocks(request.getDescription()));
+		spell.setUpperLevel(Markup.emptyToNull(Markup.trimBlocks(request.getUpper())));
 		spell.setSrd(Boolean.FALSE);
 		if (spell.getDamageType() == null) {
 			spell.setDamageType(new ArrayList<>());

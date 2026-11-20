@@ -184,10 +184,13 @@ core-app разбирает каждую строку парсером, в то�
 
 ### Мост и перевод сущностей (шаг 3)
 
-Пока фронтенд не рендерит разметку сам, бэкенд отдаёт HTML: `util/markup/MarkupHtmlRenderer`
+Сущностям, которые фронтенд ещё не рендерит разметкой, бэкенд отдаёт HTML: `util/markup/MarkupHtmlRenderer`
 (разбор — `MarkupParser`, по грамматике core-app) собирает из блоков HTML старого фронтенда
-(`<dice-roller>`, `<detail-tooltip>`, `dnd5_table`). Фасад — `Markup.toHtml` / `Markup.fromHtml`:
-API и форма мастерской получают HTML, сохранение из мастерской переводит HTML в разметку.
+(`<dice-roller>`, `<detail-tooltip>`, `dnd5_table`). Фасад — `Markup.toHtml` / `Markup.fromHtml`.
+Сущности, на которые фронтенд уже переведён (заклинания), моста не используют: API отдаёт блоки
+разметки, редактор мастерской (`MarkupEditor`, перенесён из core-app) присылает их же. HTML остаётся
+для экспорта VTTG/FVTT, краткого описания в поиске и старых ревизий: снимок аудита с HTML-строкой
+читается `MarkupBlocksDeserializer` и переводится в разметку при восстановлении.
 `convert(render(blocks)) == blocks` — проверено на всех ~25 тыс. текстах.
 
 Перевод в БД — Liquibase `customChange` `config/liquibase/MarkupColumnsChange` (параметры `table`,
