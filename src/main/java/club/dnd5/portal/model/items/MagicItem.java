@@ -7,6 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,8 +40,10 @@ public class MagicItem {
 	@Column
 	private String special;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0027/0028). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 	private boolean consumed;
 	private Integer charge;
 
@@ -168,5 +174,12 @@ public class MagicItem {
 
 	public String getUrlName(){
 		return StringUtil.getUrl(englishName);
+	}
+
+	/** jsonb-колонка NOT NULL: «нет описания» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullDescriptionToEmpty() {
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

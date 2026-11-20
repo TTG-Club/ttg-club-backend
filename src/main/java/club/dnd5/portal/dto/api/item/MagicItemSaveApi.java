@@ -10,6 +10,10 @@ import lombok.Setter;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import jakarta.validation.constraints.NotEmpty;
 
 @NoArgsConstructor
 @Getter
@@ -29,9 +33,10 @@ public class MagicItemSaveApi {
 	private String custSpecial;
 	@ValidHtml
 	private String special;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private Boolean consumed;
 	private Integer charge;
 	private Boolean curse;

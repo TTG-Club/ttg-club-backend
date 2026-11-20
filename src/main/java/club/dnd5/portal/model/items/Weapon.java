@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.List;
 @Getter
 @Setter
@@ -53,11 +55,15 @@ public class Weapon {
 
 	private Byte ammo;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Описание. Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0027/0028); NULL — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> description;
 
-	@Column(columnDefinition = "TEXT")
-	private String special;
+	/** Особое свойство. Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0027/0028); NULL — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> special;
 
 	@ManyToOne
 	@JoinColumn(name = "source")

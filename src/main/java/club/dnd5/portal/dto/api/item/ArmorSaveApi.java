@@ -2,13 +2,15 @@ package club.dnd5.portal.dto.api.item;
 
 import club.dnd5.portal.model.items.ArmorCategory;
 import club.dnd5.portal.model.items.Armor;
-import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @NoArgsConstructor
 @Getter
@@ -26,8 +28,9 @@ public class ArmorSaveApi {
 	private Boolean stealthHindrance;
 	@NotNull
 	private ArmorCategory type;
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
