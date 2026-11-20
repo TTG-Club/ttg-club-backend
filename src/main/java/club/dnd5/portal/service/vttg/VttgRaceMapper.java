@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.vttg;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Language;
@@ -51,7 +52,7 @@ public class VttgRaceMapper {
 		data.put("isSRD", false);
 		data.put("name", VttgText.orEmpty(race.getName()));
 		data.put("nameEn", VttgText.orEmpty(race.getEnglishName()));
-		data.put("description", VttgText.html(race.getDescription()));
+		data.put("description", VttgText.html(Markup.toHtml(race.getDescription())));
 		data.put("sourceKey", VttgDictionaries.sourceKey(race.getBook()));
 		data.put("creatureType", VttgDictionaries.creatureType(
 			race.getType() == null && parent != null ? parent.getType() : race.getType()));
@@ -105,7 +106,7 @@ public class VttgRaceMapper {
 		Map<String, Object> data = new LinkedHashMap<>();
 		data.put("key", recordKey + "-" + (slug == null ? String.valueOf(feature.getId()) : slug));
 		data.put("name", VttgText.orEmpty(feature.getName()));
-		data.put("description", VttgText.html(feature.getDescription()));
+		data.put("description", VttgText.html(Markup.toHtml(feature.getDescription())));
 
 		Map<String, Object> featData = featData();
 		if (feature.getSkills() != null && !feature.getSkills().isEmpty()) {

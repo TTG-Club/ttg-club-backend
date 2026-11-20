@@ -5,6 +5,7 @@ import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.races.RaceNickname;
 import club.dnd5.portal.model.races.Sex;
+import club.dnd5.portal.util.markup.Markup;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
@@ -18,7 +19,8 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 public class RaceDetailApi extends RaceApi {
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private String altName;
 	private Integer minAge;
 	private Integer maxAge;
@@ -109,7 +111,8 @@ public class RaceDetailApi extends RaceApi {
 		private final Integer id;
 		private final String name;
 		private final String englishName;
-		private final String description;
+		/** Блоки разметки core-api. */
+		private final List<String> description;
 		private final boolean feature;
 		private final Integer replaceFeatureId;
 
@@ -191,12 +194,15 @@ public class RaceDetailApi extends RaceApi {
 		}
 
 		if (!descriptionBuilder.toString().isEmpty()) {
+			List<String> nameBlocks = Markup.fromHtml(descriptionBuilder.toString());
 			if (existingSkill != null) {
-				existingSkill.setDescription(existingSkill.getDescription() + descriptionBuilder);
+				List<String> merged = new ArrayList<>(existingSkill.getDescription());
+				merged.addAll(nameBlocks);
+				existingSkill.setDescription(merged);
 			} else {
 				Feature feature = new Feature();
 				feature.setName(featureName);
-				feature.setDescription(descriptionBuilder.toString());
+				feature.setDescription(nameBlocks);
 
 				RaceSkillApi raceSkillApi = new RaceSkillApi(feature);
 				skills.add(raceSkillApi);

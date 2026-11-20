@@ -38,8 +38,10 @@ public class Feature {
 
 	private String name;
 	private String englishName;
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0031). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 	private boolean feature;
 	
 	@ManyToMany
@@ -61,5 +63,6 @@ public class Feature {
 	@jakarta.persistence.PreUpdate
 	private void nullJsonListsToEmpty() {
 		skills = skills == null ? new ArrayList<>() : skills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }
