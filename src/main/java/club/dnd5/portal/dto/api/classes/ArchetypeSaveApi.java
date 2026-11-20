@@ -1,11 +1,13 @@
 package club.dnd5.portal.dto.api.classes;
 
+import jakarta.validation.constraints.NotEmpty;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
-import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,7 +25,8 @@ public class ArchetypeSaveApi {
 	@NotBlank private String name;
 	@NotBlank private String englishName;
 	private String genitiveName;
-	@NotBlank @ValidHtml private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty @JsonDeserialize(using = MarkupBlocksDeserializer.class) private List<@NotBlank String> description;
 	@Min(1) @Max(20) private byte level;
 	private SpellcasterType spellcasterType;
 	private String optionType;

@@ -34,8 +34,10 @@ public class HeroClass {
 	private String englishName;
 	@Column(name = "name_accusative")
 	private String accusativeName;
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0033). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
 	@Column(name = "level_definitions", columnDefinition = "jsonb", nullable = false)
@@ -54,8 +56,10 @@ public class HeroClass {
 	private String savingThrows;
 	private String archetypeName;
 
-	@Column(columnDefinition = "TEXT")
-	private String equipment;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0033); {@code null} — снаряжения нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> equipment;
 
 	/**
 	 * Обратная сторона Spell.heroClass (таблица spells_hero_class). Раньше связь была
@@ -204,5 +208,6 @@ public class HeroClass {
 		levelDefenitions = levelDefenitions == null ? new ArrayList<>() : levelDefenitions;
 		primaryAbilities = primaryAbilities == null ? new ArrayList<>() : primaryAbilities;
 		availableSkills = availableSkills == null ? new ArrayList<>() : availableSkills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

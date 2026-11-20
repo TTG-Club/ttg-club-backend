@@ -15,6 +15,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,24 +37,20 @@ class HtmlValidatorTest {
 
 	@Test
 	void acceptsValidHtmlFragment() {
-		ClassSaveApi request = new ClassSaveApi();
-		request.setName("Воин");
-		request.setEnglishName("Fighter");
+		DescriptionRequest request = new DescriptionRequest();
 		request.setDescription("<p class=\"lead\">Текст <strong>описания</strong><br></p>");
-		request.setDiceHp((byte) 10);
 
-		assertThat(validator.validate(request)).isEmpty();
+		assertThat(validator.validate(request))
+			.extracting(violation -> violation.getPropertyPath().toString())
+			.doesNotContain("description");
 	}
 
 	@Test
 	void rejectsMismatchedAndUnclosedTags() {
-		ClassSaveApi request = new ClassSaveApi();
-		request.setName("Воин");
-		request.setEnglishName("Fighter");
+		DescriptionRequest request = new DescriptionRequest();
 		request.setDescription("<p><strong>Некорректное описание</p>");
-		request.setDiceHp((byte) 10);
 
-		Set<ConstraintViolation<ClassSaveApi>> violations = validator.validate(request);
+		Set<ConstraintViolation<DescriptionRequest>> violations = validator.validate(request);
 
 		assertThat(violations)
 			.anySatisfy(violation -> {
@@ -107,22 +104,22 @@ class HtmlValidatorTest {
 	}
 
 	@Test
-	void validatesNestedEditorBlocks() {
+	void rejectsBlankMarkupBlocksInNestedTraits() {
 		ClassTraitSaveApi trait = new ClassTraitSaveApi();
 		trait.setName("Второе дыхание");
 		trait.setLevel((byte) 1);
-		trait.setDescription("<div><span>Некорректный блок</div>");
+		trait.setDescription(List.of(" "));
 
 		ClassSaveApi request = new ClassSaveApi();
 		request.setName("Воин");
 		request.setEnglishName("Fighter");
-		request.setDescription("<p>Описание</p>");
+		request.setDescription(List.of("Описание"));
 		request.setDiceHp((byte) 10);
 		request.setClassTraits(Collections.singletonList(trait));
 
 		assertThat(validator.validate(request))
 			.extracting(violation -> violation.getPropertyPath().toString())
-			.contains("classTraits[0].description");
+			.anyMatch(path -> path.startsWith("classTraits[0].description"));
 	}
 
 	@Test

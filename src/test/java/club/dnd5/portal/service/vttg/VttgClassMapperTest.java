@@ -54,7 +54,7 @@ class VttgClassMapperTest {
 		ArchetypeTrait critical = new ArchetypeTrait();
 		critical.setName("Улучшенный критический удар");
 		critical.setLevel((byte) 3);
-		critical.setDescription("<p>Критическое попадание на 19–20.</p>");
+		critical.setDescription(List.of("Критическое попадание на 19–20."));
 		champion.setFeats(Collections.singletonList(critical));
 		fighter.setArchetypes(Collections.singletonList(champion));
 
@@ -259,7 +259,7 @@ class VttgClassMapperTest {
 		trait.setId(id);
 		trait.setName(name);
 		trait.setLevel((byte) level);
-		trait.setDescription("<p>Описание " + id + "</p>");
+		trait.setDescription(List.of("Описание " + id));
 		return trait;
 	}
 

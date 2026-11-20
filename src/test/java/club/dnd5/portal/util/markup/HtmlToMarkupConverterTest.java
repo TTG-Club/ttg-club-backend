@@ -31,6 +31,12 @@ class HtmlToMarkupConverterTest {
 	}
 
 	@Test
+	void samePageAnchorStaysLink() {
+		assertThat(convert("<p>См. <a href=\"#c1\">Вдохновение барда</a> и <a href=\"#\">пусто</a>.</p>"))
+			.containsExactly("См. {@link Вдохновение барда | url:#c1} и пусто.");
+	}
+
+	@Test
 	void selfClosingDiceRollerDoesNotSwallowText() {
 		assertThat(convert("<p>4&nbsp;(<dice-roller formula=\"1к4 + 2\"/>) урона, "
 			+ "<dice-roller label=\"Атака\" formula=\"к20 + 4\">+4</dice-roller> к попаданию</p>"))

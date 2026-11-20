@@ -431,13 +431,17 @@ public final class HtmlToMarkupConverter {
 	private String link(Element a) {
 		String raw = inlineChildren(a, true);
 		String href = a.attr("href").trim();
-		if (href.isEmpty() || href.startsWith("#") || href.startsWith("javascript:")) {
+		if (href.isEmpty() || href.equals("#") || href.startsWith("javascript:")) {
 			report.note("link:empty-href", a.outerHtml());
 			return raw;
 		}
 		if (isBlank(cleanBrs(raw))) {
 			report.note("link:empty-text", a.outerHtml());
 			return raw;
+		}
+		if (href.startsWith("#")) {
+			// якорь на той же странице: умения класса ссылаются друг на друга (#c12, #a34)
+			return wrapBody("link", raw, " | url:" + attrValue(href));
 		}
 		Matcher own = OWN_HOST.matcher(href);
 		if (own.find()) {
