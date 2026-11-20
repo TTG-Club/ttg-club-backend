@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api;
 
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -19,7 +20,8 @@ public class BookApi {
 	private NameApi name;
 	private String url;
 	private TypeApi type;
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private Integer year;
 	private SourceApi source;
 	/** Обложка источника, если она загружена. */

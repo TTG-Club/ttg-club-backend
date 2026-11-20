@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.util.List;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 
 @NoArgsConstructor
@@ -25,8 +28,10 @@ public class Book implements Serializable, Comparable<Book>{
 	private String altName;
 	private String englishName;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0037); {@code null} — описания нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> description;
 
 	@Enumerated(EnumType.STRING)
 	private TypeBook type;

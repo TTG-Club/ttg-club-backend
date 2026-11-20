@@ -1,8 +1,10 @@
 package club.dnd5.portal.dto.api.book;
 
+import java.util.List;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
-import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,8 +28,9 @@ public class BookSaveApi {
 	@NotNull
 	private TypeBook type;
 	private Integer year;
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 
 	public BookSaveApi(Book book) {
 		name = book.getName();

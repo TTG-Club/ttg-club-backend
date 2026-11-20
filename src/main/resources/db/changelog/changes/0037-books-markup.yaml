@@ -1,0 +1,29 @@
+# Этап 3, источники (expand): описание книги — из HTML в разметку core-api. Новую jsonb-колонку
+# (массив строк-блоков, см. util/markup/HtmlToMarkupConverter) заполняет конвертер на Java, старую
+# удаляет 0038. Описание необязательно: NULL (и пустая строка или одни пробелы до перевода) — нет.
+# Последний раздел этапа 3: дальше описания всех разделов хранятся разметкой.
+databaseChangeLog:
+  - changeSet:
+      id: 0037-books-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE books ADD COLUMN description_markup jsonb
+      rollback:
+        - sql:
+            sql: ALTER TABLE books DROP COLUMN description_markup
+  - changeSet:
+      id: 0037-books-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: books
+            idColumn: source
+            columns: description>description_markup
+        - sql:
+            sql: UPDATE books SET description_markup = NULL WHERE description_markup = '[]'::jsonb
+      # колонку удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1
