@@ -29,11 +29,15 @@ public class Background {
 	private String englishName;
 	private String altName;
 
-	@Column(columnDefinition = "TEXT")
-	private String toolOwnership;
+	/** Владение инструментами. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> toolOwnership;
 
-	@Column(columnDefinition = "TEXT")
-	private String equipmentsText;
+	/** Снаряжение (перечисление через запятую). Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> equipmentsText;
 
 	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
 	@Column(columnDefinition = "jsonb", nullable = false)

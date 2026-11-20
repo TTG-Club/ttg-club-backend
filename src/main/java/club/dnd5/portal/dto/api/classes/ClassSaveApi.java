@@ -36,9 +36,15 @@ public class ClassSaveApi {
 	@Min(1)
 	@Max(20)
 	private byte diceHp;
-	private String armor;
-	private String weapon;
-	private String tools;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> armor;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> weapon;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> tools;
 	private String savingThrows;
 	private String archetypeName;
 	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */

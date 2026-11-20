@@ -80,11 +80,12 @@ public class VttgBackgroundMapper {
 	}
 
 	private List<Map<String, Object>> equipment(Background background) {
-		if (VttgText.isBlank(background.getEquipmentsText()) && background.getStartMoney() <= 0) {
+		String equipment = Markup.toInlineHtml(background.getEquipmentsText());
+		if (VttgText.isBlank(equipment) && background.getStartMoney() <= 0) {
 			return Collections.emptyList();
 		}
 		Map<String, Object> option = new LinkedHashMap<>();
-		option.put("description", VttgText.html(background.getEquipmentsText()));
+		option.put("description", VttgText.html(equipment));
 		if (background.getStartMoney() > 0) {
 			option.put("coins", background.getStartMoney());
 		}
@@ -151,7 +152,7 @@ public class VttgBackgroundMapper {
 	private String description(Background background) {
 		StringBuilder html = new StringBuilder();
 		appendLine(html, "Владение навыками", skillsText(background));
-		appendLine(html, "Владение инструментами", background.getToolOwnership());
+		appendLine(html, "Владение инструментами", Markup.toInlineHtml(background.getToolOwnership()));
 		appendLine(html, "Языки", background.getLanguage());
 		html.append(VttgText.html(Markup.toHtml(background.getDescription())));
 		String personalization = Markup.toHtml(background.getPersonalization());

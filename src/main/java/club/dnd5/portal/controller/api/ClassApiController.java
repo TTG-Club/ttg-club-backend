@@ -340,9 +340,9 @@ public class ClassApiController {
 		heroClass.setAccusativeName(trimToNull(request.getAccusativeName()));
 		heroClass.setDescription(Markup.trimBlocks(request.getDescription()));
 		heroClass.setDiceHp(request.getDiceHp());
-		heroClass.setArmor(trimToNull(request.getArmor()));
-		heroClass.setWeapon(trimToNull(request.getWeapon()));
-		heroClass.setTools(trimToNull(request.getTools()));
+		heroClass.setArmor(Markup.emptyToNull(Markup.trimBlocks(request.getArmor())));
+		heroClass.setWeapon(Markup.emptyToNull(Markup.trimBlocks(request.getWeapon())));
+		heroClass.setTools(Markup.emptyToNull(Markup.trimBlocks(request.getTools())));
 		heroClass.setSavingThrows(trimToNull(request.getSavingThrows()));
 		heroClass.setArchetypeName(trimToNull(request.getArchetypeName()));
 		heroClass.setEquipment(Markup.emptyToNull(Markup.trimBlocks(request.getEquipment())));

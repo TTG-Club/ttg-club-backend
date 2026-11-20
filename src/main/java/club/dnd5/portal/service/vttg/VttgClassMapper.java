@@ -92,13 +92,13 @@ public class VttgClassMapper {
 		if (!primary.isEmpty()) {
 			data.put("primaryAbilities", primary);
 		}
-		Proficiency armor = armor(heroClass.getArmor());
+		Proficiency armor = armor(Markup.toInlineHtml(heroClass.getArmor()));
 		data.put("armorProficiencies", armor.categories);
 		putIfPresent(data, "armorProficienciesCustom", armor.custom);
-		Proficiency weapon = weapon(heroClass.getWeapon());
+		Proficiency weapon = weapon(Markup.toInlineHtml(heroClass.getWeapon()));
 		data.put("weaponProficiencies", weapon.categories);
 		putIfPresent(data, "weaponProficienciesCustom", weapon.custom);
-		data.put("toolProficiencies", tools(heroClass.getTools()));
+		data.put("toolProficiencies", tools(Markup.toInlineHtml(heroClass.getTools())));
 		data.put("savingThrowProficiencies", savingThrows(heroClass.getSavingThrows()));
 		data.put("skillChoices", skillChoices(heroClass));
 		String equipment = VttgText.html(Markup.toHtml(heroClass.getEquipment()));

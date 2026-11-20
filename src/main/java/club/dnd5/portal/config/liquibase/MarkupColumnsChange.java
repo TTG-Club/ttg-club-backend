@@ -2,6 +2,7 @@ package club.dnd5.portal.config.liquibase;
 
 import club.dnd5.portal.util.HtmlConverter;
 import club.dnd5.portal.util.markup.HtmlToMarkupConverter;
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.util.markup.MarkupHtmlRenderer;
 import club.dnd5.portal.util.markup.MarkupReport;
 import liquibase.change.custom.CustomTaskChange;
@@ -32,8 +33,11 @@ import java.util.List;
  * rollback). {@code NULL} остаётся {@code NULL}.
  * <p>
  * {@code sourceFormat} — формат исходного текста при {@code toMarkup}: {@code html} (по умолчанию) или
- * {@code lines} — строки через {@code }, которые API раньше оборачивало в абзацы
+ * {@code lines} — строки через {@code \r}, которые API раньше оборачивало в абзацы
  * ({@link HtmlConverter}); такой текст сначала проходит то же оборачивание.
+ * <p>
+ * {@code inline: true} при {@code toHtml} — короткие поля, которые старый код выводил внутри строки:
+ * HTML без обёртки {@code <p>} ({@link Markup#toInlineHtml}).
  */
 @Getter
 @Setter
@@ -45,6 +49,7 @@ public class MarkupColumnsChange implements CustomTaskChange {
 	private String columns;
 	private String direction = "toMarkup";
 	private String sourceFormat = "html";
+	private boolean inline;
 
 	private int converted;
 
@@ -94,8 +99,12 @@ public class MarkupColumnsChange implements CustomTaskChange {
 		return JSON.writeValueAsString(HtmlToMarkupConverter.convert(html, new MarkupReport()));
 	}
 
-	private static String html(String json) {
-		String rendered = MarkupHtmlRenderer.render(Arrays.asList(JSON.readValue(json, String[].class)));
+	private String html(String json) {
+		List<String> blocks = Arrays.asList(JSON.readValue(json, String[].class));
+		if (inline) {
+			return Markup.toInlineHtml(blocks);
+		}
+		String rendered = MarkupHtmlRenderer.render(blocks);
 		return rendered == null ? "" : rendered;
 	}
 
