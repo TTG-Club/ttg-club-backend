@@ -1,0 +1,80 @@
+# Этап 3, расы (contract): HTML-колонки удаляются, jsonb-разметка занимает их имена.
+# От описания расы зависит view глобального поиска — он пересоздаётся (версия 8 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+databaseChangeLog:
+  - changeSet:
+      id: 0032-races-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v7.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0032-races-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: races
+            direction: toHtml
+            columns: description_markup>description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: race_features
+            direction: toHtml
+            columns: description_markup>description
+  - changeSet:
+      id: 0032-races-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE races DROP COLUMN description;
+              ALTER TABLE race_features DROP COLUMN description
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE races ADD COLUMN description text COLLATE ci;
+              ALTER TABLE race_features ADD COLUMN description text COLLATE ci
+  - changeSet:
+      id: 0032-races-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE races RENAME COLUMN description_markup TO description;
+              ALTER TABLE races ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE races ALTER COLUMN description SET DEFAULT '[]'::jsonb;
+              ALTER TABLE race_features RENAME COLUMN description_markup TO description;
+              ALTER TABLE race_features ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE race_features ALTER COLUMN description SET DEFAULT '[]'::jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE race_features ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE race_features ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE race_features RENAME COLUMN description TO description_markup;
+              ALTER TABLE races ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE races ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE races RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0032-races-search-view-v8
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v8.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

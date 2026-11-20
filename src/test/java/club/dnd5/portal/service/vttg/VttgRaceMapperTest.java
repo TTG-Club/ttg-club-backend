@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.vttg;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.CreatureSize;
@@ -111,7 +112,7 @@ class VttgRaceMapperTest {
 		senses.setId(7);
 		senses.setName("Обострённые чувства");
 		senses.setEnglishName("Keen Senses");
-		senses.setDescription("<p>Вы владеете навыком <a href=\"/skills/perception\">Внимательность</a>.</p>");
+		senses.setDescription(Markup.fromHtml("<p>Вы владеете навыком <a href=\"/skills/perception\">Внимательность</a>.</p>"));
 		senses.setSkills(Collections.singletonList(SkillType.PERCEPTION));
 		Language elvish = new Language();
 		elvish.setName("Эльфийский");

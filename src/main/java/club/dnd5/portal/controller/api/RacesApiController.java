@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
@@ -37,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -287,7 +289,7 @@ public class RacesApiController {
 		race.setEnglishName(request.getEnglishName().trim());
 		race.setMinAge(request.getMinAge());
 		race.setMaxAge(request.getMaxAge());
-		race.setDescription(request.getDescription().trim());
+		race.setDescription(Markup.trimBlocks(request.getDescription()));
 		race.setParent(request.getParentId() == null ? null : raceRepository.findById(request.getParentId()).orElseThrow(PageNotFoundException::new));
 		race.setSize(request.getSize());
 		race.setType(request.getType());
@@ -345,7 +347,7 @@ public class RacesApiController {
 			.collect(Collectors.toMap(Feature::getId, feature -> feature));
 		List<Feature> features = request.getFeatures().stream()
 			.filter(featureRequest -> StringUtils.hasText(featureRequest.getName()))
-			.filter(featureRequest -> StringUtils.hasText(featureRequest.getDescription()))
+			.filter(featureRequest -> !CollectionUtils.isEmpty(Markup.trimBlocks(featureRequest.getDescription())))
 			.map(featureRequest -> {
 				Feature feature = featureRequest.getId() == null
 					? new Feature()
@@ -353,7 +355,7 @@ public class RacesApiController {
 				feature.setRaceId(race.getId());
 				feature.setName(featureRequest.getName().trim());
 				feature.setEnglishName(trimToNull(featureRequest.getEnglishName()));
-				feature.setDescription(featureRequest.getDescription().trim());
+				feature.setDescription(Markup.trimBlocks(featureRequest.getDescription()));
 				feature.setFeature(featureRequest.isFeature());
 				feature.setReplaceFeatureId(featureRequest.getReplaceFeatureId());
 				return feature;
