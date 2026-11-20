@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.vttg;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.background.Background;
@@ -67,7 +68,7 @@ public class VttgBackgroundMapper {
 		if (!VttgText.isBlank(background.getSkillName())) {
 			Map<String, Object> feature = new LinkedHashMap<>();
 			feature.put("name", background.getSkillName().trim());
-			feature.put("description", VttgText.html(background.getSkillDescription()));
+			feature.put("description", VttgText.html(Markup.toHtml(background.getSkillDescription())));
 			data.put("feature", feature);
 		}
 
@@ -152,9 +153,10 @@ public class VttgBackgroundMapper {
 		appendLine(html, "Владение навыками", skillsText(background));
 		appendLine(html, "Владение инструментами", background.getToolOwnership());
 		appendLine(html, "Языки", background.getLanguage());
-		html.append(VttgText.html(background.getDescription()));
-		if (!VttgText.isBlank(background.getPersonalization())) {
-			html.append("<h3>Персонализация</h3>").append(VttgText.html(background.getPersonalization()));
+		html.append(VttgText.html(Markup.toHtml(background.getDescription())));
+		String personalization = Markup.toHtml(background.getPersonalization());
+		if (!VttgText.isBlank(personalization)) {
+			html.append("<h3>Персонализация</h3>").append(VttgText.html(personalization));
 		}
 		appendPersonalization(html, background.getPersonalizations());
 		return html.toString();

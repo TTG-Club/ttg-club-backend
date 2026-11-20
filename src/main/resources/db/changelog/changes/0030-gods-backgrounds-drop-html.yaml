@@ -1,0 +1,85 @@
+# Этап 3, боги и предыстории (contract): старые колонки удаляются, jsonb-разметка занимает их имена.
+# От описаний зависит view глобального поиска — он пересоздаётся (версия 7 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+# Откат описаний богов возвращает HTML (абзацы <p>), а не исходные строки через \r: старый код
+# оборачивает строку без \r в один абзац, вложенные <p> браузер показывает так же.
+databaseChangeLog:
+  - changeSet:
+      id: 0030-gods-backgrounds-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v6.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0030-gods-backgrounds-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: gods
+            direction: toHtml
+            columns: description_markup>description, alternative_description_markup>alternative_description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: backgrounds
+            direction: toHtml
+            columns: description_markup>description, skill_description_markup>skill_description, personalization_markup>personalization
+  - changeSet:
+      id: 0030-gods-backgrounds-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE gods DROP COLUMN description, DROP COLUMN alternative_description;
+              ALTER TABLE backgrounds DROP COLUMN description, DROP COLUMN skill_description, DROP COLUMN personalization
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE gods ADD COLUMN description text COLLATE ci, ADD COLUMN alternative_description text COLLATE ci;
+              ALTER TABLE backgrounds ADD COLUMN description text COLLATE ci, ADD COLUMN skill_description text COLLATE ci,
+              ADD COLUMN personalization text COLLATE ci
+  - changeSet:
+      id: 0030-gods-backgrounds-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE gods RENAME COLUMN description_markup TO description;
+              ALTER TABLE gods RENAME COLUMN alternative_description_markup TO alternative_description;
+              ALTER TABLE backgrounds RENAME COLUMN description_markup TO description;
+              ALTER TABLE backgrounds ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE backgrounds ALTER COLUMN description SET DEFAULT '[]'::jsonb;
+              ALTER TABLE backgrounds RENAME COLUMN skill_description_markup TO skill_description;
+              ALTER TABLE backgrounds RENAME COLUMN personalization_markup TO personalization
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE backgrounds RENAME COLUMN personalization TO personalization_markup;
+              ALTER TABLE backgrounds RENAME COLUMN skill_description TO skill_description_markup;
+              ALTER TABLE backgrounds ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE backgrounds ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE backgrounds RENAME COLUMN description TO description_markup;
+              ALTER TABLE gods RENAME COLUMN alternative_description TO alternative_description_markup;
+              ALTER TABLE gods RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0030-gods-backgrounds-search-view-v7
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v7.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

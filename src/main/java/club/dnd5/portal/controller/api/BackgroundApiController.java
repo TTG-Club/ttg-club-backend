@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
@@ -202,10 +203,10 @@ public class BackgroundApiController {
 		background.setToolOwnership(trimToNull(request.getToolOwnership()));
 		background.setEquipmentsText(trimToNull(request.getEquipments()));
 		background.setStartMoney(request.getStartGold() == null ? 0 : request.getStartGold());
-		background.setDescription(request.getDescription().trim());
+		background.setDescription(Markup.trimBlocks(request.getDescription()));
 		background.setSkillName(trimToNull(request.getSkillName()));
-		background.setSkillDescription(trimToNull(request.getSkillDescription()));
-		background.setPersonalization(trimToNull(request.getPersonalization()));
+		background.setSkillDescription(Markup.emptyToNull(Markup.trimBlocks(request.getSkillDescription())));
+		background.setPersonalization(Markup.emptyToNull(Markup.trimBlocks(request.getPersonalization())));
 		if (request.getPersonalizationTables() != null) {
 			List<Personalization> personalizations = request.getPersonalizationTables().stream()
 				.flatMap(table -> table.toPersonalizations().stream())

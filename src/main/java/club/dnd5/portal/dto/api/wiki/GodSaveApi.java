@@ -5,7 +5,8 @@ import club.dnd5.portal.model.god.Domain;
 import club.dnd5.portal.model.god.God;
 import club.dnd5.portal.model.god.GodSex;
 import club.dnd5.portal.model.god.Rank;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,10 +33,12 @@ public class GodSaveApi {
 	private Rank rank;
 	@NotNull
 	private Alignment alignment;
-	@ValidHtml
-	private String description;
-	@ValidHtml
-	private String alternativeDescription;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> alternativeDescription;
 	private String symbol;
 	private String nicknames;
 	@NotEmpty
@@ -53,7 +56,7 @@ public class GodSaveApi {
 		sex = god.getSex();
 		rank = god.getRankValue();
 		alignment = god.getAligment();
-		description = god.getRawDescription();
+		description = god.getDescription();
 		alternativeDescription = god.getAlternativeDescription();
 		symbol = god.getSymbol();
 		nicknames = god.getNicknames();
