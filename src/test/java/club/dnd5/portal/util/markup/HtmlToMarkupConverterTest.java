@@ -61,6 +61,13 @@ class HtmlToMarkupConverterTest {
 	}
 
 	@Test
+	void headerCellKeepsLeftAlign() {
+		assertThat(convert("<table><thead><tr><th style=\"text-align: left;\">Поведение</th></tr></thead>"
+			+ "<tbody><tr><td style=\"text-align: left;\">x</td></tr></tbody></table>"))
+			.containsExactly("{@table {@tr {@th Поведение | align:left}}{@tr {@td x}}}");
+	}
+
+	@Test
 	void semanticSpansKeepTextAndAreReported() {
 		MarkupReport report = new MarkupReport();
 		assertThat(HtmlToMarkupConverter.convert("<p>спасбросок <span class=\"saving_throw\">Харизмы</span></p>", report))

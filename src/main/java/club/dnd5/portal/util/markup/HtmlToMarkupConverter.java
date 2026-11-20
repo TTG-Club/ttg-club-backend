@@ -539,13 +539,15 @@ public final class HtmlToMarkupConverter {
 				}
 			}
 		}
+		// «left» — выравнивание по умолчанию везде, кроме ячейки заголовка (там по умолчанию центр)
+		boolean keepLeft = el.normalName().equals("th");
 		Matcher m = TEXT_ALIGN.matcher(el.attr("style"));
 		if (m.find()) {
 			String align = m.group(1).toLowerCase(Locale.ROOT);
-			return align.equals("left") ? null : align;
+			return align.equals("left") && !keepLeft ? null : align;
 		}
 		String attr = el.attr("align").toLowerCase(Locale.ROOT);
-		return attr.equals("center") || attr.equals("right") ? attr : null;
+		return attr.equals("center") || attr.equals("right") || (keepLeft && attr.equals("left")) ? attr : null;
 	}
 
 	private void noteClasses(Element el) {
