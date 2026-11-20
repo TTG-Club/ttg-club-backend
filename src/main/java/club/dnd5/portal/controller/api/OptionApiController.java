@@ -27,6 +27,7 @@ import club.dnd5.portal.service.OptionTypeResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -334,7 +335,7 @@ public class OptionApiController {
 		option.setLevel(request.getLevel());
 		String prerequisite = trimToNull(request.getPrerequisite());
 		option.setPrerequisite(prerequisite == null ? "Нет" : prerequisite);
-		option.setDescription(request.getDescription().trim());
+		option.setDescription(Markup.trimBlocks(request.getDescription()));
 		option.setOptionTypes(optionTypeResolver.resolveAll(request.getOptionTypes()));
 		bookResolver.find(request.getSource()).ifPresent(option::setBook);
 	}

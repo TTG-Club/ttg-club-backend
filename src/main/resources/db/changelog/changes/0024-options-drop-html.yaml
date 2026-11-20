@@ -1,0 +1,65 @@
+# Этап 3, особенности классов (contract): HTML-колонка удаляется, jsonb-разметка занимает её имя.
+# От options.description зависит view глобального поиска — он пересоздаётся (версия 4 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+databaseChangeLog:
+  - changeSet:
+      id: 0024-options-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v3.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0024-options-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонку из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: options
+            direction: toHtml
+            columns: description_markup>description
+  - changeSet:
+      id: 0024-options-drop-html-column
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE options DROP COLUMN description
+      rollback:
+        - sql:
+            sql: ALTER TABLE options ADD COLUMN description text COLLATE ci
+  - changeSet:
+      id: 0024-options-rename-markup-column
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE options RENAME COLUMN description_markup TO description;
+              ALTER TABLE options ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE options ALTER COLUMN description SET DEFAULT '[]'::jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE options ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE options ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE options RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0024-options-search-view-v3
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v4.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

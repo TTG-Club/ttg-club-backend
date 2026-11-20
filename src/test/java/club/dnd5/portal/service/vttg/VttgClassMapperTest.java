@@ -61,7 +61,7 @@ class VttgClassMapperTest {
 		Option defense = new Option();
 		defense.setName("Оборона");
 		defense.setEnglishName("Defense");
-		defense.setDescription("<p>+1 к КД.</p>");
+		defense.setDescription(club.dnd5.portal.util.markup.Markup.fromHtml("<p>+1 к КД.</p>"));
 		defense.setPrerequisite("Нет");
 		club.dnd5.portal.model.classes.OptionTypeDefinition fightingStyle = new club.dnd5.portal.model.classes.OptionTypeDefinition("FIGHTING_STYLE", "Боевые стили: Воин", "Fighter", null, false);
 		fightingStyle.setFeatureStem("боевой стиль");
