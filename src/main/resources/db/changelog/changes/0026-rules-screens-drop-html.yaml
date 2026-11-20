@@ -1,0 +1,76 @@
+# Этап 3, правила и ширма (contract): HTML-колонки удаляются, jsonb-разметка занимает их имена.
+# От описаний зависит view глобального поиска — он пересоздаётся (версия 5 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+databaseChangeLog:
+  - changeSet:
+      id: 0026-rules-screens-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v4.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0026-rules-screens-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: rules
+            direction: toHtml
+            columns: description_markup>description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: screens
+            direction: toHtml
+            columns: description_markup>description
+  - changeSet:
+      id: 0026-rules-screens-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE rules DROP COLUMN description;
+              ALTER TABLE screens DROP COLUMN description
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE rules ADD COLUMN description text COLLATE ci;
+              ALTER TABLE screens ADD COLUMN description text COLLATE ci
+  - changeSet:
+      id: 0026-rules-screens-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE rules RENAME COLUMN description_markup TO description;
+              ALTER TABLE rules ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE rules ALTER COLUMN description SET DEFAULT '[]'::jsonb;
+              ALTER TABLE screens RENAME COLUMN description_markup TO description
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE screens RENAME COLUMN description TO description_markup;
+              ALTER TABLE rules ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE rules ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE rules RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0026-rules-screens-search-view-v5
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v5.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

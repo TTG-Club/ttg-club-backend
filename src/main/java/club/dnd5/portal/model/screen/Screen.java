@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.List;
 
 @Getter
@@ -32,8 +34,10 @@ public class Screen {
 	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Screen> chields;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0025/0026); у раздела-родителя может не быть. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> description;
 	private String icon;
 	private int ordering;
 

@@ -21,6 +21,7 @@ import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -190,7 +191,7 @@ public class ScreenApiController {
 		screen.setEnglishName(request.getEnglishName().trim());
 		screen.setAltName(trimToNull(request.getAltName()));
 		screen.setCategory(trimToNull(request.getCategory()));
-		screen.setDescription(trimToNull(request.getDescription()));
+		screen.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
 		screen.setIcon(trimToNull(request.getIcon()));
 		screen.setOrdering(request.getOrder() == null ? 0 : request.getOrder());
 		screen.setParent(parent);
