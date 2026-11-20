@@ -1,9 +1,10 @@
 package club.dnd5.portal.validation;
 
+import club.dnd5.portal.dto.api.NameValueApi;
+import club.dnd5.portal.dto.api.bestiary.LegendaryApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.dto.api.bestiary.request.DescriptionRequest;
-import club.dnd5.portal.dto.api.bestiary.LegendaryApi;
-import club.dnd5.portal.dto.api.NameValueApi;
+import club.dnd5.portal.dto.api.book.BookSaveApi;
 import club.dnd5.portal.dto.api.classes.ClassSaveApi;
 import club.dnd5.portal.dto.api.classes.ClassTraitSaveApi;
 import org.junit.jupiter.api.AfterAll;
@@ -20,6 +21,11 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * {@link ValidHtml} остался у полей, которые ещё хранят HTML (описание книги, уточнения магического
+ * предмета, значение легендарного действия из старых клиентов); описания разделов на разметке
+ * core-api проверяются как непустые блоки.
+ */
 class HtmlValidatorTest {
 	private static ValidatorFactory validatorFactory;
 	private static Validator validator;
@@ -35,22 +41,27 @@ class HtmlValidatorTest {
 		validatorFactory.close();
 	}
 
+	private static BookSaveApi book(String description) {
+		BookSaveApi book = new BookSaveApi();
+		book.setDescription(description);
+		return book;
+	}
+
+	private static List<String> paths(Object request) {
+		return validator.validate(request).stream()
+			.map(violation -> violation.getPropertyPath().toString())
+			.toList();
+	}
+
 	@Test
 	void acceptsValidHtmlFragment() {
-		DescriptionRequest request = new DescriptionRequest();
-		request.setDescription("<p class=\"lead\">Текст <strong>описания</strong><br></p>");
-
-		assertThat(validator.validate(request))
-			.extracting(violation -> violation.getPropertyPath().toString())
+		assertThat(paths(book("<p class=\"lead\">Текст <strong>описания</strong><br></p>")))
 			.doesNotContain("description");
 	}
 
 	@Test
 	void rejectsMismatchedAndUnclosedTags() {
-		DescriptionRequest request = new DescriptionRequest();
-		request.setDescription("<p><strong>Некорректное описание</p>");
-
-		Set<ConstraintViolation<DescriptionRequest>> violations = validator.validate(request);
+		Set<ConstraintViolation<BookSaveApi>> violations = validator.validate(book("<p><strong>Некорректное описание</p>"));
 
 		assertThat(violations)
 			.anySatisfy(violation -> {
@@ -61,46 +72,20 @@ class HtmlValidatorTest {
 
 	@Test
 	void acceptsSelfClosingCustomElements() {
-		DescriptionRequest action = new DescriptionRequest();
-		action.setDescription("<p><em>Попадание:</em>&nbsp;15&nbsp;(<dice-roller formula=\"3к6 + 5\"/>) урона излучением.</p>");
-
-		BeastDetailRequest request = new BeastDetailRequest();
-		request.setActions(Collections.singletonList(action));
-
-		assertThat(validator.validate(request))
-			.extracting(violation -> violation.getPropertyPath().toString())
-			.doesNotContain("actions[0].description");
+		assertThat(paths(book("<p><em>Попадание:</em>&nbsp;15&nbsp;(<dice-roller formula=\"3к6 + 5\"/>) урона излучением.</p>")))
+			.doesNotContain("description");
 	}
 
 	@Test
-	void acceptsRealCreatureMarkup() {
-		DescriptionRequest feat = new DescriptionRequest();
-		feat.setDescription("<p>Если свет перекрывается с областью <detail-tooltip type=\"spell\"><a href=\"/spells/Darkness\" >тьмы</a></detail-tooltip>.</p>");
-		DescriptionRequest action = new DescriptionRequest();
-		action.setDescription("<p>Урон огнем 14&nbsp;(<dice-roller formula=\"4d6\">4к6</dice-roller>), спасбросок <span class=\"saving_throw\">Ловкости</span>.</p>");
-		DescriptionRequest spells = new DescriptionRequest();
-		spells.setDescription("<p>Колдовство (<dice-roller formula=\"к20 + 9\">+9</dice-roller>):</p><div class=\"spell-list\"><p>Заговоры: <em><detail-tooltip type=\"spell\"><a href=\"/spells/Guidance\">указание</a></detail-tooltip>,&nbsp;</em></p></div>");
-
-		BeastDetailRequest request = new BeastDetailRequest();
-		request.setFeats(java.util.Arrays.asList(feat, spells));
-		request.setActions(Collections.singletonList(action));
-
-		assertThat(validator.validate(request))
-			.extracting(violation -> violation.getPropertyPath().toString())
-			.noneMatch(path -> path.endsWith("description"));
+	void acceptsRealOldFrontendMarkup() {
+		assertThat(paths(book("<p>Колдовство (<dice-roller formula=\"к20 + 9\">+9</dice-roller>):</p><div class=\"spell-list\">"
+			+ "<p>Заговоры: <em><detail-tooltip type=\"spell\"><a href=\"/spells/Guidance\">указание</a></detail-tooltip>,&nbsp;</em></p></div>")))
+			.doesNotContain("description");
 	}
 
 	@Test
 	void stillRejectsUnclosedCustomElement() {
-		DescriptionRequest action = new DescriptionRequest();
-		action.setDescription("<p><dice-roller formula=\"1d6\">1к6</p>");
-
-		BeastDetailRequest request = new BeastDetailRequest();
-		request.setActions(Collections.singletonList(action));
-
-		assertThat(validator.validate(request))
-			.extracting(violation -> violation.getPropertyPath().toString())
-			.contains("actions[0].description");
+		assertThat(paths(book("<p><dice-roller formula=\"1d6\">1к6</p>"))).contains("description");
 	}
 
 	@Test
@@ -117,22 +102,18 @@ class HtmlValidatorTest {
 		request.setDiceHp((byte) 10);
 		request.setClassTraits(Collections.singletonList(trait));
 
-		assertThat(validator.validate(request))
-			.extracting(violation -> violation.getPropertyPath().toString())
-			.anyMatch(path -> path.startsWith("classTraits[0].description"));
+		assertThat(paths(request)).anyMatch(path -> path.startsWith("classTraits[0].description"));
 	}
 
 	@Test
-	void validatesNestedCreatureActions() {
+	void rejectsBlankMarkupBlocksInCreatureActions() {
 		DescriptionRequest action = new DescriptionRequest();
-		action.setDescription("<strong>Незакрытое описание");
+		action.setDescription(List.of("Атака {@roll к20 + 4 | text:+4 | label:Атака}.", " "));
 
 		BeastDetailRequest request = new BeastDetailRequest();
 		request.setActions(Collections.singletonList(action));
 
-		assertThat(validator.validate(request))
-			.extracting(violation -> violation.getPropertyPath().toString())
-			.contains("actions[0].description");
+		assertThat(paths(request)).anyMatch(path -> path.startsWith("actions[0].description"));
 	}
 
 	@Test
@@ -147,8 +128,6 @@ class HtmlValidatorTest {
 		BeastDetailRequest request = new BeastDetailRequest();
 		request.setLegendary(legendary);
 
-		assertThat(validator.validate(request))
-			.extracting(violation -> violation.getPropertyPath().toString())
-			.contains("legendary.list[0].value");
+		assertThat(paths(request)).contains("legendary.list[0].value");
 	}
 }

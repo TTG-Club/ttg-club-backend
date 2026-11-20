@@ -22,6 +22,12 @@ class MarkupHtmlRendererTest {
 	}
 
 	@Test
+	void rollWithLabel() {
+		assertThat(MarkupHtmlRenderer.render(List.of("{@roll к20 + 4 | text:+4 | label:Атака}")))
+			.isEqualTo("<p><dice-roller label=\"Атака\" formula=\"к20 + 4\">+4</dice-roller></p>");
+	}
+
+	@Test
 	void samePageAnchorWithoutNewTab() {
 		assertThat(MarkupHtmlRenderer.render(List.of("См. {@link Вдохновение барда | url:#c1}.")))
 			.isEqualTo("<p>См. <a href=\"#c1\">Вдохновение барда</a>.</p>");

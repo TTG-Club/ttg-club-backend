@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.creature;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.util.ChallengeRating;
@@ -151,14 +152,20 @@ public class Creature implements FoundryCommon {
 	private List<CreatureSpell> spells;
 
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0035); {@code null} — описания нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> description;
 
-	@Column(columnDefinition = "TEXT")
-	private String legendary;
+	/** Вступление к легендарным действиям, разметка core-api; {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> legendary;
 
-	@Column(columnDefinition = "TEXT")
-	private String reaction;
+	/** Вступление к реакциям, разметка core-api; {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> reaction;
 
 	@ManyToMany
 	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
@@ -317,6 +324,6 @@ public class Creature implements FoundryCommon {
 
 	@Override
 	public String getDescriptionHtml() {
-		return description;
+		return Markup.toHtml(description);
 	}
 }

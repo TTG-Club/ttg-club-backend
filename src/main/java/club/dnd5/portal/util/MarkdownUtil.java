@@ -1,8 +1,5 @@
 package club.dnd5.portal.util;
 
-import club.dnd5.portal.model.creature.Action;
-import club.dnd5.portal.model.creature.Creature;
-import club.dnd5.portal.model.creature.CreatureFeat;
 import lombok.Builder;
 
 import java.util.Arrays;
@@ -12,7 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Конвертер markdown в html
+ * Шаблоны действий и умений существ (теги 5etools {@code {@atk mw}}, {@code {@hit 4}},
+ * {@code {@beast_name}}…) в html. С этапа 3 шаблонов в базе нет: их один раз разворачивает
+ * миграция 0035 ({@code CreatureMarkupChange}).
  */
 public class MarkdownUtil {
 	private static final List<Markdown> markdowns = Arrays.asList(
@@ -52,50 +51,36 @@ public class MarkdownUtil {
 	);
 
 	/**
-	 * Описание умения существа для ответа API: markdown переводится в html, если умение размечено.
-	 * Сущность не меняется — иначе внутри транзакции (создание и правка в мастерской) html
-	 * записался бы в базу вместо исходного markdown.
+	 * Шаблон умения существа в HTML — так его раньше показывал API (флаг markdown). Нужен только
+	 * миграции 0035, которая один раз разворачивает шаблоны и переводит текст в разметку core-api.
+	 * У существ, кроме НПС (раса 102), {@code {@beast_name}} в середине фразы пишется строчными.
 	 *
-	 * @param feat  умение
-	 * @param beast существо (для {@code {@beast_name}})
-	 * @return описание для ответа
+	 * @param description текст из базы
+	 * @param beastName   название существа для {@code {@beast_name}}
+	 * @param raceId      раса существа (102 — НПС)
+	 * @return html
 	 */
-	public static String html(CreatureFeat feat, Creature beast) {
-		if (!feat.isMarkdown() || feat.getDescription() == null) {
-			return feat.getDescription();
+	public static String featHtml(String description, String beastName, Integer raceId) {
+		if (description == null) {
+			return null;
 		}
-		String description = feat.getDescription();
-		if (!java.util.Objects.equals(beast.getRaceId(), 102)) {
-			description = description.replaceAll("\\.\\s\\{@beast_name\\}", ". " + beast.getName());
-			description = description.replaceAll(">\\{@beast_name\\}", ">" + beast.getName());
-			description = description.replaceAll("\\s\\{@beast_name\\}",
-					" " + beast.getName().toLowerCase());
+		String name = Objects.toString(beastName, "");
+		String result = description;
+		if (!Objects.equals(raceId, 102)) {
+			result = result.replaceAll("\\.\\s\\{@beast_name\\}", Matcher.quoteReplacement(". " + name));
+			result = result.replaceAll(">\\{@beast_name\\}", Matcher.quoteReplacement(">" + name));
+			result = result.replaceAll("\\s\\{@beast_name\\}", Matcher.quoteReplacement(" " + name.toLowerCase()));
 		} else {
-			description = description.replace("{@beast_name}", beast.getName());
+			result = result.replace("{@beast_name}", name);
 		}
-		for (Markdown markdown: markdowns) {
-			description = markdown.convert(description);
+		for (Markdown markdown : markdowns) {
+			result = markdown.convert(result);
 		}
-		return description;
+		return result;
 	}
 
 	/**
-	 * Описание действия существа для ответа API: markdown переводится в html, если действие размечено.
-	 * Сущность не меняется (см. {@link #html(CreatureFeat, Creature)}).
-	 *
-	 * @param action действие
-	 * @param beast  существо (для {@code {@beast_name}})
-	 * @return описание для ответа
-	 */
-	public static String html(final Action action, final Creature beast) {
-		if (!action.isMarkdown() || action.getDescription() == null) {
-			return action.getDescription();
-		}
-		return toHtml(action.getDescription(), beast.getName());
-	}
-
-	/**
-	 * Разметка действия или умения существа в html — без правки самой сущности.
+	 * Шаблон действия существа в HTML (см. {@link #featHtml}): {@code {@beast_name}} — название как есть.
 	 *
 	 * @param description текст из базы
 	 * @param beastName   название существа для {@code {@beast_name}}

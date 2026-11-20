@@ -31,6 +31,13 @@ class HtmlToMarkupConverterTest {
 	}
 
 	@Test
+	void rollKeepsLabel() {
+		assertThat(convert("<p><dice-roller label=\"Атака\" formula=\"к20 + 4\">+4</dice-roller> к попаданию, "
+			+ "урон <dice-roller label=\"Урон\" formula=\"1к6 + 2\"/>.</p>"))
+			.containsExactly("{@roll к20 + 4 | text:+4 | label:Атака} к попаданию, урон {@roll 1к6 + 2 | label:Урон}.");
+	}
+
+	@Test
 	void samePageAnchorStaysLink() {
 		assertThat(convert("<p>См. <a href=\"#c1\">Вдохновение барда</a> и <a href=\"#\">пусто</a>.</p>"))
 			.containsExactly("См. {@link Вдохновение барда | url:#c1} и пусто.");
@@ -40,7 +47,7 @@ class HtmlToMarkupConverterTest {
 	void selfClosingDiceRollerDoesNotSwallowText() {
 		assertThat(convert("<p>4&nbsp;(<dice-roller formula=\"1к4 + 2\"/>) урона, "
 			+ "<dice-roller label=\"Атака\" formula=\"к20 + 4\">+4</dice-roller> к попаданию</p>"))
-			.containsExactly("4 ({@roll 1к4 + 2}) урона, {@roll к20 + 4 | text:+4} к попаданию");
+			.containsExactly("4 ({@roll 1к4 + 2}) урона, {@roll к20 + 4 | text:+4 | label:Атака} к попаданию");
 	}
 
 	@Test

@@ -190,7 +190,12 @@ public final class MarkupHtmlRenderer {
 				case "roll" -> {
 					String formula = node.plainText().strip();
 					String shown = node.attrs().getOrDefault("text", formula);
-					out.append("<dice-roller formula=\"").append(escape(formula)).append("\">")
+					String label = node.attrs().get("label");
+					out.append("<dice-roller");
+					if (label != null && !label.isBlank()) {
+						out.append(" label=\"").append(escape(label.strip())).append('"');
+					}
+					out.append(" formula=\"").append(escape(formula)).append("\">")
 						.append(escape(shown)).append("</dice-roller>");
 				}
 				case "link" -> link(out, node);
