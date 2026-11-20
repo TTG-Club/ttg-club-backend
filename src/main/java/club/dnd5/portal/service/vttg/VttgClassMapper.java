@@ -12,6 +12,7 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
+import club.dnd5.portal.util.markup.Markup;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -246,7 +247,7 @@ public class VttgClassMapper {
 			choice.put("key", unique(used, base.isEmpty() ? "option" : base, 0));
 			choice.put("name", VttgText.orEmpty(option.getName()));
 			putIfPresent(choice, "nameEn", VttgText.optional(option.getEnglishName()));
-			choice.put("description", VttgText.html(option.getDescription()));
+			choice.put("description", VttgText.html(Markup.toHtml(option.getDescription())));
 			String prerequisite = VttgText.optional(option.getPrerequisite());
 			if (prerequisite != null && !"нет".equalsIgnoreCase(prerequisite)) {
 				choice.put("prerequisite", prerequisite);

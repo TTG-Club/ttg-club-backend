@@ -1,13 +1,14 @@
 package club.dnd5.portal.dto.api.classes;
 
 import club.dnd5.portal.model.classes.Option;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
 
 @NoArgsConstructor
@@ -23,9 +24,10 @@ public class OptionSaveApi {
 	private List<String> optionTypes;
 	private String prerequisite;
 	private Integer level;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;

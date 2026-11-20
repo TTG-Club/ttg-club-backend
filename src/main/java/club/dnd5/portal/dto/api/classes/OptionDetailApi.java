@@ -19,7 +19,8 @@ import java.util.stream.Collectors;
 public class OptionDetailApi extends OptionApi {
 	private Integer id;
 	private String requirements ;
-	private String description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
 	private List<ReferenceClassApi> classes;
 	private String altName;
 	private Integer level;
