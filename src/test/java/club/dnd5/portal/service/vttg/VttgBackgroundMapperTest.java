@@ -28,8 +28,8 @@ class VttgBackgroundMapperTest {
 		acolyte.setEquipmentsText("Священный символ, молитвенник");
 		acolyte.setStartMoney(15);
 		acolyte.setSkillName("Приют для верующих");
-		acolyte.setSkillDescription("<p>Вас и ваших спутников примут в храме.</p>");
-		acolyte.setDescription("<p>Вы служили в храме.</p>");
+		acolyte.setSkillDescription(List.of("Вас и ваших спутников примут в храме."));
+		acolyte.setDescription(List.of("Вы служили в храме."));
 		Personalization trait = new Personalization();
 		trait.setType(PersonalizationType.TRAIT);
 		trait.setText("Я цитирую молитвы.");

@@ -1,5 +1,6 @@
 package club.dnd5.portal.config.liquibase;
 
+import club.dnd5.portal.util.HtmlConverter;
 import club.dnd5.portal.util.markup.HtmlToMarkupConverter;
 import club.dnd5.portal.util.markup.MarkupHtmlRenderer;
 import club.dnd5.portal.util.markup.MarkupReport;
@@ -29,6 +30,10 @@ import java.util.List;
  * {@code источник>приёмник} через запятую, {@code direction} — {@code toMarkup} (HTML → jsonb-массив
  * блоков, {@link HtmlToMarkupConverter}) или {@code toHtml} (обратно, {@link MarkupHtmlRenderer}; для
  * rollback). {@code NULL} остаётся {@code NULL}.
+ * <p>
+ * {@code sourceFormat} — формат исходного текста при {@code toMarkup}: {@code html} (по умолчанию) или
+ * {@code lines} — строки через {@code }, которые API раньше оборачивало в абзацы
+ * ({@link HtmlConverter}); такой текст сначала проходит то же оборачивание.
  */
 @Getter
 @Setter
@@ -39,6 +44,7 @@ public class MarkupColumnsChange implements CustomTaskChange {
 	private String idColumn = "id";
 	private String columns;
 	private String direction = "toMarkup";
+	private String sourceFormat = "html";
 
 	private int converted;
 
@@ -61,7 +67,7 @@ public class MarkupColumnsChange implements CustomTaskChange {
 			while (rs.next()) {
 				for (int i = 0; i < pairs.size(); i++) {
 					String value = rs.getString(i + 2);
-					String result = value == null ? null : (toMarkup() ? markup(value) : html(value));
+					String result = value == null ? null : (toMarkup() ? markup(source(value)) : html(value));
 					ps.setString(i + 1, result);
 				}
 				ps.setObject(pairs.size() + 1, rs.getObject(1));
@@ -78,6 +84,10 @@ public class MarkupColumnsChange implements CustomTaskChange {
 
 	private boolean toMarkup() {
 		return !"toHtml".equals(direction);
+	}
+
+	private String source(String value) {
+		return "lines".equals(sourceFormat) ? HtmlConverter.toHtml(value) : value;
 	}
 
 	private static String markup(String html) {
@@ -109,6 +119,9 @@ public class MarkupColumnsChange implements CustomTaskChange {
 		ValidationErrors errors = new ValidationErrors();
 		if (table == null || columns == null) {
 			errors.addError("MarkupColumnsChange: нужны параметры table и columns");
+		}
+		if (!"html".equals(sourceFormat) && !"lines".equals(sourceFormat)) {
+			errors.addError("MarkupColumnsChange: sourceFormat — html или lines");
 		}
 		return errors;
 	}

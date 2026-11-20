@@ -5,7 +5,6 @@ import org.hibernate.type.SqlTypes;
 import org.hibernate.annotations.JdbcTypeCode;
 import club.dnd5.portal.model.Alignment;
 import club.dnd5.portal.model.book.Book;
-import club.dnd5.portal.util.HtmlConverter;
 import club.dnd5.portal.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,10 +38,15 @@ public class God {
 	@Enumerated(EnumType.STRING)
 	private Alignment aligment;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
-	@Column(columnDefinition = "TEXT")
-	private String alternativeDescription;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0029); {@code null} — описания нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> description;
+
+	/** Разметка core-api, массив строк-блоков; {@code null} — описания нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> alternativeDescription;
 
 	private String symbol;
 	private String nicknames;
@@ -65,14 +69,6 @@ public class God {
 
 	public String getPrefixName() {
 		return rank == null ? sex.getCyrilicName() : rank.getName(sex) + " " + sex.getCyrilicName();
-	}
-
-	public String getDescription() {
-		return HtmlConverter.toHtml(description);
-	}
-
-	public String getRawDescription() {
-		return description;
 	}
 
 	public String getRank() {

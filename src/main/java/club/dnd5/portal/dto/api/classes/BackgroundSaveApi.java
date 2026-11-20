@@ -6,13 +6,15 @@ import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.background.Personalization;
 import club.dnd5.portal.model.background.PersonalizationType;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -33,14 +35,17 @@ public class BackgroundSaveApi {
 	private String toolOwnership;
 	private String equipments;
 	private Integer startGold;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private String skillName;
-	@ValidHtml
-	private String skillDescription;
-	@ValidHtml
-	private String personalization;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> skillDescription;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> personalization;
 	@Valid
 	private List<BackgroundPersonalizationTableSaveApi> personalizationTables;
 	private String language;

@@ -1,0 +1,47 @@
+# Этап 3, боги и предыстории (expand): описания — из HTML в разметку core-api. Новые jsonb-колонки
+# (массив строк-блоков, см. util/markup/HtmlToMarkupConverter) заполняются конвертером на Java;
+# старые колонки удаляет 0030.
+# Описание бога часто не HTML, а строки через \r, которые API оборачивало в абзацы (util/HtmlConverter):
+# sourceFormat: lines повторяет это оборачивание перед конвертацией.
+# Обязательно только описание предыстории; у остальных NULL — текста нет. Владение инструментами
+# и снаряжение предыстории — короткие строки со ссылками, они остаются HTML.
+databaseChangeLog:
+  - changeSet:
+      id: 0029-gods-backgrounds-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE gods ADD COLUMN description_markup jsonb, ADD COLUMN alternative_description_markup jsonb;
+              ALTER TABLE backgrounds ADD COLUMN description_markup jsonb, ADD COLUMN skill_description_markup jsonb,
+              ADD COLUMN personalization_markup jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE gods DROP COLUMN description_markup, DROP COLUMN alternative_description_markup;
+              ALTER TABLE backgrounds DROP COLUMN description_markup, DROP COLUMN skill_description_markup,
+              DROP COLUMN personalization_markup
+  - changeSet:
+      id: 0029-gods-backgrounds-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: gods
+            sourceFormat: lines
+            columns: description>description_markup, alternative_description>alternative_description_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: backgrounds
+            columns: description>description_markup, skill_description>skill_description_markup, personalization>personalization_markup
+        - sql:
+            sql: >-
+              UPDATE gods SET description_markup = NULL WHERE description_markup = '[]'::jsonb;
+              UPDATE gods SET alternative_description_markup = NULL WHERE alternative_description_markup = '[]'::jsonb;
+              UPDATE backgrounds SET description_markup = '[]'::jsonb WHERE description_markup IS NULL;
+              UPDATE backgrounds SET skill_description_markup = NULL WHERE skill_description_markup = '[]'::jsonb;
+              UPDATE backgrounds SET personalization_markup = NULL WHERE personalization_markup = '[]'::jsonb
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

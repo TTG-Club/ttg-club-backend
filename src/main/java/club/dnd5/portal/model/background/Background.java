@@ -44,11 +44,15 @@ public class Background {
 
 	private String skillName;
 
-	@Column(columnDefinition = "TEXT")
-	private String skillDescription;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0029); {@code null} — описания нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> skillDescription;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0029). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	private String language;
 
@@ -63,8 +67,10 @@ public class Background {
 	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Personalization> personalizations;
 
-	@Column(columnDefinition = "TEXT")
-	private String personalization;
+	/** Разметка core-api, массив строк-блоков; {@code null} — текста нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> personalization;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
@@ -88,5 +94,6 @@ public class Background {
 	@jakarta.persistence.PreUpdate
 	private void nullJsonListsToEmpty() {
 		skills = skills == null ? new ArrayList<>() : skills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api.wiki;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
@@ -230,8 +231,8 @@ public class GodApiController {
 		god.setSex(request.getSex());
 		god.setRank(request.getRank());
 		god.setAligment(request.getAlignment());
-		god.setDescription(trimToNull(request.getDescription()));
-		god.setAlternativeDescription(trimToNull(request.getAlternativeDescription()));
+		god.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
+		god.setAlternativeDescription(Markup.emptyToNull(Markup.trimBlocks(request.getAlternativeDescription())));
 		god.setSymbol(trimToNull(request.getSymbol()));
 		god.setNicknames(trimToNull(request.getNicknames()));
 		god.setDomains(new ArrayList<>(request.getDomains()));

@@ -32,10 +32,13 @@ public class BackgroundDetailApi extends BackgroundApi {
 	private Collection<String> languages;
 	private Collection<String> equipments;
 	private Integer startGold;
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private String skillName;
-	private String skillDescription;
-	private String personalization;
+	/** Блоки разметки core-api. */
+	private List<String> skillDescription;
+	/** Блоки разметки core-api. */
+	private List<String> personalization;
 	private Collection<BackgroundPersonalizationTableApi> personalizationTables;
 	
 	public BackgroundDetailApi(Background background) {
