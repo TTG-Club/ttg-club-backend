@@ -34,8 +34,10 @@ public class Archetype {
 
 	private String englishName;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0033). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	private byte level;
 
@@ -111,5 +113,6 @@ public class Archetype {
 	@PreUpdate
 	private void nullJsonListsToEmpty() {
 		levelDefenitions = levelDefenitions == null ? new ArrayList<>() : levelDefenitions;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

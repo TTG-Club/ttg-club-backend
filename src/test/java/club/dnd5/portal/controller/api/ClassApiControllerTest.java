@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import java.util.List;
 import club.dnd5.portal.dto.api.classes.ArchetypeEditApi;
 import club.dnd5.portal.dto.api.classes.ArchetypeSaveApi;
 import club.dnd5.portal.dto.api.classes.FeatureLevelSaveApi;
@@ -51,12 +52,12 @@ class ClassApiControllerTest {
 		archetype.setId(2);
 		archetype.setName("School of Evocation");
 		archetype.setEnglishName("School of Evocation");
-		archetype.setDescription("Description");
+		archetype.setDescription(List.of("Description"));
 		archetype.setLevel((byte) 2);
 		ArchetypeTrait trait = new ArchetypeTrait();
 		trait.setId(3);
 		trait.setName("Sculpt Spells");
-		trait.setDescription("Description");
+		trait.setDescription(List.of("Description"));
 		trait.setLevel((byte) 2);
 
 		when(classRepository.findByEnglishName("wizard")).thenReturn(Optional.of(heroClass));
@@ -94,7 +95,7 @@ class ClassApiControllerTest {
 		archetype.setHeroClass(heroClass);
 		archetype.setName("School of Evocation");
 		archetype.setEnglishName("School of Evocation");
-		archetype.setDescription("Description");
+		archetype.setDescription(List.of("Description"));
 		archetype.setLevel((byte) 2);
 		FeatureLevelDefinition existingColumn = new FeatureLevelDefinition();
 		existingColumn.setId(3);

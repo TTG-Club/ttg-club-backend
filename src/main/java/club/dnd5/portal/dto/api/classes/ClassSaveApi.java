@@ -1,5 +1,8 @@
 package club.dnd5.portal.dto.api.classes;
 
+import jakarta.validation.constraints.NotEmpty;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
@@ -7,7 +10,6 @@ import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
-import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,9 +29,10 @@ public class ClassSaveApi {
 	@NotBlank
 	private String englishName;
 	private String accusativeName;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	@Min(1)
 	@Max(20)
 	private byte diceHp;
@@ -38,7 +41,9 @@ public class ClassSaveApi {
 	private String tools;
 	private String savingThrows;
 	private String archetypeName;
-	private String equipment;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> equipment;
 	private AbilityType spellAbility;
 	private SpellcasterType spellcasterType;
 	private List<AbilityType> primaryAbilities;

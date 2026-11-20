@@ -1,0 +1,55 @@
+# Этап 3, классы (expand): описания классов, архетипов, умений класса (hero_class_traits) и архетипа
+# (hero_class_feats), а также снаряжение класса — из HTML в разметку core-api. Новые jsonb-колонки
+# (массив строк-блоков, см. util/markup/HtmlToMarkupConverter) заполняются конвертером на Java;
+# старые HTML-колонки удаляет 0034.
+# Описания обязательны (NOT NULL, пустое — []): у дочерних умений класса своего текста нет, его берут
+# у умения, на которое указывает child. Снаряжение необязательно (NULL — нет).
+databaseChangeLog:
+  - changeSet:
+      id: 0033-classes-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE classes ADD COLUMN description_markup jsonb, ADD COLUMN equipment_markup jsonb;
+              ALTER TABLE archetypes ADD COLUMN description_markup jsonb;
+              ALTER TABLE hero_class_traits ADD COLUMN description_markup jsonb;
+              ALTER TABLE hero_class_feats ADD COLUMN description_markup jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE classes DROP COLUMN description_markup, DROP COLUMN equipment_markup;
+              ALTER TABLE archetypes DROP COLUMN description_markup;
+              ALTER TABLE hero_class_traits DROP COLUMN description_markup;
+              ALTER TABLE hero_class_feats DROP COLUMN description_markup
+  - changeSet:
+      id: 0033-classes-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: classes
+            columns: description>description_markup, equipment>equipment_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: archetypes
+            columns: description>description_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: hero_class_traits
+            columns: description>description_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: hero_class_feats
+            columns: description>description_markup
+        - sql:
+            sql: >-
+              UPDATE classes SET description_markup = '[]'::jsonb WHERE description_markup IS NULL;
+              UPDATE classes SET equipment_markup = NULL WHERE equipment_markup = '[]'::jsonb;
+              UPDATE archetypes SET description_markup = '[]'::jsonb WHERE description_markup IS NULL;
+              UPDATE hero_class_traits SET description_markup = '[]'::jsonb WHERE description_markup IS NULL;
+              UPDATE hero_class_feats SET description_markup = '[]'::jsonb WHERE description_markup IS NULL
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

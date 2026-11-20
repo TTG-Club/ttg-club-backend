@@ -16,7 +16,8 @@ public class ArchetypeEditApi {
 	private final String name;
 	private final String englishName;
 	private final String genitiveName;
-	private final String description;
+	/** Блоки разметки core-api. */
+	private final List<String> description;
 	private final byte level;
 	private final SpellcasterType spellcasterType;
 	private final String optionType;
@@ -42,7 +43,7 @@ public class ArchetypeEditApi {
 	@Getter
 	public static class TraitApi {
 		private final Integer id; private final String name; private final String suffix; private final byte level;
-		private final String description; private final boolean optional = false; private final String child;
+		private final List<String> description; private final boolean optional = false; private final String child;
 		private TraitApi(ArchetypeTrait trait) {
 			id = trait.getId(); name = trait.getName(); suffix = trait.getSuffix(); level = trait.getLevel();
 			description = trait.getDescription(); child = trait.getChild();

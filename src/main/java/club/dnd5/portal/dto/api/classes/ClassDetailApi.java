@@ -42,7 +42,8 @@ public class ClassDetailApi extends ClassApi {
 	private SpellFilter customFilter;
 	private String archetypeName;
 	private ClassTraitsApi traits;
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private String accusativeName;
 	private AbilityType spellAbility;
 	private SpellcasterType spellcasterType;
@@ -192,7 +193,8 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final String suffix;
 		private final int level;
-		private final String description;
+		/** Блоки разметки core-api. */
+		private final List<String> description;
 		private final boolean optional;
 		private final String child;
 
@@ -216,7 +218,8 @@ public class ClassDetailApi extends ClassApi {
 		private final String savingThrows;
 		private final int skillAvailableCount;
 		private final Collection<String> availableSkills;
-		private final String equipment;
+		/** Блоки разметки core-api. */
+		private final List<String> equipment;
 		private final Collection<FeatureLevelApi> classFeatureLevels;
 		private final Collection<FeatureLevelApi> archetypeFeatureLevels;
 		private final Collection<LevelRowApi> levels;
@@ -432,7 +435,8 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final int level;
 		private final String type;
-		private final String description;
+		/** Блоки разметки core-api. */
+		private final List<String> description;
 		private final Source source;
 		private final boolean optional;
 		private final boolean archetypeFeature;

@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
@@ -36,7 +37,7 @@ public class ClassController {
 	public String getClassDescription(@PathVariable String name) {
 		HeroClass heroClass = classRepository.findByEnglishName(name.replace("_", " "))
 				.orElseThrow(PageNotFoundException::new);
-		return heroClass.getDescription();
+		return Markup.toHtml(heroClass.getDescription());
 	}
 
 	@GetMapping("/classes/{className}/archetype/{archetypeName}/description")
@@ -48,18 +49,19 @@ public class ClassController {
 			.stream()
 			.filter(a -> a.getEnglishName().equalsIgnoreCase(archetypeName.replace("_", " ")))
 			.map(Archetype::getDescription)
+			.map(Markup::toHtml)
 			.findFirst().orElse("");
 	}
 
 	@GetMapping("/classes/feature/{id}")
 	@ResponseBody
 	public String getClassFeatureDescription(@PathVariable Integer id) {
-		return traitRepository.findById(id).map(HeroClassTrait::getDescription).orElse("");
+		return traitRepository.findById(id).map(HeroClassTrait::getDescription).map(Markup::toHtml).orElse("");
 	}
 
 	@GetMapping("/classes/archetype/feature/{id}")
 	@ResponseBody
 	public String getArchetypeFeatureDescription(@PathVariable Integer id) {
-		return archetypeTraitRepository.findById(id).map(ArchetypeTrait::getDescription).orElse("");
+		return archetypeTraitRepository.findById(id).map(ArchetypeTrait::getDescription).map(Markup::toHtml).orElse("");
 	}
 }
