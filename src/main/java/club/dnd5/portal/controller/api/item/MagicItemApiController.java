@@ -222,8 +222,8 @@ public class MagicItemApiController {
 		item.setRarity(request.getRarity());
 		item.setType(request.getType());
 		item.setCustomization(Boolean.TRUE.equals(request.getCustomization()));
-		item.setCustSpecial(trimToNull(request.getCustSpecial()));
-		item.setSpecial(trimToNull(request.getSpecial()));
+		item.setCustSpecial(Markup.emptyToNull(Markup.trimBlocks(request.getCustSpecial())));
+		item.setSpecial(Markup.emptyToNull(Markup.trimBlocks(request.getSpecial())));
 		item.setDescription(Markup.trimBlocks(request.getDescription()));
 		item.setConsumed(Boolean.TRUE.equals(request.getConsumed()));
 		item.setCharge(request.getCharge());

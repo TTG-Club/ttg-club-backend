@@ -34,11 +34,15 @@ public class MagicItem {
 
 	private Boolean customization;
 
-	@Column
-	private String custSpecial;
+	/** Условие настройки («заклинателем»), разметка core-api (см. db/changelog 0041); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> custSpecial;
 
-	@Column
-	private String special;
+	/** Уточнение типа («пара сапог»), разметка core-api (см. db/changelog 0041); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> special;
 
 	/** Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0027/0028). */
 	@JdbcTypeCode(SqlTypes.JSON)
