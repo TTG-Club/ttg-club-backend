@@ -1,5 +1,6 @@
 package club.dnd5.portal.util.markup;
 
+import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.dto.api.spell.SpellSaveApi;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
@@ -32,6 +33,18 @@ class MarkupBlocksDeserializerTest {
 
 		assertEquals(List.of("Урон {@roll 2к6}", "Второй"), api.getDescription());
 		assertNull(api.getUpper());
+	}
+
+	@Test
+	void legendaryActionFromOldClientBecomesBlocks() {
+		BeastDetailRequest request = mapper.readValue(
+			"{\"legendary\":{\"list\":[{\"name\":\"Рывок\",\"value\":\"<p>Дракон <strong>бежит</strong></p>\"},"
+				+ "{\"name\":\"Удар\",\"value\":[\"Атака {@roll к20 + 4 | text:+4 | label:Атака}\"]}]}}",
+			BeastDetailRequest.class);
+
+		assertEquals(List.of("Дракон {@b бежит}"), request.getLegendary().getList().get(0).getValue());
+		assertEquals(List.of("Атака {@roll к20 + 4 | text:+4 | label:Атака}"),
+			request.getLegendary().getList().get(1).getValue());
 	}
 
 	@Test

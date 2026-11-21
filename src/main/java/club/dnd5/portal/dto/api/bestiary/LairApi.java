@@ -3,7 +3,6 @@ package club.dnd5.portal.dto.api.bestiary;
 import java.util.List;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
-import club.dnd5.portal.validation.ValidHtml;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 

@@ -1,5 +1,6 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.dto.api.bestiary.request.LegendaryRequest;
 import java.util.Collection;
 import java.util.Objects;
 import club.dnd5.portal.util.markup.Markup;
@@ -346,7 +347,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         actions.addAll(mapActions(request.getBonusActions(), ActionType.BONUS));
         actions.addAll(mapActions(request.getMysticalActions(), ActionType.MYSTICAL));
         if (request.getLegendary() != null) {
-            actions.addAll(mapNameValueActions(request.getLegendary().getList(), ActionType.LEGENDARY));
+            actions.addAll(mapLegendaryActions(request.getLegendary().getList()));
         }
         return actions;
     }
@@ -358,10 +359,10 @@ public class BestiaryServiceImpl implements BestiaryService {
                 .collect(Collectors.toList());
     }
 
-    private List<Action> mapNameValueActions(Collection<NameValueApi> request, ActionType type) {
+    private List<Action> mapLegendaryActions(Collection<LegendaryRequest.LegendaryActionRequest> request) {
         return nullToEmpty(request).stream()
                 .filter(item -> StringUtils.hasText(item.getName()))
-                .map(item -> createAction(item.getName(), null, valueBlocks(item.getValue()), type))
+                .map(item -> createAction(item.getName(), null, item.getValue(), ActionType.LEGENDARY))
                 .collect(Collectors.toList());
     }
 
@@ -378,17 +379,6 @@ public class BestiaryServiceImpl implements BestiaryService {
     private static List<String> blocksOrEmpty(List<String> blocks) {
         List<String> trimmed = Markup.trimBlocks(blocks);
         return trimmed == null ? new ArrayList<>() : trimmed;
-    }
-
-    /**
-     * Описание легендарного действия из {@link NameValueApi#getValue()}: массив блоков разметки или
-     * HTML-строка (её переводит конвертер).
-     */
-    private static List<String> valueBlocks(Object value) {
-        if (value instanceof Collection<?> items) {
-            return items.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.toList());
-        }
-        return value == null ? null : Markup.fromHtml(value.toString());
     }
 
     private void mapLanguages(Creature beast, BeastDetailRequest request) {
