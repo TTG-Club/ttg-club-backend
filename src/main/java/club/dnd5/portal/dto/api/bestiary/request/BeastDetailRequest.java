@@ -12,7 +12,6 @@ import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.creature.HabitatType;
-import club.dnd5.portal.validation.ValidHtml;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -94,7 +93,7 @@ public class BeastDetailRequest {
 	private Collection<DescriptionRequest> bonusActions;
 	@Schema(description = "Легенданые действия")
 	@Valid
-	private LegendaryApi legendary;
+	private LegendaryRequest legendary;
 	@Schema(description = "Мистически действия")
 	@Valid
 	private Collection<DescriptionRequest> mysticalActions;
