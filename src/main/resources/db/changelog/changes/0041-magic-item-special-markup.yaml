@@ -1,0 +1,30 @@
+# Этап 3, магические предметы (expand): уточнение типа (special, «пара сапог») и условие настройки
+# (cust_special, «заклинателем») — в разметку core-api. Новые jsonb-колонки заполняет конвертер на Java,
+# старые удаляет 0042. Оба необязательны (NULL — нет). API отдаёт их отдельными полями, страница выводит
+# их в строку: уточнение — в скобках после типа, условие — после классов в «Требует настройки».
+databaseChangeLog:
+  - changeSet:
+      id: 0041-magic-item-special-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE artifactes ADD COLUMN special_markup jsonb, ADD COLUMN cust_special_markup jsonb
+      rollback:
+        - sql:
+            sql: ALTER TABLE artifactes DROP COLUMN special_markup, DROP COLUMN cust_special_markup
+  - changeSet:
+      id: 0041-magic-item-special-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: artifactes
+            columns: special>special_markup, cust_special>cust_special_markup
+        - sql:
+            sql: >-
+              UPDATE artifactes SET special_markup = NULL WHERE special_markup = '[]'::jsonb;
+              UPDATE artifactes SET cust_special_markup = NULL WHERE cust_special_markup = '[]'::jsonb
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

@@ -33,8 +33,10 @@ public class MagicItemDetailApi extends MagicItemApi {
 	private String rarityRaw;
 	private String typeRaw;
 	private String altName;
-	private String custSpecial;
-	private String specialRaw;
+	/** Условие настройки: блоки разметки core-api, выводится в строку после классов. */
+	private List<String> custSpecial;
+	/** Уточнение типа: блоки разметки core-api, выводится в строку после доспехов и оружия. */
+	private List<String> special;
 	private Boolean consumed;
 	private Integer charge;
 	private Boolean curse;
@@ -50,7 +52,7 @@ public class MagicItemDetailApi extends MagicItemApi {
 		typeRaw = item.getType().name();
 		altName = item.getAltName();
 		custSpecial = item.getCustSpecial();
-		specialRaw = item.getSpecial();
+		special = item.getSpecial();
 		consumed = item.isConsumed();
 		charge = item.getCharge();
 		curse = item.getCurse();
@@ -65,21 +67,9 @@ public class MagicItemDetailApi extends MagicItemApi {
 		if (!item.getWeapons().isEmpty()) {
 			detailType = item.getWeapons().stream().map(UrlApi::new).collect(Collectors.toList());
 		}
-		if (Objects.nonNull(item.getSpecial())) {
-			if (detailType == null) {
-				detailType = new ArrayList<>();
-			}
-			detailType.add(new UrlApi(item.getSpecial()));
-		}
 
 		if (!item.getCustClasses().isEmpty()) {
 			detailCustamization = item.getCustClasses().stream().map(HeroClass::getAblativeName).collect(Collectors.toList());
-		}
-		if (Objects.nonNull(item.getCustSpecial())) {
-			if (Objects.isNull(detailCustamization)) {
-				detailCustamization = new ArrayList<>(1);
-			}
-			detailCustamization.add(item.getCustSpecial());
 		}
 		if (item.getRarity() != Rarity.UNKNOWN && item.getRarity() != Rarity.VARIES){
 			cost = new PriceApi(item);

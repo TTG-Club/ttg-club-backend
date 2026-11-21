@@ -4,7 +4,6 @@ import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.LegendaryApi;
 import club.dnd5.portal.dto.api.bestiary.request.BeastDetailRequest;
 import club.dnd5.portal.dto.api.bestiary.request.DescriptionRequest;
-import club.dnd5.portal.dto.api.item.MagicItemSaveApi;
 import club.dnd5.portal.dto.api.classes.ClassSaveApi;
 import club.dnd5.portal.dto.api.classes.ClassTraitSaveApi;
 import org.junit.jupiter.api.AfterAll;
@@ -22,9 +21,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link ValidHtml} остался у полей, которые ещё хранят HTML (особое свойство и уточнения магического
- * предмета, значение легендарного действия из старых клиентов); описания всех разделов — разметка
- * core-api, они проверяются как непустые блоки.
+ * {@link ValidHtml} остался у одного поля — значения легендарного действия ({@link NameValueApi#getValue()}),
+ * которое старый клиент может прислать HTML-строкой; описания всех разделов — разметка core-api, они
+ * проверяются как непустые блоки.
  */
 class HtmlValidatorTest {
 	private static ValidatorFactory validatorFactory;
@@ -41,10 +40,8 @@ class HtmlValidatorTest {
 		validatorFactory.close();
 	}
 
-	private static MagicItemSaveApi item(String special) {
-		MagicItemSaveApi item = new MagicItemSaveApi();
-		item.setSpecial(special);
-		return item;
+	private static NameValueApi item(String html) {
+		return NameValueApi.builder().name("Атака хвостом").value(html).build();
 	}
 
 	private static List<String> paths(Object request) {
@@ -56,16 +53,16 @@ class HtmlValidatorTest {
 	@Test
 	void acceptsValidHtmlFragment() {
 		assertThat(paths(item("<p class=\"lead\">Текст <strong>описания</strong><br></p>")))
-			.doesNotContain("special");
+			.doesNotContain("value");
 	}
 
 	@Test
 	void rejectsMismatchedAndUnclosedTags() {
-		Set<ConstraintViolation<MagicItemSaveApi>> violations = validator.validate(item("<p><strong>Некорректное описание</p>"));
+		Set<ConstraintViolation<NameValueApi>> violations = validator.validate(item("<p><strong>Некорректное описание</p>"));
 
 		assertThat(violations)
 			.anySatisfy(violation -> {
-				assertThat(violation.getPropertyPath().toString()).isEqualTo("special");
+				assertThat(violation.getPropertyPath().toString()).isEqualTo("value");
 				assertThat(violation.getMessage()).isEqualTo("Некорректный HTML");
 			});
 	}
@@ -73,19 +70,19 @@ class HtmlValidatorTest {
 	@Test
 	void acceptsSelfClosingCustomElements() {
 		assertThat(paths(item("<p><em>Попадание:</em>&nbsp;15&nbsp;(<dice-roller formula=\"3к6 + 5\"/>) урона излучением.</p>")))
-			.doesNotContain("special");
+			.doesNotContain("value");
 	}
 
 	@Test
 	void acceptsRealOldFrontendMarkup() {
 		assertThat(paths(item("<p>Колдовство (<dice-roller formula=\"к20 + 9\">+9</dice-roller>):</p><div class=\"spell-list\">"
 			+ "<p>Заговоры: <em><detail-tooltip type=\"spell\"><a href=\"/spells/Guidance\">указание</a></detail-tooltip>,&nbsp;</em></p></div>")))
-			.doesNotContain("special");
+			.doesNotContain("value");
 	}
 
 	@Test
 	void stillRejectsUnclosedCustomElement() {
-		assertThat(paths(item("<p><dice-roller formula=\"1d6\">1к6</p>"))).contains("special");
+		assertThat(paths(item("<p><dice-roller formula=\"1d6\">1к6</p>"))).contains("value");
 	}
 
 	@Test
