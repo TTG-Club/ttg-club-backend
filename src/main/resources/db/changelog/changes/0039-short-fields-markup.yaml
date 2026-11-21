@@ -1,0 +1,44 @@
+# Этап 3, короткие поля (expand): владение доспехами, оружием и инструментами класса, владение
+# инструментами и снаряжение предыстории — из HTML в разметку core-api. Новые jsonb-колонки заполняет
+# конвертер на Java, старые удаляет 0040. Все необязательны (NULL — нет). На странице они выводятся
+# в строку («Доспехи: …»), API отдаёт снаряжение предыстории списком — по запятым вне маркеров.
+# Особое свойство и уточнения магического предмета — простые фразы без разметки, которые API
+# вставляет в подписи («требуется настройка заклинателем»), — остаются строками.
+databaseChangeLog:
+  - changeSet:
+      id: 0039-short-fields-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE classes ADD COLUMN armor_markup jsonb, ADD COLUMN weapon_markup jsonb,
+              ADD COLUMN tools_markup jsonb;
+              ALTER TABLE backgrounds ADD COLUMN tool_ownership_markup jsonb, ADD COLUMN equipments_text_markup jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE classes DROP COLUMN armor_markup, DROP COLUMN weapon_markup, DROP COLUMN tools_markup;
+              ALTER TABLE backgrounds DROP COLUMN tool_ownership_markup, DROP COLUMN equipments_text_markup
+  - changeSet:
+      id: 0039-short-fields-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: classes
+            columns: armor>armor_markup, weapon>weapon_markup, tools>tools_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: backgrounds
+            columns: tool_ownership>tool_ownership_markup, equipments_text>equipments_text_markup
+        - sql:
+            sql: >-
+              UPDATE classes SET armor_markup = NULL WHERE armor_markup = '[]'::jsonb;
+              UPDATE classes SET weapon_markup = NULL WHERE weapon_markup = '[]'::jsonb;
+              UPDATE classes SET tools_markup = NULL WHERE tools_markup = '[]'::jsonb;
+              UPDATE backgrounds SET tool_ownership_markup = NULL WHERE tool_ownership_markup = '[]'::jsonb;
+              UPDATE backgrounds SET equipments_text_markup = NULL WHERE equipments_text_markup = '[]'::jsonb
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

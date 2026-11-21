@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api.wiki;
 
+import java.util.List;
 import club.dnd5.portal.dto.api.wiki.RuleDetailApi;
 import club.dnd5.portal.dto.api.wiki.RuleSaveApi;
 import club.dnd5.portal.model.audit.RevisionOperation;
@@ -40,7 +41,7 @@ class RuleApiControllerTest {
 		request.setEnglishName("New rule");
 		request.setAltName(" Альтернативное ");
 		request.setType(" Термин ");
-		request.setDescription(" Новое описание ");
+		request.setDescription(List.of(" Новое описание "));
 		request.setPage((short) 42);
 
 		RuleApiController controller = new RuleApiController(ruleRepository, bookResolver, auditService, mock(WorkshopPreview.class));
@@ -55,7 +56,7 @@ class RuleApiControllerTest {
 		assertThat(rule.getEnglishName()).isEqualTo("New rule");
 		assertThat(rule.getAltName()).isEqualTo("Альтернативное");
 		assertThat(rule.getType()).isEqualTo("Термин");
-		assertThat(rule.getDescription()).isEqualTo("Новое описание");
+		assertThat(rule.getDescription()).isEqualTo(List.of("Новое описание"));
 		assertThat(rule.getPage()).isEqualTo((short) 42);
 	}
 
@@ -77,7 +78,7 @@ class RuleApiControllerTest {
 		request.setName("Новое правило");
 		request.setEnglishName(" New rule ");
 		request.setType("Термин");
-		request.setDescription("Новое описание");
+		request.setDescription(List.of("Новое описание"));
 
 		RuleApiController controller = new RuleApiController(
 			ruleRepository, mock(BookResolver.class), mock(AuditService.class), workshopPreview);
@@ -86,7 +87,7 @@ class RuleApiControllerTest {
 		verify(ruleRepository).saveAndFlush(rule);
 		assertThat(response.getBody()).isNotNull();
 		assertThat(response.getBody().getType()).isEqualTo("Термин");
-		assertThat(response.getBody().getDescription()).isEqualTo("Новое описание");
+		assertThat(response.getBody().getDescription()).isEqualTo(List.of("Новое описание"));
 	}
 
 	private Rule existingRule() {
@@ -99,7 +100,7 @@ class RuleApiControllerTest {
 		rule.setName("Старое правило");
 		rule.setEnglishName("Old rule");
 		rule.setType("Правило");
-		rule.setDescription("Старое описание");
+		rule.setDescription(List.of("Старое описание"));
 		rule.setBook(book);
 		rule.setPage((short) 12);
 		return rule;

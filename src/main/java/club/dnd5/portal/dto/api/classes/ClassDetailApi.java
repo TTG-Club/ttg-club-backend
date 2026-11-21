@@ -42,7 +42,8 @@ public class ClassDetailApi extends ClassApi {
 	private SpellFilter customFilter;
 	private String archetypeName;
 	private ClassTraitsApi traits;
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private String accusativeName;
 	private AbilityType spellAbility;
 	private SpellcasterType spellcasterType;
@@ -192,7 +193,8 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final String suffix;
 		private final int level;
-		private final String description;
+		/** Блоки разметки core-api. */
+		private final List<String> description;
 		private final boolean optional;
 		private final String child;
 
@@ -210,13 +212,17 @@ public class ClassDetailApi extends ClassApi {
 	@Getter
 	public static class ClassTraitsApi {
 		private final int diceHp;
-		private final String armor;
-		private final String weapon;
-		private final String tools;
+		/** Блоки разметки core-api. */
+		private final List<String> armor;
+		/** Блоки разметки core-api. */
+		private final List<String> weapon;
+		/** Блоки разметки core-api. */
+		private final List<String> tools;
 		private final String savingThrows;
 		private final int skillAvailableCount;
 		private final Collection<String> availableSkills;
-		private final String equipment;
+		/** Блоки разметки core-api. */
+		private final List<String> equipment;
 		private final Collection<FeatureLevelApi> classFeatureLevels;
 		private final Collection<FeatureLevelApi> archetypeFeatureLevels;
 		private final Collection<LevelRowApi> levels;
@@ -401,21 +407,18 @@ public class ClassDetailApi extends ClassApi {
 	public static class TraitLinkApi {
 		private final String name;
 		private final String anchor;
-		private final String tooltipUrl;
 		private final boolean archetypeFeature;
 
 		private TraitLinkApi(HeroClassTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			String child = trait.getChild() == null ? trait.getId().toString() : trait.getChild();
 			anchor = String.format("#c%s", child);
-			tooltipUrl = String.format("/classes/feature/%d", trait.getId());
 			archetypeFeature = false;
 		}
 
 		private TraitLinkApi(ArchetypeTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			anchor = String.format("#a%d", trait.getId());
-			tooltipUrl = String.format("/classes/archetype/feature/%d", trait.getId());
 			archetypeFeature = true;
 		}
 
@@ -432,7 +435,8 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final int level;
 		private final String type;
-		private final String description;
+		/** Блоки разметки core-api. */
+		private final List<String> description;
 		private final Source source;
 		private final boolean optional;
 		private final boolean archetypeFeature;

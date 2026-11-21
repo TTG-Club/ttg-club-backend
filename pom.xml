@@ -23,6 +23,8 @@
 		<aws-sdk.version>2.31.1</aws-sdk.version>
 		<twelvemonkeys.version>3.13.0</twelvemonkeys.version>
 		<webp-imageio.version>0.10.2</webp-imageio.version>
+		<!-- Имя отличается от управляемого Spring Boot querydsl.version (тот — для заброшенного com.querydsl). -->
+		<openfeign-querydsl.version>7.1</openfeign-querydsl.version>
 	</properties>
 
 	<dependencies>
@@ -53,9 +55,25 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-liquibase</artifactId>
+		</dependency>
+		<!-- QueryDSL: поддерживаемый форк OpenFeign (как на core-api); пакеты com.querydsl, Q-классы генерирует APT. -->
+		<dependency>
+			<groupId>io.github.openfeign.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+			<version>${openfeign-querydsl.version}</version>
+		</dependency>
+		<!-- Только для инструментов переезда (db/pg-migration): чтение старой MySQL. В приложение не попадает. -->
+		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
-			<scope>runtime</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -131,6 +149,17 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 							<version>${lombok.version}</version>
+						</path>
+						<path>
+							<groupId>io.github.openfeign.querydsl</groupId>
+							<artifactId>querydsl-apt</artifactId>
+							<version>${openfeign-querydsl.version}</version>
+							<classifier>jpa</classifier>
+						</path>
+						<path>
+							<groupId>jakarta.persistence</groupId>
+							<artifactId>jakarta.persistence-api</artifactId>
+							<version>${jakarta-persistence.version}</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>

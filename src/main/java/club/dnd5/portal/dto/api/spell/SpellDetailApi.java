@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.spell;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.model.splells.TimeCast;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,9 +33,11 @@ public class SpellDetailApi extends SpellApi {
 	private List<ReferenceClassApi> backgrounds;
 	private List<ReferenceClassApi> feats;
 
+	/** Разметка core-api: массив строк-блоков (фронтенд рендерит её сам). */
 	@NotNull
-	private String description;
-	private String upper;
+	private List<String> description;
+	/** «На больших уровнях» — разметка core-api; {@code null}, если нет. */
+	private List<String> upper;
 
 	public SpellDetailApi(Spell spell) {
 		super(spell);
@@ -45,9 +48,7 @@ public class SpellDetailApi extends SpellApi {
 		description = spell.getDescription();
 		components.setM(spell.getAdditionalMaterialComponent());
 		classes = spell.getHeroClass().stream().map(ReferenceClassApi::new).collect(Collectors.toList());
-		if (spell.getUpperLevel() != null) {
-			upper = spell.getUpperLevel();
-		}
+		upper = Markup.emptyToNull(spell.getUpperLevel());
 		source.setPage(spell.getPage());
 	}
 }

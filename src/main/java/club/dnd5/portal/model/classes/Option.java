@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -28,18 +32,28 @@ public class Option {
 		inverseJoinColumns = @JoinColumn(name = "option_type"),
 		foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
 		inverseForeignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<OptionTypeDefinition> optionTypes;
 
 	private String prerequisite;
 	private Integer level;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0023/0024). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
 	private Short page;
+
+	/** jsonb-колонка NOT NULL: «нет описания» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullDescriptionToEmpty() {
+		description = description == null ? new ArrayList<>() : description;
+	}
 
 	public String getUrlName() {
 		return StringUtil.getUrl(englishName);

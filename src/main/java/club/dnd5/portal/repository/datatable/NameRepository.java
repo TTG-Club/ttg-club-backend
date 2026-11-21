@@ -12,6 +12,6 @@ import club.dnd5.portal.model.races.RaceName;
 
 @Repository
 public interface NameRepository extends JpaRepository<RaceName, Integer>, JpaSpecificationExecutor<RaceName> {
-	@Query(value = "SELECT r.id AS raceId, r.name AS name FROM dnd5.race_names rn JOIN dnd5.races r ON rn.race_id = r.id WHERE r.parent_id IS NULL group by r.id, r.name ORDER BY r.name", nativeQuery = true)
+	@Query(value = "SELECT r.id AS raceId, r.name AS name FROM race_names rn JOIN races r ON rn.race_id = r.id WHERE r.parent_id IS NULL group by r.id, r.name ORDER BY r.name", nativeQuery = true)
 	Collection<IRaceName> findAllRaces();
 }

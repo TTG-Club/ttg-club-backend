@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 public class ItemDetailApi extends ItemApi {
 	private Integer id;
 	private Float weight;
-	private String description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
 	private List<String> categories;
 	private String image;
 	private String altName;
@@ -38,10 +39,13 @@ public class ItemDetailApi extends ItemApi {
 			description = item.getDescription();
 		}
 		Set<EquipmentType> types = item.getTypes() == null ? Collections.emptySet() : item.getTypes();
+		// Set без порядка: категории — в порядке объявления enum, как в списке (ItemApi)
 		categories = types.stream()
+				.sorted()
 				.map(EquipmentType::getCyrilicName)
 				.collect(Collectors.toList());
 		categoriesRaw = types.stream()
+				.sorted()
 				.map(EquipmentType::name)
 				.collect(Collectors.toList());
 		altName = item.getAltName();

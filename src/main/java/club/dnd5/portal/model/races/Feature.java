@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.races;
 
+import jakarta.persistence.OrderColumn;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CollectionTable;
@@ -18,6 +20,8 @@ import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.SkillType;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -34,22 +38,31 @@ public class Feature {
 
 	private String name;
 	private String englishName;
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0031). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 	private boolean feature;
 	
 	@ManyToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Language> lanuages;
 	
-	@ElementCollection(targetClass = SkillType.class)
-	@CollectionTable(name = "race_feature_skill_type")
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private List<SkillType> skills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SkillType> skills = new ArrayList<>();
 
 	private Integer replaceFeatureId;
 	
 	public boolean isNotFeature() {
 		return !feature;
+	}
+
+	/** jsonb-колонка NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullJsonListsToEmpty() {
+		skills = skills == null ? new ArrayList<>() : skills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

@@ -1,0 +1,110 @@
+# Этап 3, классы (contract): HTML-колонки удаляются, jsonb-разметка занимает их имена.
+# От описаний зависит view глобального поиска — он пересоздаётся (версия 9 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+# Откат возвращает пустым описаниям умений пустую строку, а не NULL: старый код одинаково
+# считает пустыми оба значения.
+databaseChangeLog:
+  - changeSet:
+      id: 0034-classes-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v8.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0034-classes-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: classes
+            direction: toHtml
+            columns: description_markup>description, equipment_markup>equipment
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: archetypes
+            direction: toHtml
+            columns: description_markup>description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: hero_class_traits
+            direction: toHtml
+            columns: description_markup>description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: hero_class_feats
+            direction: toHtml
+            columns: description_markup>description
+  - changeSet:
+      id: 0034-classes-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE classes DROP COLUMN description, DROP COLUMN equipment;
+              ALTER TABLE archetypes DROP COLUMN description;
+              ALTER TABLE hero_class_traits DROP COLUMN description;
+              ALTER TABLE hero_class_feats DROP COLUMN description
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE classes ADD COLUMN description text COLLATE ci, ADD COLUMN equipment text COLLATE ci;
+              ALTER TABLE archetypes ADD COLUMN description text COLLATE ci;
+              ALTER TABLE hero_class_traits ADD COLUMN description text COLLATE ci;
+              ALTER TABLE hero_class_feats ADD COLUMN description text COLLATE ci
+  - changeSet:
+      id: 0034-classes-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE classes RENAME COLUMN description_markup TO description;
+              ALTER TABLE classes ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE classes ALTER COLUMN description SET DEFAULT '[]'::jsonb;
+              ALTER TABLE classes RENAME COLUMN equipment_markup TO equipment;
+              ALTER TABLE archetypes RENAME COLUMN description_markup TO description;
+              ALTER TABLE archetypes ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE archetypes ALTER COLUMN description SET DEFAULT '[]'::jsonb;
+              ALTER TABLE hero_class_traits RENAME COLUMN description_markup TO description;
+              ALTER TABLE hero_class_traits ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE hero_class_traits ALTER COLUMN description SET DEFAULT '[]'::jsonb;
+              ALTER TABLE hero_class_feats RENAME COLUMN description_markup TO description;
+              ALTER TABLE hero_class_feats ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE hero_class_feats ALTER COLUMN description SET DEFAULT '[]'::jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE hero_class_feats ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE hero_class_feats ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE hero_class_feats RENAME COLUMN description TO description_markup;
+              ALTER TABLE hero_class_traits ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE hero_class_traits ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE hero_class_traits RENAME COLUMN description TO description_markup;
+              ALTER TABLE archetypes ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE archetypes ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE archetypes RENAME COLUMN description TO description_markup;
+              ALTER TABLE classes RENAME COLUMN equipment TO equipment_markup;
+              ALTER TABLE classes ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE classes ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE classes RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0034-classes-search-view-v9
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v9.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

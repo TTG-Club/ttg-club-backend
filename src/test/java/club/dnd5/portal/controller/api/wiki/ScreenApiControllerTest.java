@@ -64,7 +64,7 @@ class ScreenApiControllerTest {
 		request.setEnglishName(" New screen ");
 		request.setAltName(" Альтернативное ");
 		request.setCategory(" Правила ");
-		request.setDescription(" Новое описание ");
+		request.setDescription(List.of(" Новое описание "));
 		request.setIcon(" book ");
 		request.setOrder(20);
 		request.setParentId(2);
@@ -81,7 +81,7 @@ class ScreenApiControllerTest {
 		assertThat(screen.getEnglishName()).isEqualTo("New screen");
 		assertThat(screen.getAltName()).isEqualTo("Альтернативное");
 		assertThat(screen.getCategory()).isEqualTo("Правила");
-		assertThat(screen.getDescription()).isEqualTo("Новое описание");
+		assertThat(screen.getDescription()).isEqualTo(List.of("Новое описание"));
 		assertThat(screen.getIcon()).isEqualTo("book");
 		assertThat(screen.getOrdering()).isEqualTo(20);
 		assertThat(screen.getParent()).isSameAs(parent);
@@ -159,7 +159,7 @@ class ScreenApiControllerTest {
 		child.setId(3);
 		child.setName("Дочерний");
 		child.setEnglishName("Child screen");
-		child.setDescription("Описание");
+		child.setDescription(List.of("Описание"));
 		child.setParent(root);
 		child.setBook(book());
 		child.setChields(Collections.emptyList());
@@ -226,7 +226,7 @@ class ScreenApiControllerTest {
 		screen.setId(1);
 		screen.setName("Старый раздел");
 		screen.setEnglishName("Old screen");
-		screen.setDescription("Старое описание");
+		screen.setDescription(List.of("Старое описание"));
 		screen.setOrdering(10);
 		screen.setChields(Collections.emptyList());
 		return screen;

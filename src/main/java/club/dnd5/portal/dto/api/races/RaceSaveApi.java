@@ -5,7 +5,8 @@ import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.races.Feature;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import lombok.Setter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
@@ -27,9 +29,10 @@ public class RaceSaveApi {
 	private String englishName;
 	private Integer minAge;
 	private Integer maxAge;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private Integer parentId;
 	@NotNull
 	private CreatureSize size;

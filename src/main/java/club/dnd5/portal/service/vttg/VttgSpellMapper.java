@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.vttg;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.splells.Spell;
@@ -59,15 +60,17 @@ public class VttgSpellMapper {
 		}
 		String saveType = saveType(spell.getSavingthrows());
 		data.put("targetType", targetType(spell, range, area, saveType));
-		data.put("deliveryType", deliveryType(spell.getDescription(), range));
+		String descriptionHtml = Markup.toHtml(spell.getDescription());
+		String upperHtml = Markup.toHtml(spell.getUpperLevel());
+		data.put("deliveryType", deliveryType(descriptionHtml, range));
 		List<String> damageTypes = damageTypes(spell);
 		if (!damageTypes.isEmpty()) {
 			data.put("damageTypes", damageTypes);
 		}
 		data.put("saveType", saveType);
-		data.put("description", VttgText.html(spell.getDescription()));
-		if (!VttgText.isBlank(spell.getUpperLevel())) {
-			data.put("higherLevelDescription", VttgText.html(spell.getUpperLevel()));
+		data.put("description", VttgText.html(descriptionHtml));
+		if (!VttgText.isBlank(upperHtml)) {
+			data.put("higherLevelDescription", VttgText.html(upperHtml));
 		}
 		data.put("sourceKey", VttgDictionaries.sourceKey(spell.getBook()));
 		data.put("isSRD", spell.getSrd() != null && spell.getSrd());

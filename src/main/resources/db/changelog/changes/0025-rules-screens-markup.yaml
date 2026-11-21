@@ -1,0 +1,36 @@
+# Этап 3, правила и ширма (expand): описание — из HTML в разметку core-api.
+# Новые jsonb-колонки (массив строк-блоков, см. util/markup/HtmlToMarkupConverter) заполняются
+# конвертером на Java; старые HTML-колонки удаляет 0026. У ширмы описания может не быть (разделы-
+# родители) — там NULL остаётся NULL.
+databaseChangeLog:
+  - changeSet:
+      id: 0025-rules-screens-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE rules ADD COLUMN description_markup jsonb;
+              ALTER TABLE screens ADD COLUMN description_markup jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE rules DROP COLUMN description_markup;
+              ALTER TABLE screens DROP COLUMN description_markup
+  - changeSet:
+      id: 0025-rules-screens-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: rules
+            columns: description>description_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: screens
+            columns: description>description_markup
+        - sql:
+            sql: UPDATE rules SET description_markup = '[]'::jsonb WHERE description_markup IS NULL
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

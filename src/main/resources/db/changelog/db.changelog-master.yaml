@@ -1,0 +1,7 @@
+# Схема БД. Начальные файлы 0001-0005 сгенерированы db/pg-migration/baseline/gen_baseline.py
+# (перенос 1:1 из MySQL). Новые изменения — отдельными файлами в changes/ с префиксом
+# следующего номера; уже применённые changeset'ы не редактировать.
+databaseChangeLog:
+  - includeAll:
+      path: changes/
+      relativeToChangelogFile: true

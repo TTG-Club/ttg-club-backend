@@ -73,7 +73,7 @@ class ClassDetailApiTest {
 		archetype.setName("Чемпион");
 		archetype.setEnglishName("Champion");
 		archetype.setLevel((byte) 3);
-		archetype.setDescription("Описание чемпиона");
+		archetype.setDescription(List.of("Описание чемпиона"));
 		archetype.setGenitiveName("чемпиона");
 		archetype.setHeroClass(heroClass);
 		archetype.setBook(book);
@@ -102,7 +102,7 @@ class ClassDetailApiTest {
 		), features.stream().map(ClassDetailApi.TraitApi::getName).collect(Collectors.toList()));
 		assertEquals("Чемпион", details.getTraits().getArchetype().getName());
 		assertEquals(3, details.getTraits().getArchetype().getLevel());
-		assertEquals("Описание чемпиона", details.getTraits().getArchetype().getDescription());
+		assertEquals(List.of("Описание чемпиона"), details.getTraits().getArchetype().getDescription());
 	}
 
 	private HeroClass baseClass() {
@@ -130,7 +130,7 @@ class ClassDetailApiTest {
 		archetype.setName("Чемпион");
 		archetype.setEnglishName("Champion");
 		archetype.setLevel((byte) 3);
-		archetype.setDescription("Описание чемпиона");
+		archetype.setDescription(List.of("Описание чемпиона"));
 		archetype.setGenitiveName("чемпиона");
 		archetype.setHeroClass(heroClass);
 		archetype.setBook(heroClass.getBook());

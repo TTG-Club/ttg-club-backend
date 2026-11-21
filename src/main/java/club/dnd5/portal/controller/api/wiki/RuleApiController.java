@@ -18,6 +18,7 @@ import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -156,7 +157,7 @@ public class RuleApiController {
 		rule.setEnglishName(request.getEnglishName().trim());
 		rule.setAltName(trimToNull(request.getAltName()));
 		rule.setType(request.getType().trim());
-		rule.setDescription(request.getDescription().trim());
+		rule.setDescription(Markup.trimBlocks(request.getDescription()));
 		rule.setPage(request.getPage());
 		bookResolver.find(request.getSource()).ifPresent(rule::setBook);
 	}

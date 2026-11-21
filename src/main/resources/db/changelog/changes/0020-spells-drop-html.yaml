@@ -1,0 +1,69 @@
+# Этап 3, заклинания (contract): HTML-колонки удаляются, jsonb-разметка занимает их имена.
+# От spells.description зависит view глобального поиска — он пересоздаётся (версия 2 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый: Liquibase выполняет customChange
+# ещё при генерации SQL, поэтому в одном блоке rollback его нельзя упорядочить с SQL-шагами.
+# Откат идёт в обратном порядке: убрать view v2 → вернуть имена колонок → добавить HTML-колонки →
+# заполнить их HTML-ом из разметки (мост MarkupHtmlRenderer) → вернуть view v1.
+databaseChangeLog:
+  - changeSet:
+      id: 0020-spells-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: 0005-view-full-text-search.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0020-spells-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: spells
+            direction: toHtml
+            columns: description_markup>description, upper_level_markup>upper_level
+  - changeSet:
+      id: 0020-spells-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE spells DROP COLUMN description, DROP COLUMN upper_level
+      rollback:
+        - sql:
+            sql: ALTER TABLE spells ADD COLUMN description text COLLATE ci, ADD COLUMN upper_level text COLLATE ci
+  - changeSet:
+      id: 0020-spells-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE spells RENAME COLUMN description_markup TO description;
+              ALTER TABLE spells RENAME COLUMN upper_level_markup TO upper_level;
+              ALTER TABLE spells ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE spells ALTER COLUMN description SET DEFAULT '[]'::jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE spells ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE spells ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE spells RENAME COLUMN description TO description_markup;
+              ALTER TABLE spells RENAME COLUMN upper_level TO upper_level_markup
+  - changeSet:
+      id: 0020-spells-search-view-v2
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v2.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

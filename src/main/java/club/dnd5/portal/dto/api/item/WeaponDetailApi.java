@@ -28,8 +28,10 @@ public class WeaponDetailApi extends WeaponApi {
 	private Short minDistance;
 	private Short maxDistance;
 	private Byte ammo;
-	private String description;
-	private String special;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> special;
 	private List<PropertyApi> properties;
 	private List<Integer> propertyIds;
 	public WeaponDetailApi(Weapon weapon) {

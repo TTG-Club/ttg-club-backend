@@ -1,12 +1,15 @@
 package club.dnd5.portal.dto.api.wiki;
 
 import club.dnd5.portal.model.screen.Screen;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotBlank;
+import tools.jackson.databind.annotation.JsonDeserialize;
+
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -18,8 +21,9 @@ public class ScreenSaveApi {
 	private String englishName;
 	private String altName;
 	private String category;
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private String icon;
 	private Integer order;
 	private String source;

@@ -13,8 +13,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,29 +34,47 @@ public class HeroClass {
 	private String englishName;
 	@Column(name = "name_accusative")
 	private String accusativeName;
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0033). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
-	@OneToMany()
-	@JoinColumn(name = "hero_class_id")
-	private List<SpellLevelDefinition> levelDefenitions;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(name = "level_definitions", columnDefinition = "jsonb", nullable = false)
+	private List<SpellLevelDefinition> levelDefenitions = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "hero_class_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<FeatureLevelDefinition> featureLevelDefenitions;
 
 	private byte diceHp;
 
-	private String armor;
-	private String weapon;
-	private String tools;
+	/** Владение доспехами. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> armor;
+	/** Владение оружием. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> weapon;
+	/** Владение инструментами. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> tools;
 	private String savingThrows;
 	private String archetypeName;
 
-	@Column(columnDefinition = "TEXT")
-	private String equipment;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0033); {@code null} — снаряжения нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> equipment;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	/**
+	 * Обратная сторона Spell.heroClass (таблица spells_hero_class). Раньше связь была
+	 * независимой и жила в отдельной classes_spells, куда ничего не записывалось.
+	 */
+	@ManyToMany(mappedBy = "heroClass", fetch = FetchType.LAZY)
 	@OrderBy("level")
 	private List<Spell> spells;
 
@@ -65,29 +86,27 @@ public class HeroClass {
 	@Enumerated(EnumType.STRING)
 	private SpellcasterType spellcasterType = SpellcasterType.NONE;
 
-	@ElementCollection(targetClass = AbilityType.class)
-	@JoinTable(name = "class_primary_abilities", joinColumns = @JoinColumn(name = "class_id"))
-	@Column(name = "ability", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private List<AbilityType> primaryAbilities;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<AbilityType> primaryAbilities = new ArrayList<>();
 
 	@OneToMany()
 	@JoinColumn(name = "hero_class_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<HeroClassTrait> traits;
 
 	private int enabledArhitypeLevel;
 
 	@OneToMany()
 	@JoinColumn(name = "class_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Archetype> archetypes;
 
 	private short skillAvailableCount;
 
-	@ElementCollection(targetClass = SkillType.class)
-	@JoinTable(name = "class_available_skills", joinColumns = @JoinColumn(name = "class_id"))
-	@Column(name = "skill", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private List<SkillType> availableSkills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0015
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SkillType> availableSkills = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "option_type", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -189,5 +208,15 @@ public class HeroClass {
                 .flatMap(a -> a.getFeats().stream())
                 .filter(t-> t.getLevel() == level)
                 .collect(Collectors.toList());
+	}
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullJsonListsToEmpty() {
+		levelDefenitions = levelDefenitions == null ? new ArrayList<>() : levelDefenitions;
+		primaryAbilities = primaryAbilities == null ? new ArrayList<>() : primaryAbilities;
+		availableSkills = availableSkills == null ? new ArrayList<>() : availableSkills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

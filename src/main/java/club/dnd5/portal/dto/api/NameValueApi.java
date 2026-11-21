@@ -1,6 +1,5 @@
 package club.dnd5.portal.dto.api;
 
-import club.dnd5.portal.validation.ValidHtml;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,13 +25,10 @@ public class NameValueApi {
 	private String englishName;
 	@Schema(description = "краткое название свойства")
 	private String shortName;
-	@Schema(description = "значение свойства", example = "2")
-	@ValidHtml
+	@Schema(description = "значение свойства; у действий существа — блоки разметки core-api", example = "2")
 	private Object value;
 	@Schema(description = "дополнительный бонус если есть")
 	private Object additional;
-	@Schema(description = "флаг markdown")
-	private Boolean markdown;
 	@Schema(description = "сколько существ используют это действие")
 	private Long sharedUsageCount;
 }

@@ -1,5 +1,9 @@
 package club.dnd5.portal.model.classes;
 
+import java.util.List;
+import java.util.ArrayList;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import club.dnd5.portal.model.book.Book;
 import lombok.Data;
 
@@ -16,8 +20,10 @@ public class HeroClassTrait {
 	@Column(columnDefinition = "varchar(25) default ''")
 	private String suffix;
 	private byte level;
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0033). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	@ManyToOne(targetEntity = HeroClass.class)
 	private HeroClass heroClass;
@@ -29,4 +35,11 @@ public class HeroClassTrait {
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
+
+	/** jsonb-колонка NOT NULL: пустое описание хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullDescriptionToEmpty() {
+		description = description == null ? new ArrayList<>() : description;
+	}
 }

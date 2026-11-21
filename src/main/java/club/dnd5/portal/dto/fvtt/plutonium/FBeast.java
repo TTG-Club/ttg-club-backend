@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.fvtt.plutonium;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.fvtt.export.*;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.creature.*;
@@ -213,28 +214,28 @@ public class FBeast {
 					.collect(Collectors.toList());
 		}
 		for (Action action : creature.getActions()) {
-			if (action.getDescription().toLowerCase().matches("дробящий урон?а")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("дробящий урон?а")) {
 				damageTags.add("B");
 			}
-			if (action.getDescription().toLowerCase().matches("колющий урон")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("колющий урон")) {
 				damageTags.add("P");
 			}
-			if (action.getDescription().toLowerCase().matches("рубящий урон")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("рубящий урон")) {
 				damageTags.add("S");
 			}
-			if (action.getDescription().toLowerCase().matches("урон огнём")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("урон огнём")) {
 				damageTags.add("F");
 			}
-			if (action.getDescription().toLowerCase().matches("урон?а излучением")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("урон?а излучением")) {
 				damageTags.add("R");
 			}
-			if (action.getDescription().toLowerCase().matches("урон некротической энергией")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("урон некротической энергией")) {
 				damageTags.add("N");
 			}
-			if (action.getDescription().toLowerCase().matches("урон силовым полем")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("урон силовым полем")) {
 				damageTags.add("F");
 			}
-			if (action.getDescription().toLowerCase().matches("урон?а ядом")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).toLowerCase().matches("урон?а ядом")) {
 				damageTags.add("I");
 			}
 		}

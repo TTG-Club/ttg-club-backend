@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.List;
 
 @Entity
 @Table(name = "armors")
@@ -29,13 +33,10 @@ public class Armor {
 	@Enumerated(EnumType.ORDINAL)
 	private ArmorCategory type;
 
-	/**
-	 * В базе колонка TEXT. Без явного типа Hibernate считал её varchar(255) и на каждом
-	 * запуске (ddl-auto=update) пытался сжать: ALTER на armors мог обрезать описания и
-	 * вешал запуск, если таблицу держала чужая транзакция.
-	 */
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Описание. Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0027/0028); NULL — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> description;
 
 	@ManyToOne
 	@JoinColumn(name = "source")

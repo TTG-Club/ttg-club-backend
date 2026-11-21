@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.ClassApi;
@@ -35,6 +36,7 @@ import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -88,7 +90,8 @@ public class ClassApiController {
 			}
 		}
 		String search = ClassApi.getSearch(request);
-		return classRepo.findAll(SpecificationUtil.orAll(specification))
+		// порядок по id, как отдавал MySQL (в PostgreSQL порядок строк без ORDER BY не гарантирован)
+		return classRepo.findAll(SpecificationUtil.orAll(specification), Sort.by("id"))
 				.stream()
 				.map(classObject -> new ClassApi(classObject, request))
 				// Поиск находит класс по его названию или по названию подкласса
@@ -223,7 +226,7 @@ public class ClassApiController {
 		auditService.record(ENTITY_TYPE_ARCHETYPE, id, RevisionOperation.UPDATE,
 			new ArchetypeSaveApi(archetype, archetypeTraitRepository.findAllByArchetypeId(id)));
 		archetype.setName(request.getName().trim()); archetype.setEnglishName(request.getEnglishName().trim());
-		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(request.getDescription().trim());
+		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(Markup.trimBlocks(request.getDescription()));
 		archetype.setLevel(request.getLevel()); archetype.setSpellcasterType(request.getSpellcasterType());
 		archetype.setOptionType(optionTypeResolver.resolve(request.getOptionType()));
 		archetype.setSpellLevelType(request.getSpellLevelType() == null
@@ -288,11 +291,11 @@ public class ClassApiController {
 		Map<Integer, ArchetypeTrait> existing = archetypeTraitRepository.findAllByArchetypeId(archetype.getId()).stream()
 			.collect(Collectors.toMap(ArchetypeTrait::getId, trait -> trait));
 		List<ArchetypeTrait> traits = request.getTraits().stream()
-			.filter(trait -> StringUtils.hasText(trait.getName()) && StringUtils.hasText(trait.getDescription()))
+			.filter(trait -> StringUtils.hasText(trait.getName()) && !CollectionUtils.isEmpty(Markup.trimBlocks(trait.getDescription())))
 			.map(value -> {
 				ArchetypeTrait trait = value.getId() == null ? new ArchetypeTrait() : existing.getOrDefault(value.getId(), new ArchetypeTrait());
 				trait.setName(value.getName().trim()); trait.setSuffix(trimToNull(value.getSuffix())); trait.setLevel(value.getLevel());
-				trait.setDescription(value.getDescription().trim()); trait.setChild(trimToNull(value.getChild()));
+				trait.setDescription(Markup.trimBlocks(value.getDescription())); trait.setChild(trimToNull(value.getChild()));
 				trait.setArchetype(archetype); trait.setBook(archetype.getBook()); return trait;
 			}).collect(Collectors.toList());
 		archetypeTraitRepository.saveAll(traits); archetypeTraitRepository.flush();
@@ -335,14 +338,14 @@ public class ClassApiController {
 		heroClass.setName(request.getName().trim());
 		heroClass.setEnglishName(request.getEnglishName().trim());
 		heroClass.setAccusativeName(trimToNull(request.getAccusativeName()));
-		heroClass.setDescription(request.getDescription().trim());
+		heroClass.setDescription(Markup.trimBlocks(request.getDescription()));
 		heroClass.setDiceHp(request.getDiceHp());
-		heroClass.setArmor(trimToNull(request.getArmor()));
-		heroClass.setWeapon(trimToNull(request.getWeapon()));
-		heroClass.setTools(trimToNull(request.getTools()));
+		heroClass.setArmor(Markup.emptyToNull(Markup.trimBlocks(request.getArmor())));
+		heroClass.setWeapon(Markup.emptyToNull(Markup.trimBlocks(request.getWeapon())));
+		heroClass.setTools(Markup.emptyToNull(Markup.trimBlocks(request.getTools())));
 		heroClass.setSavingThrows(trimToNull(request.getSavingThrows()));
 		heroClass.setArchetypeName(trimToNull(request.getArchetypeName()));
-		heroClass.setEquipment(trimToNull(request.getEquipment()));
+		heroClass.setEquipment(Markup.emptyToNull(Markup.trimBlocks(request.getEquipment())));
 		heroClass.setSpellAbility(request.getSpellAbility());
 		heroClass.setSpellcasterType(request.getSpellcasterType());
 		heroClass.setPrimaryAbilities(request.getPrimaryAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getPrimaryAbilities()));
@@ -408,7 +411,7 @@ public class ClassApiController {
 			.collect(Collectors.toMap(HeroClassTrait::getId, trait -> trait));
 		List<HeroClassTrait> traits = request.getClassTraits().stream()
 			.filter(traitRequest -> StringUtils.hasText(traitRequest.getName()))
-			.filter(traitRequest -> StringUtils.hasText(traitRequest.getDescription()))
+			.filter(traitRequest -> !CollectionUtils.isEmpty(Markup.trimBlocks(traitRequest.getDescription())))
 			.map(traitRequest -> {
 				HeroClassTrait trait = traitRequest.getId() == null
 					? new HeroClassTrait()
@@ -416,7 +419,7 @@ public class ClassApiController {
 				trait.setName(traitRequest.getName().trim());
 				trait.setSuffix(trimToNull(traitRequest.getSuffix()));
 				trait.setLevel(traitRequest.getLevel());
-				trait.setDescription(traitRequest.getDescription().trim());
+				trait.setDescription(Markup.trimBlocks(traitRequest.getDescription()));
 				trait.setOptional(traitRequest.isOptional() ? 1 : 0);
 				trait.setChild(trimToNull(traitRequest.getChild()));
 				trait.setArchitype(false);

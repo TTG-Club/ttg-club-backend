@@ -1,0 +1,96 @@
+# Этап 3, предметы (contract): HTML-колонки удаляются, jsonb-разметка занимает их имена.
+# От описаний зависит view глобального поиска — он пересоздаётся (версия 6 в views/).
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+databaseChangeLog:
+  - changeSet:
+      id: 0028-items-drop-search-view
+      author: pg-migration
+      changes:
+        - sql:
+            sql: DROP VIEW full_text_search
+      rollback:
+        - sqlFile:
+            path: ../views/full_text_search-v5.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+  - changeSet:
+      id: 0028-items-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: artifactes
+            direction: toHtml
+            columns: description_markup>description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: equipments
+            direction: toHtml
+            columns: description_markup>description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: armors
+            direction: toHtml
+            columns: description_markup>description
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: weapons
+            direction: toHtml
+            columns: description_markup>description, special_markup>special
+  - changeSet:
+      id: 0028-items-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE artifactes DROP COLUMN description;
+              ALTER TABLE equipments DROP COLUMN description;
+              ALTER TABLE armors DROP COLUMN description;
+              ALTER TABLE weapons DROP COLUMN description, DROP COLUMN special
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE artifactes ADD COLUMN description text COLLATE ci;
+              ALTER TABLE equipments ADD COLUMN description text COLLATE ci;
+              ALTER TABLE armors ADD COLUMN description text COLLATE ci;
+              ALTER TABLE weapons ADD COLUMN description text COLLATE ci, ADD COLUMN special text COLLATE ci
+  - changeSet:
+      id: 0028-items-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE artifactes RENAME COLUMN description_markup TO description;
+              ALTER TABLE artifactes ALTER COLUMN description SET NOT NULL;
+              ALTER TABLE artifactes ALTER COLUMN description SET DEFAULT '[]'::jsonb;
+              ALTER TABLE equipments RENAME COLUMN description_markup TO description;
+              ALTER TABLE armors RENAME COLUMN description_markup TO description;
+              ALTER TABLE weapons RENAME COLUMN description_markup TO description;
+              ALTER TABLE weapons RENAME COLUMN special_markup TO special
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE weapons RENAME COLUMN special TO special_markup;
+              ALTER TABLE weapons RENAME COLUMN description TO description_markup;
+              ALTER TABLE armors RENAME COLUMN description TO description_markup;
+              ALTER TABLE equipments RENAME COLUMN description TO description_markup;
+              ALTER TABLE artifactes ALTER COLUMN description DROP DEFAULT;
+              ALTER TABLE artifactes ALTER COLUMN description DROP NOT NULL;
+              ALTER TABLE artifactes RENAME COLUMN description TO description_markup
+  - changeSet:
+      id: 0028-items-search-view-v6
+      author: pg-migration
+      changes:
+        - sqlFile:
+            path: ../views/full_text_search-v6.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW full_text_search

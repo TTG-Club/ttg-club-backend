@@ -23,13 +23,13 @@ class VttgBackgroundMapperTest {
 		acolyte.setEnglishName("Acolyte");
 		acolyte.setBook(new Book("PHB"));
 		acolyte.setSkills(Arrays.asList(SkillType.INSIGHT, SkillType.RELIGION));
-		acolyte.setToolOwnership("Нет");
+		acolyte.setToolOwnership(List.of("Нет"));
 		acolyte.setLanguage("Два языка на ваш выбор");
-		acolyte.setEquipmentsText("Священный символ, молитвенник");
+		acolyte.setEquipmentsText(List.of("Священный символ, молитвенник"));
 		acolyte.setStartMoney(15);
 		acolyte.setSkillName("Приют для верующих");
-		acolyte.setSkillDescription("<p>Вас и ваших спутников примут в храме.</p>");
-		acolyte.setDescription("<p>Вы служили в храме.</p>");
+		acolyte.setSkillDescription(List.of("Вас и ваших спутников примут в храме."));
+		acolyte.setDescription(List.of("Вы служили в храме."));
 		Personalization trait = new Personalization();
 		trait.setType(PersonalizationType.TRAIT);
 		trait.setText("Я цитирую молитвы.");

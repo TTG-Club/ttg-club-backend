@@ -48,9 +48,9 @@ public class DmScreen {
 
 	/**
 	 * Окна ширмы — JSON-массив {@link club.dnd5.portal.dto.api.dmscreen.DmScreenWindow}.
-	 * До 100 окон с путями и заголовками до 256 символов не помещаются в TEXT (64 КБ).
+	 * До 100 окон с путями и заголовками до 256 символов; в PostgreSQL text без ограничения длины.
 	 */
-	@Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+	@Column(nullable = false, columnDefinition = "text")
 	private String windows;
 
 	@CreationTimestamp

@@ -33,9 +33,9 @@ class VttgClassMapperTest {
 	void fighterCarriesProficienciesFeaturesAndArchetype() {
 		HeroClass fighter = heroClass("Воин", "Fighter");
 		fighter.setDiceHp((byte) 10);
-		fighter.setArmor("Все доспехи, щиты");
-		fighter.setWeapon("Простое оружие, воинское оружие");
-		fighter.setTools("Нет");
+		fighter.setArmor(List.of("Все доспехи, щиты"));
+		fighter.setWeapon(List.of("Простое оружие, воинское оружие"));
+		fighter.setTools(List.of("Нет"));
 		fighter.setSavingThrows("Сила, Телосложение");
 		fighter.setSkillAvailableCount((short) 2);
 		fighter.setAvailableSkills(Arrays.asList(SkillType.ATHLETICS, SkillType.ANIMAL_HANDLING));
@@ -54,14 +54,14 @@ class VttgClassMapperTest {
 		ArchetypeTrait critical = new ArchetypeTrait();
 		critical.setName("Улучшенный критический удар");
 		critical.setLevel((byte) 3);
-		critical.setDescription("<p>Критическое попадание на 19–20.</p>");
+		critical.setDescription(List.of("Критическое попадание на 19–20."));
 		champion.setFeats(Collections.singletonList(critical));
 		fighter.setArchetypes(Collections.singletonList(champion));
 
 		Option defense = new Option();
 		defense.setName("Оборона");
 		defense.setEnglishName("Defense");
-		defense.setDescription("<p>+1 к КД.</p>");
+		defense.setDescription(club.dnd5.portal.util.markup.Markup.fromHtml("<p>+1 к КД.</p>"));
 		defense.setPrerequisite("Нет");
 		club.dnd5.portal.model.classes.OptionTypeDefinition fightingStyle = new club.dnd5.portal.model.classes.OptionTypeDefinition("FIGHTING_STYLE", "Боевые стили: Воин", "Fighter", null, false);
 		fightingStyle.setFeatureStem("боевой стиль");
@@ -230,8 +230,8 @@ class VttgClassMapperTest {
 	@Test
 	void customProficienciesStayAsText() {
 		HeroClass rogue = heroClass("Плут", "Rogue");
-		rogue.setArmor("Лёгкие доспехи");
-		rogue.setWeapon("Простое оружие, длинные мечи, рапиры");
+		rogue.setArmor(List.of("Лёгкие доспехи"));
+		rogue.setWeapon(List.of("Простое оружие, длинные мечи, рапиры"));
 
 		Map<String, Object> data = mapper.toVttg(rogue, Collections.emptyMap());
 
@@ -259,7 +259,7 @@ class VttgClassMapperTest {
 		trait.setId(id);
 		trait.setName(name);
 		trait.setLevel((byte) level);
-		trait.setDescription("<p>Описание " + id + "</p>");
+		trait.setDescription(List.of("Описание " + id));
 		return trait;
 	}
 

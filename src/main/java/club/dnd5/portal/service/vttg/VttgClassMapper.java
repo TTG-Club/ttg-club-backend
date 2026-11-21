@@ -12,6 +12,7 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
+import club.dnd5.portal.util.markup.Markup;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -84,23 +85,23 @@ public class VttgClassMapper {
 		data.put("isSRD", false);
 		data.put("name", VttgText.orEmpty(heroClass.getName()));
 		data.put("nameEn", VttgText.orEmpty(heroClass.getEnglishName()));
-		data.put("description", VttgText.html(heroClass.getDescription()));
+		data.put("description", VttgText.html(Markup.toHtml(heroClass.getDescription())));
 		data.put("sourceKey", VttgDictionaries.sourceKey(heroClass.getBook()));
 		data.put("hitDie", (int) heroClass.getDiceHp());
 		List<String> primary = abilities(heroClass.getPrimaryAbilities());
 		if (!primary.isEmpty()) {
 			data.put("primaryAbilities", primary);
 		}
-		Proficiency armor = armor(heroClass.getArmor());
+		Proficiency armor = armor(Markup.toInlineHtml(heroClass.getArmor()));
 		data.put("armorProficiencies", armor.categories);
 		putIfPresent(data, "armorProficienciesCustom", armor.custom);
-		Proficiency weapon = weapon(heroClass.getWeapon());
+		Proficiency weapon = weapon(Markup.toInlineHtml(heroClass.getWeapon()));
 		data.put("weaponProficiencies", weapon.categories);
 		putIfPresent(data, "weaponProficienciesCustom", weapon.custom);
-		data.put("toolProficiencies", tools(heroClass.getTools()));
+		data.put("toolProficiencies", tools(Markup.toInlineHtml(heroClass.getTools())));
 		data.put("savingThrowProficiencies", savingThrows(heroClass.getSavingThrows()));
 		data.put("skillChoices", skillChoices(heroClass));
-		String equipment = VttgText.html(heroClass.getEquipment());
+		String equipment = VttgText.html(Markup.toHtml(heroClass.getEquipment()));
 		if (!equipment.isEmpty()) {
 			Map<String, Object> option = new LinkedHashMap<>();
 			option.put("key", "A");
@@ -144,10 +145,10 @@ public class VttgClassMapper {
 			if (VttgText.isBlank(trait.getName())) {
 				continue;
 			}
-			String description = trait.getDescription();
+			String description = Markup.toHtml(trait.getDescription());
 			HeroClassTrait origin = trait.getChild() == null ? null : byId.get(trait.getChild().trim());
 			if (VttgText.isBlank(description) && origin != null) {
-				description = origin.getDescription();
+				description = Markup.toHtml(origin.getDescription());
 			}
 			boolean informational = trait.isArchitype() || trait.getOptional() == 1;
 			features.add(feature(used, null, featureName(trait.getName(), trait.getSuffix()), description,
@@ -246,7 +247,7 @@ public class VttgClassMapper {
 			choice.put("key", unique(used, base.isEmpty() ? "option" : base, 0));
 			choice.put("name", VttgText.orEmpty(option.getName()));
 			putIfPresent(choice, "nameEn", VttgText.optional(option.getEnglishName()));
-			choice.put("description", VttgText.html(option.getDescription()));
+			choice.put("description", VttgText.html(Markup.toHtml(option.getDescription())));
 			String prerequisite = VttgText.optional(option.getPrerequisite());
 			if (prerequisite != null && !"нет".equalsIgnoreCase(prerequisite)) {
 				choice.put("prerequisite", prerequisite);
@@ -301,7 +302,7 @@ public class VttgClassMapper {
 		data.put("key", key);
 		data.put("name", VttgText.orEmpty(archetype.getName()));
 		data.put("nameEn", VttgText.orEmpty(archetype.getEnglishName()));
-		data.put("description", VttgText.html(archetype.getDescription()));
+		data.put("description", VttgText.html(Markup.toHtml(archetype.getDescription())));
 		data.put("unlockLevel", unlockLevel);
 		data.put("sourceKey", VttgDictionaries.sourceKey(archetype.getBook()));
 		Map<String, Object> spellcasting = subclassSpellcasting(heroClass, archetype, unlockLevel);
@@ -333,7 +334,7 @@ public class VttgClassMapper {
 				continue;
 			}
 			features.add(feature(used, subclassKey, featureName(trait.getName(), trait.getSuffix()),
-				trait.getDescription(), trait.getLevel(), false));
+				Markup.toHtml(trait.getDescription()), trait.getLevel(), false));
 		}
 		return features;
 	}

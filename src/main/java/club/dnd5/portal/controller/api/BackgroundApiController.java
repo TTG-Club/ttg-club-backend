@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
@@ -14,7 +15,6 @@ import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.exception.PageNotFoundException;
-import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.background.Personalization;
@@ -42,7 +42,6 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Order;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,26 +73,12 @@ public class BackgroundApiController {
 				});
 			}
 			if (!request.getFilter().getSkills().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<AbilityType, Background> abilityType = root.join("skills", JoinType.LEFT);
-					query.distinct(true);
-					return cb.and(abilityType.in(
-							request.getFilter().getSkills().stream().map(SkillType::valueOf).collect(Collectors.toList())));
-				});
+				specification = SpecificationUtil.getAndSpecification(specification, SpecificationUtil.jsonbContainsAny("skills",
+					request.getFilter().getSkills().stream().map(SkillType::valueOf).collect(Collectors.toList())));
 			}
 		}
-		if (request.getOrders() != null && !request.getOrders().isEmpty()) {
-			specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-				List<Order> orders = request.getOrders().stream()
-						.map(
-							order -> "asc".equals(order.getDirection()) ? cb.asc(root.get(order.getField())) : cb.desc(root.get(order.getField()))
-						)
-						.collect(Collectors.toList());
-				query.orderBy(orders);
-				return cb.and();
-			});
-		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
+		// пользовательская сортировка и последний ключ id — в pageable (без ORDER BY порядок строк в PostgreSQL не гарантирован)
+		Pageable pageable = PageAndSortUtil.getPageableWithOrders(request, "id");
 		return backgroundRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(BackgroundApi::new)
@@ -215,13 +200,13 @@ public class BackgroundApiController {
 		background.setAltName(trimToNull(request.getAltName()));
 		background.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
 		background.setOtherSkills(trimToNull(request.getOtherSkills()));
-		background.setToolOwnership(trimToNull(request.getToolOwnership()));
-		background.setEquipmentsText(trimToNull(request.getEquipments()));
+		background.setToolOwnership(Markup.emptyToNull(Markup.trimBlocks(request.getToolOwnership())));
+		background.setEquipmentsText(Markup.emptyToNull(Markup.trimBlocks(request.getEquipments())));
 		background.setStartMoney(request.getStartGold() == null ? 0 : request.getStartGold());
-		background.setDescription(request.getDescription().trim());
+		background.setDescription(Markup.trimBlocks(request.getDescription()));
 		background.setSkillName(trimToNull(request.getSkillName()));
-		background.setSkillDescription(trimToNull(request.getSkillDescription()));
-		background.setPersonalization(trimToNull(request.getPersonalization()));
+		background.setSkillDescription(Markup.emptyToNull(Markup.trimBlocks(request.getSkillDescription())));
+		background.setPersonalization(Markup.emptyToNull(Markup.trimBlocks(request.getPersonalization())));
 		if (request.getPersonalizationTables() != null) {
 			List<Personalization> personalizations = request.getPersonalizationTables().stream()
 				.flatMap(table -> table.toPersonalizations().stream())

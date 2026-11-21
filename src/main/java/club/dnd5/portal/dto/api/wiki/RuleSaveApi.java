@@ -1,12 +1,16 @@
 package club.dnd5.portal.dto.api.wiki;
 
 import club.dnd5.portal.model.rule.Rule;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import tools.jackson.databind.annotation.JsonDeserialize;
+
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -19,9 +23,10 @@ public class RuleSaveApi {
 	private String altName;
 	@NotBlank
 	private String type;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private String source;
 	private Short page;
 

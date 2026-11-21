@@ -10,8 +10,11 @@ import lombok.Setter;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,12 +42,16 @@ public class Race implements Serializable {
 
 	@OneToMany
 	@JoinColumn(name = "race_id", insertable = false, updatable = false)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	List<Feature> features;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0031). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	@OneToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	List<Language> languages;
 
 	@ManyToOne(cascade = { CascadeType.ALL })
@@ -52,6 +59,7 @@ public class Race implements Serializable {
 	private Race parent;
 
 	@OneToMany(mappedBy = "parent", orphanRemoval = true)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Race> subRaces;
 
 	@Enumerated(EnumType.STRING)
@@ -70,9 +78,11 @@ public class Race implements Serializable {
 	private Integer swim;
 
 	@OneToMany(mappedBy = "race")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<RaceName> names;
 
 	@OneToMany(mappedBy = "race", fetch = FetchType.LAZY)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<RaceNickname> nicknames;
 	private boolean view = true;
 
@@ -83,10 +93,12 @@ public class Race implements Serializable {
 
 	@OneToMany
 	@JoinColumn(name = "race_id", insertable = false, updatable = false)
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<AbilityBonus> bonuses;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "race_spells", joinColumns = @JoinColumn(name = "race_id"))
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Spell> spells;
 
 	private String icon;
@@ -172,30 +184,6 @@ public class Race implements Serializable {
 				.anyMatch(f -> f.contains("природная броня") || f.contains("природный доспех"));
 	}
 
-	public boolean isAthletics() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("атлетик") && f.contains("владеете"));
-	}
-
-	public boolean isStealth() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("скрытность") && f.contains("владеете"));
-	}
-
-	public boolean isResistenceFire() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> f.contains("сопротивление") && (f.contains("огнём") || f.contains("огню")));
-	}
-
-	public boolean isResistencePoison() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> (f.contains("урону ядом")));
-	}
-	public boolean isResistenceCold() {
-		return features.parallelStream().map(Feature::getDescription).map(String::toLowerCase)
-				.anyMatch(f -> (f.contains("урону холодом")));
-	}
-
 	public Map<Sex, Set<String>> getNames() {
 		if (names == null) {
 			return Collections.emptyMap();
@@ -233,5 +221,12 @@ public class Race implements Serializable {
 
 	public String getUrlName() {
 		return StringUtil.getUrl(englishName);
+	}
+
+	/** jsonb-колонка NOT NULL: пустое описание хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullDescriptionToEmpty() {
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

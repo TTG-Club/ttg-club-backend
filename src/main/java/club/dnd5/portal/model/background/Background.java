@@ -1,5 +1,8 @@
 package club.dnd5.portal.model.background;
 
+import java.util.ArrayList;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.book.Book;
@@ -26,42 +29,52 @@ public class Background {
 	private String englishName;
 	private String altName;
 
-	@Column(columnDefinition = "TEXT")
-	private String toolOwnership;
+	/** Владение инструментами. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> toolOwnership;
 
-	@Column(columnDefinition = "TEXT")
-	private String equipmentsText;
+	/** Снаряжение (перечисление через запятую). Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> equipmentsText;
 
-	@ElementCollection(targetClass = SkillType.class)
-	@CollectionTable(name = "background_skill_type")
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private List<SkillType> skills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SkillType> skills = new ArrayList<>();
 
 	@Column(columnDefinition = "TEXT")
 	private String otherSkills;
 
 	private String skillName;
 
-	@Column(columnDefinition = "TEXT")
-	private String skillDescription;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0029); {@code null} — описания нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> skillDescription;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0029). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
 	private String language;
 
 	@ManyToMany
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Language> languages;
 
 	private int startMoney;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "background_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<Personalization> personalizations;
 
-	@Column(columnDefinition = "TEXT")
-	private String personalization;
+	/** Разметка core-api, массив строк-блоков; {@code null} — текста нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> personalization;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
@@ -78,5 +91,13 @@ public class Background {
 
 	public String getUrlName() {
 		return StringUtil.getUrl(englishName);
+	}
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullJsonListsToEmpty() {
+		skills = skills == null ? new ArrayList<>() : skills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

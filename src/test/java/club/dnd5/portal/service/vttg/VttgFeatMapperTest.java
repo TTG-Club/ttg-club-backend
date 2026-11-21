@@ -3,6 +3,7 @@ package club.dnd5.portal.service.vttg;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.trait.Trait;
+import club.dnd5.portal.util.markup.Markup;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -18,7 +19,7 @@ class VttgFeatMapperTest {
 	void halfFeatOffersAbilityChoiceAndKeepsRequirement() {
 		Trait athlete = trait("Атлет", "Athlete");
 		athlete.setAbilities(Arrays.asList(AbilityType.STRENGTH, AbilityType.DEXTERITY));
-		athlete.setDescription("<p>Значение Силы или Ловкости увеличивается на 1, но не выше 20.</p>");
+		athlete.setDescription(Markup.fromHtml("<p>Значение Силы или Ловкости увеличивается на 1, но не выше 20.</p>"));
 		athlete.setRequirement("Нет");
 
 		Map<String, Object> data = mapper.toVttg(athlete);
@@ -34,7 +35,7 @@ class VttgFeatMapperTest {
 	void abilitiesWithoutIncreaseAreOnlyAFilter() {
 		Trait grappler = trait("Борец", "Grappler");
 		grappler.setAbilities(Collections.singletonList(AbilityType.STRENGTH));
-		grappler.setDescription("<p>Вы совершаете броски атаки с преимуществом.</p>");
+		grappler.setDescription(Markup.fromHtml("<p>Вы совершаете броски атаки с преимуществом.</p>"));
 		grappler.setRequirement("Сила 13 или выше");
 		grappler.setLevel(4);
 

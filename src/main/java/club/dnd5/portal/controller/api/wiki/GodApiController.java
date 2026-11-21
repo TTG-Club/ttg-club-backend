@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api.wiki;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.RequestApi;
@@ -84,11 +85,8 @@ public class GodApiController {
 						(root, query, cb) -> root.get("aligment").in(request.getFilter().getAlignment().stream().map(Alignment::valueOf).collect(Collectors.toList())));
 			}
 			if (!request.getFilter().getDomain().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<Domain, God> join = root.join("domains", JoinType.LEFT);
-					query.distinct(true);
-					return join.in(request.getFilter().getDomain().parallelStream().map(Domain::valueOf).collect(Collectors.toList()));
-				});
+				specification = SpecificationUtil.getAndSpecification(specification, SpecificationUtil.jsonbContainsAny("domains",
+					request.getFilter().getDomain().stream().map(Domain::valueOf).collect(Collectors.toList())));
 			}
 			if (!request.getFilter().getRank().isEmpty()) {
 				specification = SpecificationUtil.getAndSpecification(
@@ -101,7 +99,7 @@ public class GodApiController {
 				});
 			}
 		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
+		Pageable pageable = PageAndSortUtil.getPageable(request, "id");
 		return godRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(GodApi::new)
@@ -233,8 +231,8 @@ public class GodApiController {
 		god.setSex(request.getSex());
 		god.setRank(request.getRank());
 		god.setAligment(request.getAlignment());
-		god.setDescription(trimToNull(request.getDescription()));
-		god.setAlternativeDescription(trimToNull(request.getAlternativeDescription()));
+		god.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
+		god.setAlternativeDescription(Markup.emptyToNull(Markup.trimBlocks(request.getAlternativeDescription())));
 		god.setSymbol(trimToNull(request.getSymbol()));
 		god.setNicknames(trimToNull(request.getNicknames()));
 		god.setDomains(new ArrayList<>(request.getDomains()));
