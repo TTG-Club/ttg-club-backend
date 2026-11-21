@@ -23,9 +23,9 @@ class VttgBackgroundMapperTest {
 		acolyte.setEnglishName("Acolyte");
 		acolyte.setBook(new Book("PHB"));
 		acolyte.setSkills(Arrays.asList(SkillType.INSIGHT, SkillType.RELIGION));
-		acolyte.setToolOwnership("Нет");
+		acolyte.setToolOwnership(List.of("Нет"));
 		acolyte.setLanguage("Два языка на ваш выбор");
-		acolyte.setEquipmentsText("Священный символ, молитвенник");
+		acolyte.setEquipmentsText(List.of("Священный символ, молитвенник"));
 		acolyte.setStartMoney(15);
 		acolyte.setSkillName("Приют для верующих");
 		acolyte.setSkillDescription(List.of("Вас и ваших спутников примут в храме."));

@@ -50,9 +50,18 @@ public class HeroClass {
 
 	private byte diceHp;
 
-	private String armor;
-	private String weapon;
-	private String tools;
+	/** Владение доспехами. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> armor;
+	/** Владение оружием. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> weapon;
+	/** Владение инструментами. Разметка core-api, массив строк-блоков (см. db/changelog 0039); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> tools;
 	private String savingThrows;
 	private String archetypeName;
 

@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.background.Background;
@@ -27,7 +28,8 @@ public class BackgroundDetailApi extends BackgroundApi {
 	private Integer id;
 	private String url;
 	private Collection<String> skills;
-	private String toolOwnership;
+	/** Блоки разметки core-api. */
+	private List<String> toolOwnership;
 	private String language;
 	private Collection<String> languages;
 	private Collection<String> equipments;
@@ -55,7 +57,8 @@ public class BackgroundDetailApi extends BackgroundApi {
 			languages = background.getLanguages().stream().map(Language::getName).collect(Collectors.toList());
 		}
 		if (background.getEquipmentsText() != null) {
-			equipments = Arrays.asList(background.getEquipmentsText().split(", "));
+			// перечисление разметкой, по запятым вне маркеров {@…}
+			equipments = Markup.splitInline(background.getEquipmentsText(), ", ");
 		}
 		startGold = background.getStartMoney();
 		description = background.getDescription();

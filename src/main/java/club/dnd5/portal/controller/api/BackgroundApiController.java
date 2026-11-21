@@ -200,8 +200,8 @@ public class BackgroundApiController {
 		background.setAltName(trimToNull(request.getAltName()));
 		background.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
 		background.setOtherSkills(trimToNull(request.getOtherSkills()));
-		background.setToolOwnership(trimToNull(request.getToolOwnership()));
-		background.setEquipmentsText(trimToNull(request.getEquipments()));
+		background.setToolOwnership(Markup.emptyToNull(Markup.trimBlocks(request.getToolOwnership())));
+		background.setEquipmentsText(Markup.emptyToNull(Markup.trimBlocks(request.getEquipments())));
 		background.setStartMoney(request.getStartGold() == null ? 0 : request.getStartGold());
 		background.setDescription(Markup.trimBlocks(request.getDescription()));
 		background.setSkillName(trimToNull(request.getSkillName()));

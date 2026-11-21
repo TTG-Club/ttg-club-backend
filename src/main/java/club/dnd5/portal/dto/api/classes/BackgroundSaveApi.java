@@ -32,8 +32,12 @@ public class BackgroundSaveApi {
 	private String altName;
 	private List<SkillType> skills;
 	private String otherSkills;
-	private String toolOwnership;
-	private String equipments;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> toolOwnership;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> equipments;
 	private Integer startGold;
 	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
 	@NotEmpty

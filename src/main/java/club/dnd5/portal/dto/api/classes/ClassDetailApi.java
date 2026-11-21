@@ -212,9 +212,12 @@ public class ClassDetailApi extends ClassApi {
 	@Getter
 	public static class ClassTraitsApi {
 		private final int diceHp;
-		private final String armor;
-		private final String weapon;
-		private final String tools;
+		/** Блоки разметки core-api. */
+		private final List<String> armor;
+		/** Блоки разметки core-api. */
+		private final List<String> weapon;
+		/** Блоки разметки core-api. */
+		private final List<String> tools;
 		private final String savingThrows;
 		private final int skillAvailableCount;
 		private final Collection<String> availableSkills;
