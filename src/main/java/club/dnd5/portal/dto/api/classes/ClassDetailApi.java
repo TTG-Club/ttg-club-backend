@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.spells.SpellFilter;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Rest;
@@ -97,6 +98,8 @@ public class ClassDetailApi extends ClassApi {
 		super(archetype.getHeroClass(), request);
 		name.setRus(name.getRus() + " " + archetype.getCapitalizeName());
 		name.setEng(name.getEng() + " " + archetype.getEnglishName());
+		// У архетипа своя книга: бейдж источника в шапке — по ней, а не по классу
+		setSource(new SourceApi(archetype.getBook(), archetype.getPage()));
 		HeroClass heroClass = archetype.getHeroClass();
 		this.images = images;
 		archetypeSpellTable = toArchetypeSpellTable(archetype);
