@@ -159,8 +159,13 @@ try {
 		$hadPwd = [bool]$env:MYSQL_PWD
 		if (-not $hadPwd) {
 			$secure = Read-Host "Пароль MySQL для $MysqlUser" -AsSecureString
-			$env:MYSQL_PWD = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-				[Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
+			$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+			try {
+				$env:MYSQL_PWD = [Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+			} finally {
+				# копия пароля в неуправляемой памяти — затереть сразу
+				[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+			}
 		}
 		try {
 			# --result-file, а не «>»: перенаправление PowerShell 5 перекодирует дамп в UTF-16
