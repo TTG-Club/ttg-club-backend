@@ -10,16 +10,25 @@ import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.model.AbilityType;
+import club.dnd5.portal.model.effect.ActiveEffect;
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.mechanics.ProficiencyGrant;
+import club.dnd5.portal.model.mechanics.ResourceCounter;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ClassDetailApiTest {
 	@Test
@@ -103,6 +112,42 @@ class ClassDetailApiTest {
 		assertEquals("Чемпион", details.getTraits().getArchetype().getName());
 		assertEquals(3, details.getTraits().getArchetype().getLevel());
 		assertEquals(List.of("Описание чемпиона"), details.getTraits().getArchetype().getDescription());
+	}
+
+	@Test
+	void exposesMechanicsOfClassAndFeaturesInJson() {
+		HeroClass heroClass = baseClass();
+		ClassMechanics classMechanics = new ClassMechanics();
+		ProficiencyGrant proficiencies = new ProficiencyGrant();
+		proficiencies.setSavingThrows(EnumSet.of(AbilityType.STRENGTH, AbilityType.CONSTITUTION));
+		classMechanics.setProficiencies(proficiencies);
+		heroClass.setMechanics(classMechanics);
+		ActiveEffect effect = new ActiveEffect();
+		effect.setName("Защита без доспехов");
+		heroClass.setActiveEffects(List.of(effect));
+
+		HeroClassTrait withMechanics = classTrait(1, "Ярость", 1);
+		ResourceCounter counter = new ResourceCounter();
+		counter.setKey("rage");
+		counter.setMax("2");
+		ClassMechanics traitMechanics = new ClassMechanics();
+		traitMechanics.setCounters(List.of(counter));
+		withMechanics.setMechanics(traitMechanics);
+		heroClass.setTraits(Arrays.asList(withMechanics, classTrait(2, "Безрассудная атака", 2)));
+		heroClass.setArchetypes(Collections.emptyList());
+
+		JsonNode json = JsonMapper.builder().build()
+			.valueToTree(new ClassDetailApi(heroClass, Collections.emptyList(), new ClassRequestApi()));
+
+		assertEquals("STRENGTH", json.at("/mechanics/proficiencies/savingThrows/0").asString());
+		assertEquals("CONSTITUTION", json.at("/mechanics/proficiencies/savingThrows/1").asString());
+		assertEquals("Защита без доспехов", json.at("/activeEffects/0/name").asString());
+		assertEquals("rage", json.at("/traits/features/0/mechanics/counters/0/key").asString());
+		assertEquals("rage", json.at("/classTraits/0/mechanics/counters/0/key").asString());
+		// незаполненная механика не выводится вовсе (NON_NULL), как в core-api
+		assertFalse(json.at("/traits/features/1").has("mechanics"));
+		assertFalse(json.at("/traits/features/1").has("activeEffects"));
+		assertFalse(json.at("/mechanics/proficiencies").has("skills"));
 	}
 
 	private HeroClass baseClass() {

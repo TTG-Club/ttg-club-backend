@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
@@ -117,6 +119,16 @@ public class HeroClass {
 	private Rest slotsReset;
 	private boolean sidekick;
 	private String icon;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private ClassMechanics mechanics;
+
+	/** Активные эффекты (модель Active Effects VTTG, как в core-api); {@code null} — нет. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<ActiveEffect> activeEffects;
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;

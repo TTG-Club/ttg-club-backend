@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.trait;
 
+import club.dnd5.portal.model.mechanics.FeatMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import java.util.ArrayList;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -42,6 +44,16 @@ public class Trait {
 	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
 	@Column(columnDefinition = "jsonb", nullable = false)
 	private List<SkillType> skills = new ArrayList<>();
+
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private FeatMechanics mechanics;
+
+	/** Активные эффекты (модель Active Effects VTTG, как в core-api); {@code null} — нет. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<ActiveEffect> activeEffects;
 
 	@ManyToOne
 	@JoinColumn(name = "source")

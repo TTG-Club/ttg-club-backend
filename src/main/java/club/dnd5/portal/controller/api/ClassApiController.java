@@ -233,6 +233,13 @@ public class ClassApiController {
 			? ArchetypeSpellLevelType.CLASS_LEVEL
 			: request.getSpellLevelType());
 		archetype.setPage(request.getPage());
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			archetype.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			archetype.setActiveEffects(request.getActiveEffects());
+		}
 		if (archetype.getFeatureLevelDefenitions() == null) {
 			archetype.setFeatureLevelDefenitions(new ArrayList<>());
 		}
@@ -296,7 +303,15 @@ public class ClassApiController {
 				ArchetypeTrait trait = value.getId() == null ? new ArchetypeTrait() : existing.getOrDefault(value.getId(), new ArchetypeTrait());
 				trait.setName(value.getName().trim()); trait.setSuffix(trimToNull(value.getSuffix())); trait.setLevel(value.getLevel());
 				trait.setDescription(Markup.trimBlocks(value.getDescription())); trait.setChild(trimToNull(value.getChild()));
-				trait.setArchetype(archetype); trait.setBook(archetype.getBook()); return trait;
+				trait.setArchetype(archetype); trait.setBook(archetype.getBook());
+				// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+				if (value.getMechanics() != null) {
+					trait.setMechanics(value.getMechanics());
+				}
+				if (value.getActiveEffects() != null) {
+					trait.setActiveEffects(value.getActiveEffects());
+				}
+				return trait;
 			}).collect(Collectors.toList());
 		archetypeTraitRepository.saveAll(traits); archetypeTraitRepository.flush();
 		List<Integer> retained = traits.stream().map(ArchetypeTrait::getId).collect(Collectors.toList());
@@ -357,6 +372,13 @@ public class ClassApiController {
 		heroClass.setSidekick(request.isSidekick());
 		heroClass.setIcon(trimToNull(request.getIcon()));
 		heroClass.setPage(request.getPage());
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			heroClass.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			heroClass.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(heroClass::setBook);
 	}
 
@@ -424,6 +446,13 @@ public class ClassApiController {
 				trait.setChild(trimToNull(traitRequest.getChild()));
 				trait.setArchitype(false);
 				trait.setHeroClass(heroClass);
+				// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+				if (traitRequest.getMechanics() != null) {
+					trait.setMechanics(traitRequest.getMechanics());
+				}
+				if (traitRequest.getActiveEffects() != null) {
+					trait.setActiveEffects(traitRequest.getActiveEffects());
+				}
 				trait.setBook(heroClass.getBook());
 				return trait;
 			})

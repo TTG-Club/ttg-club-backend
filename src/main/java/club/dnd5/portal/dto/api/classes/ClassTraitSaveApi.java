@@ -1,5 +1,8 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
+import jakarta.validation.Valid;
 import java.util.List;
 import jakarta.validation.constraints.NotEmpty;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -31,6 +34,12 @@ public class ClassTraitSaveApi {
 	private List<@NotBlank String> description;
 	private boolean optional;
 	private String child;
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private ClassMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
 
 	public ClassTraitSaveApi(HeroClassTrait trait) {
 		id = trait.getId();
@@ -40,6 +49,8 @@ public class ClassTraitSaveApi {
 		description = trait.getDescription();
 		optional = trait.getOptional() != 0;
 		child = trait.getChild();
+		mechanics = trait.getMechanics();
+		activeEffects = trait.getActiveEffects();
 	}
 
 	public ClassTraitSaveApi(ArchetypeTrait trait) {
@@ -49,5 +60,7 @@ public class ClassTraitSaveApi {
 		level = trait.getLevel();
 		description = trait.getDescription();
 		child = trait.getChild();
+		mechanics = trait.getMechanics();
+		activeEffects = trait.getActiveEffects();
 	}
 }

@@ -337,6 +337,13 @@ public class OptionApiController {
 		option.setPrerequisite(prerequisite == null ? "Нет" : prerequisite);
 		option.setDescription(Markup.trimBlocks(request.getDescription()));
 		option.setOptionTypes(optionTypeResolver.resolveAll(request.getOptionTypes()));
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			option.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			option.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(option::setBook);
 	}
 

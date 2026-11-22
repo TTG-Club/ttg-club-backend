@@ -304,6 +304,13 @@ public class RacesApiController {
 		race.setView(request.isView());
 		race.setIcon(trimToNull(request.getIcon()));
 		race.setPage(request.getPage());
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			race.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			race.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(race::setBook);
 	}
 
@@ -358,6 +365,13 @@ public class RacesApiController {
 				feature.setDescription(Markup.trimBlocks(featureRequest.getDescription()));
 				feature.setFeature(featureRequest.isFeature());
 				feature.setReplaceFeatureId(featureRequest.getReplaceFeatureId());
+				// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+				if (featureRequest.getMechanics() != null) {
+					feature.setMechanics(featureRequest.getMechanics());
+				}
+				if (featureRequest.getActiveEffects() != null) {
+					feature.setActiveEffects(featureRequest.getActiveEffects());
+				}
 				return feature;
 			})
 			.collect(Collectors.toList());
