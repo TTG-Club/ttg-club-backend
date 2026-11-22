@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.fvtt.plutonium;
 
+import club.dnd5.portal.dto.fvtt.FvttHtml;
 import club.dnd5.portal.util.markup.Markup;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,8 +16,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class FAction {
-	private static final Pattern DAMAGE_FORMULA_PATTERN = Pattern.compile("<dice-roller formula=\"\\d+(к|d)\\d+(\\s\\+\\s\\d+){0,}\"/>");
-	private static final Pattern DAMAGE_FORMULA = Pattern.compile("\\d+(к|d)\\d+(\\s\\+\\s\\d+){0,}");
     public String name;
     public List<Object> entries;
     public FAction(Action action) {
@@ -57,22 +56,8 @@ public class FAction {
     		}
     	}
 
-    	Matcher matcher = DAMAGE_FORMULA.matcher(Markup.htmlOrEmpty(action.getDescription()));
-    	String description = Markup.htmlOrEmpty(action.getDescription());
-    	while (matcher.find()) {
-    		String group = matcher.group();
-    		String formula = "{@h}" + group.replace('к', 'd')
-    				.replace("formula=\"", "{@damage ") + "}";
-    		description = description.replace(group, formula);
-    	}
-    	description = description.replace("href=\"", "href=\"https://ttg.club/");
-
-    	matcher = DAMAGE_FORMULA_PATTERN.matcher(description);
-    	while (matcher.find()) {
-    		String group = matcher.group();
-    		String formula = group.replace("<dice-roller formula=\"", "[[/r ").replace('к', 'd');
-    		description = description.replace(group, formula);
-    	}
+    	String description = FvttHtml.absoluteLinks(
+    		FvttHtml.rolls(Markup.htmlOrEmpty(action.getDescription()), formula -> "{@damage " + formula + "}"));
     	entries.addAll(Arrays.stream(description.replace("<p>", "").split("</p>"))
     			.filter(t -> !t.isEmpty())
     			.collect(Collectors.toList()));

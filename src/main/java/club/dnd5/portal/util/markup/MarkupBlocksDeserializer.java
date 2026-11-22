@@ -17,7 +17,7 @@ public class MarkupBlocksDeserializer extends ValueDeserializer<List<String>> {
 	@Override
 	public List<String> deserialize(JsonParser parser, DeserializationContext context) {
 		if (parser.currentToken() == JsonToken.VALUE_STRING) {
-			return Markup.fromHtml(parser.getString());
+			return Markup.fromHtml(linesToParagraphs(parser.getString()));
 		}
 		if (parser.currentToken() != JsonToken.START_ARRAY) {
 			return context.reportInputMismatch(this, "Описание должно быть массивом блоков разметки");
@@ -30,6 +30,23 @@ public class MarkupBlocksDeserializer extends ValueDeserializer<List<String>> {
 			blocks.add(parser.getString());
 		}
 		return blocks;
+	}
+
+	/**
+	 * Текст без тегов с переносами строк (описания богов хранились так, абзацы добавляло API — см.
+	 * sourceFormat lines в changeset 0029) → абзацы {@code <p>}; иначе конвертер склеил бы строки.
+	 */
+	static String linesToParagraphs(String value) {
+		if (value.indexOf('<') >= 0 || (value.indexOf('\n') < 0 && value.indexOf('\r') < 0)) {
+			return value;
+		}
+		StringBuilder html = new StringBuilder();
+		for (String line : value.split("\\r\\n|\\r|\\n")) {
+			if (!line.isBlank()) {
+				html.append("<p>").append(line.strip()).append("</p>");
+			}
+		}
+		return html.toString();
 	}
 
 	@Override

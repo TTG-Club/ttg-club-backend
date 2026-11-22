@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @Setter
 public class BackgroundDetailApi extends BackgroundApi {
 	private Integer id;
-	private String url;
 	private Collection<String> skills;
 	/** Блоки разметки core-api. */
 	private List<String> toolOwnership;
@@ -46,7 +45,6 @@ public class BackgroundDetailApi extends BackgroundApi {
 	public BackgroundDetailApi(Background background) {
 		super(background);
 		id = background.getId();
-		url = String.format("/backgrounds/fragment/%d", background.getId());
 		skills = background.getSkills().stream().map(SkillType::getCyrilicName).collect(Collectors.toList());
 		if (background.getOtherSkills() != null) {
 			skills.add(background.getOtherSkills());

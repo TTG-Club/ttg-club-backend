@@ -34,6 +34,21 @@ class MarkupHtmlRendererTest {
 	}
 
 	@Test
+	void unsafeLinkAddressesBecomeText() {
+		assertThat(MarkupHtmlRenderer.render(List.of(
+			"{@link а | url:javascript:alert(1)} {@link б | url:data:text/html,x} {@link в | url://evil.example}"
+				+ " {@link г | url:/\\evil.example} {@link д | url:JavaScript:alert(1) | target:_blank}")))
+			.isEqualTo("<p>а б в г д</p>");
+	}
+
+	@Test
+	void safeLinkAddressesStayLinks() {
+		assertThat(MarkupHtmlRenderer.render(List.of(
+			"{@link а | url:/spells/fireball} {@link б | url:HTTPS://example.com} {@link в | url:mailto:a@example.com}")))
+			.isEqualTo("<p><a href=\"/spells/fireball\">а</a> <a href=\"HTTPS://example.com\">б</a> <a href=\"mailto:a@example.com\">в</a></p>");
+	}
+
+	@Test
 	void rollWithLabelAndEscaping() {
 		assertThat(MarkupHtmlRenderer.render(List.of("{@roll к20 + 4 | text:+4} <script>&")))
 			.isEqualTo("<p><dice-roller formula=\"к20 + 4\">+4</dice-roller> &lt;script&gt;&amp;</p>");

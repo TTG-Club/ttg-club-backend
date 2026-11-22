@@ -207,9 +207,9 @@ core-app разбирает каждую строку парсером, в то�
 | `Option` (особенности классов) | `description` (jsonb, NOT NULL); view поиска — версия 4 | `0023`, `0024` |
 | `Rule`, `Screen` (правила, ширма) | `description` (jsonb; у правил NOT NULL, у ширмы NULL — раздел без описания); view поиска — версия 5 | `0025`, `0026` |
 | `MagicItem`, `Equipment`, `Armor`, `Weapon` | `description` (jsonb; у магических предметов NOT NULL, у остальных NULL — нет), `Weapon.special` (jsonb, NULL — нет); view поиска — версия 6 | `0027`, `0028` |
-| `God`, `Background` | `God.description`, `God.alternativeDescription` (jsonb, NULL — нет; описание бога — HTML или строки через `\r`, `sourceFormat: lines`), `Background.description` (jsonb, NOT NULL), `skillDescription`, `personalization` (jsonb, NULL — нет); владение инструментами и снаряжение предыстории остаются HTML-строками; view поиска — версия 7 | `0029`, `0030` |
+| `God`, `Background` | `God.description`, `God.alternativeDescription` (jsonb, NULL — нет; описание бога — HTML или строки через `\r`, `sourceFormat: lines`), `Background.description` (jsonb, NOT NULL), `skillDescription`, `personalization` (jsonb, NULL — нет); владение инструментами и снаряжение предыстории — короткие поля (`0039`); view поиска — версия 7 | `0029`, `0030` |
 | `Race`, `Feature` (расы и их умения, `race_features`) | `description` (jsonb, NOT NULL, пустое — `[]`); блок «Имена» в карточке расы собирается из имён и прозвищ и переводится в разметку на лету; view поиска — версия 8 | `0031`, `0032` |
-| `HeroClass`, `Archetype`, `HeroClassTrait`, `ArchetypeTrait` (классы, архетипы, умения — `hero_class_traits`, `hero_class_feats`) | `description` (jsonb, NOT NULL, пустое — `[]`: у дочерних умений своего текста нет), `HeroClass.equipment` (jsonb, NULL — нет); доспехи, оружие и инструменты класса остаются HTML; view поиска — версия 9 | `0033`, `0034` |
+| `HeroClass`, `Archetype`, `HeroClassTrait`, `ArchetypeTrait` (классы, архетипы, умения — `hero_class_traits`, `hero_class_feats`) | `description` (jsonb, NOT NULL, пустое — `[]`: у дочерних умений своего текста нет), `HeroClass.equipment` (jsonb, NULL — нет); доспехи, оружие и инструменты класса — короткие поля (`0039`); view поиска — версия 9 | `0033`, `0034` |
 | `Creature`, `Lair` (бестиарий) | `Creature.description`, `legendary`, `reaction`, `Lair.description`, `action`, `effect` (jsonb, NULL — нет); описания умений и действий — массивы блоков внутри jsonb `creatures.feats` / `creatures.actions` (переводит `CreatureMarkupChange`, на месте); шаблоны `{@atk mw}`, `{@hit 4}`, `{@beast_name}` с флагом markdown развёрнуты один раз, флаг убран; view поиска — версия 10 | `0035`, `0036` |
 | `Book` (источники) | `description` (jsonb, NULL — нет; пустая строка и одни пробелы тоже становятся NULL); view поиска — версия 11, в нём все описания — JSON-текст разметки | `0037`, `0038` |
 | короткие поля | `HeroClass.armor`, `weapon`, `tools`, `Background.toolOwnership`, `equipmentsText` (jsonb, NULL — нет); выводятся в строку (`Markup.toInlineHtml`, фронтенд — `ContentRender inline`), снаряжение API отдаёт списком по запятым вне маркеров (`Markup.splitInline`); откат — HTML без `<p>` (`MarkupColumnsChange inline: true`) | `0039`, `0040` |
@@ -246,9 +246,19 @@ core-app разбирает каждую строку парсером, в то�
 Источники — все 153 совпадают (описание есть у 57), откат и повторное применение дают те же блоки.
 Короткие поля — владения всех 32 классов и инструменты/снаряжение всех 157 предысторий совпадают с продом,
 откат и повторное применение дают те же блоки. Уточнение типа и условие настройки магических предметов
-(232 предмета) совпадают с продом. Этим этап 3 закончен: все тексты в базе — разметка core-api.
+(232 предмета) совпадают с продом. Этим этап 3 закончен: все описания сущностей — разметка core-api. HTML-ом остаются справочные тексты,
+которые мастерская не редактирует, — `background_personalizations`, `conditions`, `creature_races`,
+`hero_madness`, `info_pages`, `random_encounters`, `taverna_atmosphera`, `weapon_properties`,
+`wild_magics`: фронтенд выводит их HTML-веткой `ContentRender` (теги и адреса фильтруются, `v-html`
+нет). Как есть хранятся пользовательский HTML ширмы мастера (`dm_screens.windows`), `json_storage` и
+снимки `revision_history`.
 Легендарные действия в запросе сохранения существа — `LegendaryRequest` с блоками разметки (HTML-строку
 старого клиента переводит десериализатор), поэтому проверка HTML (`@ValidHtml`) удалена целиком.
+Дочистка (`0043`): пустой список в необязательных колонках — NULL (0019 и 0025 этот шаг пропустили,
+у двух записей ширмы API отдавал `description: []`). Ссылки `{@link}` с адресом не из `/путь`, `#`,
+`http(s)://`, `mailto:` (`javascript:`, `data:`, `//хост`) выводятся текстом — и в `MarkupHtmlRenderer`,
+и во фронтенде. Снимок ревизии с текстом без тегов, но с переносами строк (так хранились описания
+богов) при восстановлении делится на абзацы.
 
 Подпись броска (`dice-roller label="Атака"`) с 0035 сохраняется атрибутом `{@roll к20 + 4 | text:+4 |
 label:Атака}` — расширение спецификации core-api (решение 2026-11-20), рендер и фронтенд его понимают.
