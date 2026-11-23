@@ -3,7 +3,7 @@
 # конвертер дал '[]', и API отдавал «description: []». upper_level — на будущее (сейчас 0 строк).
 databaseChangeLog:
   - changeSet:
-      id: 0043-markup-empty-to-null
+      id: 0049-markup-empty-to-null
       author: pg-migration
       changes:
         - sql:
