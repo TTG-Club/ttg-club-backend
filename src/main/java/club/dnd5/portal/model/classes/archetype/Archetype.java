@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.classes.archetype;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
@@ -76,6 +78,16 @@ public class Archetype {
 	@JoinColumn(name = "option_type", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	@org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
 	private club.dnd5.portal.model.classes.OptionTypeDefinition optionType;
+
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private ClassMechanics mechanics;
+
+	/** Активные эффекты (модель Active Effects VTTG, как в core-api); {@code null} — нет. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<ActiveEffect> activeEffects;
 
 	@ManyToOne
 	@JoinColumn(name = "source")

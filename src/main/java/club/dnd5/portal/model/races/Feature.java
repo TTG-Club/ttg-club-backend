@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.races;
 
+import club.dnd5.portal.model.mechanics.RaceMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import jakarta.persistence.OrderColumn;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,16 @@ public class Feature {
 	private List<SkillType> skills = new ArrayList<>();
 
 	private Integer replaceFeatureId;
+
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private RaceMechanics mechanics;
+
+	/** Активные эффекты (модель Active Effects VTTG, как в core-api); {@code null} — нет. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<ActiveEffect> activeEffects;
 	
 	public boolean isNotFeature() {
 		return !feature;

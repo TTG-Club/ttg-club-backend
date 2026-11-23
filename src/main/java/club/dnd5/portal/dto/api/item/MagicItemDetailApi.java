@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.item;
 
+import club.dnd5.portal.model.mechanics.MagicItemMechanics;
 import club.dnd5.portal.dto.api.UrlApi;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.items.MagicItem;
@@ -42,6 +43,8 @@ public class MagicItemDetailApi extends MagicItemApi {
 	private Boolean curse;
 	private Integer costRaw;
 	private Byte bonus;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+	private MagicItemMechanics mechanics;
 
 	public MagicItemDetailApi(MagicItem item) {
 		super(item);
@@ -58,6 +61,7 @@ public class MagicItemDetailApi extends MagicItemApi {
 		curse = item.getCurse();
 		costRaw = item.getRawCost();
 		bonus = item.getBonus();
+		mechanics = item.getMechanics();
 		if (item.getCustomization()) {
 			customization = Boolean.TRUE;
 		}

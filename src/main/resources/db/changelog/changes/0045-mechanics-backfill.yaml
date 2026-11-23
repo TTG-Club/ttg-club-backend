@@ -1,0 +1,66 @@
+# Механика для листа персонажа (колонки — 0044): заполнение из данных, которые в базе уже лежат
+# структурированно. Правила сборки — club.dnd5.portal.config.liquibase.MechanicsBackfill (Java, а не SQL:
+# слияние прибавок рас и разбор спасбросков в SQL нечитаемы). Пишутся только строки с mechanics IS NULL,
+# пустая механика не пишется. Откат обнуляет колонку целиком.
+# Не заполняется (только текст или неоднозначно): владение доспехами/оружием/инструментами классов,
+# языки, заклинания рас и архетипов, ресурсы таблицы класса (counters), навыки черт (фильтр, не владение),
+# особенности классов (options), умения классов и архетипов, магические предметы.
+databaseChangeLog:
+  # спасброски (saving_throws, текст с русскими названиями характеристик) -> proficiencies.savingThrows;
+  #   available_skills + skill_available_count -> choices[{key: class-skills, type: SKILL, count, options}]
+  - changeSet:
+      id: 0045-classes-mechanics-backfill
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MechanicsBackfillChange
+            target: classes
+      rollback:
+        - sql:
+            sql: update classes set mechanics = null
+  # race_bonuses -> abilityBonuses (элементы складываются); darkvision -> modifiers.senses[DARKVISION];
+  #   fly/climb/swim -> modifiers.speed
+  - changeSet:
+      id: 0045-races-mechanics-backfill
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MechanicsBackfillChange
+            target: races
+      rollback:
+        - sql:
+            sql: update races set mechanics = null
+  # skills -> proficiencies.skills
+  - changeSet:
+      id: 0045-race_features-mechanics-backfill
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MechanicsBackfillChange
+            target: race_features
+      rollback:
+        - sql:
+            sql: update race_features set mechanics = null
+  # skills -> proficiencies.skills
+  - changeSet:
+      id: 0045-backgrounds-mechanics-backfill
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MechanicsBackfillChange
+            target: backgrounds
+      rollback:
+        - sql:
+            sql: update backgrounds set mechanics = null
+  # abilities -> abilityBonuses[{abilities, bonus: 1, count: 1, upto: 20}], только если описание
+  #   называет повышение (как выгрузка VTTG)
+  - changeSet:
+      id: 0045-traits-mechanics-backfill
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MechanicsBackfillChange
+            target: traits
+      rollback:
+        - sql:
+            sql: update traits set mechanics = null

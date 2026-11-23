@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +59,10 @@ public class ClassDetailApi extends ClassApi {
 	private Collection<ClassTraitApi> classTraits;
 	private Collection<FeatureLevelSaveApi> tableColumns;
 	private ArchetypeSpellTableApi archetypeSpellTable;
+	/** Механика для листа персонажа (модель core-api): у класса — класса, у архетипа — архетипа. */
+	private ClassMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG): у класса — класса, у архетипа — архетипа. */
+	private List<ActiveEffect> activeEffects;
 
 	public ClassDetailApi(HeroClass heroClass, Collection<String> images, ClassRequestApi request) {
 		super(heroClass, request);
@@ -71,6 +77,8 @@ public class ClassDetailApi extends ClassApi {
 		slotsReset = heroClass.getSlotsReset();
 		enabledArhitypeLevel = heroClass.getEnabledArhitypeLevel();
 		page = heroClass.getPage();
+		mechanics = heroClass.getMechanics();
+		activeEffects = heroClass.getActiveEffects();
 		classTraits = heroClass.getTraits() == null
 			? Collections.emptyList()
 			: heroClass.getTraits()
@@ -104,6 +112,8 @@ public class ClassDetailApi extends ClassApi {
 		HeroClass heroClass = archetype.getHeroClass();
 		this.images = images;
 		archetypeSpellTable = toArchetypeSpellTable(archetype);
+		mechanics = archetype.getMechanics();
+		activeEffects = archetype.getActiveEffects();
 		tabs.add(new ClassTabAp("Навыки", String.format("/classes/%s/architypes/%s", heroClass.getUrlName(), archetype.getUrlName()), "traits", 0, true));
 		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/archetype/%s/description", heroClass.getUrlName(), archetype.getUrlName()), "description", 1, true));
 		if (heroClass.getSpellcasterType() != SpellcasterType.NONE || archetype.getSpellcasterType() != null) {
@@ -200,6 +210,12 @@ public class ClassDetailApi extends ClassApi {
 		private final List<String> description;
 		private final boolean optional;
 		private final String child;
+		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final ClassMechanics mechanics;
+		/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final List<ActiveEffect> activeEffects;
 
 		private ClassTraitApi(HeroClassTrait trait) {
 			id = trait.getId();
@@ -209,6 +225,8 @@ public class ClassDetailApi extends ClassApi {
 			description = trait.getDescription();
 			optional = trait.getOptional() == 1;
 			child = trait.getChild();
+			mechanics = trait.getMechanics();
+			activeEffects = trait.getActiveEffects();
 		}
 	}
 
@@ -444,6 +462,12 @@ public class ClassDetailApi extends ClassApi {
 		private final boolean optional;
 		private final boolean archetypeFeature;
 		private final boolean archetypeRoot;
+		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final ClassMechanics mechanics;
+		/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final List<ActiveEffect> activeEffects;
 
 		private TraitApi(HeroClassTrait trait) {
 			id = String.format("c%d", trait.getId());
@@ -455,6 +479,8 @@ public class ClassDetailApi extends ClassApi {
 			optional = trait.getOptional() == 1;
 			archetypeFeature = false;
 			archetypeRoot = false;
+			mechanics = trait.getMechanics();
+			activeEffects = trait.getActiveEffects();
 		}
 
 		private TraitApi(Archetype archetype) {
@@ -467,6 +493,8 @@ public class ClassDetailApi extends ClassApi {
 			optional = false;
 			archetypeFeature = true;
 			archetypeRoot = true;
+			mechanics = archetype.getMechanics();
+			activeEffects = archetype.getActiveEffects();
 		}
 
 		private TraitApi(ArchetypeTrait trait, Archetype archetype) {
@@ -479,6 +507,8 @@ public class ClassDetailApi extends ClassApi {
 			optional = false;
 			archetypeFeature = true;
 			archetypeRoot = false;
+			mechanics = trait.getMechanics();
+			activeEffects = trait.getActiveEffects();
 		}
 	}
 

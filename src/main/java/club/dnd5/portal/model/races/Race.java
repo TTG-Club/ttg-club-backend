@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.races;
 
+import club.dnd5.portal.model.mechanics.RaceMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.model.*;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.races.RaceNickname.NicknameType;
@@ -102,6 +104,16 @@ public class Race implements Serializable {
 	private List<Spell> spells;
 
 	private String icon;
+
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private RaceMechanics mechanics;
+
+	/** Активные эффекты (модель Active Effects VTTG, как в core-api); {@code null} — нет. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<ActiveEffect> activeEffects;
 
 	@ManyToOne
 	@JoinColumn(name = "source")

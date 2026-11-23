@@ -230,6 +230,10 @@ public class MagicItemApiController {
 		item.setCurse(Boolean.TRUE.equals(request.getCurse()));
 		item.setCost(request.getCost());
 		item.setBonus(request.getBonus());
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			item.setMechanics(request.getMechanics());
+		}
 		bookResolver.find(request.getSource()).ifPresent(item::setBook);
 	}
 

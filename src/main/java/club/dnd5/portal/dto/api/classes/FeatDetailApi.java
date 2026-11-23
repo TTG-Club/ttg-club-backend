@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.FeatMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.dto.api.spell.ReferenceClassApi;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
@@ -27,6 +29,10 @@ public class FeatDetailApi extends FeatApi {
 	private List<ReferenceClassApi> classes;
 	private String altName;
 	private Integer level;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+	private FeatMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+	private List<ActiveEffect> activeEffects;
 
 	public FeatDetailApi(Trait trait) {
 		super(trait);
@@ -35,6 +41,8 @@ public class FeatDetailApi extends FeatApi {
 		description = trait.getDescription();
 		altName = trait.getAltName();
 		level = trait.getLevel();
+		mechanics = trait.getMechanics();
+		activeEffects = trait.getActiveEffects();
 		abilities = (trait.getAbilities() == null ? Collections.<AbilityType>emptyList() : trait.getAbilities())
 			.stream().map(ability -> ability.name()).collect(java.util.stream.Collectors.toList());
 		skills = (trait.getSkills() == null ? Collections.<SkillType>emptyList() : trait.getSkills())
