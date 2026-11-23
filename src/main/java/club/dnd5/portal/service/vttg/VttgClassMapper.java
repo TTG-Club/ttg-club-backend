@@ -3,6 +3,7 @@ package club.dnd5.portal.service.vttg;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SpellcasterType;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
@@ -153,6 +154,10 @@ public class VttgClassMapper {
 			boolean informational = trait.isArchitype() || trait.getOptional() == 1;
 			features.add(feature(used, null, featureName(trait.getName(), trait.getSuffix()), description,
 				trait.getLevel(), informational));
+			for (FeatureScaling row : scalingOf(trait.getScaling())) {
+				features.add(feature(used, null, featureName(row.displayName(trait.getName()), row.getAdditional()),
+					scalingDescription(row, description), row.getLevel(), informational));
+			}
 		}
 		return features;
 	}
@@ -333,10 +338,30 @@ public class VttgClassMapper {
 			if (trait == null || VttgText.isBlank(trait.getName())) {
 				continue;
 			}
+			String description = Markup.toHtml(trait.getDescription());
 			features.add(feature(used, subclassKey, featureName(trait.getName(), trait.getSuffix()),
-				Markup.toHtml(trait.getDescription()), trait.getLevel(), false));
+				description, trait.getLevel(), false));
+			for (FeatureScaling row : scalingOf(trait.getScaling())) {
+				features.add(feature(used, subclassKey, featureName(row.displayName(trait.getName()), row.getAdditional()),
+					scalingDescription(row, description), row.getLevel(), false));
+			}
 		}
 		return features;
+	}
+
+	/**
+	 * Рост умения: {@code null} старых строк — пустой список.
+	 */
+	private static List<FeatureScaling> scalingOf(List<FeatureScaling> scaling) {
+		return scaling == null ? List.of() : scaling;
+	}
+
+	/**
+	 * Описание уровня роста: своё либо описание самого умения.
+	 */
+	private static String scalingDescription(FeatureScaling row, String traitDescription) {
+		String own = Markup.toHtml(row.getDescription());
+		return VttgText.isBlank(own) ? traitDescription : own;
 	}
 
 	/**

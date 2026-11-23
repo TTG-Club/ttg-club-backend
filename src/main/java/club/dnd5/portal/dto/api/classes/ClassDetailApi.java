@@ -22,6 +22,7 @@ import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
@@ -210,6 +211,8 @@ public class ClassDetailApi extends ClassApi {
 		private final List<String> description;
 		private final boolean optional;
 		private final String child;
+		/** Рост по уровням. */
+		private final List<FeatureScaling> scaling;
 		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
 		@JsonInclude(JsonInclude.Include.NON_NULL)
 		private final ClassMechanics mechanics;
@@ -225,9 +228,20 @@ public class ClassDetailApi extends ClassApi {
 			description = trait.getDescription();
 			optional = trait.getOptional() == 1;
 			child = trait.getChild();
+			scaling = scalingOf(trait.getScaling());
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
 		}
+	}
+
+	/**
+	 * Рост умения: {@code null} старых строк — пустой список.
+	 *
+	 * @param scaling рост из сущности
+	 * @return рост для ответа
+	 */
+	private static List<FeatureScaling> scalingOf(List<FeatureScaling> scaling) {
+		return scaling == null ? Collections.emptyList() : scaling;
 	}
 
 	@Getter
@@ -358,11 +372,22 @@ public class ClassDetailApi extends ClassApi {
 					.filter(trait -> trait.getLevel() == level)
 					.sorted(Comparator.comparing(ArchetypeTrait::getName))
 					.forEach(trait -> result.add(new TraitLinkApi(trait)));
+				archetype.getFeats()
+					.forEach(trait -> scalingOf(trait.getScaling()).stream()
+						.filter(row -> row.getLevel() == level)
+						.forEach(row -> result.add(new TraitLinkApi(trait, row))));
 			}
 			heroClass.getTraits(level)
 				.stream()
 				.filter(trait -> !trait.isArchitype())
 				.forEach(trait -> result.add(new TraitLinkApi(trait)));
+			heroClass.getTraits()
+				.stream()
+				.filter(trait -> !trait.isArchitype())
+				.forEach(trait -> scalingOf(trait.getScaling()).stream()
+					.filter(row -> row.getLevel() == level)
+					.filter(row -> archetype == null || !row.isHideInSubclasses())
+					.forEach(row -> result.add(new TraitLinkApi(trait, row))));
 			return result;
 		}
 
@@ -443,6 +468,25 @@ public class ClassDetailApi extends ClassApi {
 			archetypeFeature = true;
 		}
 
+		/** Строка роста умения класса: ссылка ведёт на само умение. */
+		private TraitLinkApi(HeroClassTrait trait, FeatureScaling row) {
+			name = normalizeTraitName(row.displayName(trait.getName()), scalingSuffix(row));
+			String child = trait.getChild() == null ? trait.getId().toString() : trait.getChild();
+			anchor = String.format("#c%s", child);
+			archetypeFeature = false;
+		}
+
+		/** Строка роста умения архетипа. */
+		private TraitLinkApi(ArchetypeTrait trait, FeatureScaling row) {
+			name = normalizeTraitName(row.displayName(trait.getName()), scalingSuffix(row));
+			anchor = String.format("#a%d", trait.getId());
+			archetypeFeature = true;
+		}
+
+		private static String scalingSuffix(FeatureScaling row) {
+			return row.getAdditional() == null ? "" : " " + row.getAdditional();
+		}
+
 		private static String normalizeTraitName(String name, String suffix) {
 			return String.format("%s%s",
 				Objects.toString(name, "").toLowerCase().trim(),
@@ -462,6 +506,8 @@ public class ClassDetailApi extends ClassApi {
 		private final boolean optional;
 		private final boolean archetypeFeature;
 		private final boolean archetypeRoot;
+		/** Рост по уровням. */
+		private final List<FeatureScaling> scaling;
 		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
 		@JsonInclude(JsonInclude.Include.NON_NULL)
 		private final ClassMechanics mechanics;
@@ -479,6 +525,7 @@ public class ClassDetailApi extends ClassApi {
 			optional = trait.getOptional() == 1;
 			archetypeFeature = false;
 			archetypeRoot = false;
+			scaling = scalingOf(trait.getScaling());
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
 		}
@@ -493,6 +540,7 @@ public class ClassDetailApi extends ClassApi {
 			optional = false;
 			archetypeFeature = true;
 			archetypeRoot = true;
+			scaling = Collections.emptyList();
 			mechanics = archetype.getMechanics();
 			activeEffects = archetype.getActiveEffects();
 		}
@@ -507,6 +555,7 @@ public class ClassDetailApi extends ClassApi {
 			optional = false;
 			archetypeFeature = true;
 			archetypeRoot = false;
+			scaling = scalingOf(trait.getScaling());
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
 		}

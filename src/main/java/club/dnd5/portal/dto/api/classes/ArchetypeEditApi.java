@@ -4,6 +4,7 @@ import club.dnd5.portal.model.mechanics.ClassMechanics;
 import club.dnd5.portal.model.effect.ActiveEffect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import club.dnd5.portal.model.SpellcasterType;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
@@ -55,6 +56,8 @@ public class ArchetypeEditApi {
 	public static class TraitApi {
 		private final Integer id; private final String name; private final String suffix; private final byte level;
 		private final List<String> description; private final boolean optional = false; private final String child;
+		/** Рост по уровням. */
+		private final List<FeatureScaling> scaling;
 		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
 		@JsonInclude(JsonInclude.Include.NON_NULL)
 		private final ClassMechanics mechanics;
@@ -64,6 +67,7 @@ public class ArchetypeEditApi {
 		private TraitApi(ArchetypeTrait trait) {
 			id = trait.getId(); name = trait.getName(); suffix = trait.getSuffix(); level = trait.getLevel();
 			description = trait.getDescription(); child = trait.getChild();
+			scaling = trait.getScaling() == null ? java.util.Collections.emptyList() : trait.getScaling();
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
 		}

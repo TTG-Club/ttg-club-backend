@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.classes.archetype;
 
+import club.dnd5.portal.model.classes.FeatureScaling;
+
 import club.dnd5.portal.model.mechanics.ClassMechanics;
 import club.dnd5.portal.model.effect.ActiveEffect;
 import java.util.ArrayList;
@@ -48,6 +50,11 @@ public class ArchetypeTrait {
 	@Column(columnDefinition = "jsonb")
 	private List<ActiveEffect> activeEffects;
 
+	/** Рост по уровням (см. db/changelog 0047); пусто — умение не повторяется. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<FeatureScaling> scaling = new ArrayList<>();
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
@@ -57,5 +64,6 @@ public class ArchetypeTrait {
 	@jakarta.persistence.PreUpdate
 	private void nullDescriptionToEmpty() {
 		description = description == null ? new ArrayList<>() : description;
+		scaling = scaling == null ? new ArrayList<>() : scaling;
 	}
 }

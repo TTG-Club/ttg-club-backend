@@ -3,6 +3,7 @@ package club.dnd5.portal.dto.api.classes;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.Archetype;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ClassDetailApiTest {
 	@Test
@@ -148,6 +150,42 @@ class ClassDetailApiTest {
 		assertFalse(json.at("/traits/features/1").has("mechanics"));
 		assertFalse(json.at("/traits/features/1").has("activeEffects"));
 		assertFalse(json.at("/mechanics/proficiencies").has("skills"));
+	}
+
+	@Test
+	void expandsFeatureScalingIntoLevelTable() {
+		HeroClass heroClass = baseClass();
+		HeroClassTrait asi = classTrait(5, "Увеличение характеристик", 4);
+		asi.setScaling(List.of(scaling(8, null, null, false), scaling(12, null, null, true)));
+		heroClass.setTraits(List.of(asi));
+		Archetype archetype = baseArchetype(heroClass);
+		ArchetypeTrait feat = archetypeTrait(11, "Боевое превосходство", 3);
+		feat.setScaling(List.of(scaling(7, null, "(2)", false)));
+		archetype.setFeats(List.of(feat));
+
+		ClassDetailApi details = new ClassDetailApi(archetype, Collections.emptyList(), new ClassRequestApi());
+		List<ClassDetailApi.LevelRowApi> levels = new ArrayList<>(details.getTraits().getLevels());
+
+		ClassDetailApi.TraitLinkApi eighth = levels.get(7).getTraits().iterator().next();
+		assertEquals("увеличение характеристик", eighth.getName());
+		assertEquals("#c5", eighth.getAnchor());
+		// строка, скрытая в подклассе, в таблице архетипа не появляется
+		assertTrue(levels.get(11).getTraits().isEmpty());
+		ClassDetailApi.TraitLinkApi seventh = levels.get(6).getTraits().iterator().next();
+		assertEquals("боевое превосходство (2)", seventh.getName());
+		assertEquals("#a11", seventh.getAnchor());
+		assertEquals(2, details.getTraits().getFeatures().stream()
+			.filter(trait -> trait.getName().equals("Увеличение характеристик"))
+			.findFirst().orElseThrow().getScaling().size());
+	}
+
+	private FeatureScaling scaling(int level, String name, String additional, boolean hide) {
+		FeatureScaling row = new FeatureScaling();
+		row.setLevel(level);
+		row.setName(name);
+		row.setAdditional(additional);
+		row.setHideInSubclasses(hide);
+		return row;
 	}
 
 	private HeroClass baseClass() {

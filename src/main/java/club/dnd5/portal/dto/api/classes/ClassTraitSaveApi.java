@@ -7,6 +7,7 @@ import java.util.List;
 import jakarta.validation.constraints.NotEmpty;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
 import lombok.Getter;
@@ -34,6 +35,9 @@ public class ClassTraitSaveApi {
 	private List<@NotBlank String> description;
 	private boolean optional;
 	private String child;
+	/** Рост по уровням; {@code null} — оставить как есть. */
+	@Valid
+	private List<@Valid FeatureScaling> scaling;
 	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
 	@Valid
 	private ClassMechanics mechanics;
@@ -49,6 +53,7 @@ public class ClassTraitSaveApi {
 		description = trait.getDescription();
 		optional = trait.getOptional() != 0;
 		child = trait.getChild();
+		scaling = trait.getScaling();
 		mechanics = trait.getMechanics();
 		activeEffects = trait.getActiveEffects();
 	}
@@ -60,6 +65,7 @@ public class ClassTraitSaveApi {
 		level = trait.getLevel();
 		description = trait.getDescription();
 		child = trait.getChild();
+		scaling = trait.getScaling();
 		mechanics = trait.getMechanics();
 		activeEffects = trait.getActiveEffects();
 	}
