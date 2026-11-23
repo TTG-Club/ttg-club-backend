@@ -27,6 +27,7 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.model.splells.SpellDamage;
 import club.dnd5.portal.model.splells.TimeCast;
 import club.dnd5.portal.repository.classes.ArchetypeSpellRepository;
 import club.dnd5.portal.repository.classes.ClassRepository;
@@ -218,6 +219,7 @@ public class SpellApiController {
 		// редактор мастерской присылает разметку core-api — как она хранится в базе
 		spell.setDescription(Markup.trimBlocks(request.getDescription()));
 		spell.setUpperLevel(Markup.emptyToNull(Markup.trimBlocks(request.getUpper())));
+		spell.setDamage(SpellDamage.normalize(request.getDamage()));
 		spell.setSrd(Boolean.FALSE);
 		if (spell.getDamageType() == null) {
 			spell.setDamageType(new ArrayList<>());
