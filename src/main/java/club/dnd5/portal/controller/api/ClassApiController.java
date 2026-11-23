@@ -20,6 +20,7 @@ import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
@@ -304,6 +305,10 @@ public class ClassApiController {
 				trait.setName(value.getName().trim()); trait.setSuffix(trimToNull(value.getSuffix())); trait.setLevel(value.getLevel());
 				trait.setDescription(Markup.trimBlocks(value.getDescription())); trait.setChild(trimToNull(value.getChild()));
 				trait.setArchetype(archetype); trait.setBook(archetype.getBook());
+				// рост: присланный заменяет сохранённый; null — оставить как есть
+				if (value.getScaling() != null) {
+					trait.setScaling(FeatureScaling.normalize(value.getScaling(), false));
+				}
 				// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
 				if (value.getMechanics() != null) {
 					trait.setMechanics(value.getMechanics());
@@ -446,6 +451,10 @@ public class ClassApiController {
 				trait.setChild(trimToNull(traitRequest.getChild()));
 				trait.setArchitype(false);
 				trait.setHeroClass(heroClass);
+				// рост: присланный заменяет сохранённый; null — оставить как есть
+				if (traitRequest.getScaling() != null) {
+					trait.setScaling(FeatureScaling.normalize(traitRequest.getScaling(), true));
+				}
 				// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
 				if (traitRequest.getMechanics() != null) {
 					trait.setMechanics(traitRequest.getMechanics());
