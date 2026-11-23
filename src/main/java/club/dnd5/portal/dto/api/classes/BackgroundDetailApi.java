@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.FeatMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.Language;
@@ -41,6 +43,10 @@ public class BackgroundDetailApi extends BackgroundApi {
 	/** Блоки разметки core-api. */
 	private List<String> personalization;
 	private Collection<BackgroundPersonalizationTableApi> personalizationTables;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+	private FeatMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+	private List<ActiveEffect> activeEffects;
 	
 	public BackgroundDetailApi(Background background) {
 		super(background);
@@ -60,6 +66,8 @@ public class BackgroundDetailApi extends BackgroundApi {
 		}
 		startGold = background.getStartMoney();
 		description = background.getDescription();
+		mechanics = background.getMechanics();
+		activeEffects = background.getActiveEffects();
 		skillName = background.getSkillName();
 		skillDescription = background.getSkillDescription();
 		if (background.getPersonalization() != null) {

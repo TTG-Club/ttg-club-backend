@@ -86,6 +86,11 @@ public class Spell implements FoundryCommon {
 	@Column(columnDefinition = "jsonb", nullable = false)
 	private List<AbilityType> savingthrows = new ArrayList<>();
 
+	/** Урон для листа персонажа; {@code null} — не заполнен (см. db/changelog 0046). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private SpellDamage damage;
+
 	// Имена колонок заданы явно: у двусторонней связи (HeroClass.spells — mappedBy)
 	// Hibernate по умолчанию назвал бы колонку spells_id вместо существующей spell_id.
 	@ManyToMany

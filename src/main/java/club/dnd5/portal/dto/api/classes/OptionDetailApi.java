@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.dto.api.spell.ReferenceClassApi;
 import club.dnd5.portal.model.classes.Option;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,6 +28,10 @@ public class OptionDetailApi extends OptionApi {
 	private Integer level;
 	private String prerequisite;
 	private List<String> optionTypes;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+	private ClassMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+	private List<ActiveEffect> activeEffects;
 
 	public OptionDetailApi(Option option) {
 		super(option);
@@ -35,6 +41,8 @@ public class OptionDetailApi extends OptionApi {
 		altName = option.getAltName();
 		level = option.getLevel();
 		prerequisite = option.getPrerequisite();
+		mechanics = option.getMechanics();
+		activeEffects = option.getActiveEffects();
 		optionTypes = option.getOptionTypes() == null ? new java.util.ArrayList<>() : option.getOptionTypes().stream().map(club.dnd5.portal.model.classes.OptionTypeDefinition::getCode).collect(java.util.stream.Collectors.toList());
 
 		if (option.getLevel() != null)

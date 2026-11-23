@@ -223,6 +223,13 @@ public class BackgroundApiController {
 		background.setLanguages(request.getLanguages() == null || request.getLanguages().isEmpty()
 			? new ArrayList<>()
 			: languageRepository.findByNameIn(request.getLanguages()));
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			background.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			background.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(background::setBook);
 	}
 

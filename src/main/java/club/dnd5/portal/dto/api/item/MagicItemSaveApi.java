@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.item;
 
+import club.dnd5.portal.model.mechanics.MagicItemMechanics;
+import jakarta.validation.Valid;
 import club.dnd5.portal.model.items.MagicThingType;
 import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.items.MagicItem;
@@ -44,6 +46,10 @@ public class MagicItemSaveApi {
 	private Integer cost;
 	private Byte bonus;
 
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private MagicItemMechanics mechanics;
+
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
 
@@ -62,6 +68,7 @@ public class MagicItemSaveApi {
 		curse = item.getCurse();
 		cost = item.getCost();
 		bonus = item.getBonus();
+		mechanics = item.getMechanics();
 		source = item.getBook() == null ? null : item.getBook().getSource();
 	}
 }

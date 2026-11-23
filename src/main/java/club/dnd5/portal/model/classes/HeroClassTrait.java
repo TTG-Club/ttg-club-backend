@@ -1,5 +1,7 @@
 package club.dnd5.portal.model.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import java.util.List;
 import java.util.ArrayList;
 import org.hibernate.type.SqlTypes;
@@ -32,6 +34,21 @@ public class HeroClassTrait {
 	private String child;
 	private int optional;
 
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private ClassMechanics mechanics;
+
+	/** Активные эффекты (модель Active Effects VTTG, как в core-api); {@code null} — нет. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<ActiveEffect> activeEffects;
+
+	/** Рост по уровням (см. db/changelog 0047); пусто — умение не повторяется. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<FeatureScaling> scaling = new ArrayList<>();
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
@@ -41,5 +58,6 @@ public class HeroClassTrait {
 	@jakarta.persistence.PreUpdate
 	private void nullDescriptionToEmpty() {
 		description = description == null ? new ArrayList<>() : description;
+		scaling = scaling == null ? new ArrayList<>() : scaling;
 	}
 }

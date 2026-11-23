@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.items;
 
+import club.dnd5.portal.model.mechanics.MagicItemMechanics;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.util.StringUtil;
@@ -76,6 +77,11 @@ public class MagicItem {
 	@JoinColumn(name = "magic_thing_id")
 	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<MagicThingTable> tables;
+
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private MagicItemMechanics mechanics;
 
 	@ManyToOne
 	@JoinColumn(name = "source")

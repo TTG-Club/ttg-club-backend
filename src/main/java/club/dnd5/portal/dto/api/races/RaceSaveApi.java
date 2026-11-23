@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.races;
 
+import club.dnd5.portal.model.mechanics.RaceMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.races.Race;
@@ -53,6 +55,13 @@ public class RaceSaveApi {
 	@Valid
 	private List<RaceFeatureSaveApi> features;
 
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private RaceMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
+
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
 
@@ -79,6 +88,8 @@ public class RaceSaveApi {
 		view = race.isView();
 		icon = race.getIcon();
 		page = race.getPage();
+		mechanics = race.getMechanics();
+		activeEffects = race.getActiveEffects();
 		abilities = raceAbilities.stream().map(RaceAbilitySaveApi::new).collect(java.util.stream.Collectors.toList());
 		features = raceFeatures.stream().map(RaceFeatureSaveApi::new).collect(java.util.stream.Collectors.toList());
 		source = race.getBook() == null ? null : race.getBook().getSource();

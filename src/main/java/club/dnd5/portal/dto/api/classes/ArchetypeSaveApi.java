@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import jakarta.validation.constraints.NotEmpty;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
@@ -34,6 +36,12 @@ public class ArchetypeSaveApi {
 	private Short page;
 	@Valid private List<ClassTraitSaveApi> traits;
 	@Valid private List<FeatureLevelSaveApi> tableColumns;
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private ClassMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
 
 	public ArchetypeSaveApi(Archetype archetype) {
 		this(archetype, archetype.getFeats());
@@ -51,6 +59,8 @@ public class ArchetypeSaveApi {
 			? ArchetypeSpellLevelType.CLASS_LEVEL
 			: archetype.getSpellLevelType();
 		page = archetype.getPage();
+		mechanics = archetype.getMechanics();
+		activeEffects = archetype.getActiveEffects();
 		traits = archetypeTraits.stream().map(ClassTraitSaveApi::new).collect(java.util.stream.Collectors.toList());
 		tableColumns = archetype.getFeatureLevelDefenitions() == null
 			? java.util.Collections.emptyList()

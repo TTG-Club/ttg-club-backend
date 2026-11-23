@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.races;
 
+import club.dnd5.portal.model.mechanics.RaceMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.model.races.Race;
@@ -42,6 +44,10 @@ public class RaceDetailApi extends RaceApi {
 	protected Collection<RaceSkillApi> skills;
 	/** Основная раса со ссылками на разновидности: для выбора разновидности на странице. */
 	private RaceApi baseRace;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+	private RaceMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+	private List<ActiveEffect> activeEffects;
 
 	public RaceDetailApi(Race race, Set<String> books) {
 		super(race, books);
@@ -82,6 +88,8 @@ public class RaceDetailApi extends RaceApi {
 		icon = race.getIcon();
 		page = race.getPage();
 		parentId = race.getParent() == null ? null : race.getParent().getId();
+		mechanics = race.getMechanics();
+		activeEffects = race.getActiveEffects();
 		features = race.getFeatures() == null
 			? Collections.emptyList()
 			: race.getFeatures().stream().map(RaceFeatureApi::new).collect(Collectors.toList());
@@ -115,6 +123,12 @@ public class RaceDetailApi extends RaceApi {
 		private final List<String> description;
 		private final boolean feature;
 		private final Integer replaceFeatureId;
+		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final RaceMechanics mechanics;
+		/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final List<ActiveEffect> activeEffects;
 
 		private RaceFeatureApi(Feature feature) {
 			id = feature.getId();
@@ -123,6 +137,8 @@ public class RaceDetailApi extends RaceApi {
 			description = feature.getDescription();
 			this.feature = feature.isFeature();
 			replaceFeatureId = feature.getReplaceFeatureId();
+			mechanics = feature.getMechanics();
+			activeEffects = feature.getActiveEffects();
 		}
 	}
 

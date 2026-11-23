@@ -4,12 +4,14 @@ import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.model.TimeUnit;
 import club.dnd5.portal.model.splells.MagicSchool;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.model.splells.SpellDamage;
 import club.dnd5.portal.model.splells.TimeCast;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -67,6 +69,10 @@ public class SpellSaveApi {
 	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
 	private List<@NotBlank String> upper;
 
+	/** Урон для листа персонажа; {@code null} или без бросков — урона нет. */
+	@Valid
+	private SpellDamage damage;
+
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
 
@@ -92,6 +98,7 @@ public class SpellSaveApi {
 		duration = spell.getDuration();
 		description = spell.getDescription();
 		upper = spell.getUpperLevel();
+		damage = spell.getDamage();
 		source = spell.getBook() == null ? null : spell.getBook().getSource();
 	}
 }

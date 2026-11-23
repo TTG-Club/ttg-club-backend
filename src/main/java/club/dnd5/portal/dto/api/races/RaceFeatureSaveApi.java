@@ -1,5 +1,8 @@
 package club.dnd5.portal.dto.api.races;
 
+import club.dnd5.portal.model.mechanics.RaceMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
+import jakarta.validation.Valid;
 import club.dnd5.portal.model.races.Feature;
 import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -25,6 +28,12 @@ public class RaceFeatureSaveApi {
 	private List<@NotBlank String> description;
 	private boolean feature;
 	private Integer replaceFeatureId;
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private RaceMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
 
 	public RaceFeatureSaveApi(Feature raceFeature) {
 		id = raceFeature.getId();
@@ -33,5 +42,7 @@ public class RaceFeatureSaveApi {
 		description = raceFeature.getDescription();
 		feature = raceFeature.isFeature();
 		replaceFeatureId = raceFeature.getReplaceFeatureId();
+		mechanics = raceFeature.getMechanics();
+		activeEffects = raceFeature.getActiveEffects();
 	}
 }

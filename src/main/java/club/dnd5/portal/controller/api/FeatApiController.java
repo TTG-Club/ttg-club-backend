@@ -241,6 +241,13 @@ public class FeatApiController {
 		trait.setDescription(Markup.trimBlocks(request.getDescription()));
 		trait.setAbilities(request.getAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getAbilities()));
 		trait.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			trait.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			trait.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(trait::setBook);
 	}
 
