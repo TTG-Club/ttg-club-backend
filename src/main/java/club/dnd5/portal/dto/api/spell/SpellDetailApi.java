@@ -2,6 +2,7 @@ package club.dnd5.portal.dto.api.spell;
 
 import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.splells.Spell;
+import club.dnd5.portal.model.splells.SpellDamage;
 import club.dnd5.portal.model.splells.TimeCast;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -38,6 +39,8 @@ public class SpellDetailApi extends SpellApi {
 	private List<String> description;
 	/** «На больших уровнях» — разметка core-api; {@code null}, если нет. */
 	private List<String> upper;
+	/** Урон для листа персонажа; {@code null} — не заполнен. */
+	private SpellDamage damage;
 
 	public SpellDetailApi(Spell spell) {
 		super(spell);
@@ -49,6 +52,7 @@ public class SpellDetailApi extends SpellApi {
 		components.setM(spell.getAdditionalMaterialComponent());
 		classes = spell.getHeroClass().stream().map(ReferenceClassApi::new).collect(Collectors.toList());
 		upper = Markup.emptyToNull(spell.getUpperLevel());
+		damage = spell.getDamage();
 		source.setPage(spell.getPage());
 	}
 }
