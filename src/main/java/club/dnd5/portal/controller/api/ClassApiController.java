@@ -15,6 +15,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.FeatureOptionProjection;
 import club.dnd5.portal.service.OptionTypeResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.model.Dice;
@@ -80,6 +81,7 @@ public class ClassApiController {
 	private final AuditService auditService;
 	private final WorkshopPreview workshopPreview;
 	private final OptionTypeResolver optionTypeResolver;
+	private final FeatureOptionProjection featureOptionProjection;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -305,6 +307,15 @@ public class ClassApiController {
 				trait.setName(value.getName().trim()); trait.setSuffix(trimToNull(value.getSuffix())); trait.setLevel(value.getLevel());
 				trait.setDescription(Markup.trimBlocks(value.getDescription())); trait.setChild(trimToNull(value.getChild()));
 				trait.setArchetype(archetype); trait.setBook(archetype.getBook());
+				// варианты: старый клиент их не присылает (null) — тогда и тип, и выбор остаются как есть
+				if (value.getOptions() != null) {
+					String optionsType = trimToNull(value.getOptionsType());
+					optionTypeResolver.resolve(optionsType);
+					trait.setOptionsType(optionsType);
+					trait.setOptionsName(trimToNull(value.getOptionsName()));
+					trait.setOptions(FeatureOptionProjection.normalize(value.getOptions()));
+					trait.setOptionsChoice(value.getOptionsChoice());
+				}
 				// рост: присланный заменяет сохранённый; null — оставить как есть
 				if (value.getScaling() != null) {
 					trait.setScaling(FeatureScaling.normalize(value.getScaling(), false));
@@ -319,6 +330,8 @@ public class ClassApiController {
 				return trait;
 			}).collect(Collectors.toList());
 		archetypeTraitRepository.saveAll(traits); archetypeTraitRepository.flush();
+		// раздел «Особенности классов» — копия вариантов умений
+		traits.forEach(trait -> featureOptionProjection.sync(trait.getOptionsType(), trait.getOptions(), archetype.getBook()));
 		List<Integer> retained = traits.stream().map(ArchetypeTrait::getId).collect(Collectors.toList());
 		existing.values().stream().filter(trait -> !retained.contains(trait.getId())).forEach(archetypeTraitRepository::delete);
 	}
@@ -451,6 +464,15 @@ public class ClassApiController {
 				trait.setChild(trimToNull(traitRequest.getChild()));
 				trait.setArchitype(false);
 				trait.setHeroClass(heroClass);
+				// варианты: старый клиент их не присылает (null) — тогда и тип, и выбор остаются как есть
+				if (traitRequest.getOptions() != null) {
+					String optionsType = trimToNull(traitRequest.getOptionsType());
+					optionTypeResolver.resolve(optionsType);
+					trait.setOptionsType(optionsType);
+					trait.setOptionsName(trimToNull(traitRequest.getOptionsName()));
+					trait.setOptions(FeatureOptionProjection.normalize(traitRequest.getOptions()));
+					trait.setOptionsChoice(traitRequest.getOptionsChoice());
+				}
 				// рост: присланный заменяет сохранённый; null — оставить как есть
 				if (traitRequest.getScaling() != null) {
 					trait.setScaling(FeatureScaling.normalize(traitRequest.getScaling(), true));
@@ -468,6 +490,8 @@ public class ClassApiController {
 			.collect(Collectors.toList());
 		heroClassTraitRepository.saveAll(traits);
 		heroClassTraitRepository.flush();
+		// раздел «Особенности классов» — копия вариантов умений
+		traits.forEach(trait -> featureOptionProjection.sync(trait.getOptionsType(), trait.getOptions(), heroClass.getBook()));
 		List<Integer> ids = traits.stream()
 			.map(HeroClassTrait::getId)
 			.collect(Collectors.toList());

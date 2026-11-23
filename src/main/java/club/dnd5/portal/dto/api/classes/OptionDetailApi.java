@@ -32,6 +32,9 @@ public class OptionDetailApi extends OptionApi {
 	private ClassMechanics mechanics;
 	/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
 	private List<ActiveEffect> activeEffects;
+	/** Умение класса, где правятся варианты записи; {@code null} — запись правится в своём разделе. */
+	private String featureUrl;
+	private String featureName;
 
 	public OptionDetailApi(Option option) {
 		super(option);

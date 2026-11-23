@@ -10,4 +10,7 @@ import java.util.List;
 @Repository
 public interface ArchetypeTraitRepository extends JpaRepository<ArchetypeTrait, Integer>{
 	List<ArchetypeTrait> findAllByArchetypeId(Integer archetypeId);
+
+	/** Умение архетипа, в котором правятся варианты типа (db/changelog 0048). */
+	java.util.Optional<ArchetypeTrait> findFirstByOptionsType(String optionsType);
 }
