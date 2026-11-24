@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.charactersheet;
 
+import club.dnd5.portal.dto.api.charactersheet.CharacterSheetAvatarResponse;
 import club.dnd5.portal.dto.api.charactersheet.CharacterSheetListResponse;
 import club.dnd5.portal.dto.api.charactersheet.CharacterSheetResponse;
 import club.dnd5.portal.exception.ApiException;
@@ -7,13 +8,16 @@ import club.dnd5.portal.model.charactersheet.CharacterSheet;
 import club.dnd5.portal.model.user.User;
 import club.dnd5.portal.repository.charactersheet.CharacterSheetRepository;
 import club.dnd5.portal.repository.user.UserRepository;
+import club.dnd5.portal.service.image.ImageStorageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
@@ -28,7 +32,11 @@ import java.util.UUID;
 /**
  * Листы персонажей пользователя. Документ листа сервер не разбирает — только хранит,
  * проверяя размер. Чужой и несуществующий лист неразличимы — оба 404.
+ * <p>
+ * Портрет персонажа — один файл на лист ({@link #avatarPath}): адрес хранит сам документ листа,
+ * а файл стирается вместе с листом.
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CharacterSheetService {
@@ -38,10 +46,23 @@ public class CharacterSheetService {
 	/** Предел документа в байтах UTF-8: лист с заметками и инвентарём укладывается с запасом. */
 	public static final int MAX_DATA_BYTES = 512 * 1024;
 	public static final String DEFAULT_NAME = "Новый персонаж";
+	/** Наибольшая сторона портрета: на листе он рисуется кругом в 96 px. */
+	public static final int AVATAR_MAX_SIDE = 512;
+	/** Портрет перезаписывают на месте, поэтому кэшируем его ненадолго. */
+	private static final String AVATAR_CACHE_CONTROL = "public, max-age=600";
 
 	private final CharacterSheetRepository sheetRepository;
 	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper;
+	private final ImageStorageService imageStorageService;
+
+	/**
+	 * Путь портрета листа от корня картинок сайта.
+	 * @param id идентификатор листа
+	 */
+	public static String avatarPath(UUID id) {
+		return "character-sheets/" + id + ".webp";
+	}
 
 	@Transactional(readOnly = true)
 	public CharacterSheetListResponse findMine() {
@@ -105,6 +126,40 @@ public class CharacterSheetService {
 	@Transactional
 	public void delete(UUID id) {
 		sheetRepository.delete(getOwned(id));
+		removeAvatarQuietly(id);
+	}
+
+	/**
+	 * Загружает портрет листа вместо прежнего. Документ листа не меняется: адрес в него
+	 * записывает клиент, иначе его автосохранение получило бы 409 из-за новой версии.
+	 * @param id идентификатор листа
+	 * @param file загруженный файл
+	 * @return адрес с меткой версии, чтобы браузер не показал старую картинку
+	 */
+	@Transactional(readOnly = true)
+	public CharacterSheetAvatarResponse uploadAvatar(UUID id, MultipartFile file) {
+		CharacterSheet sheet = getOwned(id);
+		String url = imageStorageService.uploadTo(avatarPath(sheet.getId()), file, AVATAR_CACHE_CONTROL, AVATAR_MAX_SIDE)
+				+ "?v=" + Instant.now().getEpochSecond();
+		return new CharacterSheetAvatarResponse(url);
+	}
+
+	/**
+	 * Удаляет файл портрета листа.
+	 * @param id идентификатор листа
+	 */
+	@Transactional(readOnly = true)
+	public void deleteAvatar(UUID id) {
+		imageStorageService.deletePath(avatarPath(getOwned(id).getId()));
+	}
+
+	/** Файл портрета удалённого листа: сбой хранилища не мешает удалению листа. */
+	private void removeAvatarQuietly(UUID id) {
+		try {
+			imageStorageService.deletePath(avatarPath(id));
+		} catch (ApiException e) {
+			log.warn("Не удалось удалить портрет листа {}: {}", id, e.getMessage());
+		}
 	}
 
 	private CharacterSheet getOwned(UUID id) {

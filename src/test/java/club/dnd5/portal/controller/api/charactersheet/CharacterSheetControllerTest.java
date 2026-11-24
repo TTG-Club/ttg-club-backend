@@ -2,6 +2,7 @@ package club.dnd5.portal.controller.api.charactersheet;
 
 import club.dnd5.portal.config.WebSecurityConfig;
 import club.dnd5.portal.controller.api.ApiExceptionHandler;
+import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.interceptor.RedirectToLowerCaseInterceptor;
 import club.dnd5.portal.model.charactersheet.CharacterSheet;
 import club.dnd5.portal.model.user.User;
@@ -11,6 +12,7 @@ import club.dnd5.portal.security.ExternalAuthClient;
 import club.dnd5.portal.security.ExternalAuthUserSynchronizer;
 import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
 import club.dnd5.portal.service.charactersheet.CharacterSheetService;
+import club.dnd5.portal.service.image.ImageStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -40,6 +44,10 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -48,6 +56,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -73,12 +82,15 @@ class CharacterSheetControllerTest {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private ImageStorageService imageStorageService;
+
 	private MockMvc mockMvc;
 	private CharacterSheet sheet;
 
 	@BeforeEach
 	void setUp() {
-		reset(sheetRepository, userRepository);
+		reset(sheetRepository, userRepository, imageStorageService);
 		mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 
 		User user = new User();
@@ -204,6 +216,57 @@ class CharacterSheetControllerTest {
 	void deleteOwnSheet() throws Exception {
 		mockMvc.perform(delete(URL + "/" + sheet.getId())).andExpect(status().isNoContent());
 		verify(sheetRepository).delete(sheet);
+		verify(imageStorageService).deletePath(CharacterSheetService.avatarPath(sheet.getId()));
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void deleteSheetSurvivesStorageFailure() throws Exception {
+		doThrow(new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "нет хранилища"))
+				.when(imageStorageService).deletePath(anyString());
+
+		mockMvc.perform(delete(URL + "/" + sheet.getId())).andExpect(status().isNoContent());
+		verify(sheetRepository).delete(sheet);
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void uploadAvatarToSheetPath() throws Exception {
+		MockMultipartFile file = new MockMultipartFile("file", "portrait.png", "image/png", new byte[] {1, 2, 3});
+		String path = CharacterSheetService.avatarPath(sheet.getId());
+		when(imageStorageService.uploadTo(eq(path), any(), anyString(), eq(CharacterSheetService.AVATAR_MAX_SIDE)))
+				.thenReturn("/s3/5e14/" + path);
+
+		mockMvc.perform(multipart(URL + "/" + sheet.getId() + "/avatar").file(file))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.url").value(org.hamcrest.Matchers.startsWith("/s3/5e14/" + path + "?v=")));
+		verify(sheetRepository, never()).saveAndFlush(any(CharacterSheet.class));
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void avatarOfForeignSheetIsNotFound() throws Exception {
+		MockMultipartFile file = new MockMultipartFile("file", "portrait.png", "image/png", new byte[] {1});
+		String foreign = URL + "/" + UUID.randomUUID() + "/avatar";
+
+		mockMvc.perform(multipart(foreign).file(file)).andExpect(status().isNotFound());
+		mockMvc.perform(delete(foreign)).andExpect(status().isNotFound());
+		verify(imageStorageService, never()).uploadTo(anyString(), any(), anyString(), anyInt());
+		verify(imageStorageService, never()).deletePath(anyString());
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void deleteAvatarOfOwnSheet() throws Exception {
+		mockMvc.perform(delete(URL + "/" + sheet.getId() + "/avatar")).andExpect(status().isNoContent());
+		verify(imageStorageService).deletePath(CharacterSheetService.avatarPath(sheet.getId()));
+	}
+
+	@Test
+	void anonymousCannotUploadAvatar() throws Exception {
+		MockMultipartFile file = new MockMultipartFile("file", "portrait.png", "image/png", new byte[] {1});
+		mockMvc.perform(multipart(URL + "/" + sheet.getId() + "/avatar").file(file))
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Configuration
@@ -246,9 +309,15 @@ class CharacterSheetControllerTest {
 		}
 
 		@Bean
+		ImageStorageService imageStorageService() {
+			return mock(ImageStorageService.class);
+		}
+
+		@Bean
 		CharacterSheetService characterSheetService(CharacterSheetRepository sheetRepository,
-													UserRepository userRepository) {
-			return new CharacterSheetService(sheetRepository, userRepository, new JsonMapper());
+													UserRepository userRepository,
+													ImageStorageService imageStorageService) {
+			return new CharacterSheetService(sheetRepository, userRepository, new JsonMapper(), imageStorageService);
 		}
 
 		@Bean
