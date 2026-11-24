@@ -1,5 +1,10 @@
 package club.dnd5.portal.util;
 
+/**
+ * Строки через {@code \r} → абзацы {@code <p>} — так старое API отдавало описания богов. Используется
+ * только миграциями Liquibase (sourceFormat lines в 0029), но не удалять: Liquibase выполняет
+ * customChange-классы при каждой пересборке базы и при откате.
+ */
 public final class HtmlConverter {
 	public static String toHtml(String text) {
 		if (text == null) {

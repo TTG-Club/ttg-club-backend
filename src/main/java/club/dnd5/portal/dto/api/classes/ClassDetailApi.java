@@ -90,8 +90,10 @@ public class ClassDetailApi extends ClassApi {
 		tableColumns = heroClass.getFeatureLevelDefenitions() == null
 			? Collections.emptyList()
 			: heroClass.getFeatureLevelDefenitions().stream().map(FeatureLevelSaveApi::new).collect(Collectors.toList());
-		tabs.add(new ClassTabAp("Навыки", String.format("/classes/fragment/%s", heroClass.getUrlName()), "traits", 0, true));
-		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/description", heroClass.getUrlName()), "description", 1, true));
+		// вкладки с raw=true фронтенд строит из этого же ответа; url — страница класса
+		String classUrl = String.format("/classes/%s", heroClass.getUrlName());
+		tabs.add(new ClassTabAp("Навыки", classUrl, "traits", 0, true));
+		tabs.add(new ClassTabAp("Описание", classUrl, "description", 1, true));
 		if (heroClass.getSpellcasterType() != null && heroClass.getSpellcasterType() != SpellcasterType.NONE) {
 			tabs.add(new ClassTabAp("Заклинания", String.format("/filters/spells/%s", heroClass.getUrlName()), "spells", 2, false));
 		}
@@ -115,8 +117,9 @@ public class ClassDetailApi extends ClassApi {
 		archetypeSpellTable = toArchetypeSpellTable(archetype);
 		mechanics = archetype.getMechanics();
 		activeEffects = archetype.getActiveEffects();
-		tabs.add(new ClassTabAp("Навыки", String.format("/classes/%s/architypes/%s", heroClass.getUrlName(), archetype.getUrlName()), "traits", 0, true));
-		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/archetype/%s/description", heroClass.getUrlName(), archetype.getUrlName()), "description", 1, true));
+		String archetypeUrl = String.format("/classes/%s/%s", heroClass.getUrlName(), archetype.getUrlName());
+		tabs.add(new ClassTabAp("Навыки", archetypeUrl, "traits", 0, true));
+		tabs.add(new ClassTabAp("Описание", archetypeUrl, "description", 1, true));
 		if (heroClass.getSpellcasterType() != SpellcasterType.NONE || archetype.getSpellcasterType() != null) {
 			tabs.add(new ClassTabAp("Заклинания", String.format("/filters/spells/%s/%s", heroClass.getUrlName(), archetype.getUrlName()), "spells", 2, false));
 		}

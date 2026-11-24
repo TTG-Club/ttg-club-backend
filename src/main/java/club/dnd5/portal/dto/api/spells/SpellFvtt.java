@@ -1,7 +1,7 @@
 package club.dnd5.portal.dto.api.spells;
 
+import club.dnd5.portal.dto.fvtt.FvttHtml;
 import club.dnd5.portal.util.markup.Markup;
-import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.util.StringUtil;
@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @JsonInclude(Include.NON_NULL)
@@ -83,12 +81,11 @@ public class SpellFvtt implements Serializable {
 			.stream()
 			.map(Timecast::new)
 			.collect(Collectors.toList());
-		String descriptionHtml = java.util.Objects.toString(Markup.toHtml(spell.getDescription()), "");
+		String descriptionHtml = FvttHtml.absoluteLinks(Markup.htmlOrEmpty(spell.getDescription()));
 		this.entries = new ArrayList<>(2);
 		this.entries.addAll(Arrays
 			.stream(descriptionHtml.replace("<p>", "").split("</p>"))
 			.map(t->t.replace("\\\"", ""))
-			.map(t->t.replace("href=\"", "href=\"https://ttg.club"))
 			.filter(t -> !t.isEmpty())
 			.collect(Collectors.toList()));
 		this.classes = new Classes(spell.getHeroClass());
@@ -96,16 +93,14 @@ public class SpellFvtt implements Serializable {
 			meta = new Meta();
 			meta.setRitual(true);
 		}
-		if (spell.getUpperLevel() != null) {
-			this.entriesHigherLevel = new EntriesHigherLevel(Markup.toHtml(spell.getUpperLevel()));
+		String upperLevelHtml = Markup.toHtml(spell.getUpperLevel());
+		if (upperLevelHtml != null) {
+			this.entriesHigherLevel = new EntriesHigherLevel(upperLevelHtml);
 		}
-	    Matcher matcher = Pattern.compile("(<span class=\"saving_throw\">\\W+</span>)+").matcher(descriptionHtml);
-	    if(matcher.matches()) {
-	    	this.savingThrow = new ArrayList<>(matcher.groupCount());
-	    	while (matcher.find()) {
-				String ability = AbilityType.parse(matcher.group()).getCapitalizeName().toLowerCase();
-				savingThrow.add(ability);
-			}
-	    }
+		if (!spell.getSavingthrows().isEmpty()) {
+			this.savingThrow = spell.getSavingthrows().stream()
+				.map(ability -> ability.getCapitalizeName().toLowerCase())
+				.collect(Collectors.toList());
+		}
 	}
 }

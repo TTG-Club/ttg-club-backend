@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.fvtt.export;
 
+import club.dnd5.portal.dto.fvtt.FvttHtml;
 import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Action;
@@ -52,7 +53,7 @@ public class FItemSystem {
 
 	FItemSystem(CreatureFeat feat) {
 		parseRecharge(feat.getName());
-		description = new FDiscription(Markup.htmlOrEmpty(feat.getDescription()).replace("href=\"/", "href=\"/http://ttg.club/"));
+		description = new FDiscription(FvttHtml.absoluteLinks(Markup.htmlOrEmpty(feat.getDescription())));
 		activation = new FActivation();
 		duration = new FDuration();
 		parseTarget(feat);
@@ -124,8 +125,7 @@ public class FItemSystem {
 
 	public FItemSystem(Action action) {
 		parseRecharge(action.getName());
-		description = new FDiscription(Markup.htmlOrEmpty(action.getDescription())
-			.replace("href=\"/", "href=\"/https://ttg.club/")
+		description = new FDiscription(FvttHtml.absoluteLinks(Markup.htmlOrEmpty(action.getDescription()))
 			.replace("&nbsp;", " "));
 		activation = new FActivation(action.getActionType().name().toLowerCase(), (byte) 1, "");
 		duration = new FDuration();
