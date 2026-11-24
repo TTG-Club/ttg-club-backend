@@ -36,6 +36,14 @@ class MarkupBlocksDeserializerTest {
 	}
 
 	@Test
+	void plainTextLinesOfOldRevisionsBecomeParagraphs() {
+		SpellSaveApi api = mapper.readValue(
+			"{\"description\":\"Первый абзац\\r\\rВторой\\r\\nТретий\"}", SpellSaveApi.class);
+
+		assertEquals(List.of("Первый абзац", "Второй", "Третий"), api.getDescription());
+	}
+
+	@Test
 	void legendaryActionFromOldClientBecomesBlocks() {
 		BeastDetailRequest request = mapper.readValue(
 			"{\"legendary\":{\"list\":[{\"name\":\"Рывок\",\"value\":\"<p>Дракон <strong>бежит</strong></p>\"},"

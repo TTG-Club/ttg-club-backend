@@ -1,0 +1,16 @@
+# Этап 3, дочистка: в необязательных колонках разметки пустой список хранится как NULL (так их
+# сохраняет API — Markup.emptyToNull). 0019 и 0025 этот шаг пропустили: у двух записей ширмы
+# конвертер дал '[]', и API отдавал «description: []». upper_level — на будущее (сейчас 0 строк).
+databaseChangeLog:
+  - changeSet:
+      id: 0049-markup-empty-to-null
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              UPDATE screens SET description = NULL WHERE description = '[]'::jsonb;
+              UPDATE spells SET upper_level = NULL WHERE upper_level = '[]'::jsonb
+      # пустой список и NULL для API равнозначны — возвращать нечего
+      rollback:
+        - sql:
+            sql: SELECT 1

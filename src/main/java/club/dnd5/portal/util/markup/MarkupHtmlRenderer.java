@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Мост этапа 3: разметка core-api → HTML старого фронтенда (компоненты {@code <dice-roller>},
@@ -223,6 +224,13 @@ public final class MarkupHtmlRenderer {
 		anchor(out, section.path() + url.strip(), text, section.tooltip(), false);
 	}
 
+	/**
+	 * Допустимые адреса ссылок: внутренние ({@code /path}, но не {@code //host} и {@code /\host}), якорь,
+	 * http(s) и mailto. Остальные ({@code javascript:}, {@code data:} …) выводятся текстом — как SAFE_URL
+	 * во фронтенде.
+	 */
+	private static final Pattern SAFE_URL = Pattern.compile("(?:/(?![/\\\\])|#|https?://|mailto:)", Pattern.CASE_INSENSITIVE);
+
 	private static void link(StringBuilder out, Node node) {
 		String url = node.attrs().get("url");
 		String text = inline(node.content());
@@ -231,6 +239,10 @@ public final class MarkupHtmlRenderer {
 			return;
 		}
 		url = url.strip();
+		if (!SAFE_URL.matcher(url).lookingAt()) {
+			out.append(text);
+			return;
+		}
 		if (url.startsWith("/")) {
 			String first = url.substring(1).split("/", 2)[0].toLowerCase(Locale.ROOT);
 			anchor(out, url, text, LINK_TOOLTIPS.get(first), false);
