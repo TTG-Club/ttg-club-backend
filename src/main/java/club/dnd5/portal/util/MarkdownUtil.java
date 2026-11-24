@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
  * Шаблоны действий и умений существ (теги 5etools {@code {@atk mw}}, {@code {@hit 4}},
  * {@code {@beast_name}}…) в html. С этапа 3 шаблонов в базе нет: их один раз разворачивает
  * миграция 0035 ({@code CreatureMarkupChange}).
+ *
+ * <p>Используется только миграциями Liquibase, но не удалять: Liquibase выполняет customChange-классы
+ * при каждой пересборке базы и при откате 0035.
  */
 public class MarkdownUtil {
 	private static final List<Markdown> markdowns = Arrays.asList(
