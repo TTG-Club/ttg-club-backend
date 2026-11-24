@@ -89,18 +89,18 @@ public class MagicItemApiController {
 			}
 			if (!request.getFilter().getCustomization().isEmpty()) {
 				if (request.getFilter().getCustomization().contains("1")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("customization"), 1));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isTrue(root.get("customization")));
 				}
 				if (request.getFilter().getCustomization().contains("2")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("customization"), 0));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isFalse(root.get("customization")));
 				}
 			}
 			if (!request.getFilter().getConsumable().isEmpty()) {
 				if (request.getFilter().getConsumable().contains("1")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("consumed"), 1));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isTrue(root.get("consumed")));
 				}
 				if (request.getFilter().getConsumable().contains("2")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("consumed"), 0));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isFalse(root.get("consumed")));
 				}
 			}
 			if (!request.getFilter().getCharge().isEmpty()) {
@@ -113,10 +113,10 @@ public class MagicItemApiController {
 			}
 			if (!request.getFilter().getCurse().isEmpty()) {
 				if (request.getFilter().getCurse().contains("1")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("curse"), 1));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isTrue(root.get("curse")));
 				}
 				if (request.getFilter().getCurse().contains("2")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("curse"), 0));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isFalse(root.get("curse")));
 				}
 			}
 		}
