@@ -7,7 +7,8 @@
 -- До этого повтор умения («Увеличение характеристик» на 8/12/16/19) был отдельной строкой с child =
 -- id первой строки и обычно пустым описанием. Такие строки сворачиваются в scaling родителя: уровень,
 -- своё название (если отличается), suffix → additional, своё описание. Сворачиваются только строки, чей
--- child указывает на умение того же класса (архетипа); остальные остаются как есть. Повторы умений
+-- child указывает на умение того же класса (архетипа); остальные остаются как есть.
+-- Регулярное выражение — по collation "C": PostgreSQL не выполняет ~ по недетерминированной ci. Повторы умений
 -- архетипа со своими заклинаниями тоже остаются: перенос заклинаний сломал бы порядок списка.
 
 --changeset pg-migration:0047-hero_class_traits-scaling
@@ -19,6 +20,7 @@ alter table hero_class_feats add column scaling jsonb not null default '[]'::jso
 --rollback alter table hero_class_feats drop column scaling;
 
 --changeset pg-migration:0047-hero_class_traits-collapse-children
+--validCheckSum: ANY
 update hero_class_traits p
 set scaling = rows.items
 from (
@@ -32,7 +34,7 @@ from (
            ) order by c.level, c.id) as items
     from hero_class_traits c
     join hero_class_traits parent
-      on c.child ~ '^\s*[0-9]+\s*$'
+      on c.child collate "C" ~ '^\s*[0-9]+\s*$'
      and parent.id = trim(c.child)::integer
      and parent.hero_class_id = c.hero_class_id
     group by parent.id
@@ -41,7 +43,7 @@ where p.id = rows.parent_id;
 
 delete from hero_class_traits c
 using hero_class_traits parent
-where c.child ~ '^\s*[0-9]+\s*$'
+where c.child collate "C" ~ '^\s*[0-9]+\s*$'
   and parent.id = trim(c.child)::integer
   and parent.hero_class_id = c.hero_class_id;
 --rollback insert into hero_class_traits (name, suffix, level, description, hero_class_id, architype, child, optional, source, scaling)
@@ -51,6 +53,7 @@ where c.child ~ '^\s*[0-9]+\s*$'
 --rollback update hero_class_traits set scaling = '[]'::jsonb;
 
 --changeset pg-migration:0047-hero_class_feats-collapse-children
+--validCheckSum: ANY
 update hero_class_feats p
 set scaling = rows.items
 from (
@@ -64,7 +67,7 @@ from (
            ) order by c.level, c.id) as items
     from hero_class_feats c
     join hero_class_feats parent
-      on c.child ~ '^\s*[0-9]+\s*$'
+      on c.child collate "C" ~ '^\s*[0-9]+\s*$'
      and parent.id = trim(c.child)::integer
      and parent.archetype_id = c.archetype_id
     where not exists (select 1 from hero_class_feats_spells s where s.archetype_trait_id = c.id)
@@ -74,7 +77,7 @@ where p.id = rows.parent_id;
 
 delete from hero_class_feats c
 using hero_class_feats parent
-where c.child ~ '^\s*[0-9]+\s*$'
+where c.child collate "C" ~ '^\s*[0-9]+\s*$'
   and parent.id = trim(c.child)::integer
   and parent.archetype_id = c.archetype_id
   and not exists (select 1 from hero_class_feats_spells s where s.archetype_trait_id = c.id);
