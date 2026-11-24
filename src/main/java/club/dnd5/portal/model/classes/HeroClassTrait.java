@@ -49,6 +49,24 @@ public class HeroClassTrait {
 	@Column(columnDefinition = "jsonb", nullable = false)
 	private List<FeatureScaling> scaling = new ArrayList<>();
 
+	/** Тип списка вариантов (option_type_definitions.code); {@code null} — у умения нет вариантов. См. db/changelog 0048. */
+	@Column(name = "options_type", length = 64)
+	private String optionsType;
+
+	/** Название списка вариантов: «Воззвания», «Манёвры». */
+	@Column(name = "options_name")
+	private String optionsName;
+
+	/** Варианты умения — единственное место их правки (раздел /options обновляется из них). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<FeatureOption> options = new ArrayList<>();
+
+	/** Выбор из вариантов для листа персонажа; {@code null} — варианты только справка. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "options_choice", columnDefinition = "jsonb")
+	private FeatureOptionsChoice optionsChoice;
+
 	@ManyToOne
 	@JoinColumn(name = "source")
 	private Book book;
@@ -59,5 +77,6 @@ public class HeroClassTrait {
 	private void nullDescriptionToEmpty() {
 		description = description == null ? new ArrayList<>() : description;
 		scaling = scaling == null ? new ArrayList<>() : scaling;
+		options = options == null ? new ArrayList<>() : options;
 	}
 }

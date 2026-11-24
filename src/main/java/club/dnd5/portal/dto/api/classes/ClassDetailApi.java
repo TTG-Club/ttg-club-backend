@@ -22,6 +22,8 @@ import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.classes.FeatureOption;
+import club.dnd5.portal.model.classes.FeatureOptionsChoice;
 import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
@@ -216,6 +218,11 @@ public class ClassDetailApi extends ClassApi {
 		private final String child;
 		/** Рост по уровням. */
 		private final List<FeatureScaling> scaling;
+		/** Варианты умения и их настройка (форма мастерской). */
+		private final String optionsType;
+		private final String optionsName;
+		private final List<FeatureOption> options;
+		private final FeatureOptionsChoice optionsChoice;
 		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
 		@JsonInclude(JsonInclude.Include.NON_NULL)
 		private final ClassMechanics mechanics;
@@ -232,8 +239,69 @@ public class ClassDetailApi extends ClassApi {
 			optional = trait.getOptional() == 1;
 			child = trait.getChild();
 			scaling = scalingOf(trait.getScaling());
+			optionsType = trait.getOptionsType();
+			optionsName = trait.getOptionsName();
+			options = optionsOf(trait.getOptions());
+			optionsChoice = trait.getOptionsChoice();
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
+		}
+	}
+
+	/**
+	 * Варианты умения: {@code null} старых строк — пустой список.
+	 *
+	 * @param options варианты из сущности
+	 * @return варианты для ответа
+	 */
+	private static List<FeatureOption> optionsOf(List<FeatureOption> options) {
+		return options == null ? Collections.emptyList() : options;
+	}
+
+	/**
+	 * Варианты умения для страницы класса и листа: с адресом в разделе «Особенности классов»;
+	 * на странице подкласса скрытые варианты умений класса не показываются.
+	 *
+	 * @param options варианты умения
+	 * @param hideHidden убрать варианты «скрывать в подклассе»
+	 * @return варианты для ответа
+	 */
+	private static List<FeatureOptionApi> optionApisOf(List<FeatureOption> options, boolean hideHidden) {
+		return optionsOf(options).stream()
+			.filter(option -> !hideHidden || !option.isHideInSubclasses())
+			.map(FeatureOptionApi::new)
+			.collect(Collectors.toList());
+	}
+
+	/** Вариант умения на странице класса: поля варианта и адрес в разделе «Особенности классов». */
+	@Getter
+	public static class FeatureOptionApi {
+		private final String name;
+		private final String englishName;
+		private final String url;
+		private final Integer level;
+		private final String prerequisite;
+		private final String additional;
+		private final List<String> description;
+		private final boolean repeatable;
+		/** Механика для листа персонажа; {@code null} — не заполнена. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final ClassMechanics mechanics;
+		/** Активные эффекты; {@code null} — нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final List<ActiveEffect> activeEffects;
+
+		private FeatureOptionApi(FeatureOption option) {
+			name = option.getName();
+			englishName = option.getEnglishName();
+			url = option.url();
+			level = option.getLevel();
+			prerequisite = option.getPrerequisite();
+			additional = option.getAdditional();
+			description = option.getDescription();
+			repeatable = option.isRepeatable();
+			mechanics = option.getMechanics();
+			activeEffects = option.getActiveEffects();
 		}
 	}
 
@@ -305,7 +373,7 @@ public class ClassDetailApi extends ClassApi {
 				.stream()
 				.filter(trait -> trait.getChild() == null)
 				.filter(trait -> archetype == null || !trait.isArchitype())
-				.forEach(trait -> result.add(new TraitApi(trait)));
+				.forEach(trait -> result.add(new TraitApi(trait, archetype != null)));
 			if (archetype != null) {
 				archetype.getFeats()
 					.stream()
@@ -511,6 +579,14 @@ public class ClassDetailApi extends ClassApi {
 		private final boolean archetypeRoot;
 		/** Рост по уровням. */
 		private final List<FeatureScaling> scaling;
+		/** Название списка вариантов; {@code null} — вариантов нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final String optionsName;
+		/** Варианты умения. */
+		private final List<FeatureOptionApi> options;
+		/** Выбор из вариантов для листа; {@code null} — справка. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final FeatureOptionsChoice optionsChoice;
 		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
 		@JsonInclude(JsonInclude.Include.NON_NULL)
 		private final ClassMechanics mechanics;
@@ -519,6 +595,10 @@ public class ClassDetailApi extends ClassApi {
 		private final List<ActiveEffect> activeEffects;
 
 		private TraitApi(HeroClassTrait trait) {
+			this(trait, false);
+		}
+
+		private TraitApi(HeroClassTrait trait, boolean isSubclassPage) {
 			id = String.format("c%d", trait.getId());
 			name = trait.getName();
 			level = trait.getLevel();
@@ -529,6 +609,9 @@ public class ClassDetailApi extends ClassApi {
 			archetypeFeature = false;
 			archetypeRoot = false;
 			scaling = scalingOf(trait.getScaling());
+			optionsName = trait.getOptionsName();
+			options = optionApisOf(trait.getOptions(), isSubclassPage);
+			optionsChoice = trait.getOptionsChoice();
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
 		}
@@ -544,6 +627,9 @@ public class ClassDetailApi extends ClassApi {
 			archetypeFeature = true;
 			archetypeRoot = true;
 			scaling = Collections.emptyList();
+			optionsName = null;
+			options = Collections.emptyList();
+			optionsChoice = null;
 			mechanics = archetype.getMechanics();
 			activeEffects = archetype.getActiveEffects();
 		}
@@ -559,6 +645,9 @@ public class ClassDetailApi extends ClassApi {
 			archetypeFeature = true;
 			archetypeRoot = false;
 			scaling = scalingOf(trait.getScaling());
+			optionsName = trait.getOptionsName();
+			options = optionApisOf(trait.getOptions(), false);
+			optionsChoice = trait.getOptionsChoice();
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
 		}

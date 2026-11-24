@@ -4,6 +4,8 @@ import club.dnd5.portal.model.mechanics.ClassMechanics;
 import club.dnd5.portal.model.effect.ActiveEffect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import club.dnd5.portal.model.SpellcasterType;
+import club.dnd5.portal.model.classes.FeatureOption;
+import club.dnd5.portal.model.classes.FeatureOptionsChoice;
 import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.archetype.Archetype;
@@ -58,6 +60,11 @@ public class ArchetypeEditApi {
 		private final List<String> description; private final boolean optional = false; private final String child;
 		/** Рост по уровням. */
 		private final List<FeatureScaling> scaling;
+		/** Варианты умения и их настройка. */
+		private final String optionsType;
+		private final String optionsName;
+		private final List<FeatureOption> options;
+		private final FeatureOptionsChoice optionsChoice;
 		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
 		@JsonInclude(JsonInclude.Include.NON_NULL)
 		private final ClassMechanics mechanics;
@@ -68,6 +75,10 @@ public class ArchetypeEditApi {
 			id = trait.getId(); name = trait.getName(); suffix = trait.getSuffix(); level = trait.getLevel();
 			description = trait.getDescription(); child = trait.getChild();
 			scaling = trait.getScaling() == null ? java.util.Collections.emptyList() : trait.getScaling();
+			optionsType = trait.getOptionsType();
+			optionsName = trait.getOptionsName();
+			options = trait.getOptions() == null ? java.util.Collections.emptyList() : trait.getOptions();
+			optionsChoice = trait.getOptionsChoice();
 			mechanics = trait.getMechanics();
 			activeEffects = trait.getActiveEffects();
 		}

@@ -18,6 +18,10 @@ import java.util.Optional;
 public interface OptionRepository extends JpaRepository<Option, Integer>, JpaSpecificationExecutor<Option> {
 	Optional<Option> findByEnglishName(String name);
 
+	/** Записи раздела с типом списка. */
+	@Query("SELECT o FROM Option o JOIN o.optionTypes t WHERE t = :type")
+	List<Option> findAllByType(@Param("type") OptionTypeDefinition type);
+
 	@Query("SELECT o.prerequisite FROM Option o WHERE o.prerequisite IS NOT NULL GROUP BY o.prerequisite ORDER BY o.prerequisite")
 	Collection<String> findAlldPrerequisite();
 

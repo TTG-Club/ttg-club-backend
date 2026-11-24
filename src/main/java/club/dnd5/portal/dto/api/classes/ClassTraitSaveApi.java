@@ -7,6 +7,8 @@ import java.util.List;
 import jakarta.validation.constraints.NotEmpty;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import club.dnd5.portal.model.classes.FeatureOption;
+import club.dnd5.portal.model.classes.FeatureOptionsChoice;
 import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
@@ -35,6 +37,16 @@ public class ClassTraitSaveApi {
 	private List<@NotBlank String> description;
 	private boolean optional;
 	private String child;
+	/** Тип списка вариантов; пусто — у умения нет вариантов. */
+	private String optionsType;
+	/** Название списка вариантов. */
+	private String optionsName;
+	/** Варианты умения; {@code null} — оставить как есть. */
+	@Valid
+	private List<@Valid FeatureOption> options;
+	/** Выбор из вариантов; {@code null} — варианты только справка. */
+	@Valid
+	private FeatureOptionsChoice optionsChoice;
 	/** Рост по уровням; {@code null} — оставить как есть. */
 	@Valid
 	private List<@Valid FeatureScaling> scaling;
@@ -54,6 +66,10 @@ public class ClassTraitSaveApi {
 		optional = trait.getOptional() != 0;
 		child = trait.getChild();
 		scaling = trait.getScaling();
+		optionsType = trait.getOptionsType();
+		optionsName = trait.getOptionsName();
+		options = trait.getOptions();
+		optionsChoice = trait.getOptionsChoice();
 		mechanics = trait.getMechanics();
 		activeEffects = trait.getActiveEffects();
 	}
@@ -66,6 +82,10 @@ public class ClassTraitSaveApi {
 		description = trait.getDescription();
 		child = trait.getChild();
 		scaling = trait.getScaling();
+		optionsType = trait.getOptionsType();
+		optionsName = trait.getOptionsName();
+		options = trait.getOptions();
+		optionsChoice = trait.getOptionsChoice();
 		mechanics = trait.getMechanics();
 		activeEffects = trait.getActiveEffects();
 	}
