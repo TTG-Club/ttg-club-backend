@@ -32,8 +32,7 @@ public class RaceFeatureSaveApi {
 	@Valid
 	private RaceMechanics mechanics;
 	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
-	@Valid
-	private List<ActiveEffect> activeEffects;
+	private List<@Valid ActiveEffect> activeEffects;
 
 	public RaceFeatureSaveApi(Feature raceFeature) {
 		id = raceFeature.getId();

@@ -21,4 +21,7 @@ public class CharacterSheetListResponse {
 
 	/** Сколько листов можно иметь. */
 	private int limit;
+
+	/** Сколько листов можно иметь с подпиской. */
+	private int subscriberLimit;
 }

@@ -26,4 +26,7 @@ public class CharacterSheetResponse {
 
 	/** ISO-8601. */
 	private String updatedAt;
+
+	/** Секрет ссылки на лист; null — доступ по ссылке выключен. */
+	private String shareToken;
 }

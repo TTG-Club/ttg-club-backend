@@ -12,6 +12,8 @@ import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
+import java.util.stream.Collectors;
+import club.dnd5.portal.util.StringUtil;
 import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotEmpty;
@@ -53,6 +55,18 @@ public class MagicItemSaveApi {
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
 
+	/**
+	 * Немагическая основа — оружие: адреса страниц оружия без префикса, например {@code longsword}.
+	 * Список заменяет сохранённый целиком, порядок сохраняется; {@code null} — оставить как есть.
+	 */
+	private List<@NotBlank String> weapons;
+
+	/**
+	 * Немагическая основа — доспехи: адреса страниц доспехов без префикса, например {@code chain_mail}.
+	 * Список заменяет сохранённый целиком, порядок сохраняется; {@code null} — оставить как есть.
+	 */
+	private List<@NotBlank String> armors;
+
 	public MagicItemSaveApi(MagicItem item) {
 		name = item.getName();
 		englishName = item.getEnglishName();
@@ -70,5 +84,11 @@ public class MagicItemSaveApi {
 		bonus = item.getBonus();
 		mechanics = item.getMechanics();
 		source = item.getBook() == null ? null : item.getBook().getSource();
+		weapons = item.getWeapons() == null ? null : item.getWeapons().stream()
+			.map(weapon -> StringUtil.getUrl(weapon.getEnglishName()))
+			.collect(Collectors.toList());
+		armors = item.getArmors() == null ? null : item.getArmors().stream()
+			.map(armor -> StringUtil.getUrl(armor.getEnglishName()))
+			.collect(Collectors.toList());
 	}
 }

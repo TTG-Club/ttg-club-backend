@@ -70,8 +70,7 @@ public class FeatureOption {
 	private ClassMechanics mechanics;
 
 	/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
-	@Valid
-	private List<ActiveEffect> activeEffects;
+	private List<@Valid ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника; пусто — книга класса. */
 	@Size(max = 255)

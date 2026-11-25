@@ -41,7 +41,6 @@ import java.util.UUID;
 @Service
 public class CharacterSheetService {
 
-	public static final int SHEET_LIMIT = 10;
 	public static final int MAX_NAME_LENGTH = 100;
 	/** Предел документа в байтах UTF-8: лист с заметками и инвентарём укладывается с запасом. */
 	public static final int MAX_DATA_BYTES = 512 * 1024;
@@ -71,7 +70,8 @@ public class CharacterSheetService {
 				.stream()
 				.map(CharacterSheetService::toResponse)
 				.toList();
-		return new CharacterSheetListResponse(items, items.size(), SHEET_LIMIT);
+		return new CharacterSheetListResponse(items, items.size(), CharacterSheetLimits.sheets(user),
+				CharacterSheetLimits.SUBSCRIBER_SHEETS);
 	}
 
 	/** Создаёт лист. Сверх лимита — 403: существующие листы остаются доступны. */
@@ -82,9 +82,10 @@ public class CharacterSheetService {
 			throw badRequest("Не переданы данные листа персонажа (data)");
 		}
 		validateData(data);
-		if (sheetRepository.countByUserId(user.getId()) >= SHEET_LIMIT) {
+		int limit = CharacterSheetLimits.sheets(user);
+		if (sheetRepository.countByUserId(user.getId()) >= limit) {
 			throw new ApiException(HttpStatus.FORBIDDEN,
-					"Достигнут лимит листов персонажей: " + SHEET_LIMIT + ". Удалите один из существующих");
+					"Достигнут лимит листов персонажей: " + limit + ". Удалите один из существующих");
 		}
 
 		Instant now = now();
@@ -162,13 +163,15 @@ public class CharacterSheetService {
 		}
 	}
 
-	private CharacterSheet getOwned(UUID id) {
+	/** Лист текущего пользователя; чужой и несуществующий — 404. */
+	public CharacterSheet getOwned(UUID id) {
 		User user = requireUser();
 		return sheetRepository.findByIdAndUserId(id, user.getId())
 				.orElseThrow(CharacterSheetService::notFound);
 	}
 
-	private User requireUser() {
+	/** Текущий пользователь; аноним — 401. */
+	public User requireUser() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null
 				|| !authentication.isAuthenticated()
@@ -205,7 +208,8 @@ public class CharacterSheetService {
 				sheet.getData(),
 				sheet.getVersion() == null ? 0 : sheet.getVersion(),
 				sheet.getCreatedAt().toString(),
-				sheet.getUpdatedAt().toString());
+				sheet.getUpdatedAt().toString(),
+				sheet.getShareToken() == null ? null : sheet.getShareToken().toString());
 	}
 
 	/** Миллисекундная точность: значение в ответе совпадает с тем, что сохранится в БД. */
