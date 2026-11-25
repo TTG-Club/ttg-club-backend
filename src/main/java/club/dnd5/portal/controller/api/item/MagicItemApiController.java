@@ -23,7 +23,9 @@ import club.dnd5.portal.model.items.MagicThingType;
 import club.dnd5.portal.model.items.Rarity;
 import club.dnd5.portal.model.splells.Spell;
 import club.dnd5.portal.repository.ImageRepository;
+import club.dnd5.portal.repository.datatable.ArmorRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
+import club.dnd5.portal.repository.datatable.WeaponRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
 import club.dnd5.portal.util.markup.Markup;
@@ -46,6 +48,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -59,6 +62,8 @@ public class MagicItemApiController {
 	private final BookResolver bookResolver;
 	private final AuditService auditService;
 	private final WorkshopPreview workshopPreview;
+	private final WeaponRepository weaponRepository;
+	private final ArmorRepository armorRepository;
 
 	@Operation(summary = "Получение краткого списка магических предметов и артефактов")
 	@PostMapping(value = "/api/v1/items/magic", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -235,6 +240,28 @@ public class MagicItemApiController {
 			item.setMechanics(request.getMechanics());
 		}
 		bookResolver.find(request.getSource()).ifPresent(item::setBook);
+		// немагическая основа: присланный список заменяет сохранённый; null — оставить как есть
+		// (старый редактор и ревизии до появления поля его не присылают)
+		if (request.getWeapons() != null) {
+			item.setWeapons(resolveBaseItems(request.getWeapons(), weaponRepository::findByEnglishName, "weapon"));
+		}
+		if (request.getArmors() != null) {
+			item.setArmors(resolveBaseItems(request.getArmors(), armorRepository::findByEnglishName, "armor"));
+		}
+	}
+
+	/**
+	 * Находит оружие или доспехи по адресам страниц ({@code long_sword} → «long sword») с сохранением порядка
+	 * и без повторов; неизвестный адрес — 400, чтобы опечатка не стирала связь молча.
+	 */
+	private <T> List<T> resolveBaseItems(List<String> urls, Function<String, Optional<T>> finder, String kind) {
+		List<T> resolved = new ArrayList<>();
+		for (String url : urls.stream().map(String::trim).collect(Collectors.toCollection(LinkedHashSet::new))) {
+			T found = finder.apply(url.replace('_', ' '))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown " + kind + ": " + url));
+			resolved.add(found);
+		}
+		return resolved;
 	}
 
 	private String trimToNull(String value) {
