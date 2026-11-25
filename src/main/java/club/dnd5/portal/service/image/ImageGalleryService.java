@@ -72,7 +72,7 @@ public class ImageGalleryService {
 		requireEntry(type, id);
 		List<String> unique = new ArrayList<>(new LinkedHashSet<>(urls.stream().map(String::trim).toList()));
 		for (String url : unique) {
-			if (!url.startsWith("https://") && !url.startsWith("http://")) {
+			if (!isAllowedUrl(url)) {
 				throw new ApiException(HttpStatus.BAD_REQUEST, "Неверный адрес картинки: " + url);
 			}
 		}
@@ -148,6 +148,18 @@ public class ImageGalleryService {
 		};
 		String url = imageStorageService.uploadTo(path, file, COVER_CACHE_CONTROL);
 		return new ImageCoverApi(url + "?v=" + Instant.now().getEpochSecond(), true);
+	}
+
+	/**
+	 * Адрес картинки галереи: абсолютный http(s) или путь сайта — так хранятся картинки в S3
+	 * ({@code /s3/<ключ>}, в том числе перенесённые с img.ttg.club). {@code //хост} и
+	 * {@code /\хост} браузер считает другим сайтом — не путь.
+	 */
+	static boolean isAllowedUrl(String url) {
+		if (url.startsWith("https://") || url.startsWith("http://")) {
+			return true;
+		}
+		return url.length() > 1 && url.charAt(0) == '/' && url.charAt(1) != '/' && url.charAt(1) != '\\';
 	}
 
 	private String className(Integer id) {
