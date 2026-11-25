@@ -50,16 +50,13 @@ public class BeastDetailRequest {
 	private Collection<String> armors;
 	@Schema(description = "хиты", required = true)
 	private HitRequest hits;
-	@Valid
-	private Collection<NameValueApi> speed;
+	private Collection<@Valid NameValueApi> speed;
 	@Schema(description = "Характеристики", required = true)
 	private AbilityApi ability;
 	@Schema(description = "Бонусы к спасброскам")
-	@Valid
-	private Collection<NameValueApi> savingThrows;
+	private Collection<@Valid NameValueApi> savingThrows;
 	@Schema(description = "Бонусы к умениям")
-	@Valid
-	private Collection<NameValueApi> skills;
+	private Collection<@Valid NameValueApi> skills;
 	@Schema(description = "Сопротивления к урону")
 	private Collection<DamageType> damageResistances;
 	@Schema(description = "Иммунитеты к урону")
@@ -77,26 +74,21 @@ public class BeastDetailRequest {
 	@Schema(description = "Уровень опасности", required = true)
 	private String challengeRating;
 	@Schema(description = "Особенности")
-	@Valid
-	private Collection<DescriptionRequest> feats;
+	private Collection<@Valid DescriptionRequest> feats;
 	@Schema(description = "Действия")
-	@Valid
-	private Collection<DescriptionRequest> actions;
+	private Collection<@Valid DescriptionRequest> actions;
 	@Schema(description = "Реакции")
-	@Valid
-	private Collection<DescriptionRequest> reactions;
+	private Collection<@Valid DescriptionRequest> reactions;
 	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
 	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
 	private List<@NotBlank String> reaction;
 	@Schema(description = "Бонусные действия")
-	@Valid
-	private Collection<DescriptionRequest> bonusActions;
+	private Collection<@Valid DescriptionRequest> bonusActions;
 	@Schema(description = "Легенданые действия")
 	@Valid
 	private LegendaryRequest legendary;
 	@Schema(description = "Мистически действия")
-	@Valid
-	private Collection<DescriptionRequest> mysticalActions;
+	private Collection<@Valid DescriptionRequest> mysticalActions;
 	@Schema(description = "Текстовое описание")
 	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
 	@JsonDeserialize(using = MarkupBlocksDeserializer.class)

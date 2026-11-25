@@ -52,8 +52,7 @@ public class BackgroundSaveApi {
 	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
 	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
 	private List<@NotBlank String> personalization;
-	@Valid
-	private List<BackgroundPersonalizationTableSaveApi> personalizationTables;
+	private List<@Valid BackgroundPersonalizationTableSaveApi> personalizationTables;
 	private String language;
 	private List<String> languages;
 	private LifeStyle lifeStyle;
@@ -62,8 +61,7 @@ public class BackgroundSaveApi {
 	@Valid
 	private FeatMechanics mechanics;
 	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
-	@Valid
-	private List<ActiveEffect> activeEffects;
+	private List<@Valid ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;

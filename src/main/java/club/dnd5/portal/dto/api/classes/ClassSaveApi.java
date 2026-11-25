@@ -64,16 +64,13 @@ public class ClassSaveApi {
 	private boolean sidekick;
 	private String icon;
 	private Short page;
-	@Valid
-	private List<ClassTraitSaveApi> classTraits;
-	@Valid
-	private List<FeatureLevelSaveApi> tableColumns;
+	private List<@Valid ClassTraitSaveApi> classTraits;
+	private List<@Valid FeatureLevelSaveApi> tableColumns;
 	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
 	@Valid
 	private ClassMechanics mechanics;
 	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
-	@Valid
-	private List<ActiveEffect> activeEffects;
+	private List<@Valid ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
