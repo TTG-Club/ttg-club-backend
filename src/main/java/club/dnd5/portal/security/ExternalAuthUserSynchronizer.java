@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -35,11 +36,30 @@ public class ExternalAuthUserSynchronizer {
         }
 
         List<Role> roles = resolveRoles(externalUser.getRoles());
-        if (!roles.isEmpty()) {
+        if (!roles.isEmpty() && !sameRoles(user.getRoles(), roles)) {
             user.setRoles(roles);
         }
 
         userRepository.save(user);
+    }
+
+    /**
+     * Роли переписываются только при реальном изменении. Новая коллекция заставляет
+     * Hibernate удалить и заново вставить все строки {@code user_role}; sync идёт на
+     * каждый промах кеша токена, и параллельные запросы одного пользователя ловили
+     * duplicate key на {@code user_role_pkey (user_id, sort_order)}.
+     */
+    private boolean sameRoles(List<Role> current, List<Role> resolved) {
+        if (current == null || current.size() != resolved.size()) {
+            return false;
+        }
+        for (int i = 0; i < resolved.size(); i++) {
+            Role existing = current.get(i);
+            if (existing == null || !Objects.equals(existing.getId(), resolved.get(i).getId())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
