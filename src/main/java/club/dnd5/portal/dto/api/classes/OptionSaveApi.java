@@ -36,8 +36,7 @@ public class OptionSaveApi {
 	@Valid
 	private ClassMechanics mechanics;
 	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
-	@Valid
-	private List<ActiveEffect> activeEffects;
+	private List<@Valid ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;

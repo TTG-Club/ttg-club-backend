@@ -21,8 +21,7 @@ import java.util.List;
 @Schema(description = "легендарные действия")
 public class LegendaryRequest {
 	@Schema(description = "список легендарных действий")
-	@Valid
-	private List<LegendaryActionRequest> list;
+	private List<@Valid LegendaryActionRequest> list;
 	@Schema(description = "количество возможных легендарных действий")
 	private int count;
 	@Schema(description = "вступление к легендарным действиям: блоки разметки core-api")
