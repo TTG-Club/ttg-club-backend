@@ -65,11 +65,12 @@ public class MagicItemDetailApi extends MagicItemApi {
 		if (item.getCustomization()) {
 			customization = Boolean.TRUE;
 		}
-		if (!item.getArmors().isEmpty()) {
-			detailType = item.getArmors().stream().map(UrlApi::new).collect(Collectors.toList());
-		}
-		if (!item.getWeapons().isEmpty()) {
-			detailType = item.getWeapons().stream().map(UrlApi::new).collect(Collectors.toList());
+		// немагическая основа: сначала оружие, затем доспехи — в порядке, заданном в мастерской
+		List<UrlApi> baseItems = new ArrayList<>();
+		item.getWeapons().stream().map(UrlApi::new).forEach(baseItems::add);
+		item.getArmors().stream().map(UrlApi::new).forEach(baseItems::add);
+		if (!baseItems.isEmpty()) {
+			detailType = baseItems;
 		}
 
 		if (!item.getCustClasses().isEmpty()) {
