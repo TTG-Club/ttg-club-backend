@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -44,17 +47,21 @@ public class Spell implements FoundryCommon {
 
 	private int timeCast;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "spell_id", nullable = false)
-	private List<TimeCast> times;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<TimeCast> times = new ArrayList<>();
 
 	private String distance;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (см. util/markup/Markup, db/changelog 0019). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
-	@Column(columnDefinition = "TEXT")
-	private String upperLevel;
+	/** «На больших уровнях» — разметка core-api; {@code null}, если нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> upperLevel;
 
 	private boolean verbalComponent;
 	private boolean somaticComponent;
@@ -67,25 +74,30 @@ public class Spell implements FoundryCommon {
 	private String duration;
 	private Boolean concentration;
 
-	@ElementCollection(targetClass = DamageType.class)
-	@JoinTable(name = "spell_damage_type", joinColumns = @JoinColumn(name = "spell_id"))
-	@Column(name = "damage_type", nullable = false)
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	private List<DamageType> damageType;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<DamageType> damageType = new ArrayList<>();
 
-	@ElementCollection(targetClass = HealType.class)
-	@JoinTable(name = "spell_heal_type", joinColumns = @JoinColumn(name = "spell_id"))
-	@Column(name = "heal_type", nullable = false)
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	private List<HealType> healType;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<HealType> healType = new ArrayList<>();
 
-	@ElementCollection(targetClass = AbilityType.class)
-	@JoinTable(name = "spell_savingthrows", joinColumns = @JoinColumn(name = "spell_id"))
-	@Column(name = "ability", nullable = false)
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	private List<AbilityType> savingthrows;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb-массив, см. db/changelog 0013
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<AbilityType> savingthrows = new ArrayList<>();
 
+	/** Урон для листа персонажа; {@code null} — не заполнен (см. db/changelog 0046). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private SpellDamage damage;
+
+	// Имена колонок заданы явно: у двусторонней связи (HeroClass.spells — mappedBy)
+	// Hibernate по умолчанию назвал бы колонку spells_id вместо существующей spell_id.
 	@ManyToMany
+	@JoinTable(name = "spells_hero_class",
+		joinColumns = @JoinColumn(name = "spell_id"),
+		inverseJoinColumns = @JoinColumn(name = "hero_class_id"))
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<HeroClass> heroClass;
 
 	@ManyToOne
@@ -95,11 +107,27 @@ public class Spell implements FoundryCommon {
 	private Short page;
 	private Boolean srd;
 
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullCollectionsToEmpty() {
+		times = times == null ? new ArrayList<>() : times;
+		damageType = damageType == null ? new ArrayList<>() : damageType;
+		healType = healType == null ? new ArrayList<>() : healType;
+		savingthrows = savingthrows == null ? new ArrayList<>() : savingthrows;
+		description = description == null ? new ArrayList<>() : description;
+	}
+
 	public String getComponents() {
 		return (verbalComponent ? "В" : "") + (somaticComponent ? "C" : "") + (additionalMaterialComponent != null ? "М" : "");
 	}
 
 	public String getUrlName() {
 		return StringUtil.getUrl(englishName);
+	}
+
+	@Override
+	public String getDescriptionHtml() {
+		return club.dnd5.portal.util.markup.Markup.toHtml(description);
 	}
 }

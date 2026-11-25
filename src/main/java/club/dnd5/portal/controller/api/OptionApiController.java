@@ -13,6 +13,7 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.classes.FeatureOption;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.OptionTypeDefinition;
@@ -22,11 +23,13 @@ import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.OptionTypeDefinitionRepository;
 import club.dnd5.portal.repository.datatable.OptionRepository;
 import club.dnd5.portal.service.AuditService;
+import club.dnd5.portal.service.FeatureOptionProjection;
 import club.dnd5.portal.service.BookResolver;
 import club.dnd5.portal.service.OptionTypeResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +71,7 @@ public class OptionApiController {
 	private final WorkshopPreview workshopPreview;
 	private final OptionTypeDefinitionRepository optionTypeDefinitionRepository;
 	private final OptionTypeResolver optionTypeResolver;
+	private final FeatureOptionProjection featureOptionProjection;
 
 	@PostMapping(value = "/api/v1/options", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<OptionApi> getOptions(@RequestBody OptionRequesApi request) {
@@ -125,7 +129,40 @@ public class OptionApiController {
 	@PostMapping(value = "/api/v1/options/{englishName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<OptionDetailApi> getOption(@PathVariable String englishName) {
 		Option option = optionRepository.findByEnglishName(englishName.replace('_', ' ')).orElseThrow(PageNotFoundException::new);
-		return ResponseEntity.ok(new OptionDetailApi(option));
+		return ResponseEntity.ok(detailOf(option));
+	}
+
+	@Operation(summary = "Варианты типа из раздела в виде вариантов умения (перенос в мастерской)")
+	@PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+	@GetMapping(value = "/api/v1/workshop/option-types/{code}/options", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<FeatureOption> getTypeOptionsForImport(@PathVariable String code) {
+		OptionTypeDefinition type = optionTypeDefinitionRepository.findById(code).orElseThrow(PageNotFoundException::new);
+		return featureOptionProjection.importFromSection(type);
+	}
+
+	/**
+	 * Карточка записи раздела со ссылкой на умение, где правятся её варианты.
+	 */
+	private OptionDetailApi detailOf(Option option) {
+		OptionDetailApi detail = new OptionDetailApi(option);
+		featureOptionProjection.findManagingFeature(option).ifPresent(feature -> {
+			detail.setFeatureUrl(feature.url());
+			detail.setFeatureName(feature.name());
+		});
+		return detail;
+	}
+
+	/**
+	 * Запись, чьи варианты правятся в умении класса, мастерская раздела не меняет: правка там
+	 * разошлась бы с умением и была бы затёрта при следующем сохранении класса.
+	 */
+	private void ensureNotManaged(Collection<OptionTypeDefinition> types) {
+		Option probe = new Option();
+		probe.setOptionTypes(new ArrayList<>(types));
+		featureOptionProjection.findManagingFeature(probe).ifPresent(feature -> {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+				"Вариант правится в умении класса «" + feature.name() + "»: " + feature.url());
+		});
 	}
 
 	@Operation(summary = "Создание особенности класса в мастерской")
@@ -136,6 +173,7 @@ public class OptionApiController {
 		if (optionRepository.findByEnglishName(request.getEnglishName().trim()).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Option with the same englishName already exists");
 		}
+		ensureNotManaged(optionTypeResolver.resolveAll(request.getOptionTypes()));
 		Option option = new Option();
 		option.setBook(bookResolver.getCustomBook());
 		applyOptionRequest(option, request);
@@ -150,6 +188,8 @@ public class OptionApiController {
 	@PatchMapping(value = "/api/v1/workshop/options/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<OptionDetailApi> updateOption(@PathVariable Integer id, @Valid @RequestBody OptionSaveApi request) {
 		Option option = optionRepository.findById(id).orElseThrow(PageNotFoundException::new);
+		ensureNotManaged(option.getOptionTypes() == null ? List.of() : option.getOptionTypes());
+		ensureNotManaged(optionTypeResolver.resolveAll(request.getOptionTypes()));
 		optionRepository.findByEnglishName(request.getEnglishName().trim())
 			.filter(existing -> !existing.getId().equals(id))
 			.ifPresent(existing -> {
@@ -334,8 +374,15 @@ public class OptionApiController {
 		option.setLevel(request.getLevel());
 		String prerequisite = trimToNull(request.getPrerequisite());
 		option.setPrerequisite(prerequisite == null ? "Нет" : prerequisite);
-		option.setDescription(request.getDescription().trim());
+		option.setDescription(Markup.trimBlocks(request.getDescription()));
 		option.setOptionTypes(optionTypeResolver.resolveAll(request.getOptionTypes()));
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			option.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			option.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(option::setBook);
 	}
 

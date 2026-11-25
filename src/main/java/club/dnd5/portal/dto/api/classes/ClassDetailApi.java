@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +22,9 @@ import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.book.Book;
+import club.dnd5.portal.model.classes.FeatureOption;
+import club.dnd5.portal.model.classes.FeatureOptionsChoice;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
@@ -43,7 +48,8 @@ public class ClassDetailApi extends ClassApi {
 	private SpellFilter customFilter;
 	private String archetypeName;
 	private ClassTraitsApi traits;
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private String accusativeName;
 	private AbilityType spellAbility;
 	private SpellcasterType spellcasterType;
@@ -56,6 +62,10 @@ public class ClassDetailApi extends ClassApi {
 	private Collection<ClassTraitApi> classTraits;
 	private Collection<FeatureLevelSaveApi> tableColumns;
 	private ArchetypeSpellTableApi archetypeSpellTable;
+	/** Механика для листа персонажа (модель core-api): у класса — класса, у архетипа — архетипа. */
+	private ClassMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG): у класса — класса, у архетипа — архетипа. */
+	private List<ActiveEffect> activeEffects;
 
 	public ClassDetailApi(HeroClass heroClass, Collection<String> images, ClassRequestApi request) {
 		super(heroClass, request);
@@ -70,6 +80,8 @@ public class ClassDetailApi extends ClassApi {
 		slotsReset = heroClass.getSlotsReset();
 		enabledArhitypeLevel = heroClass.getEnabledArhitypeLevel();
 		page = heroClass.getPage();
+		mechanics = heroClass.getMechanics();
+		activeEffects = heroClass.getActiveEffects();
 		classTraits = heroClass.getTraits() == null
 			? Collections.emptyList()
 			: heroClass.getTraits()
@@ -80,8 +92,10 @@ public class ClassDetailApi extends ClassApi {
 		tableColumns = heroClass.getFeatureLevelDefenitions() == null
 			? Collections.emptyList()
 			: heroClass.getFeatureLevelDefenitions().stream().map(FeatureLevelSaveApi::new).collect(Collectors.toList());
-		tabs.add(new ClassTabAp("Навыки", String.format("/classes/fragment/%s", heroClass.getUrlName()), "traits", 0, true));
-		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/description", heroClass.getUrlName()), "description", 1, true));
+		// вкладки с raw=true фронтенд строит из этого же ответа; url — страница класса
+		String classUrl = String.format("/classes/%s", heroClass.getUrlName());
+		tabs.add(new ClassTabAp("Навыки", classUrl, "traits", 0, true));
+		tabs.add(new ClassTabAp("Описание", classUrl, "description", 1, true));
 		if (heroClass.getSpellcasterType() != null && heroClass.getSpellcasterType() != SpellcasterType.NONE) {
 			tabs.add(new ClassTabAp("Заклинания", String.format("/filters/spells/%s", heroClass.getUrlName()), "spells", 2, false));
 		}
@@ -103,8 +117,11 @@ public class ClassDetailApi extends ClassApi {
 		HeroClass heroClass = archetype.getHeroClass();
 		this.images = images;
 		archetypeSpellTable = toArchetypeSpellTable(archetype);
-		tabs.add(new ClassTabAp("Навыки", String.format("/classes/%s/architypes/%s", heroClass.getUrlName(), archetype.getUrlName()), "traits", 0, true));
-		tabs.add(new ClassTabAp("Описание", String.format("/classes/%s/archetype/%s/description", heroClass.getUrlName(), archetype.getUrlName()), "description", 1, true));
+		mechanics = archetype.getMechanics();
+		activeEffects = archetype.getActiveEffects();
+		String archetypeUrl = String.format("/classes/%s/%s", heroClass.getUrlName(), archetype.getUrlName());
+		tabs.add(new ClassTabAp("Навыки", archetypeUrl, "traits", 0, true));
+		tabs.add(new ClassTabAp("Описание", archetypeUrl, "description", 1, true));
 		if (heroClass.getSpellcasterType() != SpellcasterType.NONE || archetype.getSpellcasterType() != null) {
 			tabs.add(new ClassTabAp("Заклинания", String.format("/filters/spells/%s/%s", heroClass.getUrlName(), archetype.getUrlName()), "spells", 2, false));
 		}
@@ -195,9 +212,23 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final String suffix;
 		private final int level;
-		private final String description;
+		/** Блоки разметки core-api. */
+		private final List<String> description;
 		private final boolean optional;
 		private final String child;
+		/** Рост по уровням. */
+		private final List<FeatureScaling> scaling;
+		/** Варианты умения и их настройка (форма мастерской). */
+		private final String optionsType;
+		private final String optionsName;
+		private final List<FeatureOption> options;
+		private final FeatureOptionsChoice optionsChoice;
+		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final ClassMechanics mechanics;
+		/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final List<ActiveEffect> activeEffects;
 
 		private ClassTraitApi(HeroClassTrait trait) {
 			id = trait.getId();
@@ -207,19 +238,97 @@ public class ClassDetailApi extends ClassApi {
 			description = trait.getDescription();
 			optional = trait.getOptional() == 1;
 			child = trait.getChild();
+			scaling = scalingOf(trait.getScaling());
+			optionsType = trait.getOptionsType();
+			optionsName = trait.getOptionsName();
+			options = optionsOf(trait.getOptions());
+			optionsChoice = trait.getOptionsChoice();
+			mechanics = trait.getMechanics();
+			activeEffects = trait.getActiveEffects();
 		}
+	}
+
+	/**
+	 * Варианты умения: {@code null} старых строк — пустой список.
+	 *
+	 * @param options варианты из сущности
+	 * @return варианты для ответа
+	 */
+	private static List<FeatureOption> optionsOf(List<FeatureOption> options) {
+		return options == null ? Collections.emptyList() : options;
+	}
+
+	/**
+	 * Варианты умения для страницы класса и листа: с адресом в разделе «Особенности классов»;
+	 * на странице подкласса скрытые варианты умений класса не показываются.
+	 *
+	 * @param options варианты умения
+	 * @param hideHidden убрать варианты «скрывать в подклассе»
+	 * @return варианты для ответа
+	 */
+	private static List<FeatureOptionApi> optionApisOf(List<FeatureOption> options, boolean hideHidden) {
+		return optionsOf(options).stream()
+			.filter(option -> !hideHidden || !option.isHideInSubclasses())
+			.map(FeatureOptionApi::new)
+			.collect(Collectors.toList());
+	}
+
+	/** Вариант умения на странице класса: поля варианта и адрес в разделе «Особенности классов». */
+	@Getter
+	public static class FeatureOptionApi {
+		private final String name;
+		private final String englishName;
+		private final String url;
+		private final Integer level;
+		private final String prerequisite;
+		private final String additional;
+		private final List<String> description;
+		private final boolean repeatable;
+		/** Механика для листа персонажа; {@code null} — не заполнена. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final ClassMechanics mechanics;
+		/** Активные эффекты; {@code null} — нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final List<ActiveEffect> activeEffects;
+
+		private FeatureOptionApi(FeatureOption option) {
+			name = option.getName();
+			englishName = option.getEnglishName();
+			url = option.url();
+			level = option.getLevel();
+			prerequisite = option.getPrerequisite();
+			additional = option.getAdditional();
+			description = option.getDescription();
+			repeatable = option.isRepeatable();
+			mechanics = option.getMechanics();
+			activeEffects = option.getActiveEffects();
+		}
+	}
+
+	/**
+	 * Рост умения: {@code null} старых строк — пустой список.
+	 *
+	 * @param scaling рост из сущности
+	 * @return рост для ответа
+	 */
+	private static List<FeatureScaling> scalingOf(List<FeatureScaling> scaling) {
+		return scaling == null ? Collections.emptyList() : scaling;
 	}
 
 	@Getter
 	public static class ClassTraitsApi {
 		private final int diceHp;
-		private final String armor;
-		private final String weapon;
-		private final String tools;
+		/** Блоки разметки core-api. */
+		private final List<String> armor;
+		/** Блоки разметки core-api. */
+		private final List<String> weapon;
+		/** Блоки разметки core-api. */
+		private final List<String> tools;
 		private final String savingThrows;
 		private final int skillAvailableCount;
 		private final Collection<String> availableSkills;
-		private final String equipment;
+		/** Блоки разметки core-api. */
+		private final List<String> equipment;
 		private final Collection<FeatureLevelApi> classFeatureLevels;
 		private final Collection<FeatureLevelApi> archetypeFeatureLevels;
 		private final Collection<LevelRowApi> levels;
@@ -264,7 +373,7 @@ public class ClassDetailApi extends ClassApi {
 				.stream()
 				.filter(trait -> trait.getChild() == null)
 				.filter(trait -> archetype == null || !trait.isArchitype())
-				.forEach(trait -> result.add(new TraitApi(trait)));
+				.forEach(trait -> result.add(new TraitApi(trait, archetype != null)));
 			if (archetype != null) {
 				archetype.getFeats()
 					.stream()
@@ -334,11 +443,22 @@ public class ClassDetailApi extends ClassApi {
 					.filter(trait -> trait.getLevel() == level)
 					.sorted(Comparator.comparing(ArchetypeTrait::getName))
 					.forEach(trait -> result.add(new TraitLinkApi(trait)));
+				archetype.getFeats()
+					.forEach(trait -> scalingOf(trait.getScaling()).stream()
+						.filter(row -> row.getLevel() == level)
+						.forEach(row -> result.add(new TraitLinkApi(trait, row))));
 			}
 			heroClass.getTraits(level)
 				.stream()
 				.filter(trait -> !trait.isArchitype())
 				.forEach(trait -> result.add(new TraitLinkApi(trait)));
+			heroClass.getTraits()
+				.stream()
+				.filter(trait -> !trait.isArchitype())
+				.forEach(trait -> scalingOf(trait.getScaling()).stream()
+					.filter(row -> row.getLevel() == level)
+					.filter(row -> archetype == null || !row.isHideInSubclasses())
+					.forEach(row -> result.add(new TraitLinkApi(trait, row))));
 			return result;
 		}
 
@@ -404,22 +524,38 @@ public class ClassDetailApi extends ClassApi {
 	public static class TraitLinkApi {
 		private final String name;
 		private final String anchor;
-		private final String tooltipUrl;
 		private final boolean archetypeFeature;
 
 		private TraitLinkApi(HeroClassTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			String child = trait.getChild() == null ? trait.getId().toString() : trait.getChild();
 			anchor = String.format("#c%s", child);
-			tooltipUrl = String.format("/classes/feature/%d", trait.getId());
 			archetypeFeature = false;
 		}
 
 		private TraitLinkApi(ArchetypeTrait trait) {
 			name = normalizeTraitName(trait.getName(), trait.getSuffix());
 			anchor = String.format("#a%d", trait.getId());
-			tooltipUrl = String.format("/classes/archetype/feature/%d", trait.getId());
 			archetypeFeature = true;
+		}
+
+		/** Строка роста умения класса: ссылка ведёт на само умение. */
+		private TraitLinkApi(HeroClassTrait trait, FeatureScaling row) {
+			name = normalizeTraitName(row.displayName(trait.getName()), scalingSuffix(row));
+			String child = trait.getChild() == null ? trait.getId().toString() : trait.getChild();
+			anchor = String.format("#c%s", child);
+			archetypeFeature = false;
+		}
+
+		/** Строка роста умения архетипа. */
+		private TraitLinkApi(ArchetypeTrait trait, FeatureScaling row) {
+			name = normalizeTraitName(row.displayName(trait.getName()), scalingSuffix(row));
+			anchor = String.format("#a%d", trait.getId());
+			archetypeFeature = true;
+		}
+
+		private static String scalingSuffix(FeatureScaling row) {
+			return row.getAdditional() == null ? "" : " " + row.getAdditional();
 		}
 
 		private static String normalizeTraitName(String name, String suffix) {
@@ -435,13 +571,34 @@ public class ClassDetailApi extends ClassApi {
 		private final String name;
 		private final int level;
 		private final String type;
-		private final String description;
+		/** Блоки разметки core-api. */
+		private final List<String> description;
 		private final Source source;
 		private final boolean optional;
 		private final boolean archetypeFeature;
 		private final boolean archetypeRoot;
+		/** Рост по уровням. */
+		private final List<FeatureScaling> scaling;
+		/** Название списка вариантов; {@code null} — вариантов нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final String optionsName;
+		/** Варианты умения. */
+		private final List<FeatureOptionApi> options;
+		/** Выбор из вариантов для листа; {@code null} — справка. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final FeatureOptionsChoice optionsChoice;
+		/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final ClassMechanics mechanics;
+		/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private final List<ActiveEffect> activeEffects;
 
 		private TraitApi(HeroClassTrait trait) {
+			this(trait, false);
+		}
+
+		private TraitApi(HeroClassTrait trait, boolean isSubclassPage) {
 			id = String.format("c%d", trait.getId());
 			name = trait.getName();
 			level = trait.getLevel();
@@ -451,6 +608,12 @@ public class ClassDetailApi extends ClassApi {
 			optional = trait.getOptional() == 1;
 			archetypeFeature = false;
 			archetypeRoot = false;
+			scaling = scalingOf(trait.getScaling());
+			optionsName = trait.getOptionsName();
+			options = optionApisOf(trait.getOptions(), isSubclassPage);
+			optionsChoice = trait.getOptionsChoice();
+			mechanics = trait.getMechanics();
+			activeEffects = trait.getActiveEffects();
 		}
 
 		private TraitApi(Archetype archetype) {
@@ -463,6 +626,12 @@ public class ClassDetailApi extends ClassApi {
 			optional = false;
 			archetypeFeature = true;
 			archetypeRoot = true;
+			scaling = Collections.emptyList();
+			optionsName = null;
+			options = Collections.emptyList();
+			optionsChoice = null;
+			mechanics = archetype.getMechanics();
+			activeEffects = archetype.getActiveEffects();
 		}
 
 		private TraitApi(ArchetypeTrait trait, Archetype archetype) {
@@ -475,6 +644,12 @@ public class ClassDetailApi extends ClassApi {
 			optional = false;
 			archetypeFeature = true;
 			archetypeRoot = false;
+			scaling = scalingOf(trait.getScaling());
+			optionsName = trait.getOptionsName();
+			options = optionApisOf(trait.getOptions(), false);
+			optionsChoice = trait.getOptionsChoice();
+			mechanics = trait.getMechanics();
+			activeEffects = trait.getActiveEffects();
 		}
 	}
 

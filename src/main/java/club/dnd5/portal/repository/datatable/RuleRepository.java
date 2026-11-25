@@ -14,6 +14,7 @@ import club.dnd5.portal.model.rule.Rule;
 public interface RuleRepository extends JpaRepository<Rule, Integer>, JpaSpecificationExecutor<Rule> {
 	Optional<Rule> findByEnglishName(String name);
 
-	@Query("SELECT r.type FROM Rule r GROUP BY r.type")
+	// MySQL отдавал группы отсортированными по type; в PostgreSQL порядок нужен явно.
+	@Query("SELECT r.type FROM Rule r GROUP BY r.type ORDER BY r.type")
 	Set<String> findAllCategories();
 }

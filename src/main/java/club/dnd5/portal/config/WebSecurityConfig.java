@@ -92,6 +92,8 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 				// Ширмы Мастера — личные данные пользователя: только авторизованным, иначе 401.
 				// Должно стоять выше permitAll для GET/POST/PATCH/PUT.
 				.requestMatchers("/api/v1/dm-screens/**").authenticated()
+				// Листы персонажей — тоже личные данные пользователя.
+				.requestMatchers("/api/v1/character-sheets/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/online/**").permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
 				.requestMatchers(HttpMethod.PATCH, "/api/v1/**").permitAll()

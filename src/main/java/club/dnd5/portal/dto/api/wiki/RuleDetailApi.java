@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @JsonInclude(Include.NON_NULL)
 
 @NoArgsConstructor
@@ -17,7 +19,8 @@ import lombok.Setter;
 public class RuleDetailApi extends RuleApi {
 	private Integer id;
 	private String altName;
-	private String description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
 	private String type;
 	private SourceApi source;
 	

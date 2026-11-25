@@ -30,6 +30,7 @@ public class RandomEncounterTable {
 
 	@OneToMany
 	@JoinColumn(name = "encounter_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<RandomEncounterRow> encounters;
 
 	@ManyToOne

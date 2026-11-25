@@ -3,6 +3,7 @@ package club.dnd5.portal.service.vttg;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SpellcasterType;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
@@ -12,6 +13,7 @@ import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
+import club.dnd5.portal.util.markup.Markup;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -84,23 +86,23 @@ public class VttgClassMapper {
 		data.put("isSRD", false);
 		data.put("name", VttgText.orEmpty(heroClass.getName()));
 		data.put("nameEn", VttgText.orEmpty(heroClass.getEnglishName()));
-		data.put("description", VttgText.html(heroClass.getDescription()));
+		data.put("description", VttgText.html(Markup.toHtml(heroClass.getDescription())));
 		data.put("sourceKey", VttgDictionaries.sourceKey(heroClass.getBook()));
 		data.put("hitDie", (int) heroClass.getDiceHp());
 		List<String> primary = abilities(heroClass.getPrimaryAbilities());
 		if (!primary.isEmpty()) {
 			data.put("primaryAbilities", primary);
 		}
-		Proficiency armor = armor(heroClass.getArmor());
+		Proficiency armor = armor(Markup.toInlineHtml(heroClass.getArmor()));
 		data.put("armorProficiencies", armor.categories);
 		putIfPresent(data, "armorProficienciesCustom", armor.custom);
-		Proficiency weapon = weapon(heroClass.getWeapon());
+		Proficiency weapon = weapon(Markup.toInlineHtml(heroClass.getWeapon()));
 		data.put("weaponProficiencies", weapon.categories);
 		putIfPresent(data, "weaponProficienciesCustom", weapon.custom);
-		data.put("toolProficiencies", tools(heroClass.getTools()));
+		data.put("toolProficiencies", tools(Markup.toInlineHtml(heroClass.getTools())));
 		data.put("savingThrowProficiencies", savingThrows(heroClass.getSavingThrows()));
 		data.put("skillChoices", skillChoices(heroClass));
-		String equipment = VttgText.html(heroClass.getEquipment());
+		String equipment = VttgText.html(Markup.toHtml(heroClass.getEquipment()));
 		if (!equipment.isEmpty()) {
 			Map<String, Object> option = new LinkedHashMap<>();
 			option.put("key", "A");
@@ -144,14 +146,18 @@ public class VttgClassMapper {
 			if (VttgText.isBlank(trait.getName())) {
 				continue;
 			}
-			String description = trait.getDescription();
+			String description = Markup.toHtml(trait.getDescription());
 			HeroClassTrait origin = trait.getChild() == null ? null : byId.get(trait.getChild().trim());
 			if (VttgText.isBlank(description) && origin != null) {
-				description = origin.getDescription();
+				description = Markup.toHtml(origin.getDescription());
 			}
 			boolean informational = trait.isArchitype() || trait.getOptional() == 1;
 			features.add(feature(used, null, featureName(trait.getName(), trait.getSuffix()), description,
 				trait.getLevel(), informational));
+			for (FeatureScaling row : scalingOf(trait.getScaling())) {
+				features.add(feature(used, null, featureName(row.displayName(trait.getName()), row.getAdditional()),
+					scalingDescription(row, description), row.getLevel(), informational));
+			}
 		}
 		return features;
 	}
@@ -246,7 +252,7 @@ public class VttgClassMapper {
 			choice.put("key", unique(used, base.isEmpty() ? "option" : base, 0));
 			choice.put("name", VttgText.orEmpty(option.getName()));
 			putIfPresent(choice, "nameEn", VttgText.optional(option.getEnglishName()));
-			choice.put("description", VttgText.html(option.getDescription()));
+			choice.put("description", VttgText.html(Markup.toHtml(option.getDescription())));
 			String prerequisite = VttgText.optional(option.getPrerequisite());
 			if (prerequisite != null && !"нет".equalsIgnoreCase(prerequisite)) {
 				choice.put("prerequisite", prerequisite);
@@ -301,7 +307,7 @@ public class VttgClassMapper {
 		data.put("key", key);
 		data.put("name", VttgText.orEmpty(archetype.getName()));
 		data.put("nameEn", VttgText.orEmpty(archetype.getEnglishName()));
-		data.put("description", VttgText.html(archetype.getDescription()));
+		data.put("description", VttgText.html(Markup.toHtml(archetype.getDescription())));
 		data.put("unlockLevel", unlockLevel);
 		data.put("sourceKey", VttgDictionaries.sourceKey(archetype.getBook()));
 		Map<String, Object> spellcasting = subclassSpellcasting(heroClass, archetype, unlockLevel);
@@ -332,10 +338,30 @@ public class VttgClassMapper {
 			if (trait == null || VttgText.isBlank(trait.getName())) {
 				continue;
 			}
+			String description = Markup.toHtml(trait.getDescription());
 			features.add(feature(used, subclassKey, featureName(trait.getName(), trait.getSuffix()),
-				trait.getDescription(), trait.getLevel(), false));
+				description, trait.getLevel(), false));
+			for (FeatureScaling row : scalingOf(trait.getScaling())) {
+				features.add(feature(used, subclassKey, featureName(row.displayName(trait.getName()), row.getAdditional()),
+					scalingDescription(row, description), row.getLevel(), false));
+			}
 		}
 		return features;
+	}
+
+	/**
+	 * Рост умения: {@code null} старых строк — пустой список.
+	 */
+	private static List<FeatureScaling> scalingOf(List<FeatureScaling> scaling) {
+		return scaling == null ? List.of() : scaling;
+	}
+
+	/**
+	 * Описание уровня роста: своё либо описание самого умения.
+	 */
+	private static String scalingDescription(FeatureScaling row, String traitDescription) {
+		String own = Markup.toHtml(row.getDescription());
+		return VttgText.isBlank(own) ? traitDescription : own;
 	}
 
 	/**

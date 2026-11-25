@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.bestiary;
 
+import java.util.List;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.SourceApi;
 import club.dnd5.portal.dto.api.UrlApi;
@@ -7,7 +8,6 @@ import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.creature.*;
-import club.dnd5.portal.util.MarkdownUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -75,7 +75,8 @@ public class BeastDetailApi extends BeastApi {
 	@Schema(description = "реакции")
 	private Collection<NameValueApi> reactions;
 	@Schema(description = "свободный текст к реакциям")
-	private String reaction;
+	/** Блоки разметки core-api. */
+	private List<String> reaction;
 	@Schema(description = "бонусный действия")
 	private Collection<NameValueApi> bonusActions;
 	@Schema(description = "легендарный действия")
@@ -83,7 +84,8 @@ public class BeastDetailApi extends BeastApi {
 	@Schema(description = "мистические действия")
 	private Collection<NameValueApi> mysticalActions;
 	@Schema(description = "текстовое описание")
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	@Schema(description = "тэги")
 	private Collection<TagApi> tags;
 	@Schema(description = "места обитания")
@@ -94,10 +96,6 @@ public class BeastDetailApi extends BeastApi {
 	private LairApi lair;
 
 	public BeastDetailApi(Creature beast) {
-		this(beast, actionId -> null);
-	}
-
-	public BeastDetailApi(Creature beast, Function<Integer, Long> actionUsageCounter) {
 		super(beast);
 		id = beast.getId();
 		size = new SizeApi(beast.getSizeName(), beast.getSize().name().toLowerCase(), beast.getSize().getCell());
@@ -206,12 +204,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!beast.getFeats().isEmpty()) {
 			feats = beast.getFeats()
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(feat -> NameValueApi.builder()
 					.name(feat.getName())
 					.englishName(feat.getEnglishName())
 					.value(feat.getDescription())
-					.markdown(feat.isMarkdown())
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -219,14 +215,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!actionsBeast.isEmpty()) {
 			actions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
-				.peek(action -> MarkdownUtil.convert(action, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
 					.value(action.getDescription())
-					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -235,13 +227,10 @@ public class BeastDetailApi extends BeastApi {
 			reaction = beast.getReaction();
 			reactions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
 					.value(action.getDescription())
-					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -249,13 +238,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!actionsBeast.isEmpty()) {
 			bonusActions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
 					.value(action.getDescription())
-					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}
@@ -264,13 +250,10 @@ public class BeastDetailApi extends BeastApi {
 			legendary = new LegendaryApi();
 			legendary.setList(actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
 					.value(action.getDescription())
-					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList()));
 			if (beast.getLegendary() != null) {
@@ -281,13 +264,10 @@ public class BeastDetailApi extends BeastApi {
 		if (!actionsBeast.isEmpty()) {
 			mysticalActions = actionsBeast
 				.stream()
-				.peek(feat -> MarkdownUtil.convert(feat, beast))
 				.map(action -> NameValueApi.builder()
 					.name(action.getName())
 					.englishName(action.getEnglishName())
 					.value(action.getDescription())
-					.markdown(action.isMarkdown())
-					.sharedUsageCount(actionUsageCounter.apply(action.getId()))
 					.build())
 				.collect(Collectors.toList());
 		}

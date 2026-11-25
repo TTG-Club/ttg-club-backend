@@ -20,6 +20,7 @@ import club.dnd5.portal.model.creature.Spellcater;
 import club.dnd5.portal.model.splells.Spell;
 import org.junit.jupiter.api.Test;
 
+import club.dnd5.portal.util.markup.Markup;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -110,7 +111,7 @@ class VttgCreatureMapperTest {
 	void breathWeaponHasSaveAreaAndRecharge() {
 		Creature dragon = creature("Красный дракон", "Red Dragon");
 		dragon.setSavingThrows(Collections.singletonList(new SavingThrow(AbilityType.DEXTERITY, (byte) 6)));
-		dragon.setLegendary("<p>Дракон может совершить 3 легендарных действия.</p>");
+		dragon.setLegendary(List.of("Дракон может совершить 3 легендарных действия."));
 		dragon.setActions(Arrays.asList(
 			action("Огненное дыхание (Перезарядка 5–6)", ActionType.ACTION,
 				"<p>Дракон выдыхает огонь 60-футовым конусом. Каждое существо в этой области должно совершить "
@@ -169,18 +170,16 @@ class VttgCreatureMapperTest {
 	}
 
 	@Test
-	void markdownTraitIsExpandedWithoutTouchingEntity() {
+	void traitMarkupBecomesHtmlWithRollLabel() {
 		Creature wolf = creature("Волк", "Wolf");
 		CreatureFeat pack = new CreatureFeat();
 		pack.setName("Тактика стаи");
-		pack.setMarkdown(true);
-		pack.setDescription("{@beast_name} совершает с преимуществом бросок атаки {@hit 4}.");
+		pack.setDescription(List.of("Волк совершает с преимуществом бросок атаки {@roll к20 + 4 | text:+4 | label:Атака}."));
 		wolf.setFeats(Collections.singletonList(pack));
 
 		Map<String, Object> trait = asList(asMap(mapper.toVttg(wolf, null).get("system")).get("traits")).get(0);
 
 		assertThat(asStrings(trait.get("description")).get(0)).startsWith("Волк совершает").contains("+4");
-		assertThat(pack.getDescription()).startsWith("{@beast_name}");
 	}
 
 	private static Creature creature(String name, String englishName) {
@@ -212,7 +211,7 @@ class VttgCreatureMapperTest {
 		Action action = new Action();
 		action.setName(name);
 		action.setActionType(type);
-		action.setDescription(description);
+		action.setDescription(Markup.fromHtml(description));
 		return action;
 	}
 

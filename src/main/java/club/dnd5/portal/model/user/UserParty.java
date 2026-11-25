@@ -37,6 +37,7 @@ public class UserParty {
 		joinColumns = @JoinColumn(name = "user_party_id"),
 		inverseJoinColumns = @JoinColumn(name = "user_id")
 	)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<User> userList = new ArrayList<>();
 
 	@ManyToMany
@@ -45,6 +46,7 @@ public class UserParty {
 		joinColumns = @JoinColumn(name = "user_party_id"),
 		inverseJoinColumns = @JoinColumn(name = "user_id")
 	)
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<User> userWaitList = new ArrayList<>();
 
 	@OneToOne(mappedBy = "userParty", cascade = CascadeType.REMOVE)

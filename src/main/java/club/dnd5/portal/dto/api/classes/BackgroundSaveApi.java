@@ -1,18 +1,22 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.FeatMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.background.LifeStyle;
 import club.dnd5.portal.model.background.Background;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.background.Personalization;
 import club.dnd5.portal.model.background.PersonalizationType;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -30,22 +34,36 @@ public class BackgroundSaveApi {
 	private String altName;
 	private List<SkillType> skills;
 	private String otherSkills;
-	private String toolOwnership;
-	private String equipments;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> toolOwnership;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> equipments;
 	private Integer startGold;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private String skillName;
-	@ValidHtml
-	private String skillDescription;
-	@ValidHtml
-	private String personalization;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> skillDescription;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> personalization;
 	@Valid
 	private List<BackgroundPersonalizationTableSaveApi> personalizationTables;
 	private String language;
 	private List<String> languages;
 	private LifeStyle lifeStyle;
+
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private FeatMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
@@ -79,6 +97,8 @@ public class BackgroundSaveApi {
 		languages = background.getLanguages() == null ? java.util.Collections.emptyList()
 			: background.getLanguages().stream().map(Language::getName).collect(java.util.stream.Collectors.toList());
 		lifeStyle = background.getLifeStyle();
+		mechanics = background.getMechanics();
+		activeEffects = background.getActiveEffects();
 		source = background.getBook() == null ? null : background.getBook().getSource();
 	}
 }

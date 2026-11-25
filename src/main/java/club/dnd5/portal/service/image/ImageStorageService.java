@@ -78,6 +78,20 @@ public class ImageStorageService {
 	}
 
 	/**
+	 * Картинка по заданному пути, уменьшенная до квадрата {@code maxSide} × {@code maxSide}
+	 * (пропорции сохраняются): для мелких картинок вроде портрета персонажа.
+	 * @param path путь от корня картинок сайта без ведущего «/»
+	 * @param file загруженный файл
+	 * @param cacheControl заголовок Cache-Control объекта или {@code null}
+	 * @param maxSide наибольшая сторона результата, пикселей
+	 * @return публичный адрес картинки
+	 */
+	public String uploadTo(String path, MultipartFile file, String cacheControl, int maxSide) {
+		put(path, convert(file, maxSide, maxSide), cacheControl);
+		return publicUrl(path);
+	}
+
+	/**
 	 * Удаляет картинку по её публичному адресу. Удаляются только картинки нашего хранилища.
 	 * @param url публичный адрес картинки
 	 */
@@ -86,6 +100,14 @@ public class ImageStorageService {
 		if (path == null) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Картинка лежит не в хранилище сайта: " + storageBase());
 		}
+		deletePath(path);
+	}
+
+	/**
+	 * Удаляет картинку по пути от корня картинок сайта. Отсутствие файла ошибкой не считается.
+	 * @param path путь без ведущего «/»
+	 */
+	public void deletePath(String path) {
 		try {
 			requireS3Client().deleteObject(request -> request
 				.bucket(s3Properties.getBucket())
@@ -122,8 +144,13 @@ public class ImageStorageService {
 		return path;
 	}
 
-	/** Проверяет файл и перекодирует его в WebP. */
+	/** Проверяет файл и перекодирует его в WebP с общими пределами сторон. */
 	byte[] convert(MultipartFile file) {
+		return convert(file, imageProperties.getMaxWidth(), imageProperties.getMaxHeight());
+	}
+
+	/** Проверяет файл и перекодирует его в WebP, уменьшая до заданных сторон. */
+	byte[] convert(MultipartFile file, int maxWidth, int maxHeight) {
 		byte[] bytes = readBytes(file);
 		validateType(bytes, file.getOriginalFilename());
 		validateDimensions(bytes);
@@ -131,7 +158,7 @@ public class ImageStorageService {
 		ImageConverter.WebpOptions options = imageProperties.isWebpLossless()
 			? ImageConverter.WebpOptions.lossless()
 			: ImageConverter.WebpOptions.lossy(imageProperties.getWebpQuality());
-		options = options.resizeToFit(imageProperties.getMaxWidth(), imageProperties.getMaxHeight());
+		options = options.resizeToFit(maxWidth, maxHeight);
 
 		try {
 			byte[] webp = ImageConverter.toWebp(bytes, file.getContentType(), file.getOriginalFilename(), options).bytes();

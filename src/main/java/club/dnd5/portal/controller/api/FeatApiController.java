@@ -20,6 +20,7 @@ import club.dnd5.portal.model.book.TypeBook;
 import club.dnd5.portal.model.trait.Trait;
 import club.dnd5.portal.repository.datatable.FeatRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -71,11 +72,8 @@ public class FeatApiController {
 				});
 			}
 			if (!request.getFilter().getAbilities().isEmpty()) {
-				specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-					Join<AbilityType, Trait> join = root.join("abilities", JoinType.LEFT);
-					query.distinct(true);
-					return cb.and(join.in(request.getFilter().getAbilities().stream().map(AbilityType::valueOf).collect(Collectors.toList())));
-				});
+				specification = SpecificationUtil.getAndSpecification(specification, SpecificationUtil.jsonbContainsAny("abilities",
+					request.getFilter().getAbilities().stream().map(AbilityType::valueOf).collect(Collectors.toList())));
 			}
 			if (request.getFilter().getRequirements() != null && !request.getFilter().getRequirements().isEmpty()) {
 				if (request.getFilter().getRequirements().contains("level")) {
@@ -105,7 +103,7 @@ public class FeatApiController {
 				}
 			}
 		}
-		Pageable pageable = PageAndSortUtil.getPageable(request);
+		Pageable pageable = PageAndSortUtil.getPageable(request, "id");
 		return featRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
 			.stream()
 			.map(FeatApi::new)
@@ -240,9 +238,16 @@ public class FeatApiController {
 		trait.setLevel(request.getLevel());
 		String requirement = trimToNull(request.getRequirement());
 		trait.setRequirement(requirement == null ? "Нет" : requirement);
-		trait.setDescription(request.getDescription().trim());
+		trait.setDescription(Markup.trimBlocks(request.getDescription()));
 		trait.setAbilities(request.getAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getAbilities()));
 		trait.setSkills(request.getSkills() == null ? new ArrayList<>() : new ArrayList<>(request.getSkills()));
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			trait.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			trait.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(trait::setBook);
 	}
 

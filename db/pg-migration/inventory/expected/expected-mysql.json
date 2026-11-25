@@ -1,0 +1,2640 @@
+{
+ "tables": {
+  "action_damage": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "context": "varchar(255)",
+    "formula": "varchar(255)",
+    "type": "enum ('ACID','BLUDGEONING','COLD','DARK','FAIR','FORCE','LIGHTNING','MAGIC','METAL_WEAPON','NECROTIC','NECTOTIC','NO_ADMANTIT','NO_DAMAGE','NO_NOSILVER','PHYSICAL','PHYSICAL_MAGIC','PIERCING','PIERCING_GOOD','POISON','PSYCHIC','RADIANT','SLASHING','SOUND','THUNDER','VORPAL_SWORD')"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "archetype_spell": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "advenced": "varchar(255)",
+    "level": "integer not null",
+    "type": "varchar(255)",
+    "spell_id": "integer",
+    "archetype_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "archetypes": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "genitive_name": "varchar(255)",
+    "level": "tinyint not null",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "spell_level_type": "varchar(32) default 'CLASS_LEVEL' not null",
+    "spellcaster_type": "enum ('FULL','HALF','NONE','PARTLY')",
+    "source": "varchar(255)",
+    "class_id": "integer",
+    "option_type": "varchar(64)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "armors": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "ac": "integer not null",
+    "alt_name": "varchar(255)",
+    "cost": "integer not null",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "force_requirements": "integer",
+    "name": "varchar(255)",
+    "stels_hindrance": "bit not null",
+    "type": "tinyint",
+    "weight": "float(23) not null",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "artifactes": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "bonus": "tinyint",
+    "charge": "integer",
+    "consumed": "bit not null",
+    "cost": "integer",
+    "curse": "bit",
+    "cust_special": "varchar(255)",
+    "customization": "bit",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "rarity": "tinyint",
+    "special": "varchar(255)",
+    "type": "tinyint",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "artifactes_armors": {
+   "columns": {
+    "magic_item_id": "integer not null",
+    "armors_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "magic_item_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "artifactes_cust_classes": {
+   "columns": {
+    "magic_item_id": "integer not null",
+    "cust_classes_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "magic_item_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "artifactes_weapons": {
+   "columns": {
+    "magic_item_id": "integer not null",
+    "weapons_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "magic_item_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "background_personalizations": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "text": "TEXT",
+    "type": "enum ('ADOPTED_CULTURE','AFFECTION','AMPLOIS','BAUBLE','CREED','DEFINING_EVENT','DISFIGURED','EMPLOYMENT','HERITAGE','IDEAL','LIFE_IN_SECLUSION','SCAM','SPECIALIZATION','TRAIT','VALUABLE_ITEMS','WEAKNESS','WHERE_ARE_YOU_FROM','WHY_ARE_YOU_HERE')",
+    "background_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "background_skill_type": {
+   "columns": {
+    "background_id": "integer not null",
+    "skills": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "background_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "backgrounds": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "equipments_text": "TEXT",
+    "language": "varchar(255)",
+    "life_style": "enum ('ANYTHING','ARISTOCRATIC','BEGGARLY','COMFORTABLE','MODEST','POOR','RICH')",
+    "name": "varchar(255)",
+    "other_skills": "TEXT",
+    "page": "smallint",
+    "personalization": "TEXT",
+    "skill_description": "TEXT",
+    "skill_name": "varchar(255)",
+    "start_money": "integer not null",
+    "tool_ownership": "TEXT",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "backgrounds_languages": {
+   "columns": {
+    "background_id": "integer not null",
+    "languages_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "background_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "bookmarks": {
+   "columns": {
+    "uuid": "varchar(36) not null",
+    "name": "varchar(255)",
+    "bookmark_order": "integer",
+    "prefix": "varchar(255)",
+    "url": "varchar(255)",
+    "parent_id": "varchar(36)",
+    "user_id": "bigint"
+   },
+   "pk": [
+    "uuid"
+   ],
+   "constraints": []
+  },
+  "books": {
+   "columns": {
+    "source": "varchar(255) not null",
+    "alt_name": "varchar(255)",
+    "cover": "varchar(255)",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "type": "enum ('CUSTOM','MODULE','OFFICAL','SETTING','TEST','THIRD_PARTY')",
+    "year": "integer"
+   },
+   "pk": [
+    "source"
+   ],
+   "constraints": []
+  },
+  "class_available_skills": {
+   "columns": {
+    "class_id": "integer not null",
+    "skill": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "class_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "class_primary_abilities": {
+   "columns": {
+    "class_id": "integer not null",
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "class_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "classes": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name_accusative": "varchar(255)",
+    "archetype_name": "varchar(255)",
+    "armor": "varchar(255)",
+    "description": "TEXT",
+    "dice_hp": "tinyint not null",
+    "enabled_arhitype_level": "integer not null",
+    "english_name": "varchar(255)",
+    "equipment": "TEXT",
+    "icon": "varchar(255)",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "saving_throws": "varchar(255)",
+    "sidekick": "bit not null",
+    "skill_available_count": "smallint not null",
+    "slots_reset": "enum ('FULL','LONG','SHORT')",
+    "spell_ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM')",
+    "spellcaster_type": "enum ('FULL','HALF','NONE','PARTLY')",
+    "tools": "varchar(255)",
+    "weapon": "varchar(255)",
+    "source": "varchar(255)",
+    "option_type": "varchar(64)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "classes_feature_level_definitions": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "l1": "tinyint",
+    "l10": "tinyint",
+    "l11": "tinyint",
+    "l12": "tinyint",
+    "l13": "tinyint",
+    "l14": "tinyint",
+    "l15": "tinyint",
+    "l16": "tinyint",
+    "l17": "tinyint",
+    "l18": "tinyint",
+    "l19": "tinyint",
+    "l2": "tinyint",
+    "l20": "tinyint",
+    "l3": "tinyint",
+    "l4": "tinyint",
+    "l5": "tinyint",
+    "l6": "tinyint",
+    "l7": "tinyint",
+    "l8": "tinyint",
+    "l9": "tinyint",
+    "name": "varchar(255)",
+    "prefix": "varchar(255)",
+    "sufix": "varchar(255)",
+    "hero_class_id": "integer",
+    "archetype_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "conditions": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "type": "enum ('CONDITION','DISEASE','OTHER')",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_actions": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "action_type": "tinyint",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "markdown": "boolean default false",
+    "name": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_armor_types": {
+   "columns": {
+    "creature_id": "integer not null",
+    "armor_types": "enum ('BONECRAFT','BREASTPLATE','CHAINMAIL','CHAIN_MAIL','CHAIN_SHIRT','CUIRASS','HALF_PLATE','HIDE','LEATHER','MAGE_ARMOR','NATURAL','PADDED_ARMOR','PLATE','PLATE_HALF','RING_MAIL','RIVETED_LEATHER','SCALED','SCALE_MAIL','SCRAPPY','SCRAPS','SHIELD','SPLINT','STUDDED_LEATHER')",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creature_feats": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "markdown": "boolean default false",
+    "name": "varchar(255)",
+    "creature_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_habitates": {
+   "columns": {
+    "creature_id": "integer not null",
+    "habitates": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creature_immunity_states": {
+   "columns": {
+    "creature_id": "integer not null",
+    "immunity_states": "tinyint",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creature_immunity_damages": {
+   "columns": {
+    "creature_id": "integer not null",
+    "immunity_damages": "tinyint",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creature_races": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "name": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_resistance_damages": {
+   "columns": {
+    "creature_id": "integer not null",
+    "resistance_damages": "tinyint",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creature_saving_throws": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM')",
+    "additional_bonus": "varchar(255)",
+    "bonus": "tinyint not null",
+    "creature_id": "integer not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_skills": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "additional_bonus": "varchar(255)",
+    "bonus": "tinyint not null",
+    "type": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL')",
+    "creature_id": "integer not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_spellcaster": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "attack": "tinyint",
+    "dc": "tinyint",
+    "level": "tinyint",
+    "slot1": "tinyint",
+    "slot2": "tinyint",
+    "slot3": "tinyint",
+    "slot4": "tinyint",
+    "slot5": "tinyint",
+    "slot6": "tinyint",
+    "slot7": "tinyint",
+    "slot8": "tinyint",
+    "slot9": "tinyint",
+    "spell_ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM')",
+    "creature_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_spells": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "count": "tinyint not null",
+    "unit": "varchar(255)",
+    "spell_id": "integer",
+    "creature_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creature_vulnerability_damages": {
+   "columns": {
+    "creature_id": "integer not null",
+    "vulnerability_damages": "tinyint",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creatures": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "ac": "tinyint not null",
+    "alignment": "tinyint",
+    "alignment_suffix": "varchar(255)",
+    "alt_name": "varchar(255)",
+    "average_hp": "smallint not null",
+    "blindsight": "integer",
+    "blindsight_radius": "integer",
+    "bonusac": "varchar(255)",
+    "bonushp": "smallint",
+    "challenge_rating": "varchar(255)",
+    "charisma": "tinyint not null",
+    "climbing_speed": "smallint",
+    "constitution": "tinyint not null",
+    "count_dice_hp": "smallint",
+    "darkvision": "integer",
+    "description": "TEXT",
+    "dexterity": "tinyint not null",
+    "dice_hp": "tinyint",
+    "digging_speed": "smallint",
+    "english_name": "varchar(255)",
+    "exp": "integer not null",
+    "fly_speed": "smallint",
+    "hover": "smallint",
+    "intellect": "tinyint not null",
+    "language": "TEXT",
+    "legendary": "TEXT",
+    "name": "varchar(255) not null",
+    "page": "smallint",
+    "passive_perception": "tinyint not null",
+    "passive_perception_bonus": "varchar(255)",
+    "proficiency_bonus": "varchar(255)",
+    "race_id": "integer",
+    "race_name": "varchar(255)",
+    "reaction": "TEXT",
+    "size": "tinyint",
+    "speed": "tinyint not null",
+    "speed_text": "varchar(255)",
+    "strength": "tinyint not null",
+    "suffixhp": "varchar(255)",
+    "swimming_spped": "smallint",
+    "trysight": "integer",
+    "type": "tinyint",
+    "vibration": "integer",
+    "wizdom": "tinyint not null",
+    "source": "varchar(255)",
+    "lair_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "creatures_actions": {
+   "columns": {
+    "creature_id": "integer not null",
+    "actions_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creatures_languages": {
+   "columns": {
+    "creature_id": "integer not null",
+    "languages_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "creatures_races": {
+   "columns": {
+    "creature_id": "integer not null",
+    "races_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "creature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "dm_screens": {
+   "columns": {
+    "id": "varchar(36) not null",
+    "created_at": "datetime(6)",
+    "name": "varchar(64) not null",
+    "updated_at": "datetime(6) not null",
+    "windows": "text not null",
+    "user_id": "bigint not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "equipments": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "cost": "integer",
+    "currency": "tinyint",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "weight": "float(23)",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "equipments_types": {
+   "columns": {
+    "equipment_id": "integer not null",
+    "type": "enum ('ADVENTURING_GEAR','AMMUNITION','ARMOR','ARTISANS_TOOLS','CLOTHES','CONTAINER','DRUID_FOCUS','EAT_DRINK','EXOTIC_WEAPON','FIRE_WEAPON','FOCUSING','GAME_SET','HEAVY_ARMOR','HOLY_SYMBOL','LIGHT','LIGHT_ARMOR','MARTIAL_WEAPON','MEDIUM_ARMOR','MELE_WAPON','MOUNT','MUSICAL_INSTRUMENTS','POISON','RANGE_WAPON','SET','SHIELD','SIEGE_EQUIPMENT','SIMPLE_WEAPON','THROWABLE','TOOL','TRADE_GOOD','VEHICLE_AIR','VEHICLE_LAND','VEHICLE_SPELLJAMMER','VEHICLE_WATER','WEAPON') not null"
+   },
+   "pk": [
+    "equipment_id",
+    "type"
+   ],
+   "constraints": []
+  },
+  "god_domains": {
+   "columns": {
+    "god_id": "integer not null",
+    "domains": "enum ('ARCANA','DEATH','DECEPTION','FORGE','GRAVE','KNOWLEDGE','LIFE','LIGHT','NATURE','NONE','ORDER','REPOSE','STORM','TEMPEST','TRICKERY','UNDEFINE','WAR')",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "god_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "god_pantheons": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "gods": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "aligment": "enum ('ALL','ALL_EVIL','CHAOTIC_EVIL','CHAOTIC_GOOD','CHAOTIC_NEUTRAL','LAWFUL_EVIL','LAWFUL_GOOD','LAWFUL_NEUTRAL','NEUTRAL','NEUTRAL_EVIL','NEUTRAL_GOOD','NO_GOOD','TRUE_NEUTRAL','WITHOUT')",
+    "alt_name": "varchar(255)",
+    "alternative_description": "TEXT",
+    "commitment": "varchar(255)",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "nicknames": "varchar(255)",
+    "page": "smallint",
+    "rank": "enum ('ABSOLUTE','DEAD','GREAT','HALF','LESS','MIDDLE','QUASI')",
+    "sex": "enum ('FEMALE','MALE','PHILOSOPHY','UNDEFINE')",
+    "symbol": "varchar(255)",
+    "version": "integer default 1",
+    "source": "varchar(255)",
+    "pantheon_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "hero_class_feats": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "child": "varchar(255)",
+    "description": "TEXT",
+    "level": "tinyint not null",
+    "name": "varchar(255)",
+    "suffix": "varchar(25) default ''",
+    "archetype_id": "integer",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "hero_class_feats_spells": {
+   "columns": {
+    "archetype_trait_id": "integer not null",
+    "spells_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "archetype_trait_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "hero_class_traits": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "architype": "bit not null",
+    "child": "varchar(255)",
+    "description": "TEXT",
+    "level": "tinyint not null",
+    "name": "varchar(255)",
+    "optional": "integer not null",
+    "suffix": "varchar(25) default ''",
+    "source": "varchar(255)",
+    "hero_class_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "hero_madness": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "type": "enum ('LONG','SHORT','UNLIMITED')",
+    "other": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "images": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "ref_id": "integer",
+    "type": "enum ('ARMOR','CLASS','CREATURE','GOD','ITEM','MAGIC_ITEM','RACE','SUBCLASS','WEAPON')",
+    "url": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "info_pages": {
+   "columns": {
+    "url": "varchar(255) not null",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "subtitle": "varchar(255)",
+    "title": "varchar(255)"
+   },
+   "pk": [
+    "url"
+   ],
+   "constraints": []
+  },
+  "initiative_participant": {
+   "columns": {
+    "id": "varchar(36) not null",
+    "created_at": "datetime(6)",
+    "creature_url": "varchar(255)",
+    "dead": "bit not null",
+    "initiative_bonus": "integer not null",
+    "initiative_roll": "integer",
+    "initiative_total": "integer",
+    "name": "varchar(255) not null",
+    "seq": "integer not null",
+    "tie_roll": "integer",
+    "tracker_id": "varchar(36) not null",
+    "type": "enum ('CREATURE','PLAYER') not null",
+    "updated_at": "datetime(6)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "initiative_tracker": {
+   "columns": {
+    "id": "varchar(36) not null",
+    "access_key": "varchar(36) not null",
+    "created_at": "datetime(6)",
+    "current_participant_id": "varchar(36)",
+    "deleted": "bit not null",
+    "name": "varchar(255) not null",
+    "owner_username": "varchar(255)",
+    "reroll_each_round": "bit not null",
+    "round": "integer not null",
+    "status": "enum ('ACTIVE','PREPARING') not null",
+    "updated_at": "datetime(6)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "invitation": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "code": "varchar(255)",
+    "expiration_time": "bigint",
+    "generation_date": "datetime(6)",
+    "link": "varchar(255)",
+    "user_party_id": "bigint"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": [
+    "unique_identifier varchar(255)"
+   ]
+  },
+  "json_storage": {
+   "columns": {
+    "ref_id": "integer not null",
+    "type_json": "enum ('CREATURE','SPELL') not null",
+    "version_foundry": "enum ('V10','V11') not null",
+    "json_data": "text not null",
+    "name": "varchar(255) not null"
+   },
+   "pk": [
+    "ref_id",
+    "type_json",
+    "version_foundry"
+   ],
+   "constraints": []
+  },
+  "lairs": {
+   "columns": {
+    "lair_id": "integer not null auto_increment",
+    "action": "TEXT",
+    "description": "TEXT",
+    "effect": "TEXT"
+   },
+   "pk": [
+    "lair_id"
+   ],
+   "constraints": []
+  },
+  "languages": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "level_definitions": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "level": "tinyint",
+    "slot1": "tinyint",
+    "slot2": "tinyint",
+    "slot3": "tinyint",
+    "slot4": "tinyint",
+    "slot5": "tinyint",
+    "slot6": "tinyint",
+    "slot7": "tinyint",
+    "slot8": "tinyint",
+    "slot9": "tinyint",
+    "hero_class_id": "integer",
+    "archetype_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "magic_things_random": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "end": "integer not null",
+    "name_table": "varchar(255)",
+    "start": "integer not null",
+    "magic_thing_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "menu": {
+   "columns": {
+    "id": "smallint not null auto_increment",
+    "external": "bit not null",
+    "icon": "varchar(255)",
+    "index_order": "integer",
+    "name": "varchar(255) not null",
+    "on_index": "bit not null",
+    "only_dev": "bit not null",
+    "order": "integer not null",
+    "url": "varchar(255)",
+    "parent_id": "smallint"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "name_owners": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "parent_id": "bigint"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "news_banner": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "active": "bit not null",
+    "created_at": "datetime(6)",
+    "description": "varchar(255)",
+    "image": "varchar(255)",
+    "name": "varchar(255)",
+    "url": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "option_type_definitions": {
+   "columns": {
+    "code": "varchar(64) not null",
+    "archetype_name": "varchar(255)",
+    "class_name": "varchar(255) not null",
+    "feature_stem": "varchar(255)",
+    "homebrew": "bit not null",
+    "name": "varchar(255) not null",
+    "ordering": "integer"
+   },
+   "pk": [
+    "code"
+   ],
+   "constraints": []
+  },
+  "option_types": {
+   "columns": {
+    "option_id": "integer not null",
+    "option_type": "varchar(64) not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "option_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "options": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "level": "integer",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "prerequisite": "varchar(255)",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "partners": {
+   "columns": {
+    "id": "smallint not null auto_increment",
+    "description": "varchar(255)",
+    "img": "varchar(255) not null",
+    "name": "varchar(255) not null",
+    "order": "integer not null",
+    "url": "varchar(255) not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "race_bonuses": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM')",
+    "bonus": "tinyint",
+    "race_id": "integer not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "race_feature_skill_type": {
+   "columns": {
+    "feature_id": "integer not null",
+    "skills": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "feature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "race_features": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "feature": "bit not null",
+    "name": "varchar(255)",
+    "race_id": "integer not null",
+    "replace_feature_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "race_features_lanuages": {
+   "columns": {
+    "feature_id": "integer not null",
+    "lanuages_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "feature_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "race_names": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "varchar(255)",
+    "sex": "enum ('CHILD','FEMALE','MALE','UNISEX')",
+    "race_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "race_nicknames": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "varchar(255)",
+    "type": "enum ('CLAN','DYNASTY','FROM','HOUSE','NICKNAME','SQUAD','SURNAME','TRIBE')",
+    "race_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "race_spells": {
+   "columns": {
+    "race_id": "integer not null",
+    "spells_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "race_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "races": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "climb": "integer",
+    "darkvision": "integer",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "fly": "integer",
+    "icon": "varchar(255)",
+    "max_age": "integer",
+    "min_age": "integer",
+    "name": "varchar(255)",
+    "origin": "bit",
+    "page": "smallint",
+    "size": "varchar(255) default 'MEDIUM' not null",
+    "speed": "int default 30",
+    "swim": "integer",
+    "type": "enum ('ABERRATION','BEAST','CELESTIAL','CONSTRUCT','DEVIL','DRAGON','ELEMENTAL','FEY','FIEND','GIANT','HUMANOID','MONSTROSITY','OOZE','OUTSIDER','PLANT','SLIME','SMALL_BEAST','SWARM','UNDEAD','VERMIN')",
+    "view": "bit not null",
+    "source": "varchar(255)",
+    "parent_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "races_languages": {
+   "columns": {
+    "race_id": "integer not null",
+    "languages_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "race_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "random_encounter_tables": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "environment": "varchar(255)",
+    "formula": "varchar(255)",
+    "level": "integer",
+    "name": "TEXT",
+    "type": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "random_encounters": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "end": "integer not null",
+    "level": "integer not null",
+    "start": "integer not null",
+    "type": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')",
+    "source": "varchar(255)",
+    "encounter_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "revision_history": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "created_at": "datetime(6) not null",
+    "entity_id": "integer not null",
+    "entity_type": "varchar(64) not null",
+    "operation": "enum ('CREATE','DELETE','UPDATE') not null",
+    "revision": "integer not null",
+    "snapshot": "text",
+    "user_id": "bigint",
+    "username": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "roles": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "name": "varchar(255) not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "rules": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "type": "varchar(255)",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "screens": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "category": "varchar(255)",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "icon": "varchar(255)",
+    "name": "varchar(255)",
+    "ordering": "integer not null",
+    "source": "varchar(255)",
+    "parent_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "site_configuration": {
+   "columns": {
+    "config_key": "varchar(255) not null",
+    "config_value": "varchar(255)"
+   },
+   "pk": [
+    "config_key"
+   ],
+   "constraints": []
+  },
+  "spell_damage_type": {
+   "columns": {
+    "spell_id": "integer not null",
+    "damage_type": "enum ('ACID','BLUDGEONING','COLD','DARK','FAIR','FORCE','LIGHTNING','MAGIC','METAL_WEAPON','NECROTIC','NECTOTIC','NO_ADMANTIT','NO_DAMAGE','NO_NOSILVER','PHYSICAL','PHYSICAL_MAGIC','PIERCING','PIERCING_GOOD','POISON','PSYCHIC','RADIANT','SLASHING','SOUND','THUNDER','VORPAL_SWORD') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "spell_heal_type": {
+   "columns": {
+    "spell_id": "integer not null",
+    "heal_type": "enum ('HP','THP') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "spell_savingthrows": {
+   "columns": {
+    "spell_id": "integer not null",
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "spell_source": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "class_id": "integer not null",
+    "spell_id": "integer not null",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "spells": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "additional_material_component": "TEXT",
+    "additional_type": "varchar(255)",
+    "alt_name": "varchar(255)",
+    "concentration": "bit",
+    "consumable": "boolean default false",
+    "description": "TEXT",
+    "distance": "varchar(255)",
+    "duration": "varchar(255)",
+    "english_name": "varchar(255)",
+    "level": "tinyint not null",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "ritual": "bit",
+    "school": "tinyint",
+    "somatic_component": "bit not null",
+    "srd": "bit",
+    "time_cast": "integer not null",
+    "upper_level": "TEXT",
+    "verbal_component": "bit not null",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "spells_hero_class": {
+   "columns": {
+    "spell_id": "integer not null",
+    "hero_class_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "spell_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "spells_times": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "condition": "varchar(255)",
+    "number": "integer not null",
+    "unit": "enum ('ACTION','BONUS','HOUR','MINUTE','ON_HIT','REACTION','ROUND') not null",
+    "spell_id": "integer not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "tavern_owner_secret": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "sex": "enum ('CHILD','FEMALE','MALE','UNISEX')"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "tavern_owner_traits": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "sex": "enum ('CHILD','FEMALE','MALE','UNISEX')"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "tavern_owner_weaknesses": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "sex": "enum ('CHILD','FEMALE','MALE','UNISEX')"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_atmosphera": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "name": "varchar(255)",
+    "visitors": "integer not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_dishes": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "category": "enum ('CHEAP','ELITE','EXPENSIVE','ORDINARY')",
+    "habitat": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')",
+    "name": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_drink_effects": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_drinks": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "category": "enum ('CHEAP','ELITE','EXPENSIVE','ORDINARY')",
+    "habitat": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')",
+    "name": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_events": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "visitors": "integer not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_names": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "varchar(255)",
+    "names": "varchar(255)",
+    "object_type": "enum ('ANIMATED','OBJECT')",
+    "sex": "enum ('CHILD','FEMALE','MALE','UNISEX')"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_prefixes": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "female": "varchar(255)",
+    "male": "varchar(255)",
+    "name": "varchar(255)",
+    "neuter": "varchar(255)",
+    "object_type": "enum ('ANIMATED','OBJECT')"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_race_habitates": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "chance": "integer not null",
+    "english_name": "varchar(255) not null",
+    "habitat": "enum ('ARCTIC','CITY','COAST','DESERT','DUNGEON','FOREST','GRASSLAND','HILL','MOUNTAIN','RUINS','SWAMP','TROPICS','UNDERGROUND','VILLAGE','WATERS')"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_topics": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "TEXT",
+    "visitors": "integer not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_visitor_chances": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "chance": "integer not null",
+    "taverna_category": "enum ('CHEAP','ELITE','EXPENSIVE','ORDINARY')",
+    "taverna_type": "enum ('BEER','CAFE','GAMBLING_DEN','HOTEL','INN','RESTAURANT')",
+    "visitor_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "taverna_visitor_habitates": {
+   "columns": {
+    "visitor_id": "integer not null",
+    "habitat_types": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "visitor_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "taverna_visitors": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "token_borders": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "name": "varchar(255) not null",
+    "type": "varchar(255) not null",
+    "url": "varchar(255) not null",
+    "user_id": "bigint not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "tokens": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "alt_name": "varchar(255)",
+    "english_name": "varchar(255) not null",
+    "name": "varchar(255) not null",
+    "ref_id": "integer not null",
+    "type": "varchar(255) not null",
+    "url": "varchar(255) not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "trackers": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "name": "varchar(255)",
+    "rest": "enum ('FULL','LONG','SHORT')",
+    "type": "enum ('Counter','Number','Roll')",
+    "value": "varchar(255)",
+    "level_def_id": "integer"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "trait_abilities": {
+   "columns": {
+    "trait_id": "integer not null",
+    "ability": "enum ('CHARISMA','CHOICE','CHOICE_DOUBLE','CHOICE_UNIQUE','CONSTITUTION','DEXTERITY','INTELLIGENCE','ONE','STRENGTH','WISDOM') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "trait_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "trait_skills": {
+   "columns": {
+    "trait_id": "integer not null",
+    "skill": "enum ('ACROBATICS','ANIMAL_HANDLING','ARCANA','ATHLETICS','DECEPTION','HISTORY','INSIGHT','INTIMIDATION','INVESTIGATION','MEDICINE','NATURE','PERCEPTION','PERFORMANCE','PERSUASION','RELIGION','SLEIGHT_OF_HAND','STEALTH','SURVIVAL') not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "trait_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "traits": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "level": "integer",
+    "name": "varchar(255)",
+    "requirement": "varchar(255)",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "treasures": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "cost": "integer",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "page": "smallint",
+    "type": "enum ('AI_TRINKET','BAUBLE','COINS','EET_TRINKET','ELVEN1_TRINKET','ELVEN_TRINKET','GEM','GOTIC_BAUBLE','IDR_TRINKET','WORKS_OF_ART')",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "user_excluded_sources": {
+   "columns": {
+    "user_id": "bigint not null",
+    "source": "varchar(255) not null"
+   },
+   "pk": [
+    "user_id",
+    "source"
+   ],
+   "constraints": []
+  },
+  "user_membership": {
+   "columns": {
+    "user_party_id": "bigint not null",
+    "user_id": "bigint not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "user_party_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "user_party": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "creation_date": "datetime(6)",
+    "description": "varchar(255)",
+    "group_name": "varchar(255)",
+    "last_update_date": "datetime(6)",
+    "owner_id": "bigint"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "user_role": {
+   "columns": {
+    "user_id": "bigint not null",
+    "role_id": "bigint not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "user_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "user_sources": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "enabled": "bit",
+    "source": "varchar(255)",
+    "user_id": "bigint"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "user_wait_list": {
+   "columns": {
+    "user_party_id": "bigint not null",
+    "user_id": "bigint not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "user_party_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "users": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "create_date": "datetime(6)",
+    "display_name": "varchar(24)",
+    "email": "varchar(255)",
+    "enabled": "bit",
+    "name": "varchar(255)",
+    "password": "varchar(255)",
+    "username": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "verification_token": {
+   "columns": {
+    "id": "bigint not null auto_increment",
+    "expiry_date": "date",
+    "token": "varchar(255)",
+    "user_id": "bigint not null"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "weapon_properties": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "name": "varchar(255)",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "weapons": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "alt_name": "varchar(255)",
+    "ammo": "tinyint",
+    "cost": "integer",
+    "currency": "tinyint",
+    "damage_dice": "tinyint",
+    "damage_type": "tinyint",
+    "description": "TEXT",
+    "english_name": "varchar(255)",
+    "max_distance": "smallint",
+    "min_distance": "smallint",
+    "name": "varchar(255)",
+    "number_dice": "tinyint",
+    "special": "TEXT",
+    "two_hand_damage_dice": "tinyint",
+    "type": "tinyint",
+    "weight": "float(23) not null",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "weapons_properties": {
+   "columns": {
+    "weapon_id": "integer not null",
+    "properties_id": "integer not null",
+    "sort_order": "integer not null"
+   },
+   "pk": [
+    "weapon_id",
+    "sort_order"
+   ],
+   "constraints": [
+    "check ((sort_order>=0))"
+   ]
+  },
+  "wild_magics": {
+   "columns": {
+    "id": "integer not null auto_increment",
+    "description": "TEXT",
+    "source": "varchar(255)"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  },
+  "youtube_videos": {
+   "columns": {
+    "id": "varchar(12) not null",
+    "active": "bit not null",
+    "created": "datetime(6)",
+    "name": "varchar(255)",
+    "order": "integer",
+    "user_id": "bigint"
+   },
+   "pk": [
+    "id"
+   ],
+   "constraints": []
+  }
+ },
+ "fks": [
+  {
+   "table": "archetype_spell",
+   "name": "FK391hqgq1claarkwloogefqpdw",
+   "cols": "spell_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "archetype_spell",
+   "name": "FKa54cpgbnwyj57o15ps5h2b6re",
+   "cols": "archetype_id",
+   "ref": "archetypes",
+   "refcols": "id"
+  },
+  {
+   "table": "archetypes",
+   "name": "FKg0dq1mw8dpa3688ddvxpoi6uq",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "archetypes",
+   "name": "FKcdeqyu94otyp3sod7yf4plgpt",
+   "cols": "class_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "armors",
+   "name": "FKbfq5v6c7m7hr5w98yc1ycgwb8",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "artifactes",
+   "name": "FK5xy4uqaks6ferxr8qn1gww5s2",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "artifactes_armors",
+   "name": "FK5i5i8eu38fb6xcf06mixnyamn",
+   "cols": "armors_id",
+   "ref": "armors",
+   "refcols": "id"
+  },
+  {
+   "table": "artifactes_armors",
+   "name": "FK91gehj049j319m80nyjrjivgj",
+   "cols": "magic_item_id",
+   "ref": "artifactes",
+   "refcols": "id"
+  },
+  {
+   "table": "artifactes_cust_classes",
+   "name": "FKc8gt03v2ghgfn1ewrd7nfdn81",
+   "cols": "cust_classes_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "artifactes_cust_classes",
+   "name": "FK9kj56ucic7qpqp0lu190ft4dd",
+   "cols": "magic_item_id",
+   "ref": "artifactes",
+   "refcols": "id"
+  },
+  {
+   "table": "artifactes_weapons",
+   "name": "FKl0elaumbmemngvpfnwku83kct",
+   "cols": "weapons_id",
+   "ref": "weapons",
+   "refcols": "id"
+  },
+  {
+   "table": "artifactes_weapons",
+   "name": "FKoo9f1fs6u1h2o4npincc9e5ul",
+   "cols": "magic_item_id",
+   "ref": "artifactes",
+   "refcols": "id"
+  },
+  {
+   "table": "background_personalizations",
+   "name": "FKh7jq2yxb2yijka8ppnfuujqdj",
+   "cols": "background_id",
+   "ref": "backgrounds",
+   "refcols": "id"
+  },
+  {
+   "table": "background_skill_type",
+   "name": "FK1v45ona48t2qdvygder4gmgn7",
+   "cols": "background_id",
+   "ref": "backgrounds",
+   "refcols": "id"
+  },
+  {
+   "table": "backgrounds",
+   "name": "FKjpmn88gbvkrlv4jmnc1kgubnf",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "backgrounds_languages",
+   "name": "FKa2df8p58ckkwox83jo976oe7x",
+   "cols": "languages_id",
+   "ref": "languages",
+   "refcols": "id"
+  },
+  {
+   "table": "backgrounds_languages",
+   "name": "FK1x6elbx0ik9agg9vrdjgeg1k",
+   "cols": "background_id",
+   "ref": "backgrounds",
+   "refcols": "id"
+  },
+  {
+   "table": "bookmarks",
+   "name": "FKshv247db7uv8rcu2w3q5nhi77",
+   "cols": "parent_id",
+   "ref": "bookmarks",
+   "refcols": "uuid"
+  },
+  {
+   "table": "bookmarks",
+   "name": "FKdbsho2e05w5r13fkjqfjmge5f",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "class_available_skills",
+   "name": "FKaho1tnyikqnja8cpk6u075f52",
+   "cols": "class_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "class_primary_abilities",
+   "name": "FKn0m421nes5u2691uk8uk9nyji",
+   "cols": "class_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "classes",
+   "name": "FK6gkci61ea9j6yq9q0xammknrs",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "classes_feature_level_definitions",
+   "name": "FK432a231hit6pfq6qbqylore0o",
+   "cols": "hero_class_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "classes_feature_level_definitions",
+   "name": "FKcx0s3br2ypltnbr7gyeql4cif",
+   "cols": "archetype_id",
+   "ref": "archetypes",
+   "refcols": "id"
+  },
+  {
+   "table": "conditions",
+   "name": "FKirxc396pe5tqpgcdpq5gtj06q",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "creature_armor_types",
+   "name": "FK5ps2s8ns2f2gqifwmgxwkfj23",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_feats",
+   "name": "FKl4g19uhyg7qhog09mioep7sv4",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_habitates",
+   "name": "FK3mefydcigpudtlq3d8u5a6evw",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_immunity_states",
+   "name": "FKc0xaul4wpohafsglbnm595swf",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_immunity_damages",
+   "name": "FKa5jtidv7gkp0p4oras72ifb9k",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_resistance_damages",
+   "name": "FKl6y8x11k76t8y3xt7kt7c2ghw",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_saving_throws",
+   "name": "FK8m80tp3qf9h2ar3p0f4wrdga2",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_skills",
+   "name": "FKmtsn0xecxxfbwwvui8onx7b93",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_spellcaster",
+   "name": "FKmvxfoq1m7xytdm3fqxuw8josw",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_spells",
+   "name": "FKqetl114bccl1800u401hkmjky",
+   "cols": "spell_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_spells",
+   "name": "FK6uuukak855h5rwjtpxbeqpnoc",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creature_vulnerability_damages",
+   "name": "FKto43a3sd0flyusho2e5ftwg1k",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creatures",
+   "name": "FKtdytg3s53in6mk0xtdsn0csp3",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "creatures",
+   "name": "FKdu64s54n78vis9xe6mtm6d3je",
+   "cols": "lair_id",
+   "ref": "lairs",
+   "refcols": "lair_id"
+  },
+  {
+   "table": "creatures_actions",
+   "name": "FKnhhp1o5sog3haaky88ag9n1kp",
+   "cols": "actions_id",
+   "ref": "creature_actions",
+   "refcols": "id"
+  },
+  {
+   "table": "creatures_actions",
+   "name": "FK8d41s9r0h9fbd75s726hu86wi",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creatures_languages",
+   "name": "FKti4d3h2xm3ovqi5g37exokadj",
+   "cols": "languages_id",
+   "ref": "languages",
+   "refcols": "id"
+  },
+  {
+   "table": "creatures_languages",
+   "name": "FKpsu1oivmfjoq1biew7lm1bnfe",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "creatures_races",
+   "name": "FKmcl4vek15iynip6h69kyuoi8n",
+   "cols": "races_id",
+   "ref": "creature_races",
+   "refcols": "id"
+  },
+  {
+   "table": "creatures_races",
+   "name": "FKlpy6o0v56hi00we0cgj4rqnja",
+   "cols": "creature_id",
+   "ref": "creatures",
+   "refcols": "id"
+  },
+  {
+   "table": "dm_screens",
+   "name": "FKl9of2dkbn5sc940yc10fo3nwe",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "equipments",
+   "name": "FKndpcoyd8re0248vwgbkstwcn8",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "equipments_types",
+   "name": "FKciorsbn8f74da5ckc17j4st2f",
+   "cols": "equipment_id",
+   "ref": "equipments",
+   "refcols": "id"
+  },
+  {
+   "table": "god_domains",
+   "name": "FK57qcx3qt9elttstj1swqgnig4",
+   "cols": "god_id",
+   "ref": "gods",
+   "refcols": "id"
+  },
+  {
+   "table": "gods",
+   "name": "FKa33v3bah2ahy8c3lcl2voi1q8",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "gods",
+   "name": "FKdjcufh3rgwgwfqgqxikawngs3",
+   "cols": "pantheon_id",
+   "ref": "god_pantheons",
+   "refcols": "id"
+  },
+  {
+   "table": "hero_class_feats",
+   "name": "FK5vjog62t4ravuowhkf7axiqdp",
+   "cols": "archetype_id",
+   "ref": "archetypes",
+   "refcols": "id"
+  },
+  {
+   "table": "hero_class_feats",
+   "name": "FKpme38ha3kxdqmj7awit4sk4cf",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "hero_class_feats_spells",
+   "name": "FK54bhtvdu98us0adv5hygqo1o9",
+   "cols": "spells_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "hero_class_feats_spells",
+   "name": "FKf3kgg38dum2fub6yvmo17wq9t",
+   "cols": "archetype_trait_id",
+   "ref": "hero_class_feats",
+   "refcols": "id"
+  },
+  {
+   "table": "hero_class_traits",
+   "name": "FK9kf706ehl36o45h5yyfxj9ct8",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "hero_class_traits",
+   "name": "FKnxmf9aaw3fm3xmi0ix7unnhit",
+   "cols": "hero_class_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "invitation",
+   "name": "FKbrl60e7q4pi9y54qgca2g0otu",
+   "cols": "user_party_id",
+   "ref": "user_party",
+   "refcols": "id"
+  },
+  {
+   "table": "level_definitions",
+   "name": "FKpa5e8iaewcpeueitbmdgg4t2y",
+   "cols": "hero_class_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "level_definitions",
+   "name": "FKe7mxj9q16derros838tgx230",
+   "cols": "archetype_id",
+   "ref": "archetypes",
+   "refcols": "id"
+  },
+  {
+   "table": "magic_things_random",
+   "name": "FK7nfm2a3etawo8yfg0mnse6hwg",
+   "cols": "magic_thing_id",
+   "ref": "artifactes",
+   "refcols": "id"
+  },
+  {
+   "table": "menu",
+   "name": "FKgeupubdqncc1lpgf2cn4fqwbc",
+   "cols": "parent_id",
+   "ref": "menu",
+   "refcols": "id"
+  },
+  {
+   "table": "name_owners",
+   "name": "FKsjm907nkd21mmclb3ruhj6rkk",
+   "cols": "parent_id",
+   "ref": "name_owners",
+   "refcols": "id"
+  },
+  {
+   "table": "options",
+   "name": "FK6trvhr3t4hke6kdigs0byvfgh",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "race_bonuses",
+   "name": "FKh28mis4dvhlqr76b6fiom0ddf",
+   "cols": "race_id",
+   "ref": "races",
+   "refcols": "id"
+  },
+  {
+   "table": "race_feature_skill_type",
+   "name": "FKmws6nj93m4hfh8gv83i7drfja",
+   "cols": "feature_id",
+   "ref": "race_features",
+   "refcols": "id"
+  },
+  {
+   "table": "race_features",
+   "name": "FK1wiidtjjqgsmy5ffg7wfl0h2h",
+   "cols": "race_id",
+   "ref": "races",
+   "refcols": "id"
+  },
+  {
+   "table": "race_features_lanuages",
+   "name": "FKcugwjnf9kijbbxr67v2ci5c5y",
+   "cols": "lanuages_id",
+   "ref": "languages",
+   "refcols": "id"
+  },
+  {
+   "table": "race_features_lanuages",
+   "name": "FKg3rlu574ma7ah7vwxli0tnvef",
+   "cols": "feature_id",
+   "ref": "race_features",
+   "refcols": "id"
+  },
+  {
+   "table": "race_names",
+   "name": "FKhxb1ieg3urrpjvrjdqt91gwce",
+   "cols": "race_id",
+   "ref": "races",
+   "refcols": "id"
+  },
+  {
+   "table": "race_nicknames",
+   "name": "FKpl8s9hm3l8fshh49s2ydhmlfn",
+   "cols": "race_id",
+   "ref": "races",
+   "refcols": "id"
+  },
+  {
+   "table": "race_spells",
+   "name": "FKmqemuianmkuxgekbsojof9eek",
+   "cols": "spells_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "race_spells",
+   "name": "FKnwn0w76sc1713fevi5aq2clry",
+   "cols": "race_id",
+   "ref": "races",
+   "refcols": "id"
+  },
+  {
+   "table": "races",
+   "name": "FKeqgp4vwkw5jp0dulw21sn3kay",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "races",
+   "name": "FKnt8oiohhein5ps6fmoqfhxjng",
+   "cols": "parent_id",
+   "ref": "races",
+   "refcols": "id"
+  },
+  {
+   "table": "races_languages",
+   "name": "FKmxcl48ob0tbjy05wcyqv3b5qq",
+   "cols": "languages_id",
+   "ref": "languages",
+   "refcols": "id"
+  },
+  {
+   "table": "races_languages",
+   "name": "FKbxlty3f1h994kah8s8nj7gr10",
+   "cols": "race_id",
+   "ref": "races",
+   "refcols": "id"
+  },
+  {
+   "table": "random_encounter_tables",
+   "name": "FKg62ry3vbe44dkd6hdc50xtfiu",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "random_encounters",
+   "name": "FK5jcp2sve2s2kgxuw3nkildaga",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "random_encounters",
+   "name": "FKd95da2peiaafslttipo4uua0t",
+   "cols": "encounter_id",
+   "ref": "random_encounter_tables",
+   "refcols": "id"
+  },
+  {
+   "table": "rules",
+   "name": "FKs3m2we40idk675g6jgcgug5kg",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "screens",
+   "name": "FKlhyh8v4eeqr6dfsvidnol7c0e",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "screens",
+   "name": "FKtp02ljuqq1xw33pk3ohgk6i6g",
+   "cols": "parent_id",
+   "ref": "screens",
+   "refcols": "id"
+  },
+  {
+   "table": "spell_damage_type",
+   "name": "FK3qkx14nuceyxxugh7judjkhhj",
+   "cols": "spell_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "spell_heal_type",
+   "name": "FK5d03iyh2704x3wy81g5lmpga8",
+   "cols": "spell_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "spell_savingthrows",
+   "name": "FK3xu5l5iwlukcyjr2xn8tdxs2h",
+   "cols": "spell_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "spell_source",
+   "name": "FK16pr839oq3avm3j44etpu4bpl",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "spells",
+   "name": "FKhalyvs3qve3voc96kwp8rf2dr",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "spells_hero_class",
+   "name": "FKqo8toyt80nd2cm67cfw2btiv4",
+   "cols": "hero_class_id",
+   "ref": "classes",
+   "refcols": "id"
+  },
+  {
+   "table": "spells_hero_class",
+   "name": "FK3wpc84e0k4r9ls0oxkhg8a1et",
+   "cols": "spell_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "spells_times",
+   "name": "FKpghkcnch06gfr7x3e9qbhwg0c",
+   "cols": "spell_id",
+   "ref": "spells",
+   "refcols": "id"
+  },
+  {
+   "table": "taverna_visitor_chances",
+   "name": "FK9omad8qe8aqu8n5uaee0jiwet",
+   "cols": "visitor_id",
+   "ref": "taverna_visitors",
+   "refcols": "id"
+  },
+  {
+   "table": "taverna_visitor_habitates",
+   "name": "FKag5qarx6kc8wej460jr0wga6u",
+   "cols": "visitor_id",
+   "ref": "taverna_visitors",
+   "refcols": "id"
+  },
+  {
+   "table": "trackers",
+   "name": "FKcui9odc3hfmu10c8xa1n44o1f",
+   "cols": "level_def_id",
+   "ref": "level_definitions",
+   "refcols": "id"
+  },
+  {
+   "table": "trait_abilities",
+   "name": "FK14dsek15e66cjms9q92da16hv",
+   "cols": "trait_id",
+   "ref": "traits",
+   "refcols": "id"
+  },
+  {
+   "table": "trait_skills",
+   "name": "FKfr4esayba1wcxfo2lrpgj8fsa",
+   "cols": "trait_id",
+   "ref": "traits",
+   "refcols": "id"
+  },
+  {
+   "table": "traits",
+   "name": "FKhg0mt1y5eqycedtm4ttr9xh08",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "treasures",
+   "name": "FKmu8tsy05xuvi3p0btbw0uqk57",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "user_excluded_sources",
+   "name": "FKkryr7ap9l7xng2bjca10l5i8k",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "user_membership",
+   "name": "FKrcofdno3o5impia03lef6mcg3",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "user_membership",
+   "name": "FKf6roppfi60h8fvmdu0htq7g5o",
+   "cols": "user_party_id",
+   "ref": "user_party",
+   "refcols": "id"
+  },
+  {
+   "table": "user_role",
+   "name": "FKt7e7djp752sqn6w22i6ocqy6q",
+   "cols": "role_id",
+   "ref": "roles",
+   "refcols": "id"
+  },
+  {
+   "table": "user_role",
+   "name": "FKj345gk1bovqvfame88rcx7yyx",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "user_sources",
+   "name": "FKrv9pbfy81qxf35ownwhcll7mo",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "user_sources",
+   "name": "FKikqanfs6yyui7nnbif1r491wd",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "user_wait_list",
+   "name": "FKjpjgfh5946o480m711cnot57r",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "user_wait_list",
+   "name": "FK7lqtkm6yahlhb7r0fiih47tja",
+   "cols": "user_party_id",
+   "ref": "user_party",
+   "refcols": "id"
+  },
+  {
+   "table": "verification_token",
+   "name": "FK3asw9wnv76uxu3kr1ekq4i1ld",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  },
+  {
+   "table": "weapon_properties",
+   "name": "FKc4rvlgrnunclnv8urismu07a",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "weapons",
+   "name": "FKcj81i2cvf40gg4qd30uaejux9",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "weapons_properties",
+   "name": "FK2fcchx5hfjj8b3vpwui90m018",
+   "cols": "properties_id",
+   "ref": "weapon_properties",
+   "refcols": "id"
+  },
+  {
+   "table": "weapons_properties",
+   "name": "FK1cnhsx4fd7gi3ns4441n0933h",
+   "cols": "weapon_id",
+   "ref": "weapons",
+   "refcols": "id"
+  },
+  {
+   "table": "wild_magics",
+   "name": "FKdae3lqea7tkx7ycr2sr1627bp",
+   "cols": "source",
+   "ref": "books",
+   "refcols": "source"
+  },
+  {
+   "table": "youtube_videos",
+   "name": "FK4mx6k01ak5dfbtmbybc1672hf",
+   "cols": "user_id",
+   "ref": "users",
+   "refcols": "id"
+  }
+ ]
+}

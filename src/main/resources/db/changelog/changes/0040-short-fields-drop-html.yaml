@@ -1,0 +1,60 @@
+# Этап 3, короткие поля (contract): HTML-колонки удаляются, jsonb-разметка занимает их имена.
+# View поиска от этих колонок не зависит.
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020): customChange
+# Liquibase выполняет ещё при генерации SQL, в одном блоке rollback его с SQL не упорядочить.
+# Откат возвращает HTML без обёртки <p> (inline: true): старый код выводил эти поля внутри строки.
+databaseChangeLog:
+  - changeSet:
+      id: 0040-short-fields-html-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет HTML-колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: classes
+            direction: toHtml
+            inline: true
+            columns: armor_markup>armor, weapon_markup>weapon, tools_markup>tools
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: backgrounds
+            direction: toHtml
+            inline: true
+            columns: tool_ownership_markup>tool_ownership, equipments_text_markup>equipments_text
+  - changeSet:
+      id: 0040-short-fields-drop-html-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE classes DROP COLUMN armor, DROP COLUMN weapon, DROP COLUMN tools;
+              ALTER TABLE backgrounds DROP COLUMN tool_ownership, DROP COLUMN equipments_text
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE classes ADD COLUMN armor varchar(255) COLLATE ci, ADD COLUMN weapon varchar(255) COLLATE ci,
+              ADD COLUMN tools text COLLATE ci;
+              ALTER TABLE backgrounds ADD COLUMN tool_ownership text COLLATE ci, ADD COLUMN equipments_text text COLLATE ci
+  - changeSet:
+      id: 0040-short-fields-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE classes RENAME COLUMN armor_markup TO armor;
+              ALTER TABLE classes RENAME COLUMN weapon_markup TO weapon;
+              ALTER TABLE classes RENAME COLUMN tools_markup TO tools;
+              ALTER TABLE backgrounds RENAME COLUMN tool_ownership_markup TO tool_ownership;
+              ALTER TABLE backgrounds RENAME COLUMN equipments_text_markup TO equipments_text
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE backgrounds RENAME COLUMN equipments_text TO equipments_text_markup;
+              ALTER TABLE backgrounds RENAME COLUMN tool_ownership TO tool_ownership_markup;
+              ALTER TABLE classes RENAME COLUMN tools TO tools_markup;
+              ALTER TABLE classes RENAME COLUMN weapon TO weapon_markup;
+              ALTER TABLE classes RENAME COLUMN armor TO armor_markup

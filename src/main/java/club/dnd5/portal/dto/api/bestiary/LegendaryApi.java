@@ -1,7 +1,7 @@
 package club.dnd5.portal.dto.api.bestiary;
 
+import java.util.List;
 import club.dnd5.portal.dto.api.NameValueApi;
-import club.dnd5.portal.validation.ValidHtml;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import jakarta.validation.Valid;
 import java.util.Collection;
 
 @JsonInclude(Include.NON_NULL)
@@ -21,13 +20,12 @@ import java.util.Collection;
 @Getter
 @Setter
 @Schema(description = "легендарные действия")
+/** Легендарные действия в ответе; запрос сохранения — {@link club.dnd5.portal.dto.api.bestiary.request.LegendaryRequest}. */
 public class LegendaryApi {
 	@Schema(description = "список легендарных действий")
-	@Valid
 	private Collection<NameValueApi> list;
 	@Schema(description = "количество возможных легендарных действий")
 	private int count;
-	@Schema(description = "свободное текстовое описание легендарных действий")
-	@ValidHtml
-	private String description;
+	@Schema(description = "вступление к легендарным действиям: блоки разметки core-api")
+	private List<String> description;
 }

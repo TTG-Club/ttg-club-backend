@@ -1,6 +1,7 @@
 package club.dnd5.portal.service.vttg;
 
 import club.dnd5.portal.model.trait.Trait;
+import club.dnd5.portal.util.markup.Markup;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -37,7 +38,7 @@ public class VttgFeatMapper {
 		data.put("sourceKey", VttgDictionaries.sourceKey(trait.getBook()));
 		data.put("featureType", "feat");
 		data.put("typeLabel", "Черты");
-		data.put("description", VttgText.html(trait.getDescription()));
+		data.put("description", VttgText.html(Markup.toHtml(trait.getDescription())));
 		data.put("repeatable", false);
 
 		Map<String, Object> featData = new LinkedHashMap<>();
@@ -85,11 +86,11 @@ public class VttgFeatMapper {
 		return increase;
 	}
 
-	private static boolean mentionsIncrease(String description) {
+	private static boolean mentionsIncrease(List<String> description) {
 		if (description == null) {
 			return false;
 		}
-		String text = description.toLowerCase(Locale.ROOT);
+		String text = String.join(" ", description).toLowerCase(Locale.ROOT);
 		return text.contains("увеличивается на 1") || text.contains("увеличьте");
 	}
 

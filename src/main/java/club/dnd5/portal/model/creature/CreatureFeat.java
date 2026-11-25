@@ -1,24 +1,19 @@
 package club.dnd5.portal.model.creature;
 
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import lombok.Data;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "creature_feats")
+/**
+ * Умение существа — элемент jsonb-массива {@code creatures.feats}.
+ */
 @Data
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE,
+	isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class CreatureFeat {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
 	private String name;
 	private String englishName;
-
-	@Column(columnDefinition = "TEXT")
-	private String description;
-	/**
-	 * Если умение содержит markdown
-	 */
-	@Column(columnDefinition = "boolean default false")
-	private boolean markdown;
+	/** Разметка core-api, массив строк-блоков (см. db/changelog 0035). */
+	private List<String> description;
 }

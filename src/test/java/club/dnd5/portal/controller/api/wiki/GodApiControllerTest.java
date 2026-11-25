@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,8 +54,8 @@ class GodApiControllerTest {
 		request.setSex(GodSex.FEMALE);
 		request.setRank(Rank.GREAT);
 		request.setAlignment(Alignment.CHAOTIC_GOOD);
-		request.setDescription(" Новое описание ");
-		request.setAlternativeDescription(" Альтернативное описание ");
+		request.setDescription(List.of(" Новое описание ", " "));
+		request.setAlternativeDescription(List.of(" "));
 		request.setSymbol(" Звезда ");
 		request.setNicknames("Первая, Вторая");
 		request.setDomains(Arrays.asList(Domain.ARCANA, Domain.LIGHT));
@@ -69,7 +70,7 @@ class GodApiControllerTest {
 		ArgumentCaptor<GodSaveApi> snapshot = ArgumentCaptor.forClass(GodSaveApi.class);
 		verify(auditService).record(eq("GOD"), eq(1), eq(RevisionOperation.UPDATE), snapshot.capture());
 		assertThat(snapshot.getValue().getName()).isEqualTo("Старое имя");
-		assertThat(snapshot.getValue().getDescription()).isEqualTo("Старое\rописание");
+		assertThat(snapshot.getValue().getDescription()).containsExactly("Старое", "описание");
 		assertThat(snapshot.getValue().getRank()).isEqualTo(Rank.MIDDLE);
 		assertThat(god.getName()).isEqualTo("Новое имя");
 		assertThat(god.getEnglishName()).isEqualTo("New god");
@@ -78,8 +79,8 @@ class GodApiControllerTest {
 		assertThat(god.getSex()).isEqualTo(GodSex.FEMALE);
 		assertThat(god.getRankValue()).isEqualTo(Rank.GREAT);
 		assertThat(god.getAligment()).isEqualTo(Alignment.CHAOTIC_GOOD);
-		assertThat(god.getRawDescription()).isEqualTo("Новое описание");
-		assertThat(god.getAlternativeDescription()).isEqualTo("Альтернативное описание");
+		assertThat(god.getDescription()).containsExactly("Новое описание");
+		assertThat(god.getAlternativeDescription()).isNull();
 		assertThat(god.getSymbol()).isEqualTo("Звезда");
 		assertThat(god.getDomains()).containsExactly(Domain.ARCANA, Domain.LIGHT);
 		assertThat(god.getPantheon()).isSameAs(newPantheon);
@@ -96,7 +97,7 @@ class GodApiControllerTest {
 		god.setSex(GodSex.MALE);
 		god.setRank(Rank.MIDDLE);
 		god.setAligment(Alignment.LAWFUL_GOOD);
-		god.setDescription("Старое\rописание");
+		god.setDescription(List.of("Старое", "описание"));
 		god.setDomains(Arrays.asList(Domain.KNOWLEDGE));
 		god.setPantheon(pantheon(1, "Старый пантеон"));
 		god.setBook(new Book("PHB"));

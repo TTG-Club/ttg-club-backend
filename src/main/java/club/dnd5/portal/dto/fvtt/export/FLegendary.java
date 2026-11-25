@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.fvtt.export;
 
+import club.dnd5.portal.util.markup.Markup;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +16,6 @@ public class FLegendary {
     public List<String> entries;
     public FLegendary(Action action) {
     	name = action.getName();
-    	entries = Arrays.stream(action.getDescription().replace("<p>", "").split("</p>")).filter(t -> !t.isEmpty()).collect(Collectors.toList());
+    	entries = Arrays.stream(Markup.htmlOrEmpty(action.getDescription()).replace("<p>", "").split("</p>")).filter(t -> !t.isEmpty()).collect(Collectors.toList());
     }
 }

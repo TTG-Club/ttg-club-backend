@@ -1,5 +1,9 @@
 package club.dnd5.portal.service;
 
+import club.dnd5.portal.dto.api.bestiary.request.LegendaryRequest;
+import java.util.Collection;
+import java.util.Objects;
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.RequestApi;
 import club.dnd5.portal.dto.api.NameValueApi;
 import club.dnd5.portal.dto.api.bestiary.BeastApi;
@@ -33,7 +37,7 @@ import club.dnd5.portal.repository.datatable.BestiaryRepository;
 import club.dnd5.portal.repository.datatable.TagBestiaryDatatableRepository;
 import club.dnd5.portal.util.ChallengeRating;
 import club.dnd5.portal.util.PageAndSortUtil;
-import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.service.bestiary.CreaturePredicateBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Pageable;
@@ -61,147 +65,9 @@ public class BestiaryServiceImpl implements BestiaryService {
 
     @Override
     public List<BeastApi> findAll(BeastRequesApi request) {
-        Specification<Creature> specification = null;
-        Optional<BeastRequesApi> optionalRequest = Optional.ofNullable(request);
-        if (!optionalRequest.map(RequestApi::getSearch).map(SearchRequest::getValue).orElse("").isEmpty()) {
-            specification = SpecificationUtil.getSearch(request);
-        }
-        Optional<BeastFilter> filter = Optional.ofNullable(request.getFilter());
-        if (optionalRequest.map(BeastRequesApi::getFilter).isPresent()
-                && optionalRequest.map(BeastRequesApi::getFilter)
-                .map(BeastFilter::getNpc)
-                .orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification,
-                    (root, query, cb) -> cb.notEqual(root.get("raceId"), 102));
-        }
-        if (!filter.map(BeastFilter::getChallengeRatings).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification,
-                    (root, query, cb) -> root.get("challengeRating")
-                            .in(request.getFilter().getChallengeRatings()));
-        }
-        if (!filter.map(BeastFilter::getTypes).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(
-                    specification, (root, query, cb) -> root.get("type").in(request.getFilter().getTypes()));
-        }
-        if (!filter.map(BeastFilter::getSizes).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(
-                    specification, (root, query, cb) -> root.get("size").in(request.getFilter().getSizes()));
-        }
-        if (!filter.map(BeastFilter::getTags).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-                Join<Object, Object> join = root.join("races", JoinType.INNER);
-                query.distinct(true);
-                return cb.and(join.get("id").in(request.getFilter().getTags()));
-            });
-        }
-        if (!filter.map(BeastFilter::getBooks).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-                Join<Book, Spell> join = root.join("book", JoinType.INNER);
-                return join.get("source").in(request.getFilter().getBooks());
-            });
-        }
-        if (!filter.map(BeastFilter::getMoving).orElseGet(Collections::emptyList).isEmpty()) {
-            if (request.getFilter().getMoving().contains("fly")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("flySpeed")));
-            }
-            if (request.getFilter().getMoving().contains("hover")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("hover")));
-            }
-            if (request.getFilter().getMoving().contains("climbs")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("climbingSpeed")));
-            }
-            if (request.getFilter().getMoving().contains("swim")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("swimmingSpped")));
-            }
-            if (request.getFilter().getMoving().contains("digger")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("diggingSpeed")));
-            }
-        }
-        if (!filter.map(BeastFilter::getEnvironments).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-                Join<Object, Object> join = root.join("habitates", JoinType.INNER);
-                query.distinct(true);
-                return join.in(request.getFilter().getEnvironments());
-            });
-        }
-        if (!filter.map(BeastFilter::getVulnerabilityDamage).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-                Join<Object, Object> join = root.join("vulnerabilityDamages", JoinType.INNER);
-                query.distinct(true);
-                return join.in(request.getFilter().getVulnerabilityDamage());
-            });
-        }
-        if (!filter.map(BeastFilter::getResistanceDamage).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-                Join<Object, Object> join = root.join("resistanceDamages", JoinType.INNER);
-                query.distinct(true);
-                return join.in(request.getFilter().getResistanceDamage());
-            });
-        }
-        if (!filter.map(BeastFilter::getImmunityDamage).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-                Join<Object, Object> join = root.join("immunityDamages", JoinType.INNER);
-                query.distinct(true);
-                return join.in(request.getFilter().getImmunityDamage());
-            });
-        }
-        if (!filter.map(BeastFilter::getImmunityCondition).orElseGet(Collections::emptyList).isEmpty()) {
-            specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> {
-                Join<Object, Object> join = root.join("immunityStates", JoinType.INNER);
-                query.distinct(true);
-                return join.in(request.getFilter().getImmunityCondition());
-            });
-        }
-        if (!filter.map(BeastFilter::getSenses).orElseGet(Collections::emptyList).isEmpty()) {
-            if (request.getFilter().getSenses().contains("darkvision")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("darkvision")));
-            }
-            if (request.getFilter().getSenses().contains("trysight")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("trysight")));
-            }
-            if (request.getFilter().getSenses().contains("blindsight")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("blindsight")));
-            }
-            if (request.getFilter().getSenses().contains("tremmor")) {
-                specification = SpecificationUtil.getAndSpecification(specification,
-                        (root, query, cb) -> cb.isNotNull(root.get("vibration")));
-            }
-        }
-        if (!filter.map(BeastFilter::getFeatures).orElseGet(Collections::emptyList).isEmpty()) {
-            Specification<Creature> addSpec = null;
-            if (request.getFilter().getFeatures().contains("lair")) {
-                addSpec = SpecificationUtil.getOrSpecification(null, (root, query, cb) ->
-                        cb.isNotNull(root.get("lair"))
-                );
-                request.getFilter().getFeatures().remove("lair");
-            }
-            if (request.getFilter().getFeatures().contains("legendary")) {
-                addSpec = SpecificationUtil.getOrSpecification(addSpec, (root, query, cb) -> {
-                    Join<Action, Creature> join = root.join("actions", JoinType.INNER);
-                    query.distinct(true);
-                    return cb.equal(join.get("actionType"), ActionType.LEGENDARY);
-                });
-                request.getFilter().getFeatures().remove("legendary");
-            }
-            for (String featureName : request.getFilter().getFeatures()) {
-                addSpec = SpecificationUtil.getOrSpecification(addSpec, (root, query, cb) -> {
-                    Join<CreatureFeat, Creature> join = root.join("feats", JoinType.INNER);
-                    query.distinct(true);
-                    return cb.like(join.get("name"), "%" + featureName + "%");
-                });
-            }
-            specification = SpecificationUtil.getAndSpecification(specification, addSpec);
-        }
-        Pageable pageable = PageAndSortUtil.getPageable(request);
-        return beastRepository.findAll(SpecificationUtil.orAll(specification), pageable).toList()
+        // Фильтры — в CreaturePredicateBuilder (QueryDSL, jsonb).
+        Pageable pageable = PageAndSortUtil.getPageable(request, "id");
+        return beastRepository.findAll(CreaturePredicateBuilder.build(request), pageable).toList()
                 .stream()
                 .map(BeastApi::new)
                 .collect(Collectors.toList());
@@ -211,7 +77,7 @@ public class BestiaryServiceImpl implements BestiaryService {
     public BeastDetailApi findOne(String englishName) {
         Creature beast = beastRepository.findByEnglishName(englishName.replace('_', ' '))
                 .orElseThrow(PageNotFoundException::new);
-        BeastDetailApi beastApi = new BeastDetailApi(beast, beastRepository::countByActionId);
+        BeastDetailApi beastApi = new BeastDetailApi(beast);
         Collection<String> images = new ArrayList<>();
         tokenRepository.findByRefIdAndType(beast.getId(), "круглый")
                 .stream()
@@ -274,9 +140,10 @@ public class BestiaryServiceImpl implements BestiaryService {
         beast.setChallengeRating(trimToNull(request.getChallengeRating()));
         beast.setExp(ChallengeRating.getExp(beast.getChallengeRating()));
         beast.setRaceId(request.isNpc() ? 102 : 0);
-        beast.setDescription(trimToNull(request.getDescription()));
-        beast.setReaction(trimToNull(request.getReaction()));
-        beast.setLegendary(request.getLegendary() == null ? null : trimToNull(request.getLegendary().getDescription()));
+        beast.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
+        beast.setReaction(Markup.emptyToNull(Markup.trimBlocks(request.getReaction())));
+        beast.setLegendary(request.getLegendary() == null ? null
+                : Markup.emptyToNull(Markup.trimBlocks(request.getLegendary().getDescription())));
 
         if (request.getAbility() != null) {
             beast.setStrength((byte) request.getAbility().getStr());
@@ -467,8 +334,7 @@ public class BestiaryServiceImpl implements BestiaryService {
                     CreatureFeat feat = new CreatureFeat();
                     feat.setName(item.getName().getRus().trim());
                     feat.setEnglishName(trimToNull(item.getName().getEng()));
-                    feat.setDescription(trimToNull(item.getDescription()));
-                    feat.setMarkdown(item.getMarkdown() == null || item.getMarkdown());
+                    feat.setDescription(blocksOrEmpty(item.getDescription()));
                     return feat;
                 })
                 .collect(Collectors.toList());
@@ -481,7 +347,7 @@ public class BestiaryServiceImpl implements BestiaryService {
         actions.addAll(mapActions(request.getBonusActions(), ActionType.BONUS));
         actions.addAll(mapActions(request.getMysticalActions(), ActionType.MYSTICAL));
         if (request.getLegendary() != null) {
-            actions.addAll(mapNameValueActions(request.getLegendary().getList(), ActionType.LEGENDARY));
+            actions.addAll(mapLegendaryActions(request.getLegendary().getList()));
         }
         return actions;
     }
@@ -489,25 +355,30 @@ public class BestiaryServiceImpl implements BestiaryService {
     private List<Action> mapActions(Collection<DescriptionRequest> request, ActionType type) {
         return nullToEmpty(request).stream()
                 .filter(item -> item.getName() != null && StringUtils.hasText(item.getName().getRus()))
-                .map(item -> createAction(item.getName().getRus(), item.getName().getEng(), item.getDescription(), item.getMarkdown(), type))
+                .map(item -> createAction(item.getName().getRus(), item.getName().getEng(), item.getDescription(), type))
                 .collect(Collectors.toList());
     }
 
-    private List<Action> mapNameValueActions(Collection<NameValueApi> request, ActionType type) {
+    private List<Action> mapLegendaryActions(Collection<LegendaryRequest.LegendaryActionRequest> request) {
         return nullToEmpty(request).stream()
                 .filter(item -> StringUtils.hasText(item.getName()))
-                .map(item -> createAction(item.getName(), null, item.getValue() == null ? null : item.getValue().toString(), true, type))
+                .map(item -> createAction(item.getName(), null, item.getValue(), ActionType.LEGENDARY))
                 .collect(Collectors.toList());
     }
 
-    private Action createAction(String name, String englishName, String description, Boolean markdown, ActionType type) {
+    private Action createAction(String name, String englishName, List<String> description, ActionType type) {
         Action action = new Action();
         action.setName(name.trim());
         action.setEnglishName(trimToNull(englishName));
-        action.setDescription(StringUtils.hasText(description) ? description.trim() : "");
+        action.setDescription(blocksOrEmpty(description));
         action.setActionType(type);
-        action.setMarkdown(markdown == null || markdown);
         return action;
+    }
+
+    /** Блоки без пустых; описания действия и умения хранятся всегда, пустое — {@code []}. */
+    private static List<String> blocksOrEmpty(List<String> blocks) {
+        List<String> trimmed = Markup.trimBlocks(blocks);
+        return trimmed == null ? new ArrayList<>() : trimmed;
     }
 
     private void mapLanguages(Creature beast, BeastDetailRequest request) {

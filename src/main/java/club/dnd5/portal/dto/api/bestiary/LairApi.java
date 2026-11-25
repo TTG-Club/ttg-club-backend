@@ -1,6 +1,8 @@
 package club.dnd5.portal.dto.api.bestiary;
 
-import club.dnd5.portal.validation.ValidHtml;
+import java.util.List;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -17,14 +19,14 @@ import lombok.Setter;
 @Setter
 public class LairApi {
 	@Schema(description = "описание логова")
-	@ValidHtml
-	private String description;
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<String> description;
 	@Schema(description = "действия логова")
-	@ValidHtml
-	private String action;
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<String> action;
 	@Schema(description = "эффекты в логове")
-	@ValidHtml
-	private String effect;
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<String> effect;
 
 	public LairApi(Lair lair){
 		description = lair.getDescription();

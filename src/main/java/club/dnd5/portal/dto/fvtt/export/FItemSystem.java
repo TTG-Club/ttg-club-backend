@@ -1,5 +1,7 @@
 package club.dnd5.portal.dto.fvtt.export;
 
+import club.dnd5.portal.dto.fvtt.FvttHtml;
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.ArmorType;
 import club.dnd5.portal.model.creature.Action;
 import club.dnd5.portal.model.creature.ActionDataType;
@@ -51,7 +53,7 @@ public class FItemSystem {
 
 	FItemSystem(CreatureFeat feat) {
 		parseRecharge(feat.getName());
-		description = new FDiscription(feat.getDescription().replace("href=\"/", "href=\"/http://ttg.club/"));
+		description = new FDiscription(FvttHtml.absoluteLinks(Markup.htmlOrEmpty(feat.getDescription())));
 		activation = new FActivation();
 		duration = new FDuration();
 		parseTarget(feat);
@@ -62,24 +64,24 @@ public class FItemSystem {
 		armor = new FArmor();
 		hp = new FIHP();
 		properties = new FWeaponProperties();
-		if (feat.getDescription().contains("спасброс")) {
+		if (Markup.htmlOrEmpty(feat.getDescription()).contains("спасброс")) {
 			save = new FSave();
-			if (feat.getDescription().contains("Силы")) {
+			if (Markup.htmlOrEmpty(feat.getDescription()).contains("Силы")) {
 				save.setAbility("str");
-			} else if (feat.getDescription().contains("Ловкости")) {
+			} else if (Markup.htmlOrEmpty(feat.getDescription()).contains("Ловкости")) {
 				save.setAbility("dex");
-			} else if (feat.getDescription().contains("Телосложения")) {
+			} else if (Markup.htmlOrEmpty(feat.getDescription()).contains("Телосложения")) {
 				save.setAbility("con");
-			} else if (feat.getDescription().contains("Мудрости")) {
+			} else if (Markup.htmlOrEmpty(feat.getDescription()).contains("Мудрости")) {
 				save.setAbility("wiz");
-			} else if (feat.getDescription().contains("Интеллекта")) {
+			} else if (Markup.htmlOrEmpty(feat.getDescription()).contains("Интеллекта")) {
 				save.setAbility("int");
-			} else if (feat.getDescription().contains("Харизмы")) {
+			} else if (Markup.htmlOrEmpty(feat.getDescription()).contains("Харизмы")) {
 				save.setAbility("cha");
 			}
 			Pattern dcMatcher =
 				Pattern.compile("(Сл|Сложностью)\\s\\d+");
-			Matcher matcher = dcMatcher.matcher(feat.getDescription());
+			Matcher matcher = dcMatcher.matcher(Markup.htmlOrEmpty(feat.getDescription()));
 			if (matcher.find()) {
 				String dc = matcher.group();
 				dc = dc.replaceAll("\\D+", "");
@@ -87,10 +89,10 @@ public class FItemSystem {
 				save.setScaling("flat");
 			}
 			activation = new FActivation(ActionType.ACTION.name().toLowerCase(), (byte) 1, "");
-			actionType = ActionDataType.parse(feat.getDescription());
-			Queue<String> damageTypes = FDamageType.parse(feat.getDescription());
+			actionType = ActionDataType.parse(Markup.htmlOrEmpty(feat.getDescription()));
+			Queue<String> damageTypes = FDamageType.parse(Markup.htmlOrEmpty(feat.getDescription()));
 			Pattern patternDamageFormula = Pattern.compile("\\d+к\\d+(\\s\\+\\s\\d+){0,}");
-			matcher = patternDamageFormula.matcher(feat.getDescription());
+			matcher = patternDamageFormula.matcher(Markup.htmlOrEmpty(feat.getDescription()));
 			while (matcher.find()) {
 				String damageFormula = matcher.group().replace("к", "d").replace("−", "-");
 				String damageType = damageTypes.poll();
@@ -101,20 +103,20 @@ public class FItemSystem {
 
 	private void parseTarget(CreatureFeat feat) {
 		target = new FTarget();
-		if(feat.getDescription().contains("конус")) {
-			if (feat.getDescription().contains("15-фут")){
+		if(Markup.htmlOrEmpty(feat.getDescription()).contains("конус")) {
+			if (Markup.htmlOrEmpty(feat.getDescription()).contains("15-фут")){
 				target.setValue(15);
 			}
-			if (feat.getDescription().contains("20-фут")){
+			if (Markup.htmlOrEmpty(feat.getDescription()).contains("20-фут")){
 				target.setValue(20);
 			}
-			if (feat.getDescription().contains("30-фут")){
+			if (Markup.htmlOrEmpty(feat.getDescription()).contains("30-фут")){
 				target.setValue(30);
 			}
-			if (feat.getDescription().contains("90-фут")){
+			if (Markup.htmlOrEmpty(feat.getDescription()).contains("90-фут")){
 				target.setValue(90);
 			}
-			if (feat.getDescription().contains("120-фут")){
+			if (Markup.htmlOrEmpty(feat.getDescription()).contains("120-фут")){
 				target.setValue(90);
 			}
 			target.setType("cone");
@@ -123,9 +125,7 @@ public class FItemSystem {
 
 	public FItemSystem(Action action) {
 		parseRecharge(action.getName());
-		description = new FDiscription(action
-			.getDescription()
-			.replace("href=\"/", "href=\"/https://ttg.club/")
+		description = new FDiscription(FvttHtml.absoluteLinks(Markup.htmlOrEmpty(action.getDescription()))
 			.replace("&nbsp;", " "));
 		activation = new FActivation(action.getActionType().name().toLowerCase(), (byte) 1, "");
 		duration = new FDuration();
@@ -133,25 +133,25 @@ public class FItemSystem {
 		range = new FRange();
 		uses = new FUses();
 		consume = new FConsume();
-		actionType = ActionDataType.parse(action.getDescription());
-		if (action.getDescription().contains("спасброс")) {
+		actionType = ActionDataType.parse(Markup.htmlOrEmpty(action.getDescription()));
+		if (Markup.htmlOrEmpty(action.getDescription()).contains("спасброс")) {
 			save = new FSave();
-			if (action.getDescription().contains("Силы")) {
+			if (Markup.htmlOrEmpty(action.getDescription()).contains("Силы")) {
 				save.setAbility("str");
-			} else if (action.getDescription().contains("Ловкости")) {
+			} else if (Markup.htmlOrEmpty(action.getDescription()).contains("Ловкости")) {
 				save.setAbility("dex");
-			} else if (action.getDescription().contains("Телосложения")) {
+			} else if (Markup.htmlOrEmpty(action.getDescription()).contains("Телосложения")) {
 				save.setAbility("con");
-			} else if (action.getDescription().contains("Мудрости")) {
+			} else if (Markup.htmlOrEmpty(action.getDescription()).contains("Мудрости")) {
 				save.setAbility("wiz");
-			} else if (action.getDescription().contains("Интеллекта")) {
+			} else if (Markup.htmlOrEmpty(action.getDescription()).contains("Интеллекта")) {
 				save.setAbility("int");
-			} else if (action.getDescription().contains("Харизмы")) {
+			} else if (Markup.htmlOrEmpty(action.getDescription()).contains("Харизмы")) {
 				save.setAbility("cha");
 			}
 			Pattern dcMatcher =
 					Pattern.compile("(Сл|Сложностью)\\s\\d+");
-			Matcher matcher = dcMatcher.matcher(action.getDescription());
+			Matcher matcher = dcMatcher.matcher(Markup.htmlOrEmpty(action.getDescription()));
 			if (matcher.find()) {
 				String dc = matcher.group();
 				dc = dc.replaceAll("\\D+", "");
@@ -161,9 +161,9 @@ public class FItemSystem {
 		}
 		armor = new FArmor();
 
-		Queue<String> damageTypes = FDamageType.parse(action.getDescription());
+		Queue<String> damageTypes = FDamageType.parse(Markup.htmlOrEmpty(action.getDescription()));
 		Pattern patternDamageFormula = Pattern.compile("\\\"\\d+к\\d+(\\s\\+\\s\\d+){0,}\\\"");
-		Matcher matcher = patternDamageFormula.matcher(action.getDescription());
+		Matcher matcher = patternDamageFormula.matcher(Markup.htmlOrEmpty(action.getDescription()));
 		while (matcher.find()) {
 			String damageFormula = matcher.group()
 				.replace("к", "d")

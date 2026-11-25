@@ -3,6 +3,7 @@ package club.dnd5.portal.dto.api.wiki;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,7 +22,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GodDetailApi extends GodApi {
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private String rank;
 	private Collection<String> titles;
 	private String symbol;

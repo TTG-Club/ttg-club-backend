@@ -1,11 +1,14 @@
 package club.dnd5.portal.dto.api.races;
 
+import club.dnd5.portal.model.mechanics.RaceMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
 import club.dnd5.portal.model.CreatureSize;
 import club.dnd5.portal.model.CreatureType;
 import club.dnd5.portal.model.races.Race;
 import club.dnd5.portal.model.AbilityBonus;
 import club.dnd5.portal.model.races.Feature;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +16,7 @@ import lombok.Setter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
@@ -27,9 +31,10 @@ public class RaceSaveApi {
 	private String englishName;
 	private Integer minAge;
 	private Integer maxAge;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private Integer parentId;
 	@NotNull
 	private CreatureSize size;
@@ -49,6 +54,13 @@ public class RaceSaveApi {
 	private List<RaceAbilitySaveApi> abilities;
 	@Valid
 	private List<RaceFeatureSaveApi> features;
+
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private RaceMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
@@ -76,6 +88,8 @@ public class RaceSaveApi {
 		view = race.isView();
 		icon = race.getIcon();
 		page = race.getPage();
+		mechanics = race.getMechanics();
+		activeEffects = race.getActiveEffects();
 		abilities = raceAbilities.stream().map(RaceAbilitySaveApi::new).collect(java.util.stream.Collectors.toList());
 		features = raceFeatures.stream().map(RaceFeatureSaveApi::new).collect(java.util.stream.Collectors.toList());
 		source = race.getBook() == null ? null : race.getBook().getSource();

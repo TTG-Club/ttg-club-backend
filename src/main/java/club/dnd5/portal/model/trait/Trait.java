@@ -1,5 +1,10 @@
 package club.dnd5.portal.model.trait;
 
+import club.dnd5.portal.model.mechanics.FeatMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
+import java.util.ArrayList;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.book.Book;
@@ -27,20 +32,28 @@ public class Trait {
 	private Integer level;
 	private String requirement;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0021/0022). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 
-	@ElementCollection(targetClass = AbilityType.class)
-	@JoinTable(name = "trait_abilities", joinColumns = @JoinColumn(name = "trait_id"))
-	@Column(name = "ability", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private List<AbilityType> abilities;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<AbilityType> abilities = new ArrayList<>();
 
-	@ElementCollection(targetClass = SkillType.class)
-	@JoinTable(name = "trait_skills", joinColumns = @JoinColumn(name = "trait_id"))
-	@Column(name = "skill", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private List<SkillType> skills;
+	@JdbcTypeCode(SqlTypes.JSON) // jsonb, см. db/changelog 0017
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<SkillType> skills = new ArrayList<>();
+
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private FeatMechanics mechanics;
+
+	/** Активные эффекты (модель Active Effects VTTG, как в core-api); {@code null} — нет. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<ActiveEffect> activeEffects;
 
 	@ManyToOne
 	@JoinColumn(name = "source")
@@ -51,5 +64,14 @@ public class Trait {
 	}
 	public String getCapitalazeName() {
 		return StringUtils.capitalize(name.toLowerCase());
+	}
+
+	/** jsonb-колонки NOT NULL: «нет значений» хранится как [], а не NULL. */
+	@jakarta.persistence.PrePersist
+	@jakarta.persistence.PreUpdate
+	private void nullJsonListsToEmpty() {
+		abilities = abilities == null ? new ArrayList<>() : abilities;
+		skills = skills == null ? new ArrayList<>() : skills;
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

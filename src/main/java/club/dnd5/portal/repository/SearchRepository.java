@@ -2,19 +2,25 @@ package club.dnd5.portal.repository;
 
 import club.dnd5.portal.dto.api.SearchApi;
 import club.dnd5.portal.dto.api.SourceApi;
+import club.dnd5.portal.util.markup.Markup;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Repository;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
 public class SearchRepository {
+	private static final ObjectMapper JSON = new ObjectMapper();
+
 	@PersistenceContext
 	EntityManager entityManager;
 
@@ -61,8 +67,17 @@ public class SearchRepository {
 		if (description == null) {
 			return null;
 		}
+		String html = description.toString();
+		if (html.startsWith("[")) {
+			// разметка core-api (jsonb-массив блоков, этап 3) — сначала в HTML
+			try {
+				html = Objects.toString(Markup.toHtml(List.of(JSON.readValue(html, String[].class))), "");
+			} catch (JacksonException e) {
+				// не JSON — обычный текст, оставляем как есть
+			}
+		}
 		String text = Jsoup.clean(
-			description.toString()
+			html
 				.replace("&nbsp;", " ")
 				.replaceAll("</(.+?)><(\\w)", "</$1> <$2"),
 			Safelist.none()

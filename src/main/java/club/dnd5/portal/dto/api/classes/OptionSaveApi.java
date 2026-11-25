@@ -1,13 +1,17 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
+import jakarta.validation.Valid;
 import club.dnd5.portal.model.classes.Option;
-import club.dnd5.portal.validation.ValidHtml;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
 
 @NoArgsConstructor
@@ -23,9 +27,17 @@ public class OptionSaveApi {
 	private List<String> optionTypes;
 	private String prerequisite;
 	private Integer level;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
+
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private ClassMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
@@ -38,6 +50,8 @@ public class OptionSaveApi {
 		prerequisite = option.getPrerequisite();
 		level = option.getLevel();
 		description = option.getDescription();
+		mechanics = option.getMechanics();
+		activeEffects = option.getActiveEffects();
 		source = option.getBook() == null ? null : option.getBook().getSource();
 	}
 }

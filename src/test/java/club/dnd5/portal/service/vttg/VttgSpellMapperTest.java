@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.vttg;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.DamageType;
 import club.dnd5.portal.model.TimeUnit;
@@ -29,7 +30,7 @@ class VttgSpellMapperTest {
 		spell.setDuration("Мгновенная");
 		spell.setSavingthrows(Collections.singletonList(AbilityType.DEXTERITY));
 		spell.setDamageType(Collections.singletonList(DamageType.FAIR));
-		spell.setDescription("<p>Урон <dice-roller formula=\"3к6\"/> огнём.</p>");
+		spell.setDescription(Markup.fromHtml("<p>Урон <dice-roller formula=\"3к6\"/> огнём.</p>"));
 		spell.setSrd(true);
 
 		Map<String, Object> data = mapper.toVttg(spell);
@@ -80,7 +81,7 @@ class VttgSpellMapperTest {
 	void spellAttackAndReaction() {
 		Spell spell = spell("Огненный снаряд", "Fire bolt");
 		spell.setDistance("120 футов");
-		spell.setDescription("<p>Совершите дальнобойную атаку заклинанием по цели.</p>");
+		spell.setDescription(Markup.fromHtml("<p>Совершите дальнобойную атаку заклинанием по цели.</p>"));
 		TimeCast reaction = new TimeCast();
 		reaction.setNumber(1);
 		reaction.setUnit(TimeUnit.REACTION);

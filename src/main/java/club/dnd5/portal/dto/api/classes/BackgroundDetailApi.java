@@ -1,5 +1,8 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.FeatMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.SkillType;
 import club.dnd5.portal.model.Language;
 import club.dnd5.portal.model.background.Background;
@@ -25,23 +28,29 @@ import java.util.stream.Collectors;
 @Setter
 public class BackgroundDetailApi extends BackgroundApi {
 	private Integer id;
-	private String url;
 	private Collection<String> skills;
-	private String toolOwnership;
+	/** Блоки разметки core-api. */
+	private List<String> toolOwnership;
 	private String language;
 	private Collection<String> languages;
 	private Collection<String> equipments;
 	private Integer startGold;
-	private String description;
+	/** Блоки разметки core-api. */
+	private List<String> description;
 	private String skillName;
-	private String skillDescription;
-	private String personalization;
+	/** Блоки разметки core-api. */
+	private List<String> skillDescription;
+	/** Блоки разметки core-api. */
+	private List<String> personalization;
 	private Collection<BackgroundPersonalizationTableApi> personalizationTables;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+	private FeatMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG); {@code null} — нет. */
+	private List<ActiveEffect> activeEffects;
 	
 	public BackgroundDetailApi(Background background) {
 		super(background);
 		id = background.getId();
-		url = String.format("/backgrounds/fragment/%d", background.getId());
 		skills = background.getSkills().stream().map(SkillType::getCyrilicName).collect(Collectors.toList());
 		if (background.getOtherSkills() != null) {
 			skills.add(background.getOtherSkills());
@@ -52,10 +61,13 @@ public class BackgroundDetailApi extends BackgroundApi {
 			languages = background.getLanguages().stream().map(Language::getName).collect(Collectors.toList());
 		}
 		if (background.getEquipmentsText() != null) {
-			equipments = Arrays.asList(background.getEquipmentsText().split(", "));
+			// перечисление разметкой, по запятым вне маркеров {@…}
+			equipments = Markup.splitInline(background.getEquipmentsText(), ", ");
 		}
 		startGold = background.getStartMoney();
 		description = background.getDescription();
+		mechanics = background.getMechanics();
+		activeEffects = background.getActiveEffects();
 		skillName = background.getSkillName();
 		skillDescription = background.getSkillDescription();
 		if (background.getPersonalization() != null) {

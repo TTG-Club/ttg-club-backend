@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.fvtt.export.system.details;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.model.creature.Creature;
 import club.dnd5.portal.model.creature.HabitatType;
 import club.dnd5.portal.model.creature.Spellcater;
@@ -23,7 +24,7 @@ public class FDetails {
     public String source;
 
 	public FDetails(Creature creature) {
-		biography = new FBiography(creature.getDescription(), "");
+		biography = new FBiography(Markup.htmlOrEmpty(creature.getDescription()), "");
 		alignment = creature.getAlignment().getCyrillicName();
 		race = creature.getRaceName();
 		type = new FType(creature.getType().name().toLowerCase(), "", "", "");

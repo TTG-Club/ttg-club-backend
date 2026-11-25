@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import java.util.List;
 import club.dnd5.portal.dto.api.classes.ArchetypeEditApi;
 import club.dnd5.portal.dto.api.classes.ArchetypeSaveApi;
 import club.dnd5.portal.dto.api.classes.FeatureLevelSaveApi;
@@ -15,6 +16,7 @@ import club.dnd5.portal.repository.classes.ClassRepository;
 import club.dnd5.portal.repository.classes.HeroClassTraitRepository;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.FeatureOptionProjection;
 import club.dnd5.portal.service.OptionTypeResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import org.junit.jupiter.api.Test;
@@ -43,7 +45,8 @@ class ClassApiControllerTest {
 			archetypeTraitRepository,
 			mock(AuditService.class),
 			mock(WorkshopPreview.class),
-			mock(OptionTypeResolver.class));
+			mock(OptionTypeResolver.class),
+			mock(FeatureOptionProjection.class));
 
 		HeroClass heroClass = new HeroClass();
 		heroClass.setId(1);
@@ -51,12 +54,12 @@ class ClassApiControllerTest {
 		archetype.setId(2);
 		archetype.setName("School of Evocation");
 		archetype.setEnglishName("School of Evocation");
-		archetype.setDescription("Description");
+		archetype.setDescription(List.of("Description"));
 		archetype.setLevel((byte) 2);
 		ArchetypeTrait trait = new ArchetypeTrait();
 		trait.setId(3);
 		trait.setName("Sculpt Spells");
-		trait.setDescription("Description");
+		trait.setDescription(List.of("Description"));
 		trait.setLevel((byte) 2);
 
 		when(classRepository.findByEnglishName("wizard")).thenReturn(Optional.of(heroClass));
@@ -85,7 +88,8 @@ class ClassApiControllerTest {
 			archetypeTraitRepository,
 			mock(AuditService.class),
 			mock(WorkshopPreview.class),
-			mock(OptionTypeResolver.class));
+			mock(OptionTypeResolver.class),
+			mock(FeatureOptionProjection.class));
 
 		HeroClass heroClass = new HeroClass();
 		heroClass.setId(1);
@@ -94,7 +98,7 @@ class ClassApiControllerTest {
 		archetype.setHeroClass(heroClass);
 		archetype.setName("School of Evocation");
 		archetype.setEnglishName("School of Evocation");
-		archetype.setDescription("Description");
+		archetype.setDescription(List.of("Description"));
 		archetype.setLevel((byte) 2);
 		FeatureLevelDefinition existingColumn = new FeatureLevelDefinition();
 		existingColumn.setId(3);

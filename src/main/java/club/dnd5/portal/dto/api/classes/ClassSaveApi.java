@@ -1,5 +1,10 @@
 package club.dnd5.portal.dto.api.classes;
 
+import club.dnd5.portal.model.mechanics.ClassMechanics;
+import club.dnd5.portal.model.effect.ActiveEffect;
+import jakarta.validation.constraints.NotEmpty;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Rest;
 import club.dnd5.portal.model.SkillType;
@@ -7,7 +12,6 @@ import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
-import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,18 +31,27 @@ public class ClassSaveApi {
 	@NotBlank
 	private String englishName;
 	private String accusativeName;
-	@NotBlank
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@NotEmpty
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	@Min(1)
 	@Max(20)
 	private byte diceHp;
-	private String armor;
-	private String weapon;
-	private String tools;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> armor;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> weapon;
+	/** Блоки разметки core-api; HTML-строку переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> tools;
 	private String savingThrows;
 	private String archetypeName;
-	private String equipment;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> equipment;
 	private AbilityType spellAbility;
 	private SpellcasterType spellcasterType;
 	private List<AbilityType> primaryAbilities;
@@ -55,6 +68,12 @@ public class ClassSaveApi {
 	private List<ClassTraitSaveApi> classTraits;
 	@Valid
 	private List<FeatureLevelSaveApi> tableColumns;
+	/** Механика для листа персонажа (модель core-api), сохраняется целиком; {@code null} — оставить как есть. */
+	@Valid
+	private ClassMechanics mechanics;
+	/** Активные эффекты (Active Effects VTTG), сохраняются целиком; {@code null} — оставить как есть. */
+	@Valid
+	private List<ActiveEffect> activeEffects;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
 	private String source;
@@ -86,6 +105,8 @@ public class ClassSaveApi {
 		sidekick = heroClass.isSidekick();
 		icon = heroClass.getIcon();
 		page = heroClass.getPage();
+		mechanics = heroClass.getMechanics();
+		activeEffects = heroClass.getActiveEffects();
 		classTraits = traits.stream().map(ClassTraitSaveApi::new).collect(java.util.stream.Collectors.toList());
 		tableColumns = heroClass.getFeatureLevelDefenitions() == null
 			? java.util.Collections.emptyList()

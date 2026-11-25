@@ -1,5 +1,6 @@
 package club.dnd5.portal.service.vttg;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.service.image.ImageLinks;
 import club.dnd5.portal.model.AbilityType;
 import club.dnd5.portal.model.Alignment;
@@ -19,7 +20,6 @@ import club.dnd5.portal.model.creature.SavingThrow;
 import club.dnd5.portal.model.creature.Skill;
 import club.dnd5.portal.model.creature.Spellcater;
 import club.dnd5.portal.model.splells.Spell;
-import club.dnd5.portal.util.MarkdownUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -76,7 +76,7 @@ public class VttgCreatureMapper {
 		data.put("autoSaves", true);
 		data.put("name", VttgText.orEmpty(creature.getName()));
 		data.put("nameEn", VttgText.orEmpty(creature.getEnglishName()));
-		String description = VttgText.html(creature.getDescription());
+		String description = VttgText.html(Markup.toHtml(creature.getDescription()));
 		if (!description.isEmpty()) {
 			data.put("description", description);
 		}
@@ -443,7 +443,7 @@ public class VttgCreatureMapper {
 		for (CreatureFeat feat : creature.getFeats()) {
 			if (feat != null && !VttgText.isBlank(feat.getName())) {
 				result.add(VttgCreatureActions.entry(feat.getName(), feat.getEnglishName(),
-					markup(feat.getDescription(), feat.isMarkdown(), creature)));
+					Markup.htmlOrEmpty(feat.getDescription())));
 			}
 		}
 		return result;
@@ -457,14 +457,10 @@ public class VttgCreatureMapper {
 		for (Action action : creature.getActions()) {
 			if (action != null && action.getActionType() == type && !VttgText.isBlank(action.getName())) {
 				result.add(VttgCreatureActions.entry(action.getName(), action.getEnglishName(),
-					markup(action.getDescription(), action.isMarkdown(), creature)));
+					Markup.htmlOrEmpty(action.getDescription())));
 			}
 		}
 		return result;
-	}
-
-	private static String markup(String description, boolean markdown, Creature creature) {
-		return markdown ? MarkdownUtil.toHtml(description, creature.getName()) : description;
 	}
 
 	/** Легендарные действия: число за раунд берётся из текста блока, иначе три. */
@@ -473,7 +469,7 @@ public class VttgCreatureMapper {
 		int count = 0;
 		if (!actions.isEmpty()) {
 			count = DEFAULT_LEGENDARY_COUNT;
-			String text = creature.getLegendary() == null ? "" : creature.getLegendary();
+			String text = Markup.htmlOrEmpty(creature.getLegendary());
 			Matcher matcher = Pattern.compile("(\\d+)\\s+легендарн").matcher(text);
 			if (matcher.find()) {
 				count = Integer.parseInt(matcher.group(1));
@@ -482,7 +478,7 @@ public class VttgCreatureMapper {
 		Map<String, Object> legendary = new LinkedHashMap<>();
 		legendary.put("count", count);
 		legendary.put("actions", actions);
-		String description = VttgText.html(creature.getLegendary());
+		String description = VttgText.html(Markup.toHtml(creature.getLegendary()));
 		if (!description.isEmpty()) {
 			legendary.put("description", description);
 		}
@@ -502,12 +498,12 @@ public class VttgCreatureMapper {
 		StringBuilder description = new StringBuilder();
 		String ending = "";
 		if (lair != null) {
-			description.append(VttgText.html(lair.getDescription()));
-			String action = VttgText.html(lair.getAction());
+			description.append(VttgText.html(Markup.toHtml(lair.getDescription())));
+			String action = VttgText.html(Markup.toHtml(lair.getAction()));
 			if (!action.isEmpty()) {
 				description.append("<h4>Действия логова</h4>").append(action);
 			}
-			String effect = VttgText.html(lair.getEffect());
+			String effect = VttgText.html(Markup.toHtml(lair.getEffect()));
 			if (!effect.isEmpty()) {
 				ending = "<h4>Региональные эффекты</h4>" + effect;
 			}

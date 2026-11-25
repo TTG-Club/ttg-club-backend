@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.BookApi;
 import club.dnd5.portal.dto.api.BookRequestApi;
 import club.dnd5.portal.dto.api.RequestApi;
@@ -108,7 +109,7 @@ public class BookApiController {
 		book.setAltName(trimToNull(request.getAltName()));
 		book.setType(request.getType());
 		book.setYear(request.getYear());
-		book.setDescription(trimToNull(request.getDescription()));
+		book.setDescription(Markup.emptyToNull(Markup.trimBlocks(request.getDescription())));
 		return new BookEditApi(bookRepository.saveAndFlush(book));
 	}
 

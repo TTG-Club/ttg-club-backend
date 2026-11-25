@@ -1,0 +1,44 @@
+# Этап 3, магические предметы (contract): текстовые колонки уточнения и условия настройки удаляются,
+# jsonb-разметка занимает их имена. View поиска от них не зависит.
+#
+# Шаги — отдельными changeset'ами с одним действием отката каждый (см. 0020). Откат возвращает текст
+# без обёртки <p> (inline: true): старый код вставлял эти значения в подписи как строку.
+databaseChangeLog:
+  - changeSet:
+      id: 0042-magic-item-special-text-from-markup-on-rollback
+      author: pg-migration
+      comment: Вперёд ничего не делает; при откате заполняет текстовые колонки из разметки.
+      changes:
+        - sql:
+            sql: SELECT 1
+      rollback:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: artifactes
+            direction: toHtml
+            inline: true
+            columns: special_markup>special, cust_special_markup>cust_special
+  - changeSet:
+      id: 0042-magic-item-special-drop-text-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: ALTER TABLE artifactes DROP COLUMN special, DROP COLUMN cust_special
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE artifactes ADD COLUMN special varchar(255) COLLATE ci,
+              ADD COLUMN cust_special varchar(255) COLLATE ci
+  - changeSet:
+      id: 0042-magic-item-special-rename-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE artifactes RENAME COLUMN special_markup TO special;
+              ALTER TABLE artifactes RENAME COLUMN cust_special_markup TO cust_special
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE artifactes RENAME COLUMN cust_special TO cust_special_markup;
+              ALTER TABLE artifactes RENAME COLUMN special TO special_markup

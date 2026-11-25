@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.item;
 
+import club.dnd5.portal.model.mechanics.MagicItemMechanics;
 import club.dnd5.portal.dto.api.UrlApi;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.items.MagicItem;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 
@@ -22,7 +24,8 @@ import java.util.stream.Collectors;
 @Setter
 public class MagicItemDetailApi extends MagicItemApi {
 	private Integer id;
-	private String description;
+	/** Разметка core-api: массив строк-блоков. */
+	private List<String> description;
 	private Boolean customization;
 	private Collection<UrlApi> detailType;
 	private Collection<String> detailCustamization;
@@ -31,13 +34,17 @@ public class MagicItemDetailApi extends MagicItemApi {
 	private String rarityRaw;
 	private String typeRaw;
 	private String altName;
-	private String custSpecial;
-	private String specialRaw;
+	/** Условие настройки: блоки разметки core-api, выводится в строку после классов. */
+	private List<String> custSpecial;
+	/** Уточнение типа: блоки разметки core-api, выводится в строку после доспехов и оружия. */
+	private List<String> special;
 	private Boolean consumed;
 	private Integer charge;
 	private Boolean curse;
 	private Integer costRaw;
 	private Byte bonus;
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. */
+	private MagicItemMechanics mechanics;
 
 	public MagicItemDetailApi(MagicItem item) {
 		super(item);
@@ -48,12 +55,13 @@ public class MagicItemDetailApi extends MagicItemApi {
 		typeRaw = item.getType().name();
 		altName = item.getAltName();
 		custSpecial = item.getCustSpecial();
-		specialRaw = item.getSpecial();
+		special = item.getSpecial();
 		consumed = item.isConsumed();
 		charge = item.getCharge();
 		curse = item.getCurse();
 		costRaw = item.getRawCost();
 		bonus = item.getBonus();
+		mechanics = item.getMechanics();
 		if (item.getCustomization()) {
 			customization = Boolean.TRUE;
 		}
@@ -63,21 +71,9 @@ public class MagicItemDetailApi extends MagicItemApi {
 		if (!item.getWeapons().isEmpty()) {
 			detailType = item.getWeapons().stream().map(UrlApi::new).collect(Collectors.toList());
 		}
-		if (Objects.nonNull(item.getSpecial())) {
-			if (detailType == null) {
-				detailType = new ArrayList<>();
-			}
-			detailType.add(new UrlApi(item.getSpecial()));
-		}
 
 		if (!item.getCustClasses().isEmpty()) {
 			detailCustamization = item.getCustClasses().stream().map(HeroClass::getAblativeName).collect(Collectors.toList());
-		}
-		if (Objects.nonNull(item.getCustSpecial())) {
-			if (Objects.isNull(detailCustamization)) {
-				detailCustamization = new ArrayList<>(1);
-			}
-			detailCustamization.add(item.getCustSpecial());
 		}
 		if (item.getRarity() != Rarity.UNKNOWN && item.getRarity() != Rarity.VARIES){
 			cost = new PriceApi(item);

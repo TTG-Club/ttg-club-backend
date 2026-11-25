@@ -26,6 +26,7 @@ import club.dnd5.portal.repository.ImageRepository;
 import club.dnd5.portal.repository.datatable.MagicItemRepository;
 import club.dnd5.portal.util.PageAndSortUtil;
 import club.dnd5.portal.util.SpecificationUtil;
+import club.dnd5.portal.util.markup.Markup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -88,18 +89,18 @@ public class MagicItemApiController {
 			}
 			if (!request.getFilter().getCustomization().isEmpty()) {
 				if (request.getFilter().getCustomization().contains("1")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("customization"), 1));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isTrue(root.get("customization")));
 				}
 				if (request.getFilter().getCustomization().contains("2")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("customization"), 0));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isFalse(root.get("customization")));
 				}
 			}
 			if (!request.getFilter().getConsumable().isEmpty()) {
 				if (request.getFilter().getConsumable().contains("1")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("consumed"), 1));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isTrue(root.get("consumed")));
 				}
 				if (request.getFilter().getConsumable().contains("2")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("consumed"), 0));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isFalse(root.get("consumed")));
 				}
 			}
 			if (!request.getFilter().getCharge().isEmpty()) {
@@ -112,10 +113,10 @@ public class MagicItemApiController {
 			}
 			if (!request.getFilter().getCurse().isEmpty()) {
 				if (request.getFilter().getCurse().contains("1")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("curse"), 1));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isTrue(root.get("curse")));
 				}
 				if (request.getFilter().getCurse().contains("2")) {
-					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.equal(root.get("curse"), 0));
+					specification = SpecificationUtil.getAndSpecification(specification, (root, query, cb) -> cb.isFalse(root.get("curse")));
 				}
 			}
 		}
@@ -221,14 +222,18 @@ public class MagicItemApiController {
 		item.setRarity(request.getRarity());
 		item.setType(request.getType());
 		item.setCustomization(Boolean.TRUE.equals(request.getCustomization()));
-		item.setCustSpecial(trimToNull(request.getCustSpecial()));
-		item.setSpecial(trimToNull(request.getSpecial()));
-		item.setDescription(request.getDescription().trim());
+		item.setCustSpecial(Markup.emptyToNull(Markup.trimBlocks(request.getCustSpecial())));
+		item.setSpecial(Markup.emptyToNull(Markup.trimBlocks(request.getSpecial())));
+		item.setDescription(Markup.trimBlocks(request.getDescription()));
 		item.setConsumed(Boolean.TRUE.equals(request.getConsumed()));
 		item.setCharge(request.getCharge());
 		item.setCurse(Boolean.TRUE.equals(request.getCurse()));
 		item.setCost(request.getCost());
 		item.setBonus(request.getBonus());
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			item.setMechanics(request.getMechanics());
+		}
 		bookResolver.find(request.getSource()).ifPresent(item::setBook);
 	}
 

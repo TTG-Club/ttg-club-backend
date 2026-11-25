@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import java.util.List;
 import club.dnd5.portal.dto.api.book.BookEditApi;
 import club.dnd5.portal.dto.api.book.BookSaveApi;
 import club.dnd5.portal.model.book.Book;
@@ -33,7 +34,7 @@ class BookApiControllerTest {
 		assertThat(book.getAltName()).isNull();
 		assertThat(book.getType()).isEqualTo(TypeBook.SETTING);
 		assertThat(book.getYear()).isEqualTo(2014);
-		assertThat(book.getDescription()).isEqualTo("<p>Описание</p>");
+		assertThat(book.getDescription()).containsExactly("Описание");
 	}
 
 	@Test
@@ -56,7 +57,7 @@ class BookApiControllerTest {
 		request.setAltName(" ");
 		request.setType(TypeBook.SETTING);
 		request.setYear(2014);
-		request.setDescription(" <p>Описание</p> ");
+		request.setDescription(List.of(" Описание ", " "));
 		return request;
 	}
 

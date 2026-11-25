@@ -1,0 +1,38 @@
+# Этап 3, расы (expand): описания рас и их особенностей (race_features) — из HTML в разметку core-api.
+# Новые jsonb-колонки (массив строк-блоков, см. util/markup/HtmlToMarkupConverter) заполняются
+# конвертером на Java; старые HTML-колонки удаляет 0032. Оба описания обязательны (NOT NULL,
+# пустое — []).
+databaseChangeLog:
+  - changeSet:
+      id: 0031-races-markup-columns
+      author: pg-migration
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE races ADD COLUMN description_markup jsonb;
+              ALTER TABLE race_features ADD COLUMN description_markup jsonb
+      rollback:
+        - sql:
+            sql: >-
+              ALTER TABLE races DROP COLUMN description_markup;
+              ALTER TABLE race_features DROP COLUMN description_markup
+  - changeSet:
+      id: 0031-races-markup-convert
+      author: pg-migration
+      changes:
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: races
+            columns: description>description_markup
+        - customChange:
+            class: club.dnd5.portal.config.liquibase.MarkupColumnsChange
+            table: race_features
+            columns: description>description_markup
+        - sql:
+            sql: >-
+              UPDATE races SET description_markup = '[]'::jsonb WHERE description_markup IS NULL;
+              UPDATE race_features SET description_markup = '[]'::jsonb WHERE description_markup IS NULL
+      # колонки удаляет rollback предыдущего changeset'а
+      rollback:
+        - sql:
+            sql: SELECT 1

@@ -1,34 +1,23 @@
 package club.dnd5.portal.model.creature;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
 import club.dnd5.portal.model.AbilityType;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Заклинательство существа — элемент jsonb-массива {@code creatures.spellcasters}.
+ */
 @Getter
 @Setter
-
-@Entity
-@Table(name = "creature_spellcaster")
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE,
+	isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class Spellcater {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	
 	private Byte level;
 	private Byte dc;
 	private Byte attack;
-
-	@Enumerated(EnumType.STRING)
 	private AbilityType spellAbility;
-	
 	private Byte slot1;
 	private Byte slot2;
 	private Byte slot3;

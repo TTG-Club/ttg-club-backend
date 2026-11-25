@@ -22,7 +22,8 @@ public class ScreenDetailApi extends ScreenApi {
 	private Integer id;
 	private String altName;
 	private String category;
-    private String description;
+    /** Разметка core-api: массив строк-блоков. */
+    private List<String> description;
     private ScreenDetailApi parent;
     private List<ScreenApi> chields;
 

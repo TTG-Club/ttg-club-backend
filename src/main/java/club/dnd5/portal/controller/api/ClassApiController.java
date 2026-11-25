@@ -1,5 +1,6 @@
 package club.dnd5.portal.controller.api;
 
+import club.dnd5.portal.util.markup.Markup;
 import club.dnd5.portal.dto.api.FilterApi;
 import club.dnd5.portal.dto.api.FilterValueApi;
 import club.dnd5.portal.dto.api.classes.ClassApi;
@@ -14,11 +15,13 @@ import club.dnd5.portal.exception.PageNotFoundException;
 import club.dnd5.portal.model.audit.RevisionOperation;
 import club.dnd5.portal.service.AuditService;
 import club.dnd5.portal.service.BookResolver;
+import club.dnd5.portal.service.FeatureOptionProjection;
 import club.dnd5.portal.service.OptionTypeResolver;
 import club.dnd5.portal.service.WorkshopPreview;
 import club.dnd5.portal.model.Dice;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.book.TypeBook;
+import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
@@ -35,6 +38,7 @@ import club.dnd5.portal.util.SpecificationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -77,6 +81,7 @@ public class ClassApiController {
 	private final AuditService auditService;
 	private final WorkshopPreview workshopPreview;
 	private final OptionTypeResolver optionTypeResolver;
+	private final FeatureOptionProjection featureOptionProjection;
 
 	@PostMapping(value = "/api/v1/classes", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ClassApi> getClasses(@RequestBody ClassRequestApi request) {
@@ -88,7 +93,8 @@ public class ClassApiController {
 			}
 		}
 		String search = ClassApi.getSearch(request);
-		return classRepo.findAll(SpecificationUtil.orAll(specification))
+		// порядок по id, как отдавал MySQL (в PostgreSQL порядок строк без ORDER BY не гарантирован)
+		return classRepo.findAll(SpecificationUtil.orAll(specification), Sort.by("id"))
 				.stream()
 				.map(classObject -> new ClassApi(classObject, request))
 				// Поиск находит класс по его названию или по названию подкласса
@@ -223,13 +229,20 @@ public class ClassApiController {
 		auditService.record(ENTITY_TYPE_ARCHETYPE, id, RevisionOperation.UPDATE,
 			new ArchetypeSaveApi(archetype, archetypeTraitRepository.findAllByArchetypeId(id)));
 		archetype.setName(request.getName().trim()); archetype.setEnglishName(request.getEnglishName().trim());
-		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(request.getDescription().trim());
+		archetype.setGenitiveName(trimToNull(request.getGenitiveName())); archetype.setDescription(Markup.trimBlocks(request.getDescription()));
 		archetype.setLevel(request.getLevel()); archetype.setSpellcasterType(request.getSpellcasterType());
 		archetype.setOptionType(optionTypeResolver.resolve(request.getOptionType()));
 		archetype.setSpellLevelType(request.getSpellLevelType() == null
 			? ArchetypeSpellLevelType.CLASS_LEVEL
 			: request.getSpellLevelType());
 		archetype.setPage(request.getPage());
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			archetype.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			archetype.setActiveEffects(request.getActiveEffects());
+		}
 		if (archetype.getFeatureLevelDefenitions() == null) {
 			archetype.setFeatureLevelDefenitions(new ArrayList<>());
 		}
@@ -288,14 +301,37 @@ public class ClassApiController {
 		Map<Integer, ArchetypeTrait> existing = archetypeTraitRepository.findAllByArchetypeId(archetype.getId()).stream()
 			.collect(Collectors.toMap(ArchetypeTrait::getId, trait -> trait));
 		List<ArchetypeTrait> traits = request.getTraits().stream()
-			.filter(trait -> StringUtils.hasText(trait.getName()) && StringUtils.hasText(trait.getDescription()))
+			.filter(trait -> StringUtils.hasText(trait.getName()) && !CollectionUtils.isEmpty(Markup.trimBlocks(trait.getDescription())))
 			.map(value -> {
 				ArchetypeTrait trait = value.getId() == null ? new ArchetypeTrait() : existing.getOrDefault(value.getId(), new ArchetypeTrait());
 				trait.setName(value.getName().trim()); trait.setSuffix(trimToNull(value.getSuffix())); trait.setLevel(value.getLevel());
-				trait.setDescription(value.getDescription().trim()); trait.setChild(trimToNull(value.getChild()));
-				trait.setArchetype(archetype); trait.setBook(archetype.getBook()); return trait;
+				trait.setDescription(Markup.trimBlocks(value.getDescription())); trait.setChild(trimToNull(value.getChild()));
+				trait.setArchetype(archetype); trait.setBook(archetype.getBook());
+				// варианты: старый клиент их не присылает (null) — тогда и тип, и выбор остаются как есть
+				if (value.getOptions() != null) {
+					String optionsType = trimToNull(value.getOptionsType());
+					optionTypeResolver.resolve(optionsType);
+					trait.setOptionsType(optionsType);
+					trait.setOptionsName(trimToNull(value.getOptionsName()));
+					trait.setOptions(FeatureOptionProjection.normalize(value.getOptions()));
+					trait.setOptionsChoice(value.getOptionsChoice());
+				}
+				// рост: присланный заменяет сохранённый; null — оставить как есть
+				if (value.getScaling() != null) {
+					trait.setScaling(FeatureScaling.normalize(value.getScaling(), false));
+				}
+				// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+				if (value.getMechanics() != null) {
+					trait.setMechanics(value.getMechanics());
+				}
+				if (value.getActiveEffects() != null) {
+					trait.setActiveEffects(value.getActiveEffects());
+				}
+				return trait;
 			}).collect(Collectors.toList());
 		archetypeTraitRepository.saveAll(traits); archetypeTraitRepository.flush();
+		// раздел «Особенности классов» — копия вариантов умений
+		traits.forEach(trait -> featureOptionProjection.sync(trait.getOptionsType(), trait.getOptions(), archetype.getBook()));
 		List<Integer> retained = traits.stream().map(ArchetypeTrait::getId).collect(Collectors.toList());
 		existing.values().stream().filter(trait -> !retained.contains(trait.getId())).forEach(archetypeTraitRepository::delete);
 	}
@@ -335,14 +371,14 @@ public class ClassApiController {
 		heroClass.setName(request.getName().trim());
 		heroClass.setEnglishName(request.getEnglishName().trim());
 		heroClass.setAccusativeName(trimToNull(request.getAccusativeName()));
-		heroClass.setDescription(request.getDescription().trim());
+		heroClass.setDescription(Markup.trimBlocks(request.getDescription()));
 		heroClass.setDiceHp(request.getDiceHp());
-		heroClass.setArmor(trimToNull(request.getArmor()));
-		heroClass.setWeapon(trimToNull(request.getWeapon()));
-		heroClass.setTools(trimToNull(request.getTools()));
+		heroClass.setArmor(Markup.emptyToNull(Markup.trimBlocks(request.getArmor())));
+		heroClass.setWeapon(Markup.emptyToNull(Markup.trimBlocks(request.getWeapon())));
+		heroClass.setTools(Markup.emptyToNull(Markup.trimBlocks(request.getTools())));
 		heroClass.setSavingThrows(trimToNull(request.getSavingThrows()));
 		heroClass.setArchetypeName(trimToNull(request.getArchetypeName()));
-		heroClass.setEquipment(trimToNull(request.getEquipment()));
+		heroClass.setEquipment(Markup.emptyToNull(Markup.trimBlocks(request.getEquipment())));
 		heroClass.setSpellAbility(request.getSpellAbility());
 		heroClass.setSpellcasterType(request.getSpellcasterType());
 		heroClass.setPrimaryAbilities(request.getPrimaryAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getPrimaryAbilities()));
@@ -354,6 +390,13 @@ public class ClassApiController {
 		heroClass.setSidekick(request.isSidekick());
 		heroClass.setIcon(trimToNull(request.getIcon()));
 		heroClass.setPage(request.getPage());
+		// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+		if (request.getMechanics() != null) {
+			heroClass.setMechanics(request.getMechanics());
+		}
+		if (request.getActiveEffects() != null) {
+			heroClass.setActiveEffects(request.getActiveEffects());
+		}
 		bookResolver.find(request.getSource()).ifPresent(heroClass::setBook);
 	}
 
@@ -408,7 +451,7 @@ public class ClassApiController {
 			.collect(Collectors.toMap(HeroClassTrait::getId, trait -> trait));
 		List<HeroClassTrait> traits = request.getClassTraits().stream()
 			.filter(traitRequest -> StringUtils.hasText(traitRequest.getName()))
-			.filter(traitRequest -> StringUtils.hasText(traitRequest.getDescription()))
+			.filter(traitRequest -> !CollectionUtils.isEmpty(Markup.trimBlocks(traitRequest.getDescription())))
 			.map(traitRequest -> {
 				HeroClassTrait trait = traitRequest.getId() == null
 					? new HeroClassTrait()
@@ -416,17 +459,39 @@ public class ClassApiController {
 				trait.setName(traitRequest.getName().trim());
 				trait.setSuffix(trimToNull(traitRequest.getSuffix()));
 				trait.setLevel(traitRequest.getLevel());
-				trait.setDescription(traitRequest.getDescription().trim());
+				trait.setDescription(Markup.trimBlocks(traitRequest.getDescription()));
 				trait.setOptional(traitRequest.isOptional() ? 1 : 0);
 				trait.setChild(trimToNull(traitRequest.getChild()));
 				trait.setArchitype(false);
 				trait.setHeroClass(heroClass);
+				// варианты: старый клиент их не присылает (null) — тогда и тип, и выбор остаются как есть
+				if (traitRequest.getOptions() != null) {
+					String optionsType = trimToNull(traitRequest.getOptionsType());
+					optionTypeResolver.resolve(optionsType);
+					trait.setOptionsType(optionsType);
+					trait.setOptionsName(trimToNull(traitRequest.getOptionsName()));
+					trait.setOptions(FeatureOptionProjection.normalize(traitRequest.getOptions()));
+					trait.setOptionsChoice(traitRequest.getOptionsChoice());
+				}
+				// рост: присланный заменяет сохранённый; null — оставить как есть
+				if (traitRequest.getScaling() != null) {
+					trait.setScaling(FeatureScaling.normalize(traitRequest.getScaling(), true));
+				}
+				// механика: присланная заменяет сохранённую целиком; null — оставить как есть (редактор без механики её не стирает)
+				if (traitRequest.getMechanics() != null) {
+					trait.setMechanics(traitRequest.getMechanics());
+				}
+				if (traitRequest.getActiveEffects() != null) {
+					trait.setActiveEffects(traitRequest.getActiveEffects());
+				}
 				trait.setBook(heroClass.getBook());
 				return trait;
 			})
 			.collect(Collectors.toList());
 		heroClassTraitRepository.saveAll(traits);
 		heroClassTraitRepository.flush();
+		// раздел «Особенности классов» — копия вариантов умений
+		traits.forEach(trait -> featureOptionProjection.sync(trait.getOptionsType(), trait.getOptions(), heroClass.getBook()));
 		List<Integer> ids = traits.stream()
 			.map(HeroClassTrait::getId)
 			.collect(Collectors.toList());

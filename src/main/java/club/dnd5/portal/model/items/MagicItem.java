@@ -1,5 +1,6 @@
 package club.dnd5.portal.model.items;
 
+import club.dnd5.portal.model.mechanics.MagicItemMechanics;
 import club.dnd5.portal.model.book.Book;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.util.StringUtil;
@@ -7,6 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -30,18 +35,23 @@ public class MagicItem {
 
 	private Boolean customization;
 
-	@Column
-	private String custSpecial;
+	/** Условие настройки («заклинателем»), разметка core-api (см. db/changelog 0041); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> custSpecial;
 
-	@Column
-	private String special;
+	/** Уточнение типа («пара сапог»), разметка core-api (см. db/changelog 0041); {@code null} — нет. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private List<String> special;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	/** Разметка core-api: массив строк-блоков (jsonb, см. db/changelog 0027/0028). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb", nullable = false)
+	private List<String> description = new ArrayList<>();
 	private boolean consumed;
 	private Integer charge;
 
-	@Column(columnDefinition = "TINYINT")
 	private Boolean curse;
 
 	@Column
@@ -50,19 +60,28 @@ public class MagicItem {
 
 	@OneToMany
 	@JoinTable(name = "artifactes_cust_classes")
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<HeroClass> custClasses;
 
 	@OneToMany
 	@JoinTable(name = "artifactes_weapons")
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Weapon> weapons;
 
 	@OneToMany
 	@JoinTable(name = "artifactes_armors")
+	@OrderColumn(name = "sort_order") // порядок как в MySQL, см. db/pg-migration/load
 	private List<Armor> armors;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "magic_thing_id")
+	@OrderBy("id") // порядок вставки, как в MySQL
 	private List<MagicThingTable> tables;
+
+	/** Механика для листа персонажа (модель core-api); {@code null} — не заполнена. См. db/changelog 0044. */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private MagicItemMechanics mechanics;
 
 	@ManyToOne
 	@JoinColumn(name = "source")
@@ -165,5 +184,12 @@ public class MagicItem {
 
 	public String getUrlName(){
 		return StringUtil.getUrl(englishName);
+	}
+
+	/** jsonb-колонка NOT NULL: «нет описания» хранится как [], а не NULL. */
+	@PrePersist
+	@PreUpdate
+	private void nullDescriptionToEmpty() {
+		description = description == null ? new ArrayList<>() : description;
 	}
 }

@@ -15,6 +15,9 @@ import java.util.List;
 public interface HeroClassTraitRepository extends JpaRepository<HeroClassTrait, Integer>{
 	List<HeroClassTrait> findAllByHeroClassIdAndArchitypeFalse(Integer heroClassId);
 
+	/** Умение класса, в котором правятся варианты типа (db/changelog 0048). */
+	java.util.Optional<HeroClassTrait> findFirstByOptionsType(String optionsType);
+
 	@Modifying
 	@Query("DELETE FROM HeroClassTrait t WHERE t.heroClass.id = :heroClassId AND t.architype = false AND t.id NOT IN :ids")
 	void deleteClassTraitsNotIn(@Param("heroClassId") Integer heroClassId, @Param("ids") Collection<Integer> ids);

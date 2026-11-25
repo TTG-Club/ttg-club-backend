@@ -3,13 +3,14 @@ package club.dnd5.portal.dto.api.item;
 import club.dnd5.portal.model.items.Currency;
 import club.dnd5.portal.model.items.EquipmentType;
 import club.dnd5.portal.model.items.Equipment;
-import club.dnd5.portal.validation.ValidHtml;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
+import club.dnd5.portal.util.markup.MarkupBlocksDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @NoArgsConstructor
 @Getter
@@ -23,8 +24,9 @@ public class ItemSaveApi {
 	private Integer cost;
 	private Currency currency;
 	private Float weight;
-	@ValidHtml
-	private String description;
+	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
+	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
+	private List<@NotBlank String> description;
 	private List<EquipmentType> categories;
 
 	/** Аббревиатура книги-источника, например MM. Пусто — самодельный контент. */
@@ -38,7 +40,7 @@ public class ItemSaveApi {
 		currency = item.getCurrency();
 		weight = item.getWeight();
 		description = item.getDescription();
-		categories = item.getTypes() == null ? null : new java.util.ArrayList<>(item.getTypes());
+		categories = item.getTypes() == null ? null : item.getTypes().stream().sorted().collect(java.util.stream.Collectors.toList());
 		source = item.getBook() == null ? null : item.getBook().getSource();
 	}
 }
