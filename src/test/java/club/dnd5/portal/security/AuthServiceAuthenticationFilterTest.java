@@ -2,6 +2,7 @@ package club.dnd5.portal.security;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,6 +44,16 @@ class AuthServiceAuthenticationFilterTest {
     @Test
     void authenticatesOnSuccessfulValidation() throws Exception {
         when(authClient.me(TOKEN)).thenReturn(user());
+
+        assertEquals("user@ttg.club", runFilter(filter(60_000, 600_000)).getName());
+    }
+
+    @Test
+    void keepsUserWhenLocalSyncFails() throws Exception {
+        // Гонка параллельных запросов на user_role не должна делать запрос анонимным.
+        when(authClient.me(TOKEN)).thenReturn(user());
+        doThrow(new DataIntegrityViolationException("duplicate key value violates unique constraint \"user_role_pkey\""))
+                .when(synchronizer).sync(any());
 
         assertEquals("user@ttg.club", runFilter(filter(60_000, 600_000)).getName());
     }

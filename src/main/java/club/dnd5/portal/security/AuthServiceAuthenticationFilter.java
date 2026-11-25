@@ -1,5 +1,6 @@
 package club.dnd5.portal.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -23,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 public class AuthServiceAuthenticationFilter extends OncePerRequestFilter {
     private final ExternalAuthClient externalAuthClient;
     private final ExternalAuthUserSynchronizer userSynchronizer;
@@ -67,7 +69,7 @@ public class AuthServiceAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             ExternalAuthUser user = externalAuthClient.me(token);
-            userSynchronizer.sync(user);
+            syncQuietly(user);
             cache.put(key, user);
             return user;
         } catch (HttpStatusCodeException exception) {
@@ -82,6 +84,20 @@ public class AuthServiceAuthenticationFilter extends OncePerRequestFilter {
         } catch (RuntimeException exception) {
             // ResourceAccessException (таймаут/обрыв соединения) и другие сетевые сбои.
             return fallbackOrClear(cached);
+        }
+    }
+
+    /**
+     * Токен уже подтвердил auth-service, поэтому сбой записи локальной копии пользователя
+     * (например, гонка параллельных запросов) не должен превращать запрос в анонимный.
+     * Синхронизация повторится на следующем промахе кеша.
+     */
+    private void syncQuietly(ExternalAuthUser user) {
+        try {
+            userSynchronizer.sync(user);
+        } catch (RuntimeException exception) {
+            log.warn("Не удалось синхронизировать пользователя {}: {}",
+                    principalName(user), exception.getMessage());
         }
     }
 
