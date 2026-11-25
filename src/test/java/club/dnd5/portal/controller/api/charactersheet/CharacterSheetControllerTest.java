@@ -11,6 +11,7 @@ import club.dnd5.portal.repository.user.UserRepository;
 import club.dnd5.portal.security.ExternalAuthClient;
 import club.dnd5.portal.security.ExternalAuthUserSynchronizer;
 import club.dnd5.portal.security.JwtAuthenticationEntryPoint;
+import club.dnd5.portal.service.charactersheet.CharacterSheetLimits;
 import club.dnd5.portal.service.charactersheet.CharacterSheetService;
 import club.dnd5.portal.service.image.ImageStorageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -140,7 +141,7 @@ class CharacterSheetControllerTest {
 		mockMvc.perform(get(URL))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.used").value(1))
-				.andExpect(jsonPath("$.limit").value(CharacterSheetService.SHEET_LIMIT))
+				.andExpect(jsonPath("$.limit").value(CharacterSheetLimits.SHEETS))
 				.andExpect(jsonPath("$.items", hasSize(1)))
 				.andExpect(jsonPath("$.items[0].id").value(sheet.getId().toString()))
 				.andExpect(jsonPath("$.items[0].name").value("Торин"))
@@ -170,7 +171,7 @@ class CharacterSheetControllerTest {
 	@Test
 	@WithMockUser(username = "magistr", roles = "USER")
 	void createOverLimitIsForbidden() throws Exception {
-		when(sheetRepository.countByUserId(7L)).thenReturn((long) CharacterSheetService.SHEET_LIMIT);
+		when(sheetRepository.countByUserId(7L)).thenReturn((long) CharacterSheetLimits.SHEETS);
 		mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content("{\"data\":{}}"))
 				.andExpect(status().isForbidden());
 		verify(sheetRepository, never()).saveAndFlush(any());

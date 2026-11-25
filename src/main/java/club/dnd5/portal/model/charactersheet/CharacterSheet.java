@@ -49,6 +49,14 @@ public class CharacterSheet {
 	@Column(nullable = false, length = 100)
 	private String name;
 
+	/**
+	 * Секрет ссылки на лист; null — доступ по ссылке выключен. Меняется отдельным запросом
+	 * ({@code CharacterSheetRepository#updateShareToken}), чтобы не трогать версию листа.
+	 */
+	@JdbcTypeCode(SqlTypes.CHAR)
+	@Column(name = "share_token", length = 36, insertable = false, updatable = false)
+	private UUID shareToken;
+
 	/** Документ листа (JSON-объект), формат задаёт фронтенд. */
 	@JdbcTypeCode(SqlTypes.JSON)
 	@Column(columnDefinition = "jsonb", nullable = false)
