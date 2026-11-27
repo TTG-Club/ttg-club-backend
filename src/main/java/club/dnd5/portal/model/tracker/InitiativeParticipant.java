@@ -97,6 +97,14 @@ public class InitiativeParticipant {
 	@Column(nullable = false)
 	private boolean dead;
 
+	/**
+	 * Привязка игрока к листу персонажа: по ней трекер пишет хиты из боя обратно в лист.
+	 * NULL — игрок заведён вручную (и у всех существ).
+	 */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "sheet_link", columnDefinition = "jsonb")
+	private ParticipantSheetLink sheetLink;
+
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false)
 	private Instant createdAt;

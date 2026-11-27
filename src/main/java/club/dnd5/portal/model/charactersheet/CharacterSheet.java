@@ -70,6 +70,10 @@ public class CharacterSheet {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 
+	/** Когда лист удалён в историю; null — лист активный. */
+	@Column(name = "deleted_at")
+	private Instant deletedAt;
+
 	/** Проставляется сервисом явно, чтобы значение в ответе совпадало с сохранённым. */
 	@Column(name = "updated_at", nullable = false)
 	private Instant updatedAt;

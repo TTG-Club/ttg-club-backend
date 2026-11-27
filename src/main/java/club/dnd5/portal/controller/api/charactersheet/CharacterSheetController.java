@@ -70,6 +70,12 @@ public class CharacterSheetController {
 		sheetService.delete(parseId(id));
 	}
 
+	@Operation(summary = "Восстановление листа из истории удалённых; сверх лимита активных — 403")
+	@PostMapping("/{id}/restore")
+	public CharacterSheetResponse restore(@PathVariable final String id) {
+		return sheetService.restore(parseId(id));
+	}
+
 	@Operation(summary = "Загрузка портрета персонажа (WebP до 512 px, файл листа перезаписывается)")
 	@PostMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)

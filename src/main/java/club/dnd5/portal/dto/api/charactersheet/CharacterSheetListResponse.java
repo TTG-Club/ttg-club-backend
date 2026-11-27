@@ -24,4 +24,13 @@ public class CharacterSheetListResponse {
 
 	/** Сколько листов можно иметь с подпиской. */
 	private int subscriberLimit;
+
+	/** Удалённые листы, которые ещё можно восстановить (без документа), последние первее. */
+	private List<CharacterSheetResponse> history;
+
+	/** Сколько удалённых листов хранится в истории. */
+	private int historyLimit;
+
+	/** Сколько удалённых листов хранится в истории с подпиской. */
+	private int subscriberHistoryLimit;
 }

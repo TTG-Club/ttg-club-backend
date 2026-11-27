@@ -2,6 +2,7 @@ package club.dnd5.portal.controller.api.charactersheet;
 
 import club.dnd5.portal.dto.api.charactersheet.CharacterSheetShareResponse;
 import club.dnd5.portal.dto.api.charactersheet.CharacterSheetSharedResponse;
+import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetHealthRequest;
 import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetListResponse;
 import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetRequest;
 import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetResponse;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,6 +73,16 @@ public class CharacterSheetShareController {
 	@DeleteMapping("/saved/{id}")
 	public void removeSaved(@PathVariable final String id) {
 		shareService.removeSaved(parseId(id));
+	}
+
+	@Operation(summary = "Текущие и временные хиты сохранённого чужого листа: их отмечает мастер в трекере "
+			+ "инициативы. Меняются только health.current и health.temporary (если прислано), текущие "
+			+ "зажимаются health.max. Отозванная ссылка, удалённый лист и чужая запись — 404")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PatchMapping("/saved/{id}/health")
+	public void updateSavedHealth(@PathVariable final String id,
+								  @RequestBody @Valid final SavedCharacterSheetHealthRequest request) {
+		shareService.updateSavedHealth(parseId(id), request.current(), request.temporary());
 	}
 
 	private static UUID parseId(String id) {

@@ -7,6 +7,8 @@ import club.dnd5.portal.model.charactersheet.CharacterSheet;
 import club.dnd5.portal.model.charactersheet.SavedCharacterSheet;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetEditorRepository;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetPresenceRepository;
 import club.dnd5.portal.repository.charactersheet.CharacterSheetRepository;
 import club.dnd5.portal.repository.charactersheet.SavedCharacterSheetRepository;
 import club.dnd5.portal.repository.user.UserRepository;
@@ -59,6 +61,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -113,10 +116,10 @@ class CharacterSheetShareControllerTest {
 		sheet.setCreatedAt(Instant.parse("2026-11-20T10:00:00.000Z"));
 		sheet.setUpdatedAt(Instant.parse("2026-11-22T10:15:30.123Z"));
 
-		when(sheetRepository.findByIdAndUserId(any(), anyLong())).thenReturn(Optional.empty());
-		when(sheetRepository.findByIdAndUserId(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
-		when(sheetRepository.findByShareToken(any())).thenReturn(Optional.empty());
-		when(sheetRepository.findByShareToken(token)).thenReturn(Optional.of(sheet));
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNull(any(), anyLong())).thenReturn(Optional.empty());
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNull(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
+		when(sheetRepository.findByShareTokenAndDeletedAtIsNull(any())).thenReturn(Optional.empty());
+		when(sheetRepository.findByShareTokenAndDeletedAtIsNull(token)).thenReturn(Optional.of(sheet));
 		when(savedRepository.findByUserIdAndSheetId(anyLong(), any())).thenReturn(Optional.empty());
 		when(savedRepository.findByIdAndUserId(any(), anyLong())).thenReturn(Optional.empty());
 		when(savedRepository.saveAndFlush(any(SavedCharacterSheet.class))).thenAnswer(invocation -> {
@@ -146,6 +149,25 @@ class CharacterSheetShareControllerTest {
 				.andExpect(jsonPath("$.data.level").value(3))
 				.andExpect(jsonPath("$.own").value(false))
 				.andExpect(jsonPath("$.savedId").doesNotExist());
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void deletedSheetMakesSavedUnavailable() throws Exception {
+		SavedCharacterSheet saved = new SavedCharacterSheet();
+		saved.setId(UUID.randomUUID());
+		saved.setUserId(8L);
+		saved.setSheetId(sheet.getId());
+		saved.setShareToken(token);
+		saved.setName("Торин");
+		saved.setCreatedAt(Instant.now());
+		sheet.setDeletedAt(Instant.now());
+		when(savedRepository.findAllByUserIdOrderByCreatedAtDesc(8L)).thenReturn(List.of(saved));
+		when(sheetRepository.findAllByIdIn(List.of(sheet.getId()))).thenReturn(List.of(sheet));
+
+		mockMvc.perform(get(URL + "/saved"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].available").value(false));
 	}
 
 	@Test
@@ -278,6 +300,145 @@ class CharacterSheetShareControllerTest {
 		mockMvc.perform(delete(URL + "/saved/" + UUID.randomUUID())).andExpect(status().isNotFound());
 	}
 
+	/** Сохранённая запись пользователя guest на лист Торина по текущей ссылке. */
+	private SavedCharacterSheet savedByViewer() {
+		SavedCharacterSheet saved = new SavedCharacterSheet();
+		saved.setId(UUID.randomUUID());
+		saved.setUserId(8L);
+		saved.setSheetId(sheet.getId());
+		saved.setShareToken(token);
+		saved.setName("Торин");
+		saved.setCreatedAt(Instant.now());
+		when(savedRepository.findByIdAndUserId(saved.getId(), 8L)).thenReturn(Optional.of(saved));
+		when(sheetRepository.findById(sheet.getId())).thenReturn(Optional.of(sheet));
+		when(sheetRepository.saveAndFlush(any(CharacterSheet.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		return saved;
+	}
+
+	private void putHealth(int max, int current, int temporary) {
+		Map<String, Object> health = new LinkedHashMap<>();
+		health.put("max", max);
+		health.put("current", current);
+		health.put("temporary", temporary);
+		sheet.getData().put("health", health);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> savedHealth(CharacterSheet saved) {
+		return (Map<String, Object>) saved.getData().get("health");
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void savedHealthWritesHitPointsAboveStoredMax() throws Exception {
+		putHealth(30, 30, 0);
+		SavedCharacterSheet saved = savedByViewer();
+		Map<String, Object> originalData = sheet.getData();
+
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":45,\"temporary\":5}"))
+				.andExpect(status().isNoContent());
+
+		ArgumentCaptor<CharacterSheet> captor = ArgumentCaptor.forClass(CharacterSheet.class);
+		verify(sheetRepository).saveAndFlush(captor.capture());
+		Map<String, Object> health = savedHealth(captor.getValue());
+		// Бонусы черт поднимают настоящий максимум выше health.max — сервер хиты не режет
+		assertThat(health).containsEntry("max", 30).containsEntry("current", 45).containsEntry("temporary", 5);
+		assertThat(captor.getValue().getData()).containsEntry("level", 3);
+		// Документ — новая карта: правка на месте прошла бы мимо грязной проверки Hibernate.
+		assertThat(captor.getValue().getData()).isNotSameAs(originalData);
+		assertThat(captor.getValue().getName()).isEqualTo("Торин");
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void savedHealthKeepsTemporaryWhenAbsent() throws Exception {
+		putHealth(30, 30, 7);
+		SavedCharacterSheet saved = savedByViewer();
+
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":12}"))
+				.andExpect(status().isNoContent());
+
+		ArgumentCaptor<CharacterSheet> captor = ArgumentCaptor.forClass(CharacterSheet.class);
+		verify(sheetRepository).saveAndFlush(captor.capture());
+		assertThat(savedHealth(captor.getValue())).containsEntry("current", 12).containsEntry("temporary", 7);
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void savedHealthWithoutMaxIsNotClamped() throws Exception {
+		putHealth(0, 0, 0);
+		SavedCharacterSheet saved = savedByViewer();
+
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":18}"))
+				.andExpect(status().isNoContent());
+
+		ArgumentCaptor<CharacterSheet> captor = ArgumentCaptor.forClass(CharacterSheet.class);
+		verify(sheetRepository).saveAndFlush(captor.capture());
+		assertThat(savedHealth(captor.getValue())).containsEntry("current", 18);
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void savedHealthOfRevokedLinkIsNotFound() throws Exception {
+		putHealth(30, 30, 0);
+		SavedCharacterSheet saved = savedByViewer();
+		sheet.setShareToken(UUID.randomUUID());
+
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":10}"))
+				.andExpect(status().isNotFound());
+		verify(sheetRepository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void savedHealthOfDeletedSheetIsNotFound() throws Exception {
+		putHealth(30, 30, 0);
+		SavedCharacterSheet saved = savedByViewer();
+		sheet.setDeletedAt(Instant.now());
+
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":10}"))
+				.andExpect(status().isNotFound());
+		verify(sheetRepository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void foreignSavedHealthIsNotFound() throws Exception {
+		putHealth(30, 30, 0);
+		SavedCharacterSheet saved = savedByViewer();
+
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":10}"))
+				.andExpect(status().isNotFound());
+		verify(sheetRepository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void savedHealthRejectsNegativeOrMissingCurrent() throws Exception {
+		SavedCharacterSheet saved = savedByViewer();
+
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":-1}"))
+				.andExpect(status().isBadRequest());
+		mockMvc.perform(patch(URL + "/saved/" + saved.getId() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"temporary\":3}"))
+				.andExpect(status().isBadRequest());
+		verify(sheetRepository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	void guestCannotWriteSavedHealth() throws Exception {
+		mockMvc.perform(patch(URL + "/saved/" + UUID.randomUUID() + "/health").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"current\":10}"))
+				.andExpect(status().isUnauthorized());
+	}
+
 	@Configuration
 	@EnableWebMvc
 	@Import(WebSecurityConfig.class)
@@ -326,14 +487,16 @@ class CharacterSheetShareControllerTest {
 		CharacterSheetService characterSheetService(CharacterSheetRepository sheetRepository,
 													UserRepository userRepository) {
 			return new CharacterSheetService(sheetRepository, userRepository, new JsonMapper(),
-					mock(ImageStorageService.class));
+					mock(ImageStorageService.class), mock(CharacterSheetEditorRepository.class),
+					mock(CharacterSheetPresenceRepository.class));
 		}
 
 		@Bean
 		CharacterSheetShareService characterSheetShareService(CharacterSheetService sheetService,
 															  CharacterSheetRepository sheetRepository,
 															  SavedCharacterSheetRepository savedRepository) {
-			return new CharacterSheetShareService(sheetService, sheetRepository, savedRepository);
+			return new CharacterSheetShareService(sheetService, sheetRepository, savedRepository,
+					mock(CharacterSheetEditorRepository.class));
 		}
 
 		@Bean

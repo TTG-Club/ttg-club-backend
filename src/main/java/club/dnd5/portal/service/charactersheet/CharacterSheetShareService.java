@@ -6,8 +6,11 @@ import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetListResponse;
 import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetResponse;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.model.charactersheet.CharacterSheet;
+import club.dnd5.portal.model.charactersheet.CharacterSheetEditor;
+import club.dnd5.portal.model.charactersheet.CharacterSheetEditorStatus;
 import club.dnd5.portal.model.charactersheet.SavedCharacterSheet;
 import club.dnd5.portal.model.user.User;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetEditorRepository;
 import club.dnd5.portal.repository.charactersheet.CharacterSheetRepository;
 import club.dnd5.portal.repository.charactersheet.SavedCharacterSheetRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,9 +41,14 @@ import java.util.stream.Collectors;
 @Service
 public class CharacterSheetShareService {
 
+	private static final String HEALTH_FIELD = "health";
+	private static final String CURRENT_FIELD = "current";
+	private static final String TEMPORARY_FIELD = "temporary";
+
 	private final CharacterSheetService sheetService;
 	private final CharacterSheetRepository sheetRepository;
 	private final SavedCharacterSheetRepository savedRepository;
+	private final CharacterSheetEditorRepository editorRepository;
 
 	/** Включает доступ по ссылке; у уже открытого листа возвращает прежнюю ссылку. */
 	@Transactional
@@ -53,19 +62,24 @@ public class CharacterSheetShareService {
 		return new CharacterSheetShareResponse(token.toString());
 	}
 
-	/** Отзывает ссылку: прежняя ссылка и сохранённые по ней записи больше не открывают лист. */
+	/**
+	 * Отзывает ссылку: прежняя ссылка и сохранённые по ней записи больше не открывают лист. Вместе со
+	 * ссылкой снимаются права редакторов и неотвеченные запросы: у владельца один рубильник «закрыть
+	 * всё», и редактор не остаётся в листе, который владелец считает закрытым.
+	 */
 	@Transactional
 	public void unshare(UUID id) {
 		CharacterSheet sheet = sheetService.getOwned(id);
 		if (sheet.getShareToken() != null) {
 			sheetRepository.updateShareToken(sheet.getId(), null);
 		}
+		editorRepository.deleteAllBySheetIdIn(List.of(sheet.getId()));
 	}
 
 	/** Лист по ссылке: доступен и гостю. Неизвестная или отозванная ссылка — 404. */
 	@Transactional(readOnly = true)
 	public CharacterSheetSharedResponse findShared(String token) {
-		CharacterSheet sheet = sheetRepository.findByShareToken(parseToken(token))
+		CharacterSheet sheet = sheetRepository.findByShareTokenAndDeletedAtIsNull(parseToken(token))
 				.orElseThrow(CharacterSheetShareService::sharedNotFound);
 		Optional<User> viewer = currentUser();
 		boolean own = viewer.map(user -> Objects.equals(user.getId(), sheet.getUser().getId())).orElse(false);
@@ -80,12 +94,17 @@ public class CharacterSheetShareService {
 	public SavedCharacterSheetListResponse findSaved() {
 		User user = sheetService.requireUser();
 		List<SavedCharacterSheet> saved = savedRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+		List<UUID> sheetIds = saved.stream().map(SavedCharacterSheet::getSheetId).toList();
 		Map<UUID, CharacterSheet> sheets = sheetRepository
-				.findAllByIdIn(saved.stream().map(SavedCharacterSheet::getSheetId).toList())
+				.findAllByIdIn(sheetIds)
 				.stream()
 				.collect(Collectors.toMap(CharacterSheet::getId, Function.identity()));
+		Map<UUID, CharacterSheetEditorStatus> editStatuses = sheetIds.isEmpty()
+				? Map.of()
+				: editorRepository.findAllByUserIdAndSheetIdIn(user.getId(), sheetIds).stream()
+						.collect(Collectors.toMap(CharacterSheetEditor::getSheetId, CharacterSheetEditor::getStatus));
 		List<SavedCharacterSheetResponse> items = saved.stream()
-				.map(item -> toResponse(item, sheets.get(item.getSheetId())))
+				.map(item -> toResponse(item, sheets.get(item.getSheetId()), editStatuses.get(item.getSheetId())))
 				.toList();
 		return new SavedCharacterSheetListResponse(items, items.size(), CharacterSheetLimits.saved(user),
 				CharacterSheetLimits.SUBSCRIBER_SAVED);
@@ -98,7 +117,7 @@ public class CharacterSheetShareService {
 	@Transactional
 	public SavedCharacterSheetResponse save(String token) {
 		User user = sheetService.requireUser();
-		CharacterSheet sheet = sheetRepository.findByShareToken(parseToken(token))
+		CharacterSheet sheet = sheetRepository.findByShareTokenAndDeletedAtIsNull(parseToken(token))
 				.orElseThrow(CharacterSheetShareService::sharedNotFound);
 		if (Objects.equals(sheet.getUser().getId(), user.getId())) {
 			throw new ApiException(HttpStatus.BAD_REQUEST,
@@ -108,16 +127,67 @@ public class CharacterSheetShareService {
 				.orElseGet(() -> newSaved(user, sheet));
 		saved.setShareToken(sheet.getShareToken());
 		saved.setName(sheet.getName());
-		return toResponse(savedRepository.saveAndFlush(saved), sheet);
+		CharacterSheetEditorStatus editStatus = editorRepository.findBySheetIdAndUserId(sheet.getId(), user.getId())
+				.map(CharacterSheetEditor::getStatus)
+				.orElse(null);
+		return toResponse(savedRepository.saveAndFlush(saved), sheet, editStatus);
 	}
 
-	/** Убирает лист из «Других листов»: сам лист остаётся у владельца. */
+	/**
+	 * Убирает лист из «Других листов»: сам лист остаётся у владельца. Ждущий запрос и право на
+	 * редактирование уходят вместе с записью: запросить их можно только из сохранённого листа.
+	 */
 	@Transactional
 	public void removeSaved(UUID id) {
 		User user = sheetService.requireUser();
 		SavedCharacterSheet saved = savedRepository.findByIdAndUserId(id, user.getId())
-				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Сохранённый лист не найден"));
+				.orElseThrow(CharacterSheetShareService::savedNotFound);
+		editorRepository.deleteBySheetIdAndUserId(saved.getSheetId(), user.getId());
 		savedRepository.delete(saved);
+	}
+
+	/**
+	 * Пишет в сохранённый чужой лист хиты из трекера инициативы: мастер отмечает урон, игрок видит
+	 * его в своём листе. Править можно только свою сохранённую запись и только пока лист доступен
+	 * (не удалён и ссылка не отозвана) — иначе 404. Меняются только текущие и (если прислано)
+	 * временные хиты, остальной документ остаётся владельца. Версия листа растёт: открытый у
+	 * владельца лист получит 409 при автосохранении и перечитается уже с этими хитами.
+	 * @param savedId идентификатор сохранённой записи
+	 * @param current текущие хиты; зажимаются максимумом листа
+	 * @param temporary временные хиты; null — не менять
+	 */
+	@Transactional
+	public void updateSavedHealth(UUID savedId, int current, Integer temporary) {
+		User user = sheetService.requireUser();
+		SavedCharacterSheet saved = savedRepository.findByIdAndUserId(savedId, user.getId())
+				.orElseThrow(CharacterSheetShareService::savedNotFound);
+		CharacterSheet sheet = sheetRepository.findById(saved.getSheetId())
+				.filter(found -> found.getDeletedAt() == null
+						&& Objects.equals(found.getShareToken(), saved.getShareToken()))
+				.orElseThrow(CharacterSheetShareService::sharedNotFound);
+		sheet.setData(withHealth(sheet.getData(), current, temporary));
+		sheet.setUpdatedAt(Instant.now().truncatedTo(ChronoUnit.MILLIS));
+		sheetRepository.saveAndFlush(sheet);
+	}
+
+	/**
+	 * Копия документа с новыми хитами. Именно копия (и документа, и здоровья): иначе Hibernate
+	 * сравнил бы изменённую на месте карту саму с собой и не заметил правки. Сверху хиты не режем:
+	 * настоящий максимум листа больше {@code health.max} на бонусы черт и эффектов, его считает
+	 * клиент по документу — обрезка по {@code health.max} недодавала бы хиты при лечении.
+	 */
+	private static Map<String, Object> withHealth(Map<String, Object> data, int current, Integer temporary) {
+		if (!(data.get(HEALTH_FIELD) instanceof Map<?, ?> health)) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "В листе персонажа нет хитов");
+		}
+		Map<Object, Object> nextHealth = new LinkedHashMap<>(health);
+		nextHealth.put(CURRENT_FIELD, Math.max(0, current));
+		if (temporary != null) {
+			nextHealth.put(TEMPORARY_FIELD, Math.max(0, temporary));
+		}
+		Map<String, Object> document = new LinkedHashMap<>(data);
+		document.put(HEALTH_FIELD, nextHealth);
+		return document;
 	}
 
 	private SavedCharacterSheet newSaved(User user, CharacterSheet sheet) {
@@ -134,15 +204,19 @@ public class CharacterSheetShareService {
 	}
 
 	/** Запись доступна, пока лист есть и его ссылка совпадает с сохранённой. */
-	private static SavedCharacterSheetResponse toResponse(SavedCharacterSheet saved, CharacterSheet sheet) {
-		boolean available = sheet != null && Objects.equals(sheet.getShareToken(), saved.getShareToken());
+	private static SavedCharacterSheetResponse toResponse(SavedCharacterSheet saved, CharacterSheet sheet,
+														  CharacterSheetEditorStatus editStatus) {
+		boolean available = sheet != null
+				&& sheet.getDeletedAt() == null
+				&& Objects.equals(sheet.getShareToken(), saved.getShareToken());
 		return new SavedCharacterSheetResponse(
 				saved.getId().toString(),
 				saved.getSheetId().toString(),
 				saved.getShareToken().toString(),
 				available ? sheet.getName() : saved.getName(),
 				available ? sheet.getData() : null,
-				available);
+				available,
+				editStatus);
 	}
 
 	/** Пользователь, если вошёл; гость — пусто (ссылка открывается и без входа). */
@@ -165,7 +239,12 @@ public class CharacterSheetShareService {
 		}
 	}
 
-	private static ApiException sharedNotFound() {
+	private static ApiException savedNotFound() {
+		return new ApiException(HttpStatus.NOT_FOUND, "Сохранённый лист не найден");
+	}
+
+	/** Package-private: тем же ответом закрыт запрос на редактирование по отозванной ссылке. */
+	static ApiException sharedNotFound() {
 		return new ApiException(HttpStatus.NOT_FOUND, "Лист персонажа по этой ссылке не найден");
 	}
 }

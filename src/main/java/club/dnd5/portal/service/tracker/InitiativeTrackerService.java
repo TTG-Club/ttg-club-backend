@@ -260,6 +260,8 @@ public class InitiativeTrackerService {
 				newParticipant(tracker, ParticipantType.PLAYER, participantRepository.findMaxSeq(tracker.getId()) + 1);
 		participant.setName(request.getName().trim());
 		participant.setInitiativeBonus(request.getInitiativeBonus() != null ? request.getInitiativeBonus() : 0);
+		// Игрок из листа персонажа: привязку присылает фронтенд, сервер трекера её только хранит.
+		participant.setSheetLink(request.getSheetLink());
 		return participant;
 	}
 
