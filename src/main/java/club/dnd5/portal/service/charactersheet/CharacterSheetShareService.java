@@ -6,8 +6,11 @@ import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetListResponse;
 import club.dnd5.portal.dto.api.charactersheet.SavedCharacterSheetResponse;
 import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.model.charactersheet.CharacterSheet;
+import club.dnd5.portal.model.charactersheet.CharacterSheetEditor;
+import club.dnd5.portal.model.charactersheet.CharacterSheetEditorStatus;
 import club.dnd5.portal.model.charactersheet.SavedCharacterSheet;
 import club.dnd5.portal.model.user.User;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetEditorRepository;
 import club.dnd5.portal.repository.charactersheet.CharacterSheetRepository;
 import club.dnd5.portal.repository.charactersheet.SavedCharacterSheetRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +48,7 @@ public class CharacterSheetShareService {
 	private final CharacterSheetService sheetService;
 	private final CharacterSheetRepository sheetRepository;
 	private final SavedCharacterSheetRepository savedRepository;
+	private final CharacterSheetEditorRepository editorRepository;
 
 	/** Включает доступ по ссылке; у уже открытого листа возвращает прежнюю ссылку. */
 	@Transactional
@@ -58,13 +62,18 @@ public class CharacterSheetShareService {
 		return new CharacterSheetShareResponse(token.toString());
 	}
 
-	/** Отзывает ссылку: прежняя ссылка и сохранённые по ней записи больше не открывают лист. */
+	/**
+	 * Отзывает ссылку: прежняя ссылка и сохранённые по ней записи больше не открывают лист. Вместе со
+	 * ссылкой снимаются права редакторов и неотвеченные запросы: у владельца один рубильник «закрыть
+	 * всё», и редактор не остаётся в листе, который владелец считает закрытым.
+	 */
 	@Transactional
 	public void unshare(UUID id) {
 		CharacterSheet sheet = sheetService.getOwned(id);
 		if (sheet.getShareToken() != null) {
 			sheetRepository.updateShareToken(sheet.getId(), null);
 		}
+		editorRepository.deleteAllBySheetIdIn(List.of(sheet.getId()));
 	}
 
 	/** Лист по ссылке: доступен и гостю. Неизвестная или отозванная ссылка — 404. */
@@ -85,12 +94,17 @@ public class CharacterSheetShareService {
 	public SavedCharacterSheetListResponse findSaved() {
 		User user = sheetService.requireUser();
 		List<SavedCharacterSheet> saved = savedRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+		List<UUID> sheetIds = saved.stream().map(SavedCharacterSheet::getSheetId).toList();
 		Map<UUID, CharacterSheet> sheets = sheetRepository
-				.findAllByIdIn(saved.stream().map(SavedCharacterSheet::getSheetId).toList())
+				.findAllByIdIn(sheetIds)
 				.stream()
 				.collect(Collectors.toMap(CharacterSheet::getId, Function.identity()));
+		Map<UUID, CharacterSheetEditorStatus> editStatuses = sheetIds.isEmpty()
+				? Map.of()
+				: editorRepository.findAllByUserIdAndSheetIdIn(user.getId(), sheetIds).stream()
+						.collect(Collectors.toMap(CharacterSheetEditor::getSheetId, CharacterSheetEditor::getStatus));
 		List<SavedCharacterSheetResponse> items = saved.stream()
-				.map(item -> toResponse(item, sheets.get(item.getSheetId())))
+				.map(item -> toResponse(item, sheets.get(item.getSheetId()), editStatuses.get(item.getSheetId())))
 				.toList();
 		return new SavedCharacterSheetListResponse(items, items.size(), CharacterSheetLimits.saved(user),
 				CharacterSheetLimits.SUBSCRIBER_SAVED);
@@ -113,15 +127,22 @@ public class CharacterSheetShareService {
 				.orElseGet(() -> newSaved(user, sheet));
 		saved.setShareToken(sheet.getShareToken());
 		saved.setName(sheet.getName());
-		return toResponse(savedRepository.saveAndFlush(saved), sheet);
+		CharacterSheetEditorStatus editStatus = editorRepository.findBySheetIdAndUserId(sheet.getId(), user.getId())
+				.map(CharacterSheetEditor::getStatus)
+				.orElse(null);
+		return toResponse(savedRepository.saveAndFlush(saved), sheet, editStatus);
 	}
 
-	/** Убирает лист из «Других листов»: сам лист остаётся у владельца. */
+	/**
+	 * Убирает лист из «Других листов»: сам лист остаётся у владельца. Ждущий запрос и право на
+	 * редактирование уходят вместе с записью: запросить их можно только из сохранённого листа.
+	 */
 	@Transactional
 	public void removeSaved(UUID id) {
 		User user = sheetService.requireUser();
 		SavedCharacterSheet saved = savedRepository.findByIdAndUserId(id, user.getId())
 				.orElseThrow(CharacterSheetShareService::savedNotFound);
+		editorRepository.deleteBySheetIdAndUserId(saved.getSheetId(), user.getId());
 		savedRepository.delete(saved);
 	}
 
@@ -183,7 +204,8 @@ public class CharacterSheetShareService {
 	}
 
 	/** Запись доступна, пока лист есть и его ссылка совпадает с сохранённой. */
-	private static SavedCharacterSheetResponse toResponse(SavedCharacterSheet saved, CharacterSheet sheet) {
+	private static SavedCharacterSheetResponse toResponse(SavedCharacterSheet saved, CharacterSheet sheet,
+														  CharacterSheetEditorStatus editStatus) {
 		boolean available = sheet != null
 				&& sheet.getDeletedAt() == null
 				&& Objects.equals(sheet.getShareToken(), saved.getShareToken());
@@ -193,7 +215,8 @@ public class CharacterSheetShareService {
 				saved.getShareToken().toString(),
 				available ? sheet.getName() : saved.getName(),
 				available ? sheet.getData() : null,
-				available);
+				available,
+				editStatus);
 	}
 
 	/** Пользователь, если вошёл; гость — пусто (ссылка открывается и без входа). */
@@ -220,7 +243,8 @@ public class CharacterSheetShareService {
 		return new ApiException(HttpStatus.NOT_FOUND, "Сохранённый лист не найден");
 	}
 
-	private static ApiException sharedNotFound() {
+	/** Package-private: тем же ответом закрыт запрос на редактирование по отозванной ссылке. */
+	static ApiException sharedNotFound() {
 		return new ApiException(HttpStatus.NOT_FOUND, "Лист персонажа по этой ссылке не найден");
 	}
 }

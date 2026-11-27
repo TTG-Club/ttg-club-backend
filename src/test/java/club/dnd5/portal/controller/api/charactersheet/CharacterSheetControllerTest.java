@@ -6,6 +6,8 @@ import club.dnd5.portal.exception.ApiException;
 import club.dnd5.portal.interceptor.RedirectToLowerCaseInterceptor;
 import club.dnd5.portal.model.charactersheet.CharacterSheet;
 import club.dnd5.portal.model.user.User;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetEditorRepository;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetPresenceRepository;
 import club.dnd5.portal.repository.charactersheet.CharacterSheetRepository;
 import club.dnd5.portal.repository.user.UserRepository;
 import club.dnd5.portal.security.ExternalAuthClient;
@@ -389,7 +391,8 @@ class CharacterSheetControllerTest {
 		CharacterSheetService characterSheetService(CharacterSheetRepository sheetRepository,
 													UserRepository userRepository,
 													ImageStorageService imageStorageService) {
-			return new CharacterSheetService(sheetRepository, userRepository, new JsonMapper(), imageStorageService);
+			return new CharacterSheetService(sheetRepository, userRepository, new JsonMapper(), imageStorageService,
+					mock(CharacterSheetEditorRepository.class), mock(CharacterSheetPresenceRepository.class));
 		}
 
 		@Bean

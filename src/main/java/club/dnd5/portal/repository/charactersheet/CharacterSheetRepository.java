@@ -23,6 +23,9 @@ public interface CharacterSheetRepository extends JpaRepository<CharacterSheet, 
 
 	Optional<CharacterSheet> findByIdAndUserIdAndDeletedAtIsNotNull(UUID id, Long userId);
 
+	/** Активный лист любого владельца — для редакторов и отметок присутствия. */
+	Optional<CharacterSheet> findByIdAndDeletedAtIsNull(UUID id);
+
 	Optional<CharacterSheet> findByShareTokenAndDeletedAtIsNull(UUID shareToken);
 
 	List<CharacterSheet> findAllByIdIn(List<UUID> ids);

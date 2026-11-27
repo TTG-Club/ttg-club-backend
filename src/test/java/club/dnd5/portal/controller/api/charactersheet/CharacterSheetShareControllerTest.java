@@ -7,6 +7,8 @@ import club.dnd5.portal.model.charactersheet.CharacterSheet;
 import club.dnd5.portal.model.charactersheet.SavedCharacterSheet;
 import club.dnd5.portal.model.user.Role;
 import club.dnd5.portal.model.user.User;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetEditorRepository;
+import club.dnd5.portal.repository.charactersheet.CharacterSheetPresenceRepository;
 import club.dnd5.portal.repository.charactersheet.CharacterSheetRepository;
 import club.dnd5.portal.repository.charactersheet.SavedCharacterSheetRepository;
 import club.dnd5.portal.repository.user.UserRepository;
@@ -485,14 +487,16 @@ class CharacterSheetShareControllerTest {
 		CharacterSheetService characterSheetService(CharacterSheetRepository sheetRepository,
 													UserRepository userRepository) {
 			return new CharacterSheetService(sheetRepository, userRepository, new JsonMapper(),
-					mock(ImageStorageService.class));
+					mock(ImageStorageService.class), mock(CharacterSheetEditorRepository.class),
+					mock(CharacterSheetPresenceRepository.class));
 		}
 
 		@Bean
 		CharacterSheetShareService characterSheetShareService(CharacterSheetService sheetService,
 															  CharacterSheetRepository sheetRepository,
 															  SavedCharacterSheetRepository savedRepository) {
-			return new CharacterSheetShareService(sheetService, sheetRepository, savedRepository);
+			return new CharacterSheetShareService(sheetService, sheetRepository, savedRepository,
+					mock(CharacterSheetEditorRepository.class));
 		}
 
 		@Bean

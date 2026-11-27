@@ -32,4 +32,10 @@ public class CharacterSheetResponse {
 
 	/** Когда лист удалён в историю (ISO-8601); null — лист активный. */
 	private String deletedAt;
+
+	/** Лист открыл редактор, а не владелец: ссылкой и редакторами он не управляет, shareToken — null. */
+	private boolean editor;
+
+	/** Неотвеченные запросы на редактирование — только владельцу активного листа; иначе 0. */
+	private int pendingEditRequests;
 }
