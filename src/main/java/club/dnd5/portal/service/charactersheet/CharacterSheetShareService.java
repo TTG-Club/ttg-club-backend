@@ -65,7 +65,7 @@ public class CharacterSheetShareService {
 	/** Лист по ссылке: доступен и гостю. Неизвестная или отозванная ссылка — 404. */
 	@Transactional(readOnly = true)
 	public CharacterSheetSharedResponse findShared(String token) {
-		CharacterSheet sheet = sheetRepository.findByShareToken(parseToken(token))
+		CharacterSheet sheet = sheetRepository.findByShareTokenAndDeletedAtIsNull(parseToken(token))
 				.orElseThrow(CharacterSheetShareService::sharedNotFound);
 		Optional<User> viewer = currentUser();
 		boolean own = viewer.map(user -> Objects.equals(user.getId(), sheet.getUser().getId())).orElse(false);
@@ -98,7 +98,7 @@ public class CharacterSheetShareService {
 	@Transactional
 	public SavedCharacterSheetResponse save(String token) {
 		User user = sheetService.requireUser();
-		CharacterSheet sheet = sheetRepository.findByShareToken(parseToken(token))
+		CharacterSheet sheet = sheetRepository.findByShareTokenAndDeletedAtIsNull(parseToken(token))
 				.orElseThrow(CharacterSheetShareService::sharedNotFound);
 		if (Objects.equals(sheet.getUser().getId(), user.getId())) {
 			throw new ApiException(HttpStatus.BAD_REQUEST,
@@ -135,7 +135,9 @@ public class CharacterSheetShareService {
 
 	/** Запись доступна, пока лист есть и его ссылка совпадает с сохранённой. */
 	private static SavedCharacterSheetResponse toResponse(SavedCharacterSheet saved, CharacterSheet sheet) {
-		boolean available = sheet != null && Objects.equals(sheet.getShareToken(), saved.getShareToken());
+		boolean available = sheet != null
+				&& sheet.getDeletedAt() == null
+				&& Objects.equals(sheet.getShareToken(), saved.getShareToken());
 		return new SavedCharacterSheetResponse(
 				saved.getId().toString(),
 				saved.getSheetId().toString(),

@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -111,9 +112,11 @@ class CharacterSheetControllerTest {
 		sheet.setVersion(4L);
 		sheet.setCreatedAt(Instant.parse("2026-11-20T10:00:00.000Z"));
 		sheet.setUpdatedAt(Instant.parse("2026-11-22T10:15:30.123Z"));
-		when(sheetRepository.findByIdAndUserId(any(), anyLong())).thenReturn(Optional.empty());
-		when(sheetRepository.findByIdAndUserId(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
-		when(sheetRepository.findAllByUserIdOrderByUpdatedAtDesc(7L)).thenReturn(List.of(sheet));
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNull(any(), anyLong())).thenReturn(Optional.empty());
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNull(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNotNull(any(), anyLong())).thenReturn(Optional.empty());
+		when(sheetRepository.findAllByUserIdAndDeletedAtIsNullOrderByUpdatedAtDesc(7L)).thenReturn(List.of(sheet));
+		when(sheetRepository.findAllByUserIdAndDeletedAtIsNotNullOrderByDeletedAtDesc(7L)).thenReturn(List.of());
 		when(sheetRepository.saveAndFlush(any(CharacterSheet.class))).thenAnswer(invocation -> {
 			CharacterSheet saved = invocation.getArgument(0);
 			if (saved.getId() == null) {
@@ -171,7 +174,7 @@ class CharacterSheetControllerTest {
 	@Test
 	@WithMockUser(username = "magistr", roles = "USER")
 	void createOverLimitIsForbidden() throws Exception {
-		when(sheetRepository.countByUserId(7L)).thenReturn((long) CharacterSheetLimits.SHEETS);
+		when(sheetRepository.countByUserIdAndDeletedAtIsNull(7L)).thenReturn((long) CharacterSheetLimits.SHEETS);
 		mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content("{\"data\":{}}"))
 				.andExpect(status().isForbidden());
 		verify(sheetRepository, never()).saveAndFlush(any());
@@ -214,20 +217,88 @@ class CharacterSheetControllerTest {
 
 	@Test
 	@WithMockUser(username = "magistr", roles = "USER")
-	void deleteOwnSheet() throws Exception {
+	void deleteMovesSheetToHistory() throws Exception {
 		mockMvc.perform(delete(URL + "/" + sheet.getId())).andExpect(status().isNoContent());
-		verify(sheetRepository).delete(sheet);
-		verify(imageStorageService).deletePath(CharacterSheetService.avatarPath(sheet.getId()));
+
+		assertThat(sheet.getDeletedAt()).isNotNull();
+		verify(sheetRepository, never()).delete(any(CharacterSheet.class));
+		verify(imageStorageService, never()).deletePath(anyString());
 	}
 
 	@Test
 	@WithMockUser(username = "magistr", roles = "USER")
-	void deleteSheetSurvivesStorageFailure() throws Exception {
+	void deleteTrimsOldestHistoryWithAvatars() throws Exception {
+		List<CharacterSheet> history = new java.util.ArrayList<>();
+		for (int index = 0; index <= CharacterSheetLimits.HISTORY; index++) {
+			CharacterSheet old = new CharacterSheet();
+			old.setId(UUID.randomUUID());
+			old.setDeletedAt(Instant.parse("2026-11-01T00:00:00Z").minusSeconds(index));
+			history.add(old);
+		}
+		when(sheetRepository.findAllByUserIdAndDeletedAtIsNotNullOrderByDeletedAtDesc(7L)).thenReturn(history);
 		doThrow(new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "нет хранилища"))
 				.when(imageStorageService).deletePath(anyString());
 
 		mockMvc.perform(delete(URL + "/" + sheet.getId())).andExpect(status().isNoContent());
-		verify(sheetRepository).delete(sheet);
+
+		CharacterSheet evicted = history.get(CharacterSheetLimits.HISTORY);
+		verify(sheetRepository).deleteAll(List.of(evicted));
+		verify(imageStorageService).deletePath(CharacterSheetService.avatarPath(evicted.getId()));
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void listHasHistoryWithoutDocuments() throws Exception {
+		CharacterSheet deleted = new CharacterSheet();
+		deleted.setId(UUID.randomUUID());
+		deleted.setUser(sheet.getUser());
+		deleted.setName("Старый");
+		deleted.setData(new LinkedHashMap<>(Map.of("level", 1)));
+		deleted.setVersion(1L);
+		deleted.setCreatedAt(sheet.getCreatedAt());
+		deleted.setUpdatedAt(sheet.getUpdatedAt());
+		deleted.setDeletedAt(Instant.parse("2026-11-23T10:00:00Z"));
+		when(sheetRepository.findAllByUserIdAndDeletedAtIsNotNullOrderByDeletedAtDesc(7L)).thenReturn(List.of(deleted));
+
+		mockMvc.perform(get(URL))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.used").value(1))
+				.andExpect(jsonPath("$.history", hasSize(1)))
+				.andExpect(jsonPath("$.history[0].name").value("Старый"))
+				.andExpect(jsonPath("$.history[0].data").doesNotExist())
+				.andExpect(jsonPath("$.history[0].deletedAt").value("2026-11-23T10:00:00Z"))
+				.andExpect(jsonPath("$.historyLimit").value(CharacterSheetLimits.HISTORY))
+				.andExpect(jsonPath("$.subscriberHistoryLimit").value(CharacterSheetLimits.SUBSCRIBER_HISTORY));
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void restoreFromHistory() throws Exception {
+		sheet.setDeletedAt(Instant.parse("2026-11-23T10:00:00Z"));
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNotNull(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
+
+		mockMvc.perform(post(URL + "/" + sheet.getId() + "/restore"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.deletedAt").doesNotExist())
+				.andExpect(jsonPath("$.data.level").value(3));
+		assertThat(sheet.getDeletedAt()).isNull();
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void restoreOverLimitIsForbidden() throws Exception {
+		sheet.setDeletedAt(Instant.parse("2026-11-23T10:00:00Z"));
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNotNull(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
+		when(sheetRepository.countByUserIdAndDeletedAtIsNull(7L)).thenReturn((long) CharacterSheetLimits.SHEETS);
+
+		mockMvc.perform(post(URL + "/" + sheet.getId() + "/restore")).andExpect(status().isForbidden());
+		assertThat(sheet.getDeletedAt()).isNotNull();
+	}
+
+	@Test
+	@WithMockUser(username = "magistr", roles = "USER")
+	void restoreActiveOrForeignSheetIsNotFound() throws Exception {
+		mockMvc.perform(post(URL + "/" + sheet.getId() + "/restore")).andExpect(status().isNotFound());
 	}
 
 	@Test

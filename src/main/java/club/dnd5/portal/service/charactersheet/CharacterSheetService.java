@@ -63,15 +63,27 @@ public class CharacterSheetService {
 		return "character-sheets/" + id + ".webp";
 	}
 
+	/**
+	 * Активные листы с документами и история удалённых — без документов: её показывают только
+	 * названием, а восстановленный лист перечитывается целиком.
+	 */
 	@Transactional(readOnly = true)
 	public CharacterSheetListResponse findMine() {
 		User user = requireUser();
-		List<CharacterSheetResponse> items = sheetRepository.findAllByUserIdOrderByUpdatedAtDesc(user.getId())
+		List<CharacterSheetResponse> items = sheetRepository
+				.findAllByUserIdAndDeletedAtIsNullOrderByUpdatedAtDesc(user.getId())
 				.stream()
 				.map(CharacterSheetService::toResponse)
 				.toList();
+		List<CharacterSheetResponse> history = sheetRepository
+				.findAllByUserIdAndDeletedAtIsNotNullOrderByDeletedAtDesc(user.getId())
+				.stream()
+				.limit(CharacterSheetLimits.history(user))
+				.map(CharacterSheetService::toHistoryResponse)
+				.toList();
 		return new CharacterSheetListResponse(items, items.size(), CharacterSheetLimits.sheets(user),
-				CharacterSheetLimits.SUBSCRIBER_SHEETS);
+				CharacterSheetLimits.SUBSCRIBER_SHEETS, history, CharacterSheetLimits.history(user),
+				CharacterSheetLimits.SUBSCRIBER_HISTORY);
 	}
 
 	/** Создаёт лист. Сверх лимита — 403: существующие листы остаются доступны. */
@@ -82,11 +94,7 @@ public class CharacterSheetService {
 			throw badRequest("Не переданы данные листа персонажа (data)");
 		}
 		validateData(data);
-		int limit = CharacterSheetLimits.sheets(user);
-		if (sheetRepository.countByUserId(user.getId()) >= limit) {
-			throw new ApiException(HttpStatus.FORBIDDEN,
-					"Достигнут лимит листов персонажей: " + limit + ". Удалите один из существующих");
-		}
+		requireFreeSlot(user);
 
 		Instant now = now();
 		CharacterSheet sheet = new CharacterSheet();
@@ -124,10 +132,55 @@ public class CharacterSheetService {
 		return toResponse(sheetRepository.saveAndFlush(sheet));
 	}
 
+	/**
+	 * Мягкое удаление: лист уходит в историю вместе с документом и портретом, ссылка на него
+	 * перестаёт открываться. История подрезается до последних листов — иначе цикл «создать →
+	 * удалить» рос бы в базе без конца: лимит активных удалённые не считает.
+	 */
 	@Transactional
 	public void delete(UUID id) {
-		sheetRepository.delete(getOwned(id));
-		removeAvatarQuietly(id);
+		User user = requireUser();
+		CharacterSheet sheet = getOwned(id);
+		sheet.setDeletedAt(now());
+		sheetRepository.saveAndFlush(sheet);
+		trimHistory(user);
+	}
+
+	/**
+	 * Восстановление из истории: лист снова активный, если в лимите активных есть место.
+	 * @param id идентификатор листа
+	 */
+	@Transactional
+	public CharacterSheetResponse restore(UUID id) {
+		User user = requireUser();
+		CharacterSheet sheet = sheetRepository.findByIdAndUserIdAndDeletedAtIsNotNull(id, user.getId())
+				.orElseThrow(CharacterSheetService::notFound);
+		requireFreeSlot(user);
+		sheet.setDeletedAt(null);
+		sheet.setUpdatedAt(now());
+		return toResponse(sheetRepository.saveAndFlush(sheet));
+	}
+
+	/** Сверх лимита активных — 403: существующие листы остаются доступны. */
+	private void requireFreeSlot(User user) {
+		int limit = CharacterSheetLimits.sheets(user);
+		if (sheetRepository.countByUserIdAndDeletedAtIsNull(user.getId()) >= limit) {
+			throw new ApiException(HttpStatus.FORBIDDEN,
+					"Достигнут лимит листов персонажей: " + limit + ". Удалите один из существующих");
+		}
+	}
+
+	/** Самые старые удалённые листы сверх истории удаляются насовсем, с портретами. */
+	private void trimHistory(User user) {
+		List<CharacterSheet> deleted = sheetRepository
+				.findAllByUserIdAndDeletedAtIsNotNullOrderByDeletedAtDesc(user.getId());
+		int keep = CharacterSheetLimits.history(user);
+		if (deleted.size() <= keep) {
+			return;
+		}
+		List<CharacterSheet> evicted = deleted.subList(keep, deleted.size());
+		sheetRepository.deleteAll(evicted);
+		evicted.forEach(sheet -> removeAvatarQuietly(sheet.getId()));
 	}
 
 	/**
@@ -166,7 +219,7 @@ public class CharacterSheetService {
 	/** Лист текущего пользователя; чужой и несуществующий — 404. */
 	public CharacterSheet getOwned(UUID id) {
 		User user = requireUser();
-		return sheetRepository.findByIdAndUserId(id, user.getId())
+		return sheetRepository.findByIdAndUserIdAndDeletedAtIsNull(id, user.getId())
 				.orElseThrow(CharacterSheetService::notFound);
 	}
 
@@ -209,7 +262,16 @@ public class CharacterSheetService {
 				sheet.getVersion() == null ? 0 : sheet.getVersion(),
 				sheet.getCreatedAt().toString(),
 				sheet.getUpdatedAt().toString(),
-				sheet.getShareToken() == null ? null : sheet.getShareToken().toString());
+				sheet.getShareToken() == null ? null : sheet.getShareToken().toString(),
+				sheet.getDeletedAt() == null ? null : sheet.getDeletedAt().toString());
+	}
+
+	/** Лист истории: без документа, ссылка ему не нужна. */
+	private static CharacterSheetResponse toHistoryResponse(CharacterSheet sheet) {
+		CharacterSheetResponse response = toResponse(sheet);
+		response.setData(null);
+		response.setShareToken(null);
+		return response;
 	}
 
 	/** Миллисекундная точность: значение в ответе совпадает с тем, что сохранится в БД. */

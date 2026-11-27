@@ -113,10 +113,10 @@ class CharacterSheetShareControllerTest {
 		sheet.setCreatedAt(Instant.parse("2026-11-20T10:00:00.000Z"));
 		sheet.setUpdatedAt(Instant.parse("2026-11-22T10:15:30.123Z"));
 
-		when(sheetRepository.findByIdAndUserId(any(), anyLong())).thenReturn(Optional.empty());
-		when(sheetRepository.findByIdAndUserId(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
-		when(sheetRepository.findByShareToken(any())).thenReturn(Optional.empty());
-		when(sheetRepository.findByShareToken(token)).thenReturn(Optional.of(sheet));
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNull(any(), anyLong())).thenReturn(Optional.empty());
+		when(sheetRepository.findByIdAndUserIdAndDeletedAtIsNull(sheet.getId(), 7L)).thenReturn(Optional.of(sheet));
+		when(sheetRepository.findByShareTokenAndDeletedAtIsNull(any())).thenReturn(Optional.empty());
+		when(sheetRepository.findByShareTokenAndDeletedAtIsNull(token)).thenReturn(Optional.of(sheet));
 		when(savedRepository.findByUserIdAndSheetId(anyLong(), any())).thenReturn(Optional.empty());
 		when(savedRepository.findByIdAndUserId(any(), anyLong())).thenReturn(Optional.empty());
 		when(savedRepository.saveAndFlush(any(SavedCharacterSheet.class))).thenAnswer(invocation -> {
@@ -146,6 +146,25 @@ class CharacterSheetShareControllerTest {
 				.andExpect(jsonPath("$.data.level").value(3))
 				.andExpect(jsonPath("$.own").value(false))
 				.andExpect(jsonPath("$.savedId").doesNotExist());
+	}
+
+	@Test
+	@WithMockUser(username = "guest", roles = "USER")
+	void deletedSheetMakesSavedUnavailable() throws Exception {
+		SavedCharacterSheet saved = new SavedCharacterSheet();
+		saved.setId(UUID.randomUUID());
+		saved.setUserId(8L);
+		saved.setSheetId(sheet.getId());
+		saved.setShareToken(token);
+		saved.setName("Торин");
+		saved.setCreatedAt(Instant.now());
+		sheet.setDeletedAt(Instant.now());
+		when(savedRepository.findAllByUserIdOrderByCreatedAtDesc(8L)).thenReturn(List.of(saved));
+		when(sheetRepository.findAllByIdIn(List.of(sheet.getId()))).thenReturn(List.of(sheet));
+
+		mockMvc.perform(get(URL + "/saved"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].available").value(false));
 	}
 
 	@Test

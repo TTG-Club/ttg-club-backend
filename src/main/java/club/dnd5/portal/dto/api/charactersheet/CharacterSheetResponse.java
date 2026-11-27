@@ -29,4 +29,7 @@ public class CharacterSheetResponse {
 
 	/** Секрет ссылки на лист; null — доступ по ссылке выключен. */
 	private String shareToken;
+
+	/** Когда лист удалён в историю (ISO-8601); null — лист активный. */
+	private String deletedAt;
 }
