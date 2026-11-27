@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +37,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class CharacterSheetShareService {
+
+	private static final String HEALTH_FIELD = "health";
+	private static final String CURRENT_FIELD = "current";
+	private static final String TEMPORARY_FIELD = "temporary";
 
 	private final CharacterSheetService sheetService;
 	private final CharacterSheetRepository sheetRepository;
@@ -116,8 +121,52 @@ public class CharacterSheetShareService {
 	public void removeSaved(UUID id) {
 		User user = sheetService.requireUser();
 		SavedCharacterSheet saved = savedRepository.findByIdAndUserId(id, user.getId())
-				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Сохранённый лист не найден"));
+				.orElseThrow(CharacterSheetShareService::savedNotFound);
 		savedRepository.delete(saved);
+	}
+
+	/**
+	 * Пишет в сохранённый чужой лист хиты из трекера инициативы: мастер отмечает урон, игрок видит
+	 * его в своём листе. Править можно только свою сохранённую запись и только пока лист доступен
+	 * (не удалён и ссылка не отозвана) — иначе 404. Меняются только текущие и (если прислано)
+	 * временные хиты, остальной документ остаётся владельца. Версия листа растёт: открытый у
+	 * владельца лист получит 409 при автосохранении и перечитается уже с этими хитами.
+	 * @param savedId идентификатор сохранённой записи
+	 * @param current текущие хиты; зажимаются максимумом листа
+	 * @param temporary временные хиты; null — не менять
+	 */
+	@Transactional
+	public void updateSavedHealth(UUID savedId, int current, Integer temporary) {
+		User user = sheetService.requireUser();
+		SavedCharacterSheet saved = savedRepository.findByIdAndUserId(savedId, user.getId())
+				.orElseThrow(CharacterSheetShareService::savedNotFound);
+		CharacterSheet sheet = sheetRepository.findById(saved.getSheetId())
+				.filter(found -> found.getDeletedAt() == null
+						&& Objects.equals(found.getShareToken(), saved.getShareToken()))
+				.orElseThrow(CharacterSheetShareService::sharedNotFound);
+		sheet.setData(withHealth(sheet.getData(), current, temporary));
+		sheet.setUpdatedAt(Instant.now().truncatedTo(ChronoUnit.MILLIS));
+		sheetRepository.saveAndFlush(sheet);
+	}
+
+	/**
+	 * Копия документа с новыми хитами. Именно копия (и документа, и здоровья): иначе Hibernate
+	 * сравнил бы изменённую на месте карту саму с собой и не заметил правки. Сверху хиты не режем:
+	 * настоящий максимум листа больше {@code health.max} на бонусы черт и эффектов, его считает
+	 * клиент по документу — обрезка по {@code health.max} недодавала бы хиты при лечении.
+	 */
+	private static Map<String, Object> withHealth(Map<String, Object> data, int current, Integer temporary) {
+		if (!(data.get(HEALTH_FIELD) instanceof Map<?, ?> health)) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "В листе персонажа нет хитов");
+		}
+		Map<Object, Object> nextHealth = new LinkedHashMap<>(health);
+		nextHealth.put(CURRENT_FIELD, Math.max(0, current));
+		if (temporary != null) {
+			nextHealth.put(TEMPORARY_FIELD, Math.max(0, temporary));
+		}
+		Map<String, Object> document = new LinkedHashMap<>(data);
+		document.put(HEALTH_FIELD, nextHealth);
+		return document;
 	}
 
 	private SavedCharacterSheet newSaved(User user, CharacterSheet sheet) {
@@ -165,6 +214,10 @@ public class CharacterSheetShareService {
 		} catch (IllegalArgumentException | NullPointerException e) {
 			throw sharedNotFound();
 		}
+	}
+
+	private static ApiException savedNotFound() {
+		return new ApiException(HttpStatus.NOT_FOUND, "Сохранённый лист не найден");
 	}
 
 	private static ApiException sharedNotFound() {
