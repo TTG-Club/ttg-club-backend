@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.tracker;
 
+import club.dnd5.portal.model.tracker.ParticipantSheetLink;
 import club.dnd5.portal.model.tracker.ParticipantType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,4 +44,7 @@ public class ParticipantResponse {
 
 	@Schema(description = "Слаг существа в бестиарии (для перехода к статблоку). NULL — игрок")
 	private String creatureUrl;
+
+	@Schema(description = "Привязка игрока к листу персонажа. NULL — игрок заведён вручную или существо")
+	private ParticipantSheetLink sheetLink;
 }

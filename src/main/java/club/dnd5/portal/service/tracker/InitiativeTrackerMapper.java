@@ -78,6 +78,7 @@ public class InitiativeTrackerMapper {
 		response.setInitiativeRoll(participant.getInitiativeRoll());
 		response.setInitiativeTotal(participant.getInitiativeTotal());
 		response.setCreatureUrl(participant.getCreatureUrl());
+		response.setSheetLink(participant.getSheetLink());
 		return response;
 	}
 

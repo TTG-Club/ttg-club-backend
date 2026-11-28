@@ -1,5 +1,6 @@
 package club.dnd5.portal.dto.api.tracker;
 
+import club.dnd5.portal.model.tracker.ParticipantSheetLink;
 import club.dnd5.portal.model.tracker.ParticipantType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -40,4 +42,9 @@ public class ParticipantAddRequest {
 	@Schema(description = "Сколько существ добавить одной пачкой (только для CREATURE, по умолчанию 1). "
 			+ "Имена нумеруются автоматически: «Гоблин 1», «Гоблин 2», ...")
 	private Integer count;
+
+	@Valid
+	@Schema(description = "Привязка игрока к листу персонажа (только для PLAYER): по ней трекер пишет хиты "
+			+ "из боя обратно в лист. Для существа не учитывается")
+	private ParticipantSheetLink sheetLink;
 }

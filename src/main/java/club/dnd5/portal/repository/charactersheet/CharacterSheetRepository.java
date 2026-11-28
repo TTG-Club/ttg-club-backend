@@ -12,13 +12,21 @@ import java.util.UUID;
 
 public interface CharacterSheetRepository extends JpaRepository<CharacterSheet, UUID> {
 
-	List<CharacterSheet> findAllByUserIdOrderByUpdatedAtDesc(Long userId);
+	List<CharacterSheet> findAllByUserIdAndDeletedAtIsNullOrderByUpdatedAtDesc(Long userId);
 
-	long countByUserId(Long userId);
+	/** История удалённых, последние удалённые первее. */
+	List<CharacterSheet> findAllByUserIdAndDeletedAtIsNotNullOrderByDeletedAtDesc(Long userId);
 
-	Optional<CharacterSheet> findByIdAndUserId(UUID id, Long userId);
+	long countByUserIdAndDeletedAtIsNull(Long userId);
 
-	Optional<CharacterSheet> findByShareToken(UUID shareToken);
+	Optional<CharacterSheet> findByIdAndUserIdAndDeletedAtIsNull(UUID id, Long userId);
+
+	Optional<CharacterSheet> findByIdAndUserIdAndDeletedAtIsNotNull(UUID id, Long userId);
+
+	/** Активный лист любого владельца — для редакторов и отметок присутствия. */
+	Optional<CharacterSheet> findByIdAndDeletedAtIsNull(UUID id);
+
+	Optional<CharacterSheet> findByShareTokenAndDeletedAtIsNull(UUID shareToken);
 
 	List<CharacterSheet> findAllByIdIn(List<UUID> ids);
 

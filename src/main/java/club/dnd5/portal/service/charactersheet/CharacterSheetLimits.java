@@ -18,6 +18,11 @@ public final class CharacterSheetLimits {
 	/** Чужих листов, сохранённых по ссылке, с подпиской. */
 	public static final int SUBSCRIBER_SAVED = 40;
 
+	/** Удалённых листов в истории без подписки. */
+	public static final int HISTORY = 20;
+	/** Удалённых листов в истории с подпиской. */
+	public static final int SUBSCRIBER_HISTORY = 30;
+
 	private CharacterSheetLimits() {
 	}
 
@@ -28,6 +33,10 @@ public final class CharacterSheetLimits {
 
 	public static int sheets(User user) {
 		return isSubscriber(user) ? SUBSCRIBER_SHEETS : SHEETS;
+	}
+
+	public static int history(User user) {
+		return isSubscriber(user) ? SUBSCRIBER_HISTORY : HISTORY;
 	}
 
 	public static int saved(User user) {
