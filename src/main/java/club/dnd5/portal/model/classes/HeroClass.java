@@ -73,6 +73,14 @@ public class HeroClass {
 	private List<String> equipment;
 
 	/**
+	 * Стартовое снаряжение структурой (строки с вариантами), см. db/changelog 0054;
+	 * {@code null} — не заполнено, тогда остаётся текст {@link #equipment}.
+	 */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "starting_equipment", columnDefinition = "jsonb")
+	private List<StartingEquipmentLine> startingEquipment;
+
+	/**
 	 * Обратная сторона Spell.heroClass (таблица spells_hero_class). Раньше связь была
 	 * независимой и жила в отдельной classes_spells, куда ничего не записывалось.
 	 */

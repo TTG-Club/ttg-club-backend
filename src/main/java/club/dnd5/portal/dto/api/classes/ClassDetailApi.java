@@ -30,6 +30,7 @@ import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.SpellLevelDefinition;
+import club.dnd5.portal.model.classes.StartingEquipmentLine;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpell;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
@@ -329,6 +330,8 @@ public class ClassDetailApi extends ClassApi {
 		private final Collection<String> availableSkills;
 		/** Блоки разметки core-api. */
 		private final List<String> equipment;
+		/** Стартовое снаряжение структурой; {@code null} — не заполнено, показывается текст {@code equipment}. */
+		private final List<StartingEquipmentLine> startingEquipment;
 		private final Collection<FeatureLevelApi> classFeatureLevels;
 		private final Collection<FeatureLevelApi> archetypeFeatureLevels;
 		private final Collection<LevelRowApi> levels;
@@ -349,6 +352,7 @@ public class ClassDetailApi extends ClassApi {
 				.map(SkillType::getCyrilicName)
 				.collect(Collectors.toList());
 			equipment = heroClass.getEquipment();
+			startingEquipment = heroClass.getStartingEquipment();
 			classFeatureLevels = toFeatureLevels(heroClass.getFeatureLevelDefenitions());
 			archetypeFeatureLevels = archetype == null
 				? Collections.emptyList()

@@ -25,6 +25,7 @@ import club.dnd5.portal.model.classes.FeatureScaling;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
 import club.dnd5.portal.model.classes.FeatureLevelDefinition;
+import club.dnd5.portal.model.classes.StartingEquipmentLine;
 import club.dnd5.portal.model.classes.archetype.Archetype;
 import club.dnd5.portal.model.classes.archetype.ArchetypeSpellLevelType;
 import club.dnd5.portal.model.classes.archetype.ArchetypeTrait;
@@ -379,6 +380,10 @@ public class ClassApiController {
 		heroClass.setSavingThrows(trimToNull(request.getSavingThrows()));
 		heroClass.setArchetypeName(trimToNull(request.getArchetypeName()));
 		heroClass.setEquipment(Markup.emptyToNull(Markup.trimBlocks(request.getEquipment())));
+		// стартовое снаряжение: null — оставить как есть (старый редактор его не присылает), [] — очистить
+		if (request.getStartingEquipment() != null) {
+			heroClass.setStartingEquipment(StartingEquipmentLine.normalize(request.getStartingEquipment()));
+		}
 		heroClass.setSpellAbility(request.getSpellAbility());
 		heroClass.setSpellcasterType(request.getSpellcasterType());
 		heroClass.setPrimaryAbilities(request.getPrimaryAbilities() == null ? new ArrayList<>() : new ArrayList<>(request.getPrimaryAbilities()));

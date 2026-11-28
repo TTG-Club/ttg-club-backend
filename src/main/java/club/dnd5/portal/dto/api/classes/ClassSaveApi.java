@@ -12,6 +12,7 @@ import club.dnd5.portal.model.SpellcasterType;
 import club.dnd5.portal.model.classes.Option;
 import club.dnd5.portal.model.classes.HeroClass;
 import club.dnd5.portal.model.classes.HeroClassTrait;
+import club.dnd5.portal.model.classes.StartingEquipmentLine;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -52,6 +53,11 @@ public class ClassSaveApi {
 	/** Блоки разметки core-api; HTML-строку старых ревизий аудита переводит десериализатор. */
 	@JsonDeserialize(using = MarkupBlocksDeserializer.class)
 	private List<@NotBlank String> equipment;
+	/**
+	 * Стартовое снаряжение структурой; проверяется при сохранении. {@code null} — оставить как
+	 * есть, пустой список — очистить.
+	 */
+	private List<StartingEquipmentLine> startingEquipment;
 	private AbilityType spellAbility;
 	private SpellcasterType spellcasterType;
 	private List<AbilityType> primaryAbilities;
@@ -91,6 +97,7 @@ public class ClassSaveApi {
 		savingThrows = heroClass.getSavingThrows();
 		archetypeName = heroClass.getArchetypeName();
 		equipment = heroClass.getEquipment();
+		startingEquipment = heroClass.getStartingEquipment();
 		spellAbility = heroClass.getSpellAbility();
 		spellcasterType = heroClass.getSpellcasterType();
 		primaryAbilities = heroClass.getPrimaryAbilities();
